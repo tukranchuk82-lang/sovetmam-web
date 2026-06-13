@@ -104,29 +104,16 @@ export default async function MeasurePage({
 
         <Separator className="my-6" />
 
-        <a
-          href={m.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(buttonVariants(), "h-11 w-full px-5")}
-        >
-          Перейти к официальному источнику
-        </a>
-
         <Link
           href={inquiryHref}
           className={cn(
-            buttonVariants({ variant: "outline" }),
-            "mt-2 h-11 w-full gap-2 px-5",
+            buttonVariants(),
+            "h-11 w-full gap-2 px-5",
           )}
         >
           <MessageSquarePlus className="size-4" />
           Задать вопрос про эту меру
         </Link>
-
-        <p className="mt-3 text-center text-xs text-muted-foreground">
-          Источник: {m.sourceName} · обновлено {m.updatedAt}
-        </p>
       </article>
     </div>
   );

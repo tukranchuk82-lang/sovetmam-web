@@ -12,7 +12,7 @@ export function BackLink({ href, label }: { href: string; label: string }) {
       href={href}
       className="inline-flex items-center gap-1 rounded-full bg-stone-100 py-1.5 pl-2 pr-3.5 text-sm font-medium text-foreground shadow-sm ring-1 ring-stone-200 transition-all hover:bg-stone-200 active:scale-95"
     >
-      <ChevronLeft className="size-4 text-[#c9002f]" />
+      <ChevronLeft className="size-4 text-brand" />
       {label}
     </Link>
   );

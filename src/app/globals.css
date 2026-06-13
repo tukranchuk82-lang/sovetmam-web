@@ -5,6 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-soft: var(--brand-soft);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -48,40 +51,47 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Фирменная тема «Совет матерей»: красный — белый — чёрный */
+/* Тема «Тёплый материнский»: тёплый кремовый фон + спокойный изумрудный
+   акцент. Красный убран по просьбе клиента (раздражал тест-группу).
+   Бренд-цвет задаётся переменной --brand — все компоненты ссылаются на неё,
+   чтобы тему можно было переключать в одном месте. */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.16 0 0);
+  --brand: #0f8a6a; /* изумрудно-зелёный — основной акцент */
+  --brand-foreground: #ffffff;
+  --brand-soft: #e7f4ef; /* светлая подложка под акцент */
+
+  --background: oklch(0.99 0.008 95);
+  --foreground: oklch(0.2 0.012 80);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0 0);
+  --card-foreground: oklch(0.2 0.012 80);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0 0);
-  --primary: oklch(0.55 0.224 29);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.2 0 0);
-  --muted: oklch(0.968 0 0);
-  --muted-foreground: oklch(0.5 0 0);
-  --accent: oklch(0.955 0.03 25);
-  --accent-foreground: oklch(0.4 0.18 27);
+  --popover-foreground: oklch(0.2 0.012 80);
+  --primary: oklch(0.56 0.1 168);
+  --primary-foreground: oklch(0.99 0.01 150);
+  --secondary: oklch(0.96 0.012 90);
+  --secondary-foreground: oklch(0.25 0.02 80);
+  --muted: oklch(0.96 0.01 90);
+  --muted-foreground: oklch(0.5 0.012 80);
+  --accent: oklch(0.95 0.03 168);
+  --accent-foreground: oklch(0.4 0.08 168);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.92 0 0);
-  --ring: oklch(0.55 0.224 29);
-  --chart-1: oklch(0.55 0.224 29);
-  --chart-2: oklch(0.65 0.18 30);
-  --chart-3: oklch(0.45 0 0);
-  --chart-4: oklch(0.7 0 0);
-  --chart-5: oklch(0.3 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.16 0 0);
-  --sidebar-primary: oklch(0.55 0.224 29);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.955 0.03 25);
-  --sidebar-accent-foreground: oklch(0.4 0.18 27);
-  --sidebar-border: oklch(0.9 0 0);
-  --sidebar-ring: oklch(0.55 0.224 29);
+  --border: oklch(0.9 0.008 90);
+  --input: oklch(0.92 0.008 90);
+  --ring: oklch(0.56 0.1 168);
+  --chart-1: oklch(0.56 0.1 168);
+  --chart-2: oklch(0.65 0.12 200);
+  --chart-3: oklch(0.7 0.13 60);
+  --chart-4: oklch(0.6 0.13 300);
+  --chart-5: oklch(0.55 0.14 30);
+  --radius: 0.875rem;
+  --sidebar: oklch(0.985 0.008 95);
+  --sidebar-foreground: oklch(0.2 0.012 80);
+  --sidebar-primary: oklch(0.56 0.1 168);
+  --sidebar-primary-foreground: oklch(0.99 0.01 150);
+  --sidebar-accent: oklch(0.95 0.03 168);
+  --sidebar-accent-foreground: oklch(0.4 0.08 168);
+  --sidebar-border: oklch(0.9 0.008 90);
+  --sidebar-ring: oklch(0.56 0.1 168);
 }
 
 .dark {

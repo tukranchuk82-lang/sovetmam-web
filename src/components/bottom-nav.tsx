@@ -41,7 +41,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="relative z-20 shrink-0 rounded-t-3xl bg-[#c9002f] shadow-[0_-6px_16px_-6px_rgba(201,0,47,0.45)]">
+    <nav className="relative z-20 shrink-0 rounded-t-3xl bg-brand shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.25)]">
       <div className="grid grid-cols-4">
         {tabs.map((t) => {
           const active = t.match(pathname);

@@ -23,7 +23,7 @@ const chipClass = (active: boolean) =>
   cn(
     "shrink-0 rounded-full border px-3.5 py-1.5 text-sm whitespace-nowrap transition-all",
     active
-      ? "border-[#c9002f] bg-[#c9002f] text-white font-semibold shadow-[0_4px_12px_-4px_rgba(201,0,47,0.45)]"
+      ? "border-brand bg-brand text-white font-semibold shadow-[0_4px_12px_-4px_rgba(15,138,106,0.45)]"
       : "border-stone-200 bg-white text-foreground hover:bg-stone-50",
   );
 
@@ -99,14 +99,14 @@ export function SegmentMeasures({
           onClick={() => setPickerOpen(true)}
           className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 py-1.5 pl-2.5 pr-3 text-sm text-foreground transition-colors hover:bg-stone-100"
         >
-          <MapPin className="size-4 shrink-0 text-[#c9002f]" />
+          <MapPin className="size-4 shrink-0 text-brand" />
           {region ? (
             <span className="truncate">
               <span className="text-muted-foreground">Регион: </span>
               <span className="font-semibold">{region}</span>
             </span>
           ) : (
-            <span className="font-semibold text-[#c9002f]">
+            <span className="font-semibold text-brand">
               Указать регион
             </span>
           )}
@@ -140,9 +140,9 @@ export function SegmentMeasures({
         <button
           type="button"
           onClick={() => setPickerOpen(true)}
-          className="mt-3 flex w-full items-center gap-2.5 rounded-2xl border border-dashed border-[#c9002f]/40 bg-[#c9002f]/5 p-3.5 text-left text-sm transition-colors hover:bg-[#c9002f]/10"
+          className="mt-3 flex w-full items-center gap-2.5 rounded-2xl border border-dashed border-brand/40 bg-brand/5 p-3.5 text-left text-sm transition-colors hover:bg-brand/10"
         >
-          <MapPin className="size-5 shrink-0 text-[#c9002f]" />
+          <MapPin className="size-5 shrink-0 text-brand" />
           <span>
             <span className="font-semibold">Укажите ваш регион</span> — покажем
             и региональные меры поддержки
@@ -180,7 +180,7 @@ function EmptyHint({
         onClick={onPickRegion}
         className="mt-2 flex w-full flex-col items-center gap-2 rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-4 py-6 text-center transition-colors hover:bg-stone-100"
       >
-        <MapPin className="size-6 text-[#c9002f]" />
+        <MapPin className="size-6 text-brand" />
         <span className="text-sm font-semibold">Укажите ваш регион</span>
         <span className="text-xs text-muted-foreground">
           Чтобы показать положенные региональные меры
@@ -195,7 +195,7 @@ function EmptyHint({
       <p className="mt-6 px-4 text-center text-sm text-muted-foreground">
         В регионе «{region}» пока нет региональных мер по этой ситуации.
         Попробуйте посмотреть{" "}
-        <span className="font-semibold text-[#c9002f]">федеральные</span>.
+        <span className="font-semibold text-brand">федеральные</span>.
       </p>
     );
   }
@@ -278,7 +278,7 @@ function RegionPicker({
                     onClick={() => onChoose(r)}
                     className={cn(
                       "flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-stone-100",
-                      active && "bg-[#c9002f]/5 font-semibold text-[#c9002f]",
+                      active && "bg-brand/5 font-semibold text-brand",
                     )}
                   >
                     <span>{r}</span>

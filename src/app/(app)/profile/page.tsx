@@ -75,7 +75,7 @@ export default async function ProfilePage() {
             href="/podbor"
             className="mt-6 flex items-center gap-3 rounded-2xl bg-[#2d2d2d] p-4 text-white shadow-[0_10px_24px_-10px_rgba(0,0,0,0.35)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_14px_28px_-10px_rgba(0,0,0,0.45)]"
           >
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#c9002f] to-rose-700 text-white shadow-[0_6px_16px_-6px_rgba(201,0,47,0.6)]">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(15,138,106,0.6)]">
               <Sparkles className="size-6" />
             </div>
             <div className="min-w-0 flex-1">
@@ -99,7 +99,7 @@ export default async function ProfilePage() {
             </h2>
             <Link
               href="/profile/inquiries/new"
-              className="text-xs font-semibold text-[#c9002f] hover:underline"
+              className="text-xs font-semibold text-brand hover:underline"
             >
               + Новое
             </Link>
@@ -217,7 +217,7 @@ function AdminLink({
       href={href}
       className="flex items-center gap-3 rounded-2xl bg-white p-3 text-foreground shadow-[0_8px_22px_-10px_rgba(0,0,0,0.18)] ring-1 ring-stone-100 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_12px_26px_-8px_rgba(0,0,0,0.25)]"
     >
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#c9002f] to-rose-700 text-white shadow-[0_4px_12px_-4px_rgba(201,0,47,0.5)]">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand text-white shadow-[0_4px_12px_-4px_rgba(15,138,106,0.5)]">
         {icon}
       </div>
       <div className="min-w-0 flex-1">

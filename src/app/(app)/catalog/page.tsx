@@ -17,7 +17,7 @@ const chip = (active: boolean) =>
   cn(
     "shrink-0 rounded-full border px-3.5 py-1.5 text-sm whitespace-nowrap transition-all",
     active
-      ? "border-[#c9002f] bg-[#c9002f] text-white font-semibold shadow-[0_4px_12px_-4px_rgba(201,0,47,0.45)]"
+      ? "border-brand bg-brand text-white font-semibold shadow-[0_4px_12px_-4px_rgba(15,138,106,0.45)]"
       : "border-stone-200 bg-white text-foreground hover:bg-stone-50",
   );
 
@@ -30,10 +30,17 @@ export default async function CatalogPage({
   const activeCategory = sp.category ?? "";
   const activeLevel = sp.level ?? "";
 
+  // Фильтр по уровню пока реально работает только для federal/regional —
+  // других уровней (municipal/employer/vuz/nko) в базе ещё нет, подключим
+  // после доразметки мер. Прочие разрезы с главной (type/topic/situation)
+  // каталог сейчас игнорирует и показывает все меры.
+  const effectiveLevel =
+    activeLevel === "federal" || activeLevel === "regional" ? activeLevel : "";
+
   const measures = await getAllMeasures();
   const filtered = measures.filter((m) => {
     if (activeCategory && m.category !== activeCategory) return false;
-    if (activeLevel && m.level !== activeLevel) return false;
+    if (effectiveLevel && m.level !== effectiveLevel) return false;
     return true;
   });
 
@@ -47,7 +54,7 @@ export default async function CatalogPage({
           Все меры в одном месте. Или{" "}
           <Link
             href="/podbor"
-            className="font-semibold text-[#c9002f] hover:underline"
+            className="font-semibold text-brand hover:underline"
           >
             пройдите анкету
           </Link>{" "}

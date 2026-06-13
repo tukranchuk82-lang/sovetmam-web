@@ -118,7 +118,7 @@ export function InstallAppButton() {
         type="button"
         onClick={handleClick}
         className={cn(
-          "mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#c9002f]/20 bg-[#c9002f]/5 py-3 text-sm font-semibold text-[#c9002f] transition-colors hover:bg-[#c9002f]/10",
+          "mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-brand/20 bg-brand/5 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/10",
         )}
       >
         <Download className="size-4" />
@@ -198,7 +198,7 @@ function InstructionsModal({
         <button
           type="button"
           onClick={onClose}
-          className="mt-5 h-11 w-full rounded-xl bg-[#c9002f] text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(201,0,47,0.5)] hover:bg-[#a3002a]"
+          className="mt-5 h-11 w-full rounded-xl bg-brand text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(15,138,106,0.5)] hover:bg-brand/90"
         >
           Понятно
         </button>
@@ -242,7 +242,7 @@ function IosGuide() {
       />
 
       {/* Подсказка-стрелка к реальной кнопке «Поделиться» внизу Safari */}
-      <div className="flex flex-col items-center pt-1 text-[#c9002f]">
+      <div className="flex flex-col items-center pt-1 text-brand">
         <span className="text-xs font-semibold">
           Кнопка «Поделиться» — внизу
         </span>
@@ -255,7 +255,7 @@ function IosGuide() {
 function NumberedStep({ n, text }: { n: number; text: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3 rounded-2xl bg-stone-50 p-3.5">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#c9002f] text-sm font-bold text-white shadow-[0_4px_10px_-3px_rgba(201,0,47,0.6)]">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white shadow-[0_4px_10px_-3px_rgba(15,138,106,0.6)]">
         {n}
       </span>
       <span className="flex-1 pt-0.5 text-sm leading-snug">{text}</span>
@@ -359,7 +359,7 @@ function Steps({
 function Step({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <li className="flex items-start gap-2.5 text-sm">
-      <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-white text-[#c9002f] ring-1 ring-stone-200">
+      <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-white text-brand ring-1 ring-stone-200">
         {icon}
       </span>
       <span className="flex-1">{text}</span>

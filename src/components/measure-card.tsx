@@ -18,7 +18,7 @@ export function MeasureCard({ measure }: { measure: SupportMeasure }) {
             <Badge
               className={
                 measure.level === "federal"
-                  ? "bg-[#c9002f] text-white hover:bg-[#a3002a]"
+                  ? "bg-brand text-white hover:bg-brand/90"
                   : "bg-stone-100 text-foreground hover:bg-stone-200"
               }
             >
@@ -33,7 +33,7 @@ export function MeasureCard({ measure }: { measure: SupportMeasure }) {
             {measure.shortDescription}
           </p>
           {measure.amount ? (
-            <p className="mt-2 text-sm font-semibold text-[#c9002f]">
+            <p className="mt-2 text-sm font-semibold text-brand">
               {measure.amount}
             </p>
           ) : null}

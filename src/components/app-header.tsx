@@ -8,7 +8,7 @@ export async function AppHeader() {
   const user = await getCurrentDemoUser();
 
   return (
-    <header className="relative z-20 shrink-0 rounded-b-3xl bg-[#c9002f] shadow-[0_6px_16px_-6px_rgba(201,0,47,0.45)]">
+    <header className="relative z-20 shrink-0 rounded-b-3xl bg-brand shadow-[0_6px_16px_-6px_rgba(0,0,0,0.25)]">
       <div className="flex h-14 items-center justify-between gap-2.5 px-4">
         <Link href="/" className="flex min-w-0 items-center gap-2.5">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
@@ -35,7 +35,7 @@ export async function AppHeader() {
           <Link
             href="/profile"
             aria-label="Личный кабинет"
-            className="shrink-0 rounded-full ring-2 ring-white/40 ring-offset-2 ring-offset-[#c9002f] transition-transform hover:scale-105"
+            className="shrink-0 rounded-full ring-2 ring-white/40 ring-offset-2 ring-offset-brand transition-transform hover:scale-105"
           >
             <Avatar name={user.name} color={user.avatarColor} size={36} />
           </Link>
