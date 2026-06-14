@@ -442,6 +442,86 @@
 [data-theme="kids"] .sm-cat span:first-child { color: #ffffff !important; }
 [data-theme="kids"] .sm-cat span:last-child { background: rgba(255, 255, 255, 0.6) !important; }
 
+/* ===================== Тема «Минимализм» =====================
+   Светлый прохладный фон, индиго-акцент, белые карточки с тонкой рамкой,
+   много воздуха, чистый шрифт, без декоративных подчёркиваний. */
+[data-theme="minimal"] {
+  --app-font-body: var(--font-manrope);
+  --app-font-head: var(--font-manrope);
+
+  --background: #f7f8fc;
+  --foreground: #14172b;
+  --card: #ffffff;
+  --card-foreground: #14172b;
+  --popover: #ffffff;
+  --popover-foreground: #14172b;
+  --primary: #5b3df5;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f2f8;
+  --secondary-foreground: #14172b;
+  --muted: #f1f2f8;
+  --muted-foreground: #888fa8;
+  --accent: #ecebfe;
+  --accent-foreground: #4f46e5;
+  --border: #e9ebf3;
+  --input: #e9ebf3;
+  --ring: #5b3df5;
+
+  --brand: #5b3df5;
+  --brand-foreground: #ffffff;
+  --brand-soft: #ecebfe;
+  --accent-red: #5b3df5;
+  --accent-red-soft: #ecebfe;
+}
+
+/* Чистые карточки: тонкая рамка, мягкая лёгкая тень */
+[data-theme="minimal"] .sm-card {
+  border-radius: 1rem !important;
+  box-shadow: 0 2px 10px -6px rgba(20, 23, 43, 0.12) !important;
+}
+[data-theme="minimal"] .sm-cta {
+  border-radius: 1rem !important;
+  box-shadow: 0 14px 28px -14px rgba(91, 61, 245, 0.5) !important;
+}
+
+/* Без декоративной черты под заголовками */
+[data-theme="minimal"] .sm-h2-rule {
+  display: none !important;
+}
+
+/* Пирамида: белые ступени с тонкой рамкой; основание (федеральные) — индиго */
+[data-theme="minimal"] .sm-step {
+  background: #ffffff !important;
+  border: 1px solid #e9ebf3 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 2px 10px -6px rgba(20, 23, 43, 0.12) !important;
+}
+[data-theme="minimal"] .sm-step span {
+  color: #14172b !important;
+}
+[data-theme="minimal"] .sm-step svg {
+  color: #5b3df5 !important;
+  fill: transparent !important;
+}
+[data-theme="minimal"] .sm-step[data-level="federal"] {
+  background: linear-gradient(135deg, #5b3df5, #4f46e5) !important;
+  border: none !important;
+}
+[data-theme="minimal"] .sm-step[data-level="federal"] span,
+[data-theme="minimal"] .sm-step[data-level="federal"] svg {
+  color: #ffffff !important;
+}
+
+/* Каталог: без цветной черты под названием */
+[data-theme="minimal"] .sm-cat span:last-child {
+  display: none !important;
+}
+
+/* Тонкая фирменная полоса в шапке убрана для чистоты */
+[data-theme="minimal"] header .h-1 {
+  display: none !important;
+}
+
 /* Появление секций на чистом CSS (см. components/motion.tsx). Контент виден
    по умолчанию; анимация не зависит от JS-гидратации. */
 @keyframes sm-fade-up {

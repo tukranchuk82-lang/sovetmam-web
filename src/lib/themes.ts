@@ -12,6 +12,7 @@ export const THEMES: ThemeOption[] = [
   { key: "neon", name: "Неон", hint: "Яркий брутализм" },
   { key: "warm", name: "Тёплый", hint: "Пастель, коралл и шалфей" },
   { key: "kids", name: "Яркий", hint: "Цветные карточки, лаванда" },
+  { key: "minimal", name: "Минимализм", hint: "Чистый, индиго" },
 ];
 
 export const DEFAULT_THEME = "classic";
