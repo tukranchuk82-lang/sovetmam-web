@@ -1,37 +1,35 @@
-"use client";
-
 import { Children, isValidElement } from "react";
-import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
 
 /**
- * Простое появление с лёгким сдвигом вверх. Подходит для отдельных секций.
+ * Появление секций — на ЧИСТОМ CSS (keyframes sm-fade-up в globals.css).
+ * Важно: контент виден по умолчанию (opacity:1) и анимируется через CSS, а не
+ * прячется до запуска JS. Иначе при медленной/несработавшей гидратации
+ * (например, через туннель) содержимое осталось бы невидимым.
  */
 export function MotionFadeIn({
   children,
   delay = 0,
-  y = 12,
   className,
 }: {
   children: React.ReactNode;
   delay?: number;
+  /** Не используется (оставлено для совместимости вызовов). */
   y?: number;
   className?: string;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
+    <div
+      className={cn("sm-fade-up", className)}
+      style={delay ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
 /**
- * Каскадное появление списка — каждый ребёнок появляется с задержкой.
- * Передавайте серверные компоненты как children — обёртка клиентская.
+ * Каскадное появление списка — каждый ребёнок с нарастающей CSS-задержкой.
  */
 export function MotionStagger({
   children,
@@ -50,27 +48,19 @@ export function MotionStagger({
   return (
     <div className={className}>
       {items.map((child, i) => (
-        <motion.div
+        <div
           key={i}
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.45,
-            delay: initialDelay + i * stagger,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className={itemClassName}
+          className={cn("sm-fade-up", itemClassName)}
+          style={{ animationDelay: `${initialDelay + i * stagger}s` }}
         >
           {child}
-        </motion.div>
+        </div>
       ))}
     </div>
   );
 }
 
-/**
- * «Прыгающий» бейдж/иконка — лёгкая пульсация при появлении.
- */
+/** «Прыгающее» появление бейджа/иконки — CSS-анимация sm-pop. */
 export function MotionPop({
   children,
   delay = 0,
@@ -81,18 +71,11 @@ export function MotionPop({
   className?: string;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.85 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        type: "spring",
-        stiffness: 240,
-        damping: 18,
-        delay,
-      }}
-      className={className}
+    <div
+      className={cn("sm-pop", className)}
+      style={delay ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
