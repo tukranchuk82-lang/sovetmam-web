@@ -8,14 +8,16 @@ import { cn } from "@/lib/utils";
 // Ширина «ступеней» сверху вниз (%, узкая вершина → широкое основание).
 const WIDTHS = [56, 65, 74, 83, 92, 100];
 
-// Свой мягкий оттенок для каждого уровня (классы Tailwind — литералами).
-const LEVEL_TINT: Record<string, { box: string; fg: string }> = {
-  federal: { box: "border-blue-200 bg-blue-50 hover:bg-blue-100", fg: "text-blue-800" },
-  regional: { box: "border-sky-200 bg-sky-50 hover:bg-sky-100", fg: "text-sky-800" },
-  municipal: { box: "border-emerald-200 bg-emerald-50 hover:bg-emerald-100", fg: "text-emerald-800" },
-  employer: { box: "border-orange-200 bg-orange-50 hover:bg-orange-100", fg: "text-orange-800" },
-  vuz: { box: "border-violet-200 bg-violet-50 hover:bg-violet-100", fg: "text-violet-800" },
-  nko: { box: "border-rose-200 bg-rose-50 hover:bg-rose-100", fg: "text-rose-800" },
+// Пастельная радуга по уровням (классы Tailwind — литералами). Каждое
+// семейство цвета — своё, чтобы ступени не сливались. Иконка ярче подложки,
+// текст тёмный для читаемости.
+const LEVEL_TINT: Record<string, { box: string; icon: string; fg: string }> = {
+  federal: { box: "border-red-200 bg-red-100 hover:bg-red-200/70", icon: "text-red-500", fg: "text-red-800" },
+  regional: { box: "border-orange-200 bg-orange-100 hover:bg-orange-200/70", icon: "text-orange-500", fg: "text-orange-800" },
+  municipal: { box: "border-green-200 bg-green-100 hover:bg-green-200/70", icon: "text-green-600", fg: "text-green-800" },
+  employer: { box: "border-teal-200 bg-teal-100 hover:bg-teal-200/70", icon: "text-teal-600", fg: "text-teal-800" },
+  vuz: { box: "border-blue-200 bg-blue-100 hover:bg-blue-200/70", icon: "text-blue-600", fg: "text-blue-800" },
+  nko: { box: "border-violet-200 bg-violet-100 hover:bg-violet-200/70", icon: "text-violet-600", fg: "text-violet-800" },
 };
 
 /**
@@ -37,7 +39,7 @@ export function SupportPyramid() {
         <Link
           href={PYRAMID_CROWN.href}
           style={{ width: "46%" }}
-          className="flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 shadow-sm transition-colors hover:bg-amber-100"
+          className="flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-100 px-3 py-2.5 shadow-sm transition-colors hover:bg-amber-200/70"
         >
           <Star className="size-4 shrink-0 fill-amber-400 text-amber-500" />
           <span className="text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-amber-700">
@@ -58,7 +60,7 @@ export function SupportPyramid() {
                 tint.box,
               )}
             >
-              {Icon && <Icon className={cn("size-4 shrink-0", tint.fg)} />}
+              {Icon && <Icon className={cn("size-4 shrink-0", tint.icon)} />}
               <span
                 className={cn(
                   "text-center text-xs font-bold uppercase leading-tight tracking-wide",
