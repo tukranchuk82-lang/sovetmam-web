@@ -3,9 +3,20 @@ import { Star } from "lucide-react";
 import { PYRAMID_LEVELS, PYRAMID_CROWN } from "@/lib/home-taxonomy";
 import { PYRAMID_ICONS } from "./icons";
 import { SectionHeading } from "./section-heading";
+import { cn } from "@/lib/utils";
 
 // Ширина «ступеней» сверху вниз (%, узкая вершина → широкое основание).
 const WIDTHS = [56, 65, 74, 83, 92, 100];
+
+// Свой мягкий оттенок для каждого уровня (классы Tailwind — литералами).
+const LEVEL_TINT: Record<string, { box: string; fg: string }> = {
+  federal: { box: "border-blue-200 bg-blue-50 hover:bg-blue-100", fg: "text-blue-800" },
+  regional: { box: "border-sky-200 bg-sky-50 hover:bg-sky-100", fg: "text-sky-800" },
+  municipal: { box: "border-emerald-200 bg-emerald-50 hover:bg-emerald-100", fg: "text-emerald-800" },
+  employer: { box: "border-orange-200 bg-orange-50 hover:bg-orange-100", fg: "text-orange-800" },
+  vuz: { box: "border-violet-200 bg-violet-50 hover:bg-violet-100", fg: "text-violet-800" },
+  nko: { box: "border-rose-200 bg-rose-50 hover:bg-rose-100", fg: "text-rose-800" },
+};
 
 /**
  * Пирамида мер поддержки в стиле «Шпаргалки»: белые ступени, расширяющиеся
@@ -36,15 +47,24 @@ export function SupportPyramid() {
 
         {topToBottom.map((lvl, i) => {
           const Icon = PYRAMID_ICONS[lvl.id];
+          const tint = LEVEL_TINT[lvl.id];
           return (
             <Link
               key={lvl.id}
               href={lvl.href}
               style={{ width: `${WIDTHS[i]}%` }}
-              className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 shadow-[0_4px_14px_-8px_rgba(27,58,107,0.5)] transition-all hover:border-brand/40 hover:shadow-[0_6px_18px_-8px_rgba(27,58,107,0.6)]"
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-lg border px-3 py-3 shadow-sm transition-all",
+                tint.box,
+              )}
             >
-              {Icon && <Icon className="size-4 shrink-0 text-brand" />}
-              <span className="text-center text-xs font-bold uppercase leading-tight tracking-wide text-brand">
+              {Icon && <Icon className={cn("size-4 shrink-0", tint.fg)} />}
+              <span
+                className={cn(
+                  "text-center text-xs font-bold uppercase leading-tight tracking-wide",
+                  tint.fg,
+                )}
+              >
                 {lvl.title}
               </span>
             </Link>

@@ -34,15 +34,15 @@ export function CatalogSituations() {
         {special && (
           <Link
             href={special.href}
-            className="col-span-2 flex flex-col items-center justify-center rounded-xl bg-brand-soft px-3 py-5 text-center ring-1 ring-brand/20 transition-all hover:ring-brand/40"
+            className="col-span-2 flex flex-col items-center justify-center rounded-xl bg-brand px-3 py-6 text-center text-brand-foreground shadow-[0_12px_28px_-12px_rgba(27,58,107,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
           >
-            <span className="text-sm font-bold leading-tight text-brand">
+            <span className="text-base font-extrabold leading-tight">
               {special.title}
             </span>
-            <span className="mt-1 text-xs text-muted-foreground">
+            <span className="mt-1 text-xs text-white/80">
               Подберём по анкете или примем обращение
             </span>
-            <span className="mt-2 block h-0.5 w-8 rounded-full bg-accent-red" />
+            <span className="mt-2.5 block h-0.5 w-10 rounded-full bg-accent-red" />
           </Link>
         )}
       </div>
