@@ -18,7 +18,7 @@ export function LifeCategories() {
             <Link
               key={c.id}
               href={c.href}
-              className="sm-card flex flex-col items-center gap-2 rounded-xl bg-card p-3 text-center ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all hover:ring-brand/40"
+              className="sm-card sm-tile flex flex-col items-center gap-2 rounded-xl bg-card p-3 text-center ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all hover:ring-brand/40"
             >
               <span className="flex size-11 items-center justify-center rounded-full bg-brand-soft text-brand">
                 {Icon && <Icon className="size-5" />}

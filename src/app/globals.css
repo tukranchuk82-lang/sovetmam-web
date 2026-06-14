@@ -365,6 +365,83 @@
 [data-theme="warm"] .sm-card[data-variant="type"]:nth-child(2) { border-left: 4px solid #e89a5c !important; }
 [data-theme="warm"] .sm-card[data-variant="type"]:nth-child(3) { border-left: 4px solid #d9785b !important; }
 
+/* ===================== Тема «Яркая» (детская) =====================
+   Лавандовый фон, разноцветные скруглённые карточки, округлый шрифт. */
+[data-theme="kids"] {
+  --app-font-body: var(--font-nunito);
+  --app-font-head: var(--font-nunito);
+
+  --background: #eef0fb;
+  --foreground: #2b2e4a;
+  --card: #ffffff;
+  --card-foreground: #2b2e4a;
+  --popover: #ffffff;
+  --popover-foreground: #2b2e4a;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #eceafe;
+  --secondary-foreground: #2b2e4a;
+  --muted: #eceafe;
+  --muted-foreground: #6b6f8d;
+  --accent: #ede9fe;
+  --accent-foreground: #6d28d9;
+  --border: #e3e4f4;
+  --input: #e3e4f4;
+  --ring: #8b5cf6;
+
+  --brand: #8b5cf6;
+  --brand-foreground: #ffffff;
+  --brand-soft: #ede9fe;
+  --accent-red: #ff6b6b;
+  --accent-red-soft: #ffe3e3;
+}
+
+[data-theme="kids"] .sm-card {
+  border-radius: 1.1rem !important;
+  box-shadow: 0 8px 18px -10px rgba(80, 70, 140, 0.45) !important;
+}
+[data-theme="kids"] .sm-cta {
+  border-radius: 1.4rem !important;
+  box-shadow: 0 16px 30px -14px rgba(139, 92, 246, 0.6) !important;
+}
+
+/* Пирамида: яркие пилюли, белый текст и иконки */
+[data-theme="kids"] .sm-step {
+  border: none !important;
+  border-radius: 1.3rem !important;
+  box-shadow: 0 8px 16px -8px rgba(80, 70, 140, 0.5) !important;
+}
+[data-theme="kids"] .sm-step span { color: #ffffff !important; }
+[data-theme="kids"] .sm-step svg { color: #ffffff !important; fill: transparent !important; }
+[data-theme="kids"] .sm-step[data-level="grandparents"] { background: #ff8787 !important; }
+[data-theme="kids"] .sm-step[data-level="nko"] { background: #9775fa !important; }
+[data-theme="kids"] .sm-step[data-level="vuz"] { background: #4dabf7 !important; }
+[data-theme="kids"] .sm-step[data-level="employer"] { background: #51cf66 !important; }
+[data-theme="kids"] .sm-step[data-level="municipal"] { background: #fcc419 !important; }
+[data-theme="kids"] .sm-step[data-level="regional"] { background: #ffa94d !important; }
+[data-theme="kids"] .sm-step[data-level="federal"] { background: #ff6b6b !important; }
+
+/* Цветные плитки «жизненных ситуаций» по циклу */
+[data-theme="kids"] .sm-tile:nth-child(6n + 1) { background: #ff6b6b !important; }
+[data-theme="kids"] .sm-tile:nth-child(6n + 2) { background: #ffa94d !important; }
+[data-theme="kids"] .sm-tile:nth-child(6n + 3) { background: #fcc419 !important; }
+[data-theme="kids"] .sm-tile:nth-child(6n + 4) { background: #51cf66 !important; }
+[data-theme="kids"] .sm-tile:nth-child(6n + 5) { background: #4dabf7 !important; }
+[data-theme="kids"] .sm-tile:nth-child(6n + 6) { background: #9775fa !important; }
+[data-theme="kids"] .sm-tile span { color: #ffffff !important; }
+[data-theme="kids"] .sm-tile span:first-child { background: rgba(255, 255, 255, 0.25) !important; }
+[data-theme="kids"] .sm-tile svg { color: #ffffff !important; }
+
+/* Цветные карточки каталога по циклу */
+[data-theme="kids"] .sm-cat:nth-child(6n + 1) { background: #ff6b6b !important; }
+[data-theme="kids"] .sm-cat:nth-child(6n + 2) { background: #ffa94d !important; }
+[data-theme="kids"] .sm-cat:nth-child(6n + 3) { background: #fcc419 !important; }
+[data-theme="kids"] .sm-cat:nth-child(6n + 4) { background: #51cf66 !important; }
+[data-theme="kids"] .sm-cat:nth-child(6n + 5) { background: #4dabf7 !important; }
+[data-theme="kids"] .sm-cat:nth-child(6n + 6) { background: #9775fa !important; }
+[data-theme="kids"] .sm-cat span:first-child { color: #ffffff !important; }
+[data-theme="kids"] .sm-cat span:last-child { background: rgba(255, 255, 255, 0.6) !important; }
+
 /* Появление секций на чистом CSS (см. components/motion.tsx). Контент виден
    по умолчанию; анимация не зависит от JS-гидратации. */
 @keyframes sm-fade-up {
