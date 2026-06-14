@@ -59,8 +59,9 @@ function TypeCard({
   return (
     <Link
       href={item.href}
+      data-variant={variant}
       className={
-        "flex items-center gap-3.5 rounded-xl bg-card p-3.5 ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all hover:ring-brand/40 " +
+        "sm-card flex items-center gap-3.5 rounded-xl bg-card p-3.5 ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all hover:ring-brand/40 " +
         (isFreq ? "border-l-4 border-accent-red" : "")
       }
     >

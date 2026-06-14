@@ -17,12 +17,12 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn("text-center", className)}>
-      <h2 className="font-serif text-xl font-bold uppercase leading-tight tracking-wide text-brand">
+      <h2 className="sm-h2 font-serif text-xl font-bold uppercase leading-tight tracking-wide text-brand">
         {children}
       </h2>
       <span
         className={cn(
-          "mx-auto mt-2 block h-1 w-12 rounded-full",
+          "sm-h2-rule mx-auto mt-2 block h-1 w-12 rounded-full",
           accent === "red" ? "bg-accent-red" : "bg-brand",
         )}
       />

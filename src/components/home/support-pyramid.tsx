@@ -41,8 +41,9 @@ export function SupportPyramid() {
         {/* Венец — звезда (бабушки и дедушки) */}
         <Link
           href={PYRAMID_CROWN.href}
+          data-level="grandparents"
           style={{ width: "46%" }}
-          className="flex items-center justify-center gap-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2.5 shadow-sm transition-colors hover:bg-orange-200/70"
+          className="sm-step flex items-center justify-center gap-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2.5 shadow-sm transition-colors hover:bg-orange-200/70"
         >
           <Star className="size-4 shrink-0 fill-orange-400 text-orange-500" />
           <span className="text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-orange-700">
@@ -57,9 +58,10 @@ export function SupportPyramid() {
             <Link
               key={lvl.id}
               href={lvl.href}
+              data-level={lvl.id}
               style={{ width: `${WIDTHS[i]}%` }}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-lg border px-3 py-3 shadow-sm transition-all",
+                "sm-step flex items-center justify-center gap-2 rounded-lg border px-3 py-3 shadow-sm transition-all",
                 tint.box,
               )}
             >

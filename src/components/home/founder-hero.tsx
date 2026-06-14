@@ -8,7 +8,7 @@ import Image from "next/image";
  */
 export function FounderHero() {
   return (
-    <section className="rounded-2xl bg-card p-6 text-center ring-1 ring-border shadow-[0_10px_30px_-18px_rgba(27,58,107,0.4)]">
+    <section className="sm-card rounded-2xl bg-card p-6 text-center ring-1 ring-border shadow-[0_10px_30px_-18px_rgba(27,58,107,0.4)]">
       {/* Фото в двух фигурах (как в референсе): круг с градиентом-подложкой
           + смещённое тонкое кольцо вокруг. Фигура — cutout с воздухом над
           головой (object-contain, прижата к низу). */}
@@ -29,7 +29,7 @@ export function FounderHero() {
         </div>
       </div>
 
-      <h1 className="font-serif text-2xl font-bold leading-tight text-brand">
+      <h1 className="sm-h2 font-serif text-2xl font-bold leading-tight text-brand">
         Возьми своё от государства
       </h1>
       <span className="mx-auto mt-3 block h-1 w-14 rounded-full bg-accent-red" />

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, PT_Serif, Geist_Mono } from "next/font/google";
+import { Manrope, PT_Serif, JetBrains_Mono, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
@@ -18,17 +18,26 @@ const INSTALL_PROMPT_CAPTURE = `(function(){
   });
 })();`;
 
+// Шрифты тем. Базовые имена переменных не используются напрямую в утилитах —
+// тема выбирает шрифт через --app-font-body / --app-font-head (см. globals.css).
 const manrope = Manrope({
-  variable: "--font-sans",
+  variable: "--font-manrope",
   subsets: ["latin", "cyrillic"],
   display: "swap",
 });
 
-// Сериф для крупных заголовков — официальный, «государственный» характер
-// (как в референсе «Шпаргалка для родителей»).
+// Сериф для классической темы (официальный, «государственный» характер).
 const ptSerif = PT_Serif({
-  variable: "--font-serif",
+  variable: "--font-pt-serif",
   weight: ["400", "700"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
+// Моноширинный — для неоновой/брутализм-темы.
+const jetBrainsMono = JetBrains_Mono({
+  variable: "--font-jb",
+  weight: ["400", "700", "800"],
   subsets: ["latin", "cyrillic"],
   display: "swap",
 });
@@ -37,6 +46,9 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// Раннее применение выбранной темы (до отрисовки) — чтобы не было мигания.
+const THEME_INIT = `(function(){try{var q=new URLSearchParams(location.search).get('theme');var t=q||localStorage.getItem('sm-theme');if(t){document.documentElement.setAttribute('data-theme',t);if(q)localStorage.setItem('sm-theme',q);}}catch(e){}})();`;
 
 export const metadata: Metadata = {
   title: {
@@ -62,8 +74,12 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${manrope.variable} ${ptSerif.variable} ${geistMono.variable} antialiased`}
+      suppressHydrationWarning
+      className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${geistMono.variable} antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
       <body className="min-h-dvh bg-slate-300">
         <script dangerouslySetInnerHTML={{ __html: INSTALL_PROMPT_CAPTURE }} />
         {children}

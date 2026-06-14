@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export default function AppLayout({
   children,
@@ -18,6 +19,7 @@ export default function AppLayout({
         {children}
       </main>
       <BottomNav />
+      <ThemeSwitcher />
     </div>
   );
 }

@@ -12,10 +12,10 @@
   --color-accent-red-soft: var(--accent-red-soft);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
+  --font-sans: var(--app-font-body);
+  --font-serif: var(--app-font-head);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-serif);
+  --font-heading: var(--app-font-head);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -59,6 +59,10 @@
    фон, белые карточки. Бренд-цвет задаётся переменными --brand / --accent-red —
    все компоненты ссылаются на них, тему можно переключать в одном месте. */
 :root {
+  /* Шрифты классической темы */
+  --app-font-body: var(--font-manrope);
+  --app-font-head: var(--font-pt-serif);
+
   --brand: #1b3a6b; /* navy — основной цвет */
   --brand-foreground: #ffffff;
   --brand-soft: #e8eef7; /* светлая синяя подложка */
@@ -197,6 +201,100 @@
   --border: oklch(1 0 0 / 14%);
   --input: oklch(1 0 0 / 18%);
   --ring: oklch(0.72 0.22 330);
+}
+
+/* ===================== Тема «Неон» (нео-брутализм) =====================
+   Яркие цвета, моноширинный шрифт, жёсткие чёрные рамки и «твёрдые» тени.
+   Структура и тексты те же — меняется только оформление. */
+[data-theme="neon"] {
+  --app-font-body: var(--font-jb);
+  --app-font-head: var(--font-manrope);
+
+  --background: #ededed;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f0f0;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f0f0f0;
+  --muted-foreground: #4a4a4a;
+  --accent: #00c3ff;
+  --accent-foreground: #0a0a0a;
+  --border: #0a0a0a;
+  --input: #0a0a0a;
+  --ring: #0a0a0a;
+
+  --brand: #0a0a0a;
+  --brand-foreground: #ffffff;
+  --brand-soft: #ffffff;
+  --accent-red: #ff2d6f;
+  --accent-red-soft: #ffe0ec;
+}
+
+/* Карточки: жёсткая чёрная рамка + твёрдая тень, почти без скруглений */
+[data-theme="neon"] .sm-card {
+  border: 3px solid #0a0a0a !important;
+  border-radius: 0.25rem !important;
+  box-shadow: 4px 4px 0 #0a0a0a !important;
+  background: #ffffff;
+}
+[data-theme="neon"] .sm-cta {
+  background: #0a0a0a !important;
+  color: #fff !important;
+  border: 3px solid #0a0a0a !important;
+  border-radius: 0.25rem !important;
+  box-shadow: 6px 6px 0 var(--accent-red) !important;
+}
+
+/* Заголовки секций — толстая чёрная черта */
+[data-theme="neon"] .sm-h2 {
+  letter-spacing: 0.01em;
+}
+[data-theme="neon"] .sm-h2-rule {
+  height: 6px !important;
+  width: 64px !important;
+  border-radius: 0 !important;
+  background: #0a0a0a !important;
+}
+
+/* Пирамида: неоновые ступени, чёрная рамка, твёрдая тень, чёрный текст/иконки */
+[data-theme="neon"] .sm-step {
+  border: 3px solid #0a0a0a !important;
+  border-radius: 0.3rem !important;
+  box-shadow: 4px 4px 0 #0a0a0a !important;
+}
+[data-theme="neon"] .sm-step span {
+  color: #0a0a0a !important;
+}
+[data-theme="neon"] .sm-step svg {
+  color: #0a0a0a !important;
+  fill: #0a0a0a !important;
+}
+[data-theme="neon"] .sm-step[data-level="grandparents"] { background: #ff8a00 !important; }
+[data-theme="neon"] .sm-step[data-level="nko"] { background: #00c3ff !important; }
+[data-theme="neon"] .sm-step[data-level="vuz"] { background: #ff2d6f !important; }
+[data-theme="neon"] .sm-step[data-level="employer"] { background: #aef000 !important; }
+[data-theme="neon"] .sm-step[data-level="municipal"] { background: #ffd400 !important; }
+[data-theme="neon"] .sm-step[data-level="regional"] { background: #b14dff !important; }
+[data-theme="neon"] .sm-step[data-level="federal"] { background: #ff3b3b !important; }
+
+/* Каталог ситуаций: разноцветные плитки по циклу */
+[data-theme="neon"] .sm-cat:nth-child(4n + 2) { background: #ffb000 !important; }
+[data-theme="neon"] .sm-cat:nth-child(4n + 3) { background: #ff2d6f !important; }
+[data-theme="neon"] .sm-cat:nth-child(4n + 3) span:first-child { color: #ffffff !important; }
+[data-theme="neon"] .sm-cat:nth-child(4n + 4) { background: #00c3ff !important; }
+
+/* Шапка — жёлтая с чёрной рамкой */
+[data-theme="neon"] header {
+  background: #ffd400 !important;
+  border-bottom: 3px solid #0a0a0a !important;
+}
+[data-theme="neon"] header .h-1 {
+  display: none !important;
 }
 
 /* Появление секций на чистом CSS (см. components/motion.tsx). Контент виден

@@ -9,7 +9,7 @@ export function AnketaBanner() {
   return (
     <Link
       href="/podbor"
-      className="group block overflow-hidden rounded-2xl border-t-4 border-accent-red bg-brand text-brand-foreground shadow-[0_14px_30px_-14px_rgba(27,58,107,0.7)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.99]"
+      className="sm-cta group block overflow-hidden rounded-2xl border-t-4 border-accent-red bg-brand text-brand-foreground shadow-[0_14px_30px_-14px_rgba(27,58,107,0.7)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.99]"
     >
       <div className="relative flex items-center gap-3.5 p-5">
         <div
