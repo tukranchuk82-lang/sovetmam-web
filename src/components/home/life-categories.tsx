@@ -1,30 +1,34 @@
 import Link from "next/link";
 import { LIFE_CATEGORIES } from "@/lib/home-taxonomy";
+import { LIFE_CATEGORY_ICONS } from "./icons";
+import { SectionHeading } from "./section-heading";
 
-/** «Жизненные ситуации» — тематические категории (15 «лепестков»). */
+/** «Жизненные ситуации» — тематические категории с линейными иконками. */
 export function LifeCategories() {
   return (
     <section>
-      <h2 className="text-lg font-extrabold tracking-tight text-foreground">
+      <SectionHeading subtitle="Поддержка со всех сторон — выберите, что вам нужно">
         Жизненные ситуации
-      </h2>
-      <p className="mt-0.5 text-sm text-muted-foreground">
-        Поддержка со всех сторон — выберите, что вам нужно
-      </p>
+      </SectionHeading>
 
-      <div className="mt-3 grid grid-cols-3 gap-2.5">
-        {LIFE_CATEGORIES.map((c) => (
-          <Link
-            key={c.id}
-            href={c.href}
-            className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-white p-3 text-center ring-1 ring-black/5 transition-all hover:scale-[1.03] hover:ring-brand/30"
-          >
-            <span className="text-2xl leading-none">{c.emoji}</span>
-            <span className="text-xs font-semibold leading-tight text-foreground">
-              {c.title}
-            </span>
-          </Link>
-        ))}
+      <div className="mt-5 grid grid-cols-3 gap-2.5">
+        {LIFE_CATEGORIES.map((c) => {
+          const Icon = LIFE_CATEGORY_ICONS[c.id];
+          return (
+            <Link
+              key={c.id}
+              href={c.href}
+              className="flex flex-col items-center gap-2 rounded-xl bg-card p-3 text-center ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all hover:ring-brand/40"
+            >
+              <span className="flex size-11 items-center justify-center rounded-full bg-brand-soft text-brand">
+                {Icon && <Icon className="size-5" />}
+              </span>
+              <span className="text-xs font-semibold leading-tight text-brand">
+                {c.title}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

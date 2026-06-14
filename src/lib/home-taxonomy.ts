@@ -73,45 +73,88 @@ export const PYRAMID_CROWN = {
 export interface MeasureType {
   id: string;
   title: string;
-  emoji: string;
+  desc: string;
+  /** «type» — по типу помощи, «frequency» — по частоте получения. */
+  group: "type" | "frequency";
   href: string;
 }
 
-/** «Какими бывают меры» — по характеру и периодичности. */
+/** «Классификация поддержки» — по типу помощи и по частоте получения. */
 export const MEASURE_TYPES: MeasureType[] = [
-  { id: "free", title: "Бесплатно", emoji: "🎁", href: "/catalog?type=free" },
-  { id: "discount", title: "Скидки", emoji: "🏷️", href: "/catalog?type=discount" },
-  { id: "money", title: "Денежные выплаты", emoji: "💰", href: "/catalog?type=money" },
-  { id: "once-life", title: "1 раз в жизни", emoji: "⭐", href: "/catalog?type=once-life" },
-  { id: "once-year", title: "1 раз в год", emoji: "📅", href: "/catalog?type=once-year" },
-  { id: "once-month", title: "1 раз в месяц", emoji: "🗓️", href: "/catalog?type=once-month" },
-  { id: "situational", title: "По возникшей ситуации", emoji: "🆘", href: "/catalog?type=situational" },
+  {
+    id: "free",
+    title: "Положено бесплатно",
+    desc: "Услуги и вещи, предоставляемые безвозмездно",
+    group: "type",
+    href: "/catalog?type=free",
+  },
+  {
+    id: "discount",
+    title: "Положено со скидкой",
+    desc: "Льготы на оплату услуг, проезда, ЖКУ",
+    group: "type",
+    href: "/catalog?type=discount",
+  },
+  {
+    id: "money",
+    title: "Вам платят деньги",
+    desc: "Пособия, выплаты, материнский капитал",
+    group: "type",
+    href: "/catalog?type=money",
+  },
+  {
+    id: "once-life",
+    title: "1 раз в жизни",
+    desc: "Крупные целевые выплаты (например, маткапитал)",
+    group: "frequency",
+    href: "/catalog?type=once-life",
+  },
+  {
+    id: "once-year",
+    title: "1 раз в год",
+    desc: "Ежегодные компенсации к школе, путёвки",
+    group: "frequency",
+    href: "/catalog?type=once-year",
+  },
+  {
+    id: "once-month",
+    title: "1 раз в месяц",
+    desc: "Ежемесячные пособия на детей",
+    group: "frequency",
+    href: "/catalog?type=once-month",
+  },
+  {
+    id: "situational",
+    title: "По ситуации",
+    desc: "Помощь в трудной жизненной ситуации",
+    group: "frequency",
+    href: "/catalog?type=situational",
+  },
 ];
 
 export interface LifeCategory {
   id: string;
   title: string;
-  emoji: string;
   href: string;
 }
 
-/** «Жизненные ситуации» — тематические лепестки (по картинке с цветком). */
+/** «Жизненные ситуации» — тематические категории (по картинке с цветком). */
 export const LIFE_CATEGORIES: LifeCategory[] = [
-  { id: "money", title: "Деньги", emoji: "💵", href: "/catalog?topic=money" },
-  { id: "health", title: "Здоровье", emoji: "❤️‍🩹", href: "/catalog?topic=health" },
-  { id: "housing", title: "Жильё", emoji: "🏠", href: "/catalog?topic=housing" },
-  { id: "utilities", title: "ЖКХ", emoji: "💡", href: "/catalog?topic=utilities" },
-  { id: "transport", title: "Проезд", emoji: "🚌", href: "/catalog?topic=transport" },
-  { id: "education", title: "Образование", emoji: "🎓", href: "/catalog?topic=education" },
-  { id: "employers", title: "Работодатели", emoji: "💼", href: "/catalog?topic=employers" },
-  { id: "vuz", title: "ВУЗы", emoji: "🏛️", href: "/catalog?topic=vuz" },
-  { id: "leisure", title: "Отдых", emoji: "🏖️", href: "/catalog?topic=leisure" },
-  { id: "culture", title: "Культура", emoji: "🎭", href: "/catalog?topic=culture" },
-  { id: "sport", title: "Спорт", emoji: "⚽", href: "/catalog?topic=sport" },
-  { id: "taxes", title: "Налоги", emoji: "🧾", href: "/catalog?topic=taxes" },
-  { id: "social", title: "Соцподдержка", emoji: "🤝", href: "/catalog?topic=social" },
-  { id: "shops", title: "Магазины", emoji: "🛒", href: "/catalog?topic=shops" },
-  { id: "kids-goods", title: "Товары для детей", emoji: "🧸", href: "/catalog?topic=kids-goods" },
+  { id: "money", title: "Деньги", href: "/catalog?topic=money" },
+  { id: "health", title: "Здоровье", href: "/catalog?topic=health" },
+  { id: "housing", title: "Жильё", href: "/catalog?topic=housing" },
+  { id: "utilities", title: "ЖКХ", href: "/catalog?topic=utilities" },
+  { id: "transport", title: "Проезд", href: "/catalog?topic=transport" },
+  { id: "education", title: "Образование", href: "/catalog?topic=education" },
+  { id: "employers", title: "Работодатели", href: "/catalog?topic=employers" },
+  { id: "vuz", title: "ВУЗы", href: "/catalog?topic=vuz" },
+  { id: "leisure", title: "Отдых", href: "/catalog?topic=leisure" },
+  { id: "culture", title: "Культура", href: "/catalog?topic=culture" },
+  { id: "sport", title: "Спорт", href: "/catalog?topic=sport" },
+  { id: "taxes", title: "Налоги", href: "/catalog?topic=taxes" },
+  { id: "social", title: "Соцподдержка", href: "/catalog?topic=social" },
+  { id: "shops", title: "Магазины", href: "/catalog?topic=shops" },
+  { id: "kids-goods", title: "Товары для детей", href: "/catalog?topic=kids-goods" },
 ];
 
 export interface CatalogSituation {

@@ -17,7 +17,7 @@ const chip = (active: boolean) =>
   cn(
     "shrink-0 rounded-full border px-3.5 py-1.5 text-sm whitespace-nowrap transition-all",
     active
-      ? "border-brand bg-brand text-white font-semibold shadow-[0_4px_12px_-4px_rgba(15,138,106,0.45)]"
+      ? "border-brand bg-brand text-white font-semibold shadow-[0_4px_12px_-4px_rgba(27,58,107,0.45)]"
       : "border-stone-200 bg-white text-foreground hover:bg-stone-50",
   );
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Geist_Mono } from "next/font/google";
+import { Manrope, PT_Serif, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
@@ -24,6 +24,15 @@ const manrope = Manrope({
   display: "swap",
 });
 
+// Сериф для крупных заголовков — официальный, «государственный» характер
+// (как в референсе «Шпаргалка для родителей»).
+const ptSerif = PT_Serif({
+  variable: "--font-serif",
+  weight: ["400", "700"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -31,11 +40,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Совет матерей — меры поддержки семей с детьми",
-    template: "%s — Совет матерей",
+    default: "Шпаргалка для родителей — меры поддержки семей с детьми",
+    template: "%s — Шпаргалка для родителей",
   },
   description:
-    "Каталог федеральных и региональных мер государственной поддержки для семей с детьми и будущих родителей. Пройдите анкету и узнайте, что положено именно вам.",
+    "Шпаргалка для родителей от «Совета матерей»: все меры поддержки семей с детьми — федеральные, региональные, муниципальные, от работодателя и вузов. Пройдите анкету и узнайте, что положено именно вам.",
   icons: { icon: "/logo.png", apple: "/icon-192.png" },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -53,9 +62,9 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${manrope.variable} ${geistMono.variable} antialiased`}
+      className={`${manrope.variable} ${ptSerif.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-dvh bg-stone-200">
+      <body className="min-h-dvh bg-slate-300">
         <script dangerouslySetInnerHTML={{ __html: INSTALL_PROMPT_CAPTURE }} />
         {children}
         <ServiceWorkerRegister />

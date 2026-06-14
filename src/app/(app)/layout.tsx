@@ -14,7 +14,7 @@ export default function AppLayout({
         Прототип · данные демонстрационные
       </div>
       <AppHeader />
-      <main className="flex-1 overflow-y-auto overscroll-contain bg-white text-foreground">
+      <main className="flex-1 overflow-y-auto overscroll-contain bg-background text-foreground">
         {children}
       </main>
       <BottomNav />

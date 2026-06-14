@@ -27,7 +27,7 @@ export default function OwnSituationPage() {
       <MotionStagger className="mt-6 space-y-3" initialDelay={0.1} stagger={0.08}>
         <Link
           href="/podbor"
-          className="flex items-center gap-3.5 rounded-3xl bg-brand p-5 text-brand-foreground shadow-[0_14px_30px_-12px_rgba(15,138,106,0.55)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="flex items-center gap-3.5 rounded-3xl bg-brand p-5 text-brand-foreground shadow-[0_14px_30px_-12px_rgba(27,58,107,0.55)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/20">
             <Sparkles className="size-6" />

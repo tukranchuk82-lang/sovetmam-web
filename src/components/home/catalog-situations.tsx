@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { CATALOG_SITUATIONS } from "@/lib/home-taxonomy";
+import { SectionHeading } from "./section-heading";
 
 /**
- * «Каталог мер поддержки» — жизненные ситуации семьи (карточки).
- * Последняя — «Своя жизненная ситуация» — ведёт на страницу-развилку
- * (анкета или обращение в Совет матерей).
+ * «Каталог ситуаций» — жизненные ситуации семьи карточками: белая плитка,
+ * заголовок по центру и короткая красная черта под ним (стиль референса).
+ * Последняя — «Своя жизненная ситуация» — ведёт на развилку (анкета/обращение).
  */
 export function CatalogSituations() {
   const regular = CATALOG_SITUATIONS.filter((s) => !s.special);
@@ -13,46 +13,39 @@ export function CatalogSituations() {
 
   return (
     <section>
-      <h2 className="text-lg font-extrabold tracking-tight text-foreground">
-        Каталог мер поддержки
-      </h2>
-      <p className="mt-0.5 text-sm text-muted-foreground">
-        Выберите жизненную ситуацию вашей семьи
-      </p>
+      <SectionHeading subtitle="Выберите жизненную ситуацию вашей семьи — и получите персональный список мер поддержки">
+        Каталог ситуаций
+      </SectionHeading>
 
-      <div className="mt-3 grid grid-cols-2 gap-2.5">
-        {regular.map((s, i) => (
+      <div className="mt-5 grid grid-cols-2 gap-2.5">
+        {regular.map((s) => (
           <Link
             key={s.id}
             href={s.href}
-            className="flex items-center gap-2 rounded-2xl bg-white p-3 ring-1 ring-black/5 transition-all hover:scale-[1.02] hover:ring-brand/30"
+            className="flex flex-col items-center justify-center rounded-xl bg-card px-3 py-5 text-center ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all hover:ring-brand/40"
           >
-            <span className="text-[11px] font-bold tabular-nums text-brand/60">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <span className="text-sm font-semibold leading-tight text-foreground">
+            <span className="text-sm font-bold leading-tight text-brand">
               {s.title}
             </span>
+            <span className="mt-2 block h-0.5 w-8 rounded-full bg-accent-red" />
           </Link>
         ))}
-      </div>
 
-      {special && (
-        <Link
-          href={special.href}
-          className="mt-2.5 flex items-center gap-3 rounded-2xl bg-brand p-4 text-brand-foreground shadow-[0_12px_26px_-12px_rgba(15,138,106,0.6)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="text-base font-extrabold leading-tight">
+        {special && (
+          <Link
+            href={special.href}
+            className="col-span-2 flex flex-col items-center justify-center rounded-xl bg-brand-soft px-3 py-5 text-center ring-1 ring-brand/20 transition-all hover:ring-brand/40"
+          >
+            <span className="text-sm font-bold leading-tight text-brand">
               {special.title}
-            </p>
-            <p className="mt-0.5 text-sm text-white/85">
-              Не нашли свою? Подберём по анкете или примем обращение
-            </p>
-          </div>
-          <ChevronRight className="size-5 shrink-0" />
-        </Link>
-      )}
+            </span>
+            <span className="mt-1 text-xs text-muted-foreground">
+              Подберём по анкете или примем обращение
+            </span>
+            <span className="mt-2 block h-0.5 w-8 rounded-full bg-accent-red" />
+          </Link>
+        )}
+      </div>
     </section>
   );
 }

@@ -4,12 +4,13 @@ import { SupportPyramid } from "@/components/home/support-pyramid";
 import { MeasureTypes } from "@/components/home/measure-types";
 import { LifeCategories } from "@/components/home/life-categories";
 import { CatalogSituations } from "@/components/home/catalog-situations";
+import { SiteFooter } from "@/components/home/site-footer";
 import { InstallAppButton } from "@/components/install-app-button";
 import { MotionFadeIn } from "@/components/motion";
 
 export default function Home() {
   return (
-    <div className="space-y-7 px-4 py-5">
+    <div className="space-y-9 px-4 py-5">
       <MotionFadeIn>
         <FounderHero />
       </MotionFadeIn>
@@ -36,6 +37,7 @@ export default function Home() {
 
       <MotionFadeIn delay={0.1}>
         <InstallAppButton />
+        <SiteFooter />
       </MotionFadeIn>
     </div>
   );

@@ -23,7 +23,7 @@ export default async function PodborPage() {
 function AuthGate() {
   return (
     <div className="flex h-full flex-col items-center justify-center px-6 py-8 text-center">
-      <div className="flex size-16 items-center justify-center rounded-2xl bg-brand text-white shadow-[0_10px_24px_-8px_rgba(15,138,106,0.55)]">
+      <div className="flex size-16 items-center justify-center rounded-2xl bg-brand text-white shadow-[0_10px_24px_-8px_rgba(27,58,107,0.55)]">
         <Sparkles className="size-8" />
       </div>
       <h1 className="mt-5 text-xl font-extrabold tracking-tight">

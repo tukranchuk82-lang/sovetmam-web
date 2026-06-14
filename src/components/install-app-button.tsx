@@ -198,7 +198,7 @@ function InstructionsModal({
         <button
           type="button"
           onClick={onClose}
-          className="mt-5 h-11 w-full rounded-xl bg-brand text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(15,138,106,0.5)] hover:bg-brand/90"
+          className="mt-5 h-11 w-full rounded-xl bg-brand text-sm font-semibold text-white shadow-[0_4px_14px_-4px_rgba(27,58,107,0.5)] hover:bg-brand/90"
         >
           Понятно
         </button>
@@ -255,7 +255,7 @@ function IosGuide() {
 function NumberedStep({ n, text }: { n: number; text: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3 rounded-2xl bg-stone-50 p-3.5">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white shadow-[0_4px_10px_-3px_rgba(15,138,106,0.6)]">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white shadow-[0_4px_10px_-3px_rgba(27,58,107,0.6)]">
         {n}
       </span>
       <span className="flex-1 pt-0.5 text-sm leading-snug">{text}</span>
