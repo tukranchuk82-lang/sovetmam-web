@@ -5,7 +5,7 @@ import {
   Users,
   Briefcase,
   GraduationCap,
-  HeartHandshake,
+  Heart,
   Gift,
   Tag,
   Banknote,
@@ -34,7 +34,7 @@ export const PYRAMID_ICONS: Record<string, LucideIcon> = {
   municipal: Users,
   employer: Briefcase,
   vuz: GraduationCap,
-  nko: HeartHandshake,
+  nko: Heart,
 };
 
 /** Иконки типов мер (по id из MEASURE_TYPES). */
