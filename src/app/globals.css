@@ -297,6 +297,74 @@
   display: none !important;
 }
 
+/* ===================== Тема «Тёплая» (пастель) =====================
+   Кремово-персиковый фон, коралл + шалфейно-зелёный, мягкие скругления,
+   дружелюбный округлый шрифт. Заголовки тёмные, коралл — акцент. */
+[data-theme="warm"] {
+  --app-font-body: var(--font-manrope);
+  --app-font-head: var(--font-nunito);
+
+  --background: #fbf0e7;
+  --foreground: #34344e;
+  --card: #ffffff;
+  --card-foreground: #34344e;
+  --popover: #ffffff;
+  --popover-foreground: #34344e;
+  --primary: #d9785b;
+  --primary-foreground: #ffffff;
+  --secondary: #f6e7da;
+  --secondary-foreground: #34344e;
+  --muted: #f6e7da;
+  --muted-foreground: #927f73;
+  --accent: #e7ede3;
+  --accent-foreground: #5d7a5f;
+  --border: #f0e0d2;
+  --input: #ecdcce;
+  --ring: #d9785b;
+
+  --brand: #d9785b;
+  --brand-foreground: #ffffff;
+  --brand-soft: #fbe4d8;
+  --accent-red: #d9785b;
+  --accent-red-soft: #fbe4d8;
+}
+
+/* Мягкие тёплые тени и крупные скругления */
+[data-theme="warm"] .sm-card {
+  border-radius: 1.25rem !important;
+  box-shadow: 0 10px 26px -16px rgba(180, 110, 80, 0.5) !important;
+}
+[data-theme="warm"] .sm-cta {
+  border-radius: 1.5rem !important;
+  box-shadow: 0 16px 32px -16px rgba(217, 120, 92, 0.65) !important;
+}
+
+/* Пирамида: чередование коралла и шалфея, белый текст, мягкие скругления */
+[data-theme="warm"] .sm-step {
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 20px -10px rgba(170, 110, 80, 0.5) !important;
+}
+[data-theme="warm"] .sm-step span {
+  color: #ffffff !important;
+}
+[data-theme="warm"] .sm-step svg {
+  color: #ffffff !important;
+  fill: transparent !important;
+}
+[data-theme="warm"] .sm-step[data-level="grandparents"] { background: #e3a06b !important; }
+[data-theme="warm"] .sm-step[data-level="nko"] { background: #e0805c !important; }
+[data-theme="warm"] .sm-step[data-level="vuz"] { background: #88a98b !important; }
+[data-theme="warm"] .sm-step[data-level="employer"] { background: #eaa57e !important; }
+[data-theme="warm"] .sm-step[data-level="municipal"] { background: #9cb89d !important; }
+[data-theme="warm"] .sm-step[data-level="regional"] { background: #e89a5c !important; }
+[data-theme="warm"] .sm-step[data-level="federal"] { background: #d9785b !important; }
+
+/* Классификация «по типу»: разноцветные левые полоски (коралл/шалфей/оранжевый) */
+[data-theme="warm"] .sm-card[data-variant="type"]:nth-child(1) { border-left: 4px solid #88a98b !important; }
+[data-theme="warm"] .sm-card[data-variant="type"]:nth-child(2) { border-left: 4px solid #e89a5c !important; }
+[data-theme="warm"] .sm-card[data-variant="type"]:nth-child(3) { border-left: 4px solid #d9785b !important; }
+
 /* Появление секций на чистом CSS (см. components/motion.tsx). Контент виден
    по умолчанию; анимация не зависит от JS-гидратации. */
 @keyframes sm-fade-up {

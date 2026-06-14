@@ -76,7 +76,7 @@ function TypeCard({
         {Icon && <Icon className="size-5" />}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-bold uppercase leading-tight tracking-wide text-brand">
+        <span className="block text-sm font-bold uppercase leading-tight tracking-wide text-foreground">
           {item.title}
         </span>
         <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">

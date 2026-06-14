@@ -10,6 +10,7 @@ export interface ThemeOption {
 export const THEMES: ThemeOption[] = [
   { key: "classic", name: "Классический", hint: "Официальный navy" },
   { key: "neon", name: "Неон", hint: "Яркий брутализм" },
+  { key: "warm", name: "Тёплый", hint: "Пастель, коралл и шалфей" },
 ];
 
 export const DEFAULT_THEME = "classic";

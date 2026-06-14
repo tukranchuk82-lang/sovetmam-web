@@ -23,7 +23,7 @@ export function LifeCategories() {
               <span className="flex size-11 items-center justify-center rounded-full bg-brand-soft text-brand">
                 {Icon && <Icon className="size-5" />}
               </span>
-              <span className="text-xs font-semibold leading-tight text-brand">
+              <span className="text-xs font-semibold leading-tight text-foreground">
                 {c.title}
               </span>
             </Link>

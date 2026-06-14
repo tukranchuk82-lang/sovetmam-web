@@ -25,7 +25,7 @@ export function CatalogSituations() {
             data-i={i}
             className="sm-card sm-cat flex flex-col items-center justify-center rounded-xl bg-card px-3 py-5 text-center ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all hover:ring-brand/40"
           >
-            <span className="text-sm font-bold leading-tight text-brand">
+            <span className="text-sm font-bold leading-tight text-foreground">
               {s.title}
             </span>
             <span className="mt-2 block h-0.5 w-8 rounded-full bg-accent-red" />

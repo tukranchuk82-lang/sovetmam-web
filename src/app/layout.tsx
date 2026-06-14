@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope, PT_Serif, JetBrains_Mono, Geist_Mono } from "next/font/google";
+import {
+  Manrope,
+  PT_Serif,
+  JetBrains_Mono,
+  Nunito,
+  Geist_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
@@ -42,6 +48,14 @@ const jetBrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// Округлый дружелюбный — для тёплой пастельной темы.
+const nunito = Nunito({
+  variable: "--font-nunito",
+  weight: ["400", "700", "800"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -75,7 +89,7 @@ export default function RootLayout({
     <html
       lang="ru"
       suppressHydrationWarning
-      className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${geistMono.variable} antialiased`}
+      className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${nunito.variable} ${geistMono.variable} antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
