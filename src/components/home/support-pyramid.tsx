@@ -43,7 +43,7 @@ export function SupportPyramid() {
           href={PYRAMID_CROWN.href}
           data-level="grandparents"
           style={{ width: "46%" }}
-          className="sm-step flex items-center justify-center gap-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2.5 shadow-sm transition-colors hover:bg-orange-200/70"
+          className="sm-step sm-pop flex items-center justify-center gap-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2.5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.04] hover:bg-orange-200/70 hover:shadow-md"
         >
           <Star className="size-4 shrink-0 fill-orange-400 text-orange-500" />
           <span className="text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-orange-700">
@@ -59,9 +59,9 @@ export function SupportPyramid() {
               key={lvl.id}
               href={lvl.href}
               data-level={lvl.id}
-              style={{ width: `${WIDTHS[i]}%` }}
+              style={{ width: `${WIDTHS[i]}%`, animationDelay: `${(i + 1) * 80}ms` }}
               className={cn(
-                "sm-step flex items-center justify-center gap-2 rounded-lg border px-3 py-3 shadow-sm transition-all",
+                "sm-step sm-pop flex items-center justify-center gap-2 rounded-lg border px-3 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md",
                 tint.box,
               )}
             >

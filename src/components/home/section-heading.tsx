@@ -17,7 +17,7 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn("text-center", className)}>
-      <h2 className="sm-h2 font-serif text-xl font-bold uppercase leading-tight tracking-wide text-foreground">
+      <h2 className="sm-h2 font-serif text-[26px] font-extrabold leading-tight tracking-tight text-foreground">
         {children}
       </h2>
       <span

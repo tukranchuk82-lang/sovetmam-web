@@ -285,7 +285,7 @@
 /* Каталог ситуаций: разноцветные плитки по циклу */
 [data-theme="neon"] .sm-cat:nth-child(4n + 2) { background: #ffb000 !important; }
 [data-theme="neon"] .sm-cat:nth-child(4n + 3) { background: #ff2d6f !important; }
-[data-theme="neon"] .sm-cat:nth-child(4n + 3) span:first-child { color: #ffffff !important; }
+[data-theme="neon"] .sm-cat:nth-child(4n + 3) span { color: #ffffff !important; }
 [data-theme="neon"] .sm-cat:nth-child(4n + 4) { background: #00c3ff !important; }
 
 /* Шапка — жёлтая с чёрной рамкой */
@@ -439,7 +439,7 @@
 [data-theme="kids"] .sm-cat:nth-child(6n + 4) { background: #51cf66 !important; }
 [data-theme="kids"] .sm-cat:nth-child(6n + 5) { background: #4dabf7 !important; }
 [data-theme="kids"] .sm-cat:nth-child(6n + 6) { background: #9775fa !important; }
-[data-theme="kids"] .sm-cat span:first-child { color: #ffffff !important; }
+[data-theme="kids"] .sm-cat span { color: #ffffff !important; }
 [data-theme="kids"] .sm-cat span:last-child { background: rgba(255, 255, 255, 0.6) !important; }
 
 /* ===================== Тема «Минимализм» =====================
