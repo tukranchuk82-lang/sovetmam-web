@@ -30,7 +30,7 @@ const tabs: {
     href: "/podbor",
     label: "Подбор",
     icon: Sparkles,
-    emoji: "🪄",
+    emoji: "⭐️",
     match: (p) => p.startsWith("/podbor"),
   },
   {
@@ -44,7 +44,7 @@ const tabs: {
     href: "/profile",
     label: "Профиль",
     icon: User,
-    emoji: "👤",
+    emoji: "🙎🏻",
     match: (p) =>
       (p.startsWith("/profile") && !p.startsWith("/profile/inquiries")) ||
       p.startsWith("/login"),
