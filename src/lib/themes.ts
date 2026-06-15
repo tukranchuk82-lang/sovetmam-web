@@ -13,6 +13,7 @@ export const THEMES: ThemeOption[] = [
   { key: "warm", name: "Тёплый", hint: "Пастель, коралл и шалфей" },
   { key: "kids", name: "Яркий", hint: "Цветные карточки, лаванда" },
   { key: "crayon", name: "Карандаш", hint: "Детские рисунки, цветные мелки" },
+  { key: "notebook", name: "Тетрадка", hint: "Шпаргалка на листе в клетку" },
   { key: "minimal", name: "Минимализм", hint: "Чистый, индиго" },
 ];
 

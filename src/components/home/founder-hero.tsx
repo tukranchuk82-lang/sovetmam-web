@@ -22,7 +22,7 @@ export function FounderHero() {
   return (
     <section className="sm-card sm-hero relative overflow-hidden rounded-3xl bg-card p-5 ring-1 ring-border shadow-[0_14px_36px_-20px_rgba(27,58,107,0.45)]">
       {/* Бейдж-рекомендация */}
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white shadow-[0_6px_14px_-6px_rgba(16,185,129,0.7)]">
+      <span className="sm-hero-badge inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white shadow-[0_6px_14px_-6px_rgba(16,185,129,0.7)]">
         🌸 Совет матерей рекомендует
       </span>
 
@@ -30,7 +30,7 @@ export function FounderHero() {
       <h1 className="sm-h2 mt-4 font-serif text-[28px] font-extrabold leading-[1.12] text-foreground">
         Всё, что положено{" "}
         <span className="text-accent-red">вашей семье</span>{" "}
-        <span className="align-middle">👨‍👩‍👧‍👦</span>
+        <span className="sm-hero-emoji align-middle">👨‍👩‍👧‍👦</span>
       </h1>
 
       <p className="mt-3 text-sm leading-relaxed text-foreground/70">
@@ -43,15 +43,15 @@ export function FounderHero() {
         {/* Подложка 1 — жёлтая, выглядывает справа-сверху */}
         <span
           aria-hidden
-          className="absolute inset-0 rotate-3 rounded-[2rem] bg-amber-300"
+          className="sm-hero-frame absolute inset-0 rotate-3 rounded-[2rem] bg-amber-300"
         />
         {/* Подложка 2 — кремовая, выглядывает слева-снизу */}
         <span
           aria-hidden
-          className="absolute inset-0 -rotate-2 rounded-[2rem] bg-amber-100"
+          className="sm-hero-frame absolute inset-0 -rotate-2 rounded-[2rem] bg-amber-100"
         />
         {/* Карточка с фото */}
-        <div className="absolute inset-0 overflow-hidden rounded-[2rem] bg-gradient-to-b from-slate-50 to-brand-soft ring-1 ring-black/5 shadow-[0_16px_30px_-16px_rgba(27,58,107,0.5)]">
+        <div className="sm-hero-photo absolute inset-0 overflow-hidden rounded-[2rem] bg-gradient-to-b from-slate-50 to-brand-soft ring-1 ring-black/5 shadow-[0_16px_30px_-16px_rgba(27,58,107,0.5)]">
           <Image
             src="/founder/butskaya.png"
             alt="Татьяна Викторовна Бутская"
