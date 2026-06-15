@@ -442,6 +442,21 @@
 [data-theme="kids"] .sm-cat span { color: #ffffff !important; }
 [data-theme="kids"] .sm-cat span:last-child { background: rgba(255, 255, 255, 0.6) !important; }
 
+/* Нижнее меню: по умолчанию line-иконки, мультяшные эмодзи скрыты. */
+.sm-nav-emoji { display: none; }
+
+/* Тема «Яркий»: белое меню в жёлтой рамке с эмодзи-иконками. */
+[data-theme="kids"] .sm-bottom-nav {
+  background: #ffffff !important;
+  border: 3px solid #fcc419 !important;
+  border-bottom: none !important;
+}
+[data-theme="kids"] .sm-bottom-nav .sm-nav-lucide { display: none !important; }
+[data-theme="kids"] .sm-bottom-nav .sm-nav-emoji { display: inline-block !important; }
+[data-theme="kids"] .sm-bottom-nav a { color: #6b6f8d !important; }
+[data-theme="kids"] .sm-bottom-nav a[data-active="true"] { color: #8b5cf6 !important; }
+[data-theme="kids"] .sm-bottom-nav .sm-nav-indicator { background: #8b5cf6 !important; }
+
 /* ===================== Тема «Минимализм» =====================
    Светлый прохладный фон, индиго-акцент, белые карточки с тонкой рамкой,
    много воздуха, чистый шрифт, без декоративных подчёркиваний. */

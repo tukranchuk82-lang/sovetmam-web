@@ -48,8 +48,11 @@ export function LoginForm() {
   const [pending, startTransition] = useTransition();
 
   function login(channel: Channel) {
+    // Куда вернуться после входа (например, к форме обращения) — берём из ?next.
+    const next =
+      new URLSearchParams(window.location.search).get("next") ?? undefined;
     startTransition(async () => {
-      await loginAsDemoUser(channel, role);
+      await loginAsDemoUser(channel, role, next);
     });
   }
 
