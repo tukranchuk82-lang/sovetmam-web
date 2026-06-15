@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CATALOG_SITUATIONS } from "@/lib/home-taxonomy";
-import { CATALOG_SITUATION_EMOJI } from "./icons";
+import { CATALOG_SITUATION_EMOJI, CATALOG_SITUATION_DOODLE } from "./icons";
+import { Doodle } from "./crayon-doodles";
 import { SectionHeading } from "./section-heading";
 
 /**
@@ -28,7 +29,10 @@ export function CatalogSituations() {
             className="sm-card sm-cat group flex flex-col items-center justify-center gap-1.5 rounded-xl bg-card px-3 py-4 text-center ring-1 ring-border shadow-[0_4px_14px_-10px_rgba(27,58,107,0.5)] transition-all duration-200 hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_16px_28px_-12px_rgba(27,58,107,0.65)] hover:ring-2 hover:ring-brand"
           >
             <span className="text-3xl transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-125">
-              {CATALOG_SITUATION_EMOJI[s.id]}
+              <span className="sm-ico-emoji">{CATALOG_SITUATION_EMOJI[s.id]}</span>
+              <span className="sm-ico-doodle">
+                <Doodle name={CATALOG_SITUATION_DOODLE[s.id]} className="size-10" />
+              </span>
             </span>
             <span className="text-sm font-bold leading-tight text-foreground">
               {s.title}
@@ -47,11 +51,17 @@ export function CatalogSituations() {
               aria-hidden
               className="pointer-events-none absolute -right-3 -top-5 rotate-12 text-7xl opacity-20 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110"
             >
-              {CATALOG_SITUATION_EMOJI[special.id]}
+              <span className="sm-ico-emoji">{CATALOG_SITUATION_EMOJI[special.id]}</span>
+              <span className="sm-ico-doodle">
+                <Doodle name="pencil" className="size-20" />
+              </span>
             </span>
             {/* Иконка в кружке */}
             <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white/15 text-3xl ring-1 ring-white/25">
-              {CATALOG_SITUATION_EMOJI[special.id]}
+              <span className="sm-ico-emoji">{CATALOG_SITUATION_EMOJI[special.id]}</span>
+              <span className="sm-ico-doodle">
+                <Doodle name="pencil" className="size-9" />
+              </span>
             </span>
             <span className="relative min-w-0 flex-1">
               <span className="block text-base font-extrabold leading-tight">
@@ -63,9 +73,12 @@ export function CatalogSituations() {
             </span>
             <span
               aria-hidden
-              className="relative text-2xl opacity-80 transition-transform duration-200 group-hover:translate-x-1"
+              className="relative shrink-0 text-2xl opacity-80 transition-transform duration-200 group-hover:translate-x-1"
             >
-              →
+              <span className="sm-ico-emoji">→</span>
+              <span className="sm-ico-doodle">
+                <Doodle name="arrow" className="size-7" />
+              </span>
             </span>
           </Link>
         )}

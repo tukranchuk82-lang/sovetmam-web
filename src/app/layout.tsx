@@ -4,6 +4,7 @@ import {
   PT_Serif,
   JetBrains_Mono,
   Nunito,
+  Caveat,
   Geist_Mono,
 } from "next/font/google";
 import "./globals.css";
@@ -56,6 +57,14 @@ const nunito = Nunito({
   display: "swap",
 });
 
+// Рукописный «карандашный» — для детской темы «Карандаш» (заголовки).
+const caveat = Caveat({
+  variable: "--font-caveat",
+  weight: ["400", "700"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -89,7 +98,7 @@ export default function RootLayout({
     <html
       lang="ru"
       suppressHydrationWarning
-      className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${nunito.variable} ${geistMono.variable} antialiased`}
+      className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${nunito.variable} ${caveat.variable} ${geistMono.variable} antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />

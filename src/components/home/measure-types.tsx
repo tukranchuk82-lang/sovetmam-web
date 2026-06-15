@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MEASURE_TYPES, type MeasureType } from "@/lib/home-taxonomy";
-import { MEASURE_TYPE_EMOJI } from "./icons";
+import { MEASURE_TYPE_EMOJI, MEASURE_TYPE_DOODLE } from "./icons";
+import { Doodle } from "./crayon-doodles";
 import { SectionHeading } from "./section-heading";
 
 /**
@@ -79,11 +80,14 @@ function TypeCard({
     >
       <span
         className={
-          "flex size-12 shrink-0 items-center justify-center rounded-2xl text-2xl " +
+          "sm-ico-tile flex size-12 shrink-0 items-center justify-center rounded-2xl text-2xl " +
           tile
         }
       >
-        {emoji}
+        <span className="sm-ico-emoji">{emoji}</span>
+        <span className="sm-ico-doodle">
+          <Doodle name={MEASURE_TYPE_DOODLE[item.id]} className="size-8" />
+        </span>
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-bold uppercase leading-tight tracking-wide text-foreground">

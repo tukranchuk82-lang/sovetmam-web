@@ -457,6 +457,138 @@
 [data-theme="kids"] .sm-bottom-nav a[data-active="true"] { color: #8b5cf6 !important; }
 [data-theme="kids"] .sm-bottom-nav .sm-nav-indicator { background: #8b5cf6 !important; }
 
+/* ===================== Тема «Карандаш» (детский рисунок) =====================
+   Кремовая бумага с зерном, восковые меловые заливки, кривоватые контуры «от
+   руки» (через неровный border-radius), рукописный шрифт Caveat и дудлы
+   (солнышко, цветочки). Структура и тексты те же — меняется оформление. */
+[data-theme="crayon"] {
+  --app-font-body: var(--font-nunito);
+  --app-font-head: var(--font-caveat);
+
+  --background: #fbf6ea;
+  --foreground: #4a4036;
+  --card: #fffdf6;
+  --card-foreground: #4a4036;
+  --popover: #fffdf6;
+  --popover-foreground: #4a4036;
+  --primary: #4a90d9;
+  --primary-foreground: #fffdf6;
+  --secondary: #fdeccb;
+  --secondary-foreground: #4a4036;
+  --muted: #f3ead6;
+  --muted-foreground: #8a7d6a;
+  --accent: #fce9c8;
+  --accent-foreground: #b5651d;
+  --border: #d9c7a6;
+  --input: #d9c7a6;
+  --ring: #4a90d9;
+
+  --brand: #4a90d9;
+  --brand-foreground: #fffdf6;
+  --brand-soft: #e3f0fb;
+  --accent-red: #f0663f;
+  --accent-red-soft: #fde3da;
+}
+
+/* Бумажный фон с лёгким зерном */
+[data-theme="crayon"] body {
+  background-color: #fbf6ea;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* Рукописные заголовки покрупнее (у Caveat низкий рост строчных) */
+[data-theme="crayon"] .sm-h2 { font-size: 2rem !important; letter-spacing: 0 !important; }
+[data-theme="crayon"] .sm-hero h1 { font-size: 2.5rem !important; line-height: 1.05 !important; }
+
+/* Карточки «от руки»: кремовая бумага, карандашный контур, неровные углы */
+[data-theme="crayon"] .sm-card {
+  background: var(--card);
+  border: 2.5px solid #6b5d4a !important;
+  border-radius: 255px 18px 235px 18px / 18px 235px 18px 255px !important;
+  box-shadow: 3px 4px 0 rgba(107, 93, 74, 0.12) !important;
+}
+[data-theme="crayon"] .sm-card:nth-child(even) {
+  border-radius: 18px 235px 18px 255px / 235px 18px 255px 18px !important;
+}
+[data-theme="crayon"] .sm-cta {
+  background: var(--brand);
+  border: 2.5px solid #6b5d4a !important;
+  border-radius: 235px 16px 235px 16px / 16px 235px 16px 235px !important;
+  box-shadow: 3px 4px 0 rgba(107, 93, 74, 0.2) !important;
+}
+
+/* Короткая черта под заголовком → нарисованный цветочек */
+[data-theme="crayon"] .sm-h2-rule {
+  height: 26px !important;
+  width: 26px !important;
+  border-radius: 0 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg stroke='%23e8743b' stroke-width='2.5'%3E%3Ccircle cx='20' cy='9' r='5' fill='%23f7b7c4'/%3E%3Ccircle cx='31' cy='20' r='5' fill='%23f7b7c4'/%3E%3Ccircle cx='9' cy='20' r='5' fill='%23f7b7c4'/%3E%3Ccircle cx='20' cy='31' r='5' fill='%23f7b7c4'/%3E%3C/g%3E%3Ccircle cx='20' cy='20' r='5.5' fill='%23ffd24a' stroke='%23e8743b' stroke-width='2.5'/%3E%3C/svg%3E") center/contain no-repeat !important;
+}
+
+/* Солнышко-дудл в углу героя */
+[data-theme="crayon"] .sm-hero::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 54px;
+  height: 54px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23f5a623' stroke-width='5' stroke-linecap='round'%3E%3Cpath d='M50 6v12M50 82v12M6 50h12M82 50h12M19 19l8 8M73 73l8 8M81 19l-8 8M27 73l-8 8'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='25' fill='%23ffd24a' stroke='%23f5a623' stroke-width='4'/%3E%3Cg fill='%236b5d4a'%3E%3Ccircle cx='42' cy='47' r='2.6'/%3E%3Ccircle cx='58' cy='47' r='2.6'/%3E%3C/g%3E%3Cpath d='M42 56q8 7 16 0' fill='none' stroke='%236b5d4a' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* Пирамида: меловые заливки, карандашный контур, неровные углы */
+[data-theme="crayon"] .sm-step {
+  border: 2.5px solid #6b5d4a !important;
+  border-radius: 235px 16px 235px 16px / 16px 235px 16px 235px !important;
+  box-shadow: 2px 3px 0 rgba(107, 93, 74, 0.16) !important;
+}
+[data-theme="crayon"] .sm-step span { color: #4a4036 !important; }
+[data-theme="crayon"] .sm-step svg { color: #6b5d4a !important; fill: currentColor !important; opacity: 0.55; }
+[data-theme="crayon"] .sm-step[data-level="grandparents"] { background: #ffe08a !important; }
+[data-theme="crayon"] .sm-step[data-level="nko"] { background: #c9b3e6 !important; }
+[data-theme="crayon"] .sm-step[data-level="vuz"] { background: #f6b8c6 !important; }
+[data-theme="crayon"] .sm-step[data-level="employer"] { background: #b7d99a !important; }
+[data-theme="crayon"] .sm-step[data-level="municipal"] { background: #f5e08a !important; }
+[data-theme="crayon"] .sm-step[data-level="regional"] { background: #f3c98b !important; }
+[data-theme="crayon"] .sm-step[data-level="federal"] { background: #f7b2a0 !important; }
+
+/* Дудлы вместо эмодзи только в теме «Карандаш» */
+.sm-ico-doodle,
+.sm-nav-doodle {
+  display: none;
+}
+[data-theme="crayon"] .sm-ico-emoji { display: none !important; }
+[data-theme="crayon"] .sm-ico-doodle { display: inline-flex !important; }
+
+/* Иконка-«пузырёк» под дудлом: бумага + карандашный контур, неровный круг */
+[data-theme="crayon"] .sm-ico-tile {
+  background: #fffdf6 !important;
+  border: 2.5px solid #5b4f3f !important;
+  border-radius: 60% 40% 55% 45% / 50% 55% 45% 50% !important;
+  box-shadow: 2px 2px 0 rgba(91, 79, 63, 0.12) !important;
+}
+
+/* Каталог ситуаций: «бумажные» карточки с карандашным контуром, без заливки —
+   дудл-рисунок на чистом фоне, как набросок в альбоме. */
+[data-theme="crayon"] .sm-cat { background: #fffdf6 !important; }
+[data-theme="crayon"] .sm-cat span { color: #4a4036 !important; }
+[data-theme="crayon"] .sm-cat span:last-child { background: #d8c7a8 !important; }
+
+/* Нижнее меню: белая бумага, карандашный контур сверху, эмодзи-иконки */
+[data-theme="crayon"] .sm-bottom-nav {
+  background: #fffdf6 !important;
+  border: 2.5px solid #6b5d4a !important;
+  border-bottom: none !important;
+  border-radius: 235px 235px 0 0 / 28px 28px 0 0 !important;
+}
+[data-theme="crayon"] .sm-bottom-nav .sm-nav-lucide { display: none !important; }
+[data-theme="crayon"] .sm-bottom-nav .sm-nav-emoji { display: none !important; }
+[data-theme="crayon"] .sm-bottom-nav .sm-nav-doodle { display: inline-flex !important; }
+[data-theme="crayon"] .sm-bottom-nav a { color: #8a7d6a !important; }
+[data-theme="crayon"] .sm-bottom-nav a[data-active="true"] { color: #4a90d9 !important; }
+[data-theme="crayon"] .sm-bottom-nav .sm-nav-indicator { background: #f0663f !important; }
+
 /* ===================== Тема «Минимализм» =====================
    Светлый прохладный фон, индиго-акцент, белые карточки с тонкой рамкой,
    много воздуха, чистый шрифт, без декоративных подчёркиваний. */

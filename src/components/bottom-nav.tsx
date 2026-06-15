@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, LayoutGrid, Sparkles, Mail, User } from "lucide-react";
+import { Doodle } from "@/components/home/crayon-doodles";
+import { NAV_DOODLE } from "@/components/home/icons";
 import { cn } from "@/lib/utils";
 
 const tabs: {
@@ -92,6 +94,13 @@ export function BottomNav() {
               >
                 {t.emoji}
               </span>
+              <Doodle
+                name={NAV_DOODLE[t.href]}
+                className={cn(
+                  "sm-nav-doodle size-6 transition-transform",
+                  active && "scale-110",
+                )}
+              />
               <span className="mt-0.5">{t.label}</span>
             </Link>
           );

@@ -20,7 +20,7 @@ import Image from "next/image";
  */
 export function FounderHero() {
   return (
-    <section className="sm-card relative overflow-hidden rounded-3xl bg-card p-5 ring-1 ring-border shadow-[0_14px_36px_-20px_rgba(27,58,107,0.45)]">
+    <section className="sm-card sm-hero relative overflow-hidden rounded-3xl bg-card p-5 ring-1 ring-border shadow-[0_14px_36px_-20px_rgba(27,58,107,0.45)]">
       {/* Бейдж-рекомендация */}
       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white shadow-[0_6px_14px_-6px_rgba(16,185,129,0.7)]">
         🌸 Совет матерей рекомендует
