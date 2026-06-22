@@ -48,7 +48,7 @@ export default async function SegmentPage({
       <BackLink href="/" label="На главную" />
 
       <div className="mt-3 flex items-center gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(27,58,107,0.5)]">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(142,29,44,0.5)]">
           <Icon className="size-6" />
         </div>
         <h1 className="text-xl font-extrabold leading-tight">{segment.title}</h1>
@@ -61,7 +61,7 @@ export default async function SegmentPage({
         href="/podbor"
         className="mt-4 flex items-center gap-3 rounded-2xl bg-[#2d2d2d] p-4 text-white shadow-[0_10px_24px_-10px_rgba(0,0,0,0.35)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_14px_28px_-10px_rgba(0,0,0,0.45)]"
       >
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(27,58,107,0.6)]">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(142,29,44,0.6)]">
           <Sparkles className="size-6" />
         </div>
         <div className="min-w-0 flex-1">

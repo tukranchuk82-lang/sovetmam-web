@@ -1,11 +1,13 @@
 export const metadata = { title: "Об организации" };
 
+import { OrgName } from "@/components/org-name";
+
 export default function AboutPage() {
   return (
     <div className="px-4 py-5">
       <h1 className="text-xl font-extrabold tracking-tight">Об организации</h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        Общероссийская общественная организация «Совет матерей» помогает семьям с детьми и будущим
+        Общероссийская общественная организация <OrgName /> помогает семьям с детьми и будущим
         родителям разобраться в мерах государственной поддержки — как федеральных, так и
         региональных.
       </p>
@@ -23,7 +25,7 @@ export default function AboutPage() {
       </div>
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Совет матерей
+        © {new Date().getFullYear()} <OrgName />
       </p>
     </div>
   );

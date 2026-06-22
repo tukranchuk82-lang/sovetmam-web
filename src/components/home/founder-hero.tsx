@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { OrgName } from "@/components/org-name";
+import { FamilyDoodle } from "@/components/family-doodle";
 
 /**
  * Первый экран: обращение от лица Татьяны Викторовны Бутской.
@@ -22,15 +24,27 @@ export function FounderHero() {
   return (
     <section className="sm-card sm-hero relative overflow-hidden rounded-3xl bg-card p-5 ring-1 ring-border shadow-[0_14px_36px_-20px_rgba(27,58,107,0.45)]">
       {/* Бейдж-рекомендация */}
-      <span className="sm-hero-badge inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white shadow-[0_6px_14px_-6px_rgba(16,185,129,0.7)]">
-        🌸 Совет матерей рекомендует
+      <span className="sm-hero-badge inline-flex items-center gap-1 rounded-full bg-[#4a9590] px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-white shadow-[0_3px_8px_-5px_rgba(74,149,144,0.8)]">
+        {/* Галочка «от руки»: рукописный кистевой мазок, тёмно-зелёный (#2d6a2f)
+            на светло-зелёной плашке + светлая тень для отрыва от фона. */}
+        <svg
+          viewBox="0 0 48 44"
+          className="size-4 shrink-0 -rotate-[8deg] drop-shadow-[1px_1.5px_0.5px_rgba(255,255,255,0.6)]"
+          aria-hidden
+        >
+          <path
+            d="M5 21 Q4 18 8 19 Q13 24 17 30 Q18 31 19 31 Q26 20 35 11 Q40 6 46 3 Q49 2 47 6 Q47 9 43 12 Q35 19 28 28 Q24 33 21 39 Q19 42 16 40 Q11 34 6 24 Q5 22 5 21 Z"
+            fill="#2d6a2f"
+          />
+        </svg>
+        <OrgName /> рекомендует
       </span>
 
       {/* Заголовок: округлый, жирный, с красным акцентным словом */}
       <h1 className="sm-h2 mt-4 font-serif text-[28px] font-extrabold leading-[1.12] text-foreground">
         Всё, что положено{" "}
         <span className="text-accent-red">вашей семье</span>{" "}
-        <span className="sm-hero-emoji align-middle">👨‍👩‍👧‍👦</span>
+        <FamilyDoodle className="sm-hero-emoji ml-1 inline-block h-[1.3em] w-auto align-middle" />
       </h1>
 
       <p className="mt-3 text-sm leading-relaxed text-foreground/70">
@@ -83,7 +97,7 @@ export function FounderHero() {
           — Татьяна Викторовна Бутская
         </figcaption>
         <p className="text-xs text-muted-foreground">
-          Председатель общероссийской общественной организации «Совет матерей»
+          Председатель общероссийской общественной организации <OrgName />
         </p>
       </figure>
     </section>

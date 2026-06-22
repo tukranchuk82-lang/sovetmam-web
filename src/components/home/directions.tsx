@@ -1,0 +1,142 @@
+import Link from "next/link";
+import {
+  RussianRuble,
+  Heart,
+  Home,
+  Droplet,
+  Bus,
+  BookOpen,
+  Users,
+  GraduationCap,
+  Sun,
+  Drama,
+  Dumbbell,
+  Calculator,
+  HandHeart,
+  ShoppingBag,
+  Baby,
+  Sparkles,
+  ChevronRight,
+  type LucideIcon,
+} from "lucide-react";
+
+// Экран «Направления мер поддержки» — секция на главной (по референсу).
+// Сетка 3×5 тематических плиток. Иллюстрации из public: domik-cut.png (у
+// заголовка) и city2-cut.png (силуэт города снизу, перекрашен в цвет city).
+// Плитки кликабельны → /catalog (с фильтром по категории, где есть соответствие).
+
+const BLUE = "#B51234"; // символы иконок — основной красный
+const CIRCLE = "#bbc1cc"; // фоновый круг
+const T1 = "#15234A";
+const T2 = "#5E6785";
+
+interface Direction {
+  icon: LucideIcon;
+  label: string;
+  category?: string; // категория меры в БД (для фильтра каталога)
+}
+
+const DIRECTIONS: Direction[] = [
+  { icon: RussianRuble, label: "Деньги", category: "Выплаты и пособия" },
+  { icon: Heart, label: "Здоровье", category: "Здоровье" },
+  { icon: Home, label: "Жильё", category: "Жильё и ипотека" },
+  { icon: Droplet, label: "ЖКХ", category: "Жильё и ипотека" },
+  { icon: Bus, label: "Проезд", category: "Транспорт" },
+  { icon: BookOpen, label: "Образование", category: "Образование" },
+  { icon: Users, label: "Работодатели", category: "Работа и занятость" },
+  { icon: GraduationCap, label: "Вузы", category: "Образование" },
+  { icon: Sun, label: "Отдых", category: "Культура и отдых" },
+  { icon: Drama, label: "Культура", category: "Культура и отдых" },
+  { icon: Dumbbell, label: "Спорт" },
+  { icon: Calculator, label: "Налоги", category: "Налоги и льготы" },
+  { icon: HandHeart, label: "Соцподдержка", category: "Помощь и сопровождение" },
+  { icon: ShoppingBag, label: "Магазины" },
+  { icon: Baby, label: "Товары для детей" },
+];
+
+function hrefFor(d: Direction) {
+  return d.category
+    ? `/catalog?category=${encodeURIComponent(d.category)}`
+    : "/catalog";
+}
+
+export function Directions() {
+  return (
+    <section
+      className="px-5 pb-10 pt-2"
+      style={{ fontFamily: "var(--font-inter), sans-serif", color: T1 }}
+    >
+      {/* Заголовок + домик справа */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h2
+            className="text-[26px] font-normal leading-[1.12]"
+            style={{ fontFamily: "var(--font-playfair), serif", color: T1 }}
+          >
+            Направления мер поддержки
+          </h2>
+          <p className="mt-2 text-[14px] leading-snug" style={{ color: T2 }}>
+            Меры поддержки на все случаи жизни для вас и вашей семьи
+          </p>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/domik2-cut.png"
+          alt=""
+          aria-hidden
+          className="mt-1 w-[140px] shrink-0 object-contain"
+        />
+      </div>
+
+      {/* Сетка направлений */}
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        {DIRECTIONS.map((d) => {
+          const Icon = d.icon;
+          return (
+            <Link
+              key={d.label}
+              href={hrefFor(d)}
+              className="flex flex-col items-center rounded-[20px] border border-[#3A4D63]/30 bg-white px-2 py-4 shadow-[0_10px_24px_-8px_rgba(21,35,74,0.34)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[#3A4D63]/55 hover:shadow-[0_16px_32px_-10px_rgba(21,35,74,0.42)] active:scale-95"
+            >
+              <span
+                className="flex size-14 items-center justify-center rounded-full"
+                style={{ background: CIRCLE }}
+              >
+                <Icon size={26} strokeWidth={1.6} color={BLUE} aria-hidden />
+              </span>
+              <span
+                className="mt-2.5 text-center text-[13px] font-medium leading-tight"
+                style={{ color: T1 }}
+              >
+                {d.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Баннер «Подобрать меры поддержки» → анкета */}
+      <Link
+        href="/podbor"
+        className="mt-6 flex items-center gap-3 rounded-2xl px-5 py-4 text-white"
+        style={{
+          background: "linear-gradient(to bottom, #B51234, #8E1D2C)",
+          boxShadow: "0 14px 28px -16px rgba(142,29,44,0.6)",
+        }}
+      >
+        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-white/15">
+          <Sparkles size={22} aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[16px] font-semibold leading-tight">
+            Подобрать меры поддержки
+          </span>
+          <span className="mt-0.5 block text-[12.5px] leading-snug text-white/85">
+            Пройдите анкету — подберём меры под вашу семью
+          </span>
+        </span>
+        <ChevronRight size={20} className="shrink-0" aria-hidden />
+      </Link>
+    </section>
+  );
+}

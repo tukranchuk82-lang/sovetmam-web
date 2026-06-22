@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Sparkles, MessageSquareHeart, ChevronRight } from "lucide-react";
 import { BackLink } from "@/components/back-link";
 import { MotionFadeIn, MotionStagger } from "@/components/motion";
+import { OrgName } from "@/components/org-name";
 
 export const metadata = { title: "Своя жизненная ситуация" };
 
@@ -27,7 +28,7 @@ export default function OwnSituationPage() {
       <MotionStagger className="mt-6 space-y-3" initialDelay={0.1} stagger={0.08}>
         <Link
           href="/podbor"
-          className="flex items-center gap-3.5 rounded-3xl bg-brand p-5 text-brand-foreground shadow-[0_14px_30px_-12px_rgba(27,58,107,0.55)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="flex items-center gap-3.5 rounded-3xl bg-brand p-5 text-brand-foreground shadow-[0_14px_30px_-12px_rgba(142,29,44,0.55)] transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/20">
             <Sparkles className="size-6" />
@@ -56,7 +57,7 @@ export default function OwnSituationPage() {
               Написать обращение
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Опишите свою ситуацию — специалисты «Совета матерей» ответят и
+              Опишите свою ситуацию — специалисты <OrgName genitive /> ответят и
               подскажут
             </p>
           </div>

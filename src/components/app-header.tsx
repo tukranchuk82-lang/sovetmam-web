@@ -1,55 +1,54 @@
 import Link from "next/link";
-import Image from "next/image";
 import { LogIn } from "lucide-react";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { Avatar } from "@/components/avatar";
+import { OrgName } from "@/components/org-name";
 
+// Хедер по утверждённому дизайну: плавающая белая карточка на светлом фоне,
+// логотип слева, название (Playfair) + подзаголовок (Inter) по центру,
+// pill-кнопка «Войти» справа — тихая, полупрозрачная (синий тинт бренд-кита),
+// чтобы не перетягивать внимание с основного действия.
 export async function AppHeader() {
   const user = await getCurrentDemoUser();
 
   return (
-    <header className="relative z-20 shrink-0 border-b border-border bg-card">
-      {/* Тонкая фирменная полоса сверху: navy + красный акцент */}
-      <div className="flex h-1">
-        <div className="flex-1 bg-brand" />
-        <div className="w-1/4 bg-accent-red" />
-      </div>
-      <div className="flex h-14 items-center justify-between gap-2.5 px-4">
-        <Link href="/" className="flex min-w-0 items-center gap-2.5">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft ring-1 ring-brand/15">
-            <Image
-              src="/logo.png"
-              alt="Совет матерей"
-              width={28}
-              height={28}
-              priority
-              className="size-7 rounded-full object-contain"
-            />
-          </div>
+    <header className="relative z-20 shrink-0 border-b border-black/10 bg-white shadow-[0_6px_18px_-6px_rgba(0,0,0,0.20)]">
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
+        <Link href="/" className="flex min-w-0 items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.svg"
+            alt="Совет матерей"
+            width={52}
+            height={52}
+            className="size-[52px] shrink-0 object-contain"
+          />
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate font-serif text-sm font-bold uppercase tracking-wide text-brand">
-              Шпаргалка для родителей
+            <span
+              className="text-[22px] font-semibold leading-none text-[#8E1D2C]"
+              style={{ fontFamily: "var(--font-playfair), serif" }}
+            >
+              <OrgName />
             </span>
-            <span className="truncate text-[10px] text-muted-foreground">
-              Проект «Совета матерей»
+            <span
+              className="mt-1.5 text-[11px] leading-tight text-[#666666]"
+              style={{ fontFamily: "var(--font-inter), sans-serif" }}
+            >
+              общероссийская общественная организация
             </span>
           </span>
         </Link>
 
         {user ? (
-          <Link
-            href="/profile"
-            aria-label="Личный кабинет"
-            className="shrink-0 rounded-full ring-2 ring-brand/20 ring-offset-2 ring-offset-card transition-transform hover:scale-105"
-          >
-            <Avatar name={user.name} color={user.avatarColor} size={36} />
+          <Link href="/profile" aria-label="Личный кабинет" className="shrink-0">
+            <Avatar name={user.name} color={user.avatarColor} size={44} />
           </Link>
         ) : (
           <Link
             href="/login"
-            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-brand/30 bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand transition-colors hover:bg-brand/10"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-[#3A4D63]/20 bg-[#3A4D63]/12 px-5 text-sm font-semibold text-[#3A4D63]"
           >
-            <LogIn className="size-3.5" />
+            <LogIn className="size-4" />
             Войти
           </Link>
         )}

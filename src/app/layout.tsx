@@ -5,7 +5,10 @@ import {
   JetBrains_Mono,
   Nunito,
   Caveat,
+  Marck_Script,
   Geist_Mono,
+  Playfair_Display,
+  Inter,
 } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
@@ -65,13 +68,36 @@ const caveat = Caveat({
   display: "swap",
 });
 
+// Изящный размашистый каллиграфический — для подписи автора (с кириллицей).
+const marckScript = Marck_Script({
+  variable: "--font-marck",
+  weight: ["400"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
+// Элегантный сериф для заголовка-героя главной (по референсу).
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  weight: ["400", "500", "600"],
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
+// Inter — основной текст экранов по референсу.
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
 // Раннее применение выбранной темы (до отрисовки) — чтобы не было мигания.
-const THEME_INIT = `(function(){try{var q=new URLSearchParams(location.search).get('theme');var t=q||localStorage.getItem('sm-theme');if(t){document.documentElement.setAttribute('data-theme',t);if(q)localStorage.setItem('sm-theme',q);}}catch(e){}})();`;
+const THEME_INIT = `(function(){try{var q=new URLSearchParams(location.search).get('theme');var t=q||localStorage.getItem('sm-theme')||'city';document.documentElement.setAttribute('data-theme',t);if(q)localStorage.setItem('sm-theme',q);}catch(e){document.documentElement.setAttribute('data-theme','city');}})();`;
 
 export const metadata: Metadata = {
   title: {
@@ -85,7 +111,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Совет матерей",
+    title: "«Совет матерей»",
   },
 };
 
@@ -98,7 +124,7 @@ export default function RootLayout({
     <html
       lang="ru"
       suppressHydrationWarning
-      className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${nunito.variable} ${caveat.variable} ${geistMono.variable} antialiased`}
+      className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${nunito.variable} ${caveat.variable} ${marckScript.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />

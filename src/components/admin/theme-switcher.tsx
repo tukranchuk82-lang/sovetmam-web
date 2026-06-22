@@ -7,6 +7,7 @@ import { setAdminThemeAction } from "@/app/admin/actions";
 import type { AdminTheme } from "@/lib/admin-theme";
 
 const OPTIONS: Array<{ id: AdminTheme; label: string; swatch: string }> = [
+  { id: "city", label: "Город", swatch: "bg-[#8e1d2c]" },
   { id: "blue", label: "Синяя", swatch: "bg-slate-800" },
   { id: "beige", label: "Бежевая", swatch: "bg-stone-100 border border-stone-400" },
   { id: "dark", label: "Тёмная", swatch: "bg-black" },

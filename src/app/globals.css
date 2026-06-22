@@ -203,167 +203,27 @@
   --ring: oklch(0.72 0.22 330);
 }
 
-/* ===================== Тема «Неон» (нео-брутализм) =====================
-   Яркие цвета, моноширинный шрифт, жёсткие чёрные рамки и «твёрдые» тени.
-   Структура и тексты те же — меняется только оформление. */
-[data-theme="neon"] {
-  --app-font-body: var(--font-jb);
-  --app-font-head: var(--font-manrope);
-
-  --background: #ededed;
-  --foreground: #0a0a0a;
+/* Тема «Город» для админки — палитра бренд-кита (как [data-theme="city"]). */
+[data-admin-theme="city"] {
+  --background: #f7f7f8;
+  --foreground: #1a1a1a;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #1a1a1a;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #0a0a0a;
+  --popover-foreground: #1a1a1a;
+  --primary: #8e1d2c;
   --primary-foreground: #ffffff;
-  --secondary: #f0f0f0;
-  --secondary-foreground: #0a0a0a;
-  --muted: #f0f0f0;
-  --muted-foreground: #4a4a4a;
-  --accent: #00c3ff;
-  --accent-foreground: #0a0a0a;
-  --border: #0a0a0a;
-  --input: #0a0a0a;
-  --ring: #0a0a0a;
-
-  --brand: #0a0a0a;
-  --brand-foreground: #ffffff;
-  --brand-soft: #ffffff;
-  --accent-red: #ff2d6f;
-  --accent-red-soft: #ffe0ec;
+  --secondary: #f7d9dc;
+  --secondary-foreground: #8e1d2c;
+  --muted: #f1f1f3;
+  --muted-foreground: #6b6b6b;
+  --accent: #f7d9dc;
+  --accent-foreground: #8e1d2c;
+  --destructive: oklch(0.55 0.2 27);
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #8e1d2c;
 }
-
-/* Карточки: жёсткая чёрная рамка + твёрдая тень, почти без скруглений */
-[data-theme="neon"] .sm-card {
-  border: 3px solid #0a0a0a !important;
-  border-radius: 0.25rem !important;
-  box-shadow: 4px 4px 0 #0a0a0a !important;
-  background: #ffffff;
-}
-[data-theme="neon"] .sm-cta {
-  background: #0a0a0a !important;
-  color: #fff !important;
-  border: 3px solid #0a0a0a !important;
-  border-radius: 0.25rem !important;
-  box-shadow: 6px 6px 0 var(--accent-red) !important;
-}
-
-/* Заголовки секций — толстая чёрная черта */
-[data-theme="neon"] .sm-h2 {
-  letter-spacing: 0.01em;
-}
-[data-theme="neon"] .sm-h2-rule {
-  height: 6px !important;
-  width: 64px !important;
-  border-radius: 0 !important;
-  background: #0a0a0a !important;
-}
-
-/* Пирамида: неоновые ступени, чёрная рамка, твёрдая тень, чёрный текст/иконки */
-[data-theme="neon"] .sm-step {
-  border: 3px solid #0a0a0a !important;
-  border-radius: 0.3rem !important;
-  box-shadow: 4px 4px 0 #0a0a0a !important;
-}
-[data-theme="neon"] .sm-step span {
-  color: #0a0a0a !important;
-}
-[data-theme="neon"] .sm-step svg {
-  color: #0a0a0a !important;
-  fill: #0a0a0a !important;
-}
-[data-theme="neon"] .sm-step[data-level="grandparents"] { background: #ff8a00 !important; }
-[data-theme="neon"] .sm-step[data-level="nko"] { background: #00c3ff !important; }
-[data-theme="neon"] .sm-step[data-level="vuz"] { background: #ff2d6f !important; }
-[data-theme="neon"] .sm-step[data-level="employer"] { background: #aef000 !important; }
-[data-theme="neon"] .sm-step[data-level="municipal"] { background: #ffd400 !important; }
-[data-theme="neon"] .sm-step[data-level="regional"] { background: #b14dff !important; }
-[data-theme="neon"] .sm-step[data-level="federal"] { background: #ff3b3b !important; }
-
-/* Каталог ситуаций: разноцветные плитки по циклу */
-[data-theme="neon"] .sm-cat:nth-child(4n + 2) { background: #ffb000 !important; }
-[data-theme="neon"] .sm-cat:nth-child(4n + 3) { background: #ff2d6f !important; }
-[data-theme="neon"] .sm-cat:nth-child(4n + 3) span { color: #ffffff !important; }
-[data-theme="neon"] .sm-cat:nth-child(4n + 4) { background: #00c3ff !important; }
-
-/* Шапка — жёлтая с чёрной рамкой */
-[data-theme="neon"] header {
-  background: #ffd400 !important;
-  border-bottom: 3px solid #0a0a0a !important;
-}
-[data-theme="neon"] header .h-1 {
-  display: none !important;
-}
-
-/* ===================== Тема «Тёплая» (пастель) =====================
-   Кремово-персиковый фон, коралл + шалфейно-зелёный, мягкие скругления,
-   дружелюбный округлый шрифт. Заголовки тёмные, коралл — акцент. */
-[data-theme="warm"] {
-  --app-font-body: var(--font-manrope);
-  --app-font-head: var(--font-nunito);
-
-  --background: #fbf0e7;
-  --foreground: #34344e;
-  --card: #ffffff;
-  --card-foreground: #34344e;
-  --popover: #ffffff;
-  --popover-foreground: #34344e;
-  --primary: #d9785b;
-  --primary-foreground: #ffffff;
-  --secondary: #f6e7da;
-  --secondary-foreground: #34344e;
-  --muted: #f6e7da;
-  --muted-foreground: #927f73;
-  --accent: #e7ede3;
-  --accent-foreground: #5d7a5f;
-  --border: #f0e0d2;
-  --input: #ecdcce;
-  --ring: #d9785b;
-
-  --brand: #d9785b;
-  --brand-foreground: #ffffff;
-  --brand-soft: #fbe4d8;
-  --accent-red: #d9785b;
-  --accent-red-soft: #fbe4d8;
-}
-
-/* Мягкие тёплые тени и крупные скругления */
-[data-theme="warm"] .sm-card {
-  border-radius: 1.25rem !important;
-  box-shadow: 0 10px 26px -16px rgba(180, 110, 80, 0.5) !important;
-}
-[data-theme="warm"] .sm-cta {
-  border-radius: 1.5rem !important;
-  box-shadow: 0 16px 32px -16px rgba(217, 120, 92, 0.65) !important;
-}
-
-/* Пирамида: чередование коралла и шалфея, белый текст, мягкие скругления */
-[data-theme="warm"] .sm-step {
-  border: none !important;
-  border-radius: 1rem !important;
-  box-shadow: 0 10px 20px -10px rgba(170, 110, 80, 0.5) !important;
-}
-[data-theme="warm"] .sm-step span {
-  color: #ffffff !important;
-}
-[data-theme="warm"] .sm-step svg {
-  color: #ffffff !important;
-  fill: transparent !important;
-}
-[data-theme="warm"] .sm-step[data-level="grandparents"] { background: #e3a06b !important; }
-[data-theme="warm"] .sm-step[data-level="nko"] { background: #e0805c !important; }
-[data-theme="warm"] .sm-step[data-level="vuz"] { background: #88a98b !important; }
-[data-theme="warm"] .sm-step[data-level="employer"] { background: #eaa57e !important; }
-[data-theme="warm"] .sm-step[data-level="municipal"] { background: #9cb89d !important; }
-[data-theme="warm"] .sm-step[data-level="regional"] { background: #e89a5c !important; }
-[data-theme="warm"] .sm-step[data-level="federal"] { background: #d9785b !important; }
-
-/* Классификация «по типу»: разноцветные левые полоски (коралл/шалфей/оранжевый) */
-[data-theme="warm"] .sm-card[data-variant="type"]:nth-child(1) { border-left: 4px solid #88a98b !important; }
-[data-theme="warm"] .sm-card[data-variant="type"]:nth-child(2) { border-left: 4px solid #e89a5c !important; }
-[data-theme="warm"] .sm-card[data-variant="type"]:nth-child(3) { border-left: 4px solid #d9785b !important; }
 
 /* ===================== Тема «Яркая» (детская) =====================
    Лавандовый фон, разноцветные скруглённые карточки, округлый шрифт. */
@@ -824,6 +684,345 @@
 [data-theme="minimal"] header .h-1 {
   display: none !important;
 }
+
+/* ===================== Тема «Ягодный» (+ варианты) =========================
+   Среднее между «Минимализмом» и «Ярким»: чистые белые карточки, спокойная
+   типографика и line-иконки (не по-детски), но тёплый фон, дружелюбный округлый
+   заголовочный шрифт и мягкая ягодная палитра (клюква, малина, пыльная роза,
+   приглушённый шалфей) вместо тревожного алого. Бренд-красный узнаваем, но не
+   раздражает. Три варианта различаются ТОЛЬКО фоном/бренд-красным/текстом —
+   форма, тени и тональная пирамида общие (ниже). */
+
+/* Базовый: клюква на кремово-розовом */
+[data-theme="berry"] {
+  --app-font-body: var(--font-manrope);
+  --app-font-head: var(--font-nunito);
+  --background: #fbf5f3; /* тёплый кремово-розовый «бумажный» фон */
+  --foreground: #3c2730; /* тёмный тёпло-сливовый текст (не navy, не чёрный) */
+  --card: #ffffff;
+  --card-foreground: #3c2730;
+  --popover: #ffffff;
+  --popover-foreground: #3c2730;
+  --primary: #b83149; /* клюквенно-малиновый — мягкий бренд-красный */
+  --primary-foreground: #ffffff;
+  --secondary: #f6e8e8;
+  --secondary-foreground: #3c2730;
+  --muted: #f4eae9;
+  --muted-foreground: #8a6e76;
+  --accent: #eef1ea; /* приглушённый шалфей — спокойный контраст */
+  --accent-foreground: #4f6b58;
+  --border: #efe0dd;
+  --input: #ecdcd9;
+  --ring: #b83149;
+  --brand: #b83149;
+  --brand-foreground: #ffffff;
+  --brand-soft: #f7e6e8;
+  --accent-red: #b83149;
+  --accent-red-soft: #f7e6e8;
+}
+
+/* Вариант «тёплый»: коралл-малина на персиковом креме — больше «умиления» */
+[data-theme="berry-warm"] {
+  --app-font-body: var(--font-manrope);
+  --app-font-head: var(--font-nunito);
+  --background: #fdf4ef; /* персиковый крем */
+  --foreground: #43292f;
+  --card: #ffffff;
+  --card-foreground: #43292f;
+  --popover: #ffffff;
+  --popover-foreground: #43292f;
+  --primary: #c64a5b; /* тёплый коралл-малина */
+  --primary-foreground: #ffffff;
+  --secondary: #f8e8e4;
+  --secondary-foreground: #43292f;
+  --muted: #f6eae6;
+  --muted-foreground: #927078;
+  --accent: #eef1ea;
+  --accent-foreground: #4f6b58;
+  --border: #f1e1da;
+  --input: #eeddd5;
+  --ring: #c64a5b;
+  --brand: #c64a5b;
+  --brand-foreground: #ffffff;
+  --brand-soft: #fbe7e6;
+  --accent-red: #c64a5b;
+  --accent-red-soft: #fbe7e6;
+}
+
+/* Вариант «кремовый»: глубокая клюква на нейтральном креме (без розового
+   подтона) — ближе к «природной/сушёной» гамме шиповника из мудборда */
+[data-theme="berry-cream"] {
+  --app-font-body: var(--font-manrope);
+  --app-font-head: var(--font-nunito);
+  --background: #faf6ee; /* нейтральный тёплый крем */
+  --foreground: #38292b;
+  --card: #ffffff;
+  --card-foreground: #38292b;
+  --popover: #ffffff;
+  --popover-foreground: #38292b;
+  --primary: #ad2c42; /* глубокая клюква, чуть холоднее */
+  --primary-foreground: #ffffff;
+  --secondary: #f1ebe1;
+  --secondary-foreground: #38292b;
+  --muted: #f1ece2;
+  --muted-foreground: #897a6e;
+  --accent: #ebeee6;
+  --accent-foreground: #51664f;
+  --border: #ece3d6;
+  --input: #e8ddcd;
+  --ring: #ad2c42;
+  --brand: #ad2c42;
+  --brand-foreground: #ffffff;
+  --brand-soft: #f4e6e3;
+  --accent-red: #ad2c42;
+  --accent-red-soft: #f4e6e3;
+}
+
+/* «База»: точная копия Классической темы — те же шрифты (PT Serif + Manrope),
+   те же скругления/тени, та же пирамида с её иконками. Меняется ТОЛЬКО палитра.
+   Гамма «малина + мята»: красный #b82b3c — основа (бренд/кнопки/акценты),
+   светло-мятный фон и бирюза/мята — спокойный контрапункт, чтобы красный был
+   узнаваемым, но не «кричал». Единственное переопределение оформления — меню. */
+[data-theme="base"] {
+  --app-font-body: var(--font-manrope);
+  --app-font-head: var(--font-manrope); /* как в «Минимализме» — единый Manrope */
+  --background: #eff4f5; /* светлый прохладный фон */
+  --foreground: #3a1820; /* тёмное вино — почти чёрный тёплый текст */
+  --card: #ffffff;
+  --card-foreground: #3a1820;
+  --popover: #ffffff;
+  --popover-foreground: #3a1820;
+  --primary: #b82b3c; /* малиновый красный — основа */
+  --primary-foreground: #ffffff;
+  --secondary: #d9ece8; /* мятная поверхность */
+  --secondary-foreground: #3a1820;
+  --muted: #e2efeb;
+  --muted-foreground: #5f8782; /* приглушённый мятно-бирюзовый */
+  --accent: #d3ebe6; /* светлая бирюзовая подложка */
+  --accent-foreground: #2f7a72;
+  --destructive: oklch(0.55 0.2 27);
+  --border: #cfe3df; /* мятно-серая рамка */
+  --input: #c6ddd8;
+  --ring: #b82b3c;
+  --chart-1: #b82b3c; /* малиновый красный */
+  --chart-2: #3f9890; /* бирюза */
+  --chart-3: #c25a6a; /* пыльная роза */
+  --chart-4: #bfe0db; /* светлая мята */
+  --chart-5: #5c1620; /* тёмное вино */
+  --radius: 0.625rem; /* классическое скругление */
+  --sidebar: #f4faf8;
+  --sidebar-foreground: #3a1820;
+  --sidebar-primary: #b82b3c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #d9ece8;
+  --sidebar-accent-foreground: #b82b3c;
+  --sidebar-border: #cfe3df;
+  --sidebar-ring: #b82b3c;
+  --brand: #b82b3c; /* малиновый красный — основа */
+  --brand-foreground: #ffffff;
+  --brand-soft: #f6dde0; /* мягкая розово-красная подложка */
+  --accent-red: #b82b3c;
+  --accent-red-soft: #f6dde0;
+}
+
+/* «База»: нижнее меню — белый фон, обведённый красной рамкой. Верхнее меню
+   оставляем как в Классической (белый фон, тонкая полоса снизу, прямые углы). */
+[data-theme="base"] .sm-bottom-nav {
+  background: #ffffff !important;
+  border: 4px solid var(--accent-red) !important;
+  border-bottom: none !important;
+}
+/* На белом фоне белый текст/иконки не видны: активная вкладка — красная,
+   неактивные — приглушённо-серые, индикатор — красный. */
+[data-theme="base"] .sm-bottom-nav a { color: var(--muted-foreground) !important; }
+[data-theme="base"] .sm-bottom-nav a[data-active="true"] { color: var(--accent-red) !important; }
+[data-theme="base"] .sm-bottom-nav .sm-nav-indicator { background: var(--accent-red) !important; }
+
+/* ---- Общее оформление для вариантов «Ягодного» (+ «База» где указано) ---- */
+
+/* Мягкие, чуть тёплые тени и умеренные скругления (между minimal и kids).
+   «База» сюда НЕ входит — у неё классические квадратные карточки. */
+[data-theme="berry"] .sm-card,
+[data-theme="berry-warm"] .sm-card,
+[data-theme="berry-cream"] .sm-card {
+  border-radius: 1.1rem !important;
+  box-shadow: 0 6px 18px -12px rgba(120, 50, 70, 0.4) !important;
+}
+[data-theme="berry"] .sm-cta,
+[data-theme="berry-warm"] .sm-cta,
+[data-theme="berry-cream"] .sm-cta {
+  border-radius: 1.2rem !important;
+  box-shadow: 0 16px 30px -16px rgba(120, 50, 70, 0.45) !important;
+}
+
+/* Короткая фирменная черта под заголовком — следует за бренд-красным варианта */
+[data-theme="berry"] .sm-h2-rule,
+[data-theme="berry-warm"] .sm-h2-rule,
+[data-theme="berry-cream"] .sm-h2-rule {
+  background: var(--brand) !important;
+}
+
+/* Пирамида: тональная ягодно-шалфейная гамма (от глубокого вина в основании
+   к нежному блашу наверху) — мягкие пилюли, без «радуги». Общая для вариантов.
+   «База» сюда НЕ входит — у неё классическая пирамида (иконки/ступени Классики). */
+[data-theme="berry"] .sm-step,
+[data-theme="berry-warm"] .sm-step,
+[data-theme="berry-cream"] .sm-step {
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 8px 18px -12px rgba(120, 50, 70, 0.45) !important;
+}
+[data-theme="berry"] .sm-step span, [data-theme="berry-warm"] .sm-step span, [data-theme="berry-cream"] .sm-step span { color: #ffffff !important; }
+[data-theme="berry"] .sm-step svg, [data-theme="berry-warm"] .sm-step svg, [data-theme="berry-cream"] .sm-step svg { color: #ffffff !important; fill: transparent !important; }
+[data-theme="berry"] .sm-step[data-level="grandparents"], [data-theme="berry-warm"] .sm-step[data-level="grandparents"], [data-theme="berry-cream"] .sm-step[data-level="grandparents"] { background: #f2d3d6 !important; }
+[data-theme="berry"] .sm-step[data-level="vuz"], [data-theme="berry-warm"] .sm-step[data-level="vuz"], [data-theme="berry-cream"] .sm-step[data-level="vuz"] { background: #e09aa6 !important; }
+[data-theme="berry"] .sm-step[data-level="nko"], [data-theme="berry-warm"] .sm-step[data-level="nko"], [data-theme="berry-cream"] .sm-step[data-level="nko"] { background: #b67e96 !important; }
+[data-theme="berry"] .sm-step[data-level="employer"], [data-theme="berry-warm"] .sm-step[data-level="employer"], [data-theme="berry-cream"] .sm-step[data-level="employer"] { background: #7f9d87 !important; }
+[data-theme="berry"] .sm-step[data-level="municipal"], [data-theme="berry-warm"] .sm-step[data-level="municipal"], [data-theme="berry-cream"] .sm-step[data-level="municipal"] { background: #c75a6b !important; }
+[data-theme="berry"] .sm-step[data-level="regional"], [data-theme="berry-warm"] .sm-step[data-level="regional"], [data-theme="berry-cream"] .sm-step[data-level="regional"] { background: #b23a4e !important; }
+[data-theme="berry"] .sm-step[data-level="federal"], [data-theme="berry-warm"] .sm-step[data-level="federal"], [data-theme="berry-cream"] .sm-step[data-level="federal"] { background: #8d2c43 !important; }
+/* Светлые ступени (блаш и роза) — тёмный ягодный текст вместо белого */
+[data-theme="berry"] .sm-step[data-level="grandparents"] span, [data-theme="berry"] .sm-step[data-level="grandparents"] svg,
+[data-theme="berry"] .sm-step[data-level="vuz"] span, [data-theme="berry"] .sm-step[data-level="vuz"] svg,
+[data-theme="berry-warm"] .sm-step[data-level="grandparents"] span, [data-theme="berry-warm"] .sm-step[data-level="grandparents"] svg,
+[data-theme="berry-warm"] .sm-step[data-level="vuz"] span, [data-theme="berry-warm"] .sm-step[data-level="vuz"] svg,
+[data-theme="berry-cream"] .sm-step[data-level="grandparents"] span, [data-theme="berry-cream"] .sm-step[data-level="grandparents"] svg,
+[data-theme="berry-cream"] .sm-step[data-level="vuz"] span, [data-theme="berry-cream"] .sm-step[data-level="vuz"] svg {
+  color: #6e2a3c !important;
+}
+
+/* Каталог ситуаций: мягкая ягодная черта под названием (следует за брендом) */
+[data-theme="berry"] .sm-cat span:last-child,
+[data-theme="berry-warm"] .sm-cat span:last-child,
+[data-theme="berry-cream"] .sm-cat span:last-child { background: var(--brand) !important; }
+
+/* ===================== Тема «Город» (бренд-кит по референсу) ===============
+   Точная палитра из макета: основной #8e1d2c, акцент #c44d5e, светлый акцент
+   #f7d9dc, серый #a7a7a7, светлый фон #f7f7f8, текст #1a1a1a/#6b6b6b, границы
+   #e5e5e5. Чистые белые карточки с тонкой рамкой, бордовые кнопки, пирамида
+   красным градиентом (тёмная вершина → светлое основание), нижнее меню белое с
+   бордовым активным пунктом, иконки в розовых «пузырьках», на фоне — контурный
+   силуэт города (public/city.png). Структура приложения — наша. */
+[data-theme="city"] {
+  --app-font-body: var(--font-inter);
+  --app-font-head: var(--font-playfair);
+  --background: #f7f7f8; /* светлый фон */
+  --foreground: #1a1a1a; /* текст основной */
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #8e1d2c; /* основной */
+  --primary-foreground: #ffffff;
+  --secondary: #f7d9dc; /* светлый акцент — вторичная кнопка */
+  --secondary-foreground: #8e1d2c;
+  --muted: #f1f1f3;
+  --muted-foreground: #6b6b6b; /* текст вторичный */
+  --accent: #f7d9dc; /* светлый акцент */
+  --accent-foreground: #8e1d2c;
+  --destructive: oklch(0.55 0.2 27);
+  --border: #e5e5e5; /* граница */
+  --input: #e5e5e5;
+  --ring: #8e1d2c;
+  --chart-1: #8e1d2c;
+  --chart-2: #c44d5e;
+  --chart-3: #f7d9dc;
+  --chart-4: #a7a7a7;
+  --chart-5: #6b6b6b;
+  --radius: 0.875rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #8e1d2c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f7d9dc;
+  --sidebar-accent-foreground: #8e1d2c;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #8e1d2c;
+  --brand: #8e1d2c; /* основной */
+  --brand-foreground: #ffffff;
+  --brand-soft: #f7d9dc; /* светлый акцент */
+  --accent-red: #c44d5e; /* акцентный */
+  --accent-red-soft: #f7d9dc;
+}
+
+/* Силуэт города вернём точечно позже (как акцент под героем), а не сплошным
+   фоном — так чище, ближе к референсу. */
+
+/* Чистые карточки: тонкая рамка #e5e5e5 + мягкая тень, крупные скругления */
+[data-theme="city"] .sm-card {
+  background: #ffffff;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 6px 18px -12px rgba(26, 26, 26, 0.18) !important;
+}
+[data-theme="city"] .sm-cta {
+  border-radius: 0.75rem !important;
+  box-shadow: 0 12px 24px -14px rgba(142, 29, 44, 0.55) !important;
+}
+
+/* Короткая бордовая черта под заголовком */
+[data-theme="city"] .sm-h2-rule {
+  background: var(--brand) !important;
+}
+
+/* Иконки в розовых «пузырьках» с бордовым контуром (как на макете) */
+[data-theme="city"] .sm-ico-tile {
+  background: #f7d9dc !important;
+  border: none !important;
+}
+[data-theme="city"] .sm-ico-tile svg {
+  color: #8e1d2c !important;
+}
+
+/* Бейдж героя: вместо зелёного — бордовый с белой галочкой */
+[data-theme="city"] .sm-hero-badge {
+  background: #8e1d2c !important;
+  box-shadow: 0 3px 8px -5px rgba(142, 29, 44, 0.8) !important;
+}
+[data-theme="city"] .sm-hero-badge svg path {
+  fill: #ffffff !important;
+}
+
+/* Пирамида: красный градиент (тёмная вершина → светлое основание), как в
+   референсе. Перебивает Tailwind-тинты из support-pyramid.tsx. */
+[data-theme="city"] .sm-step {
+  border: none !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 8px 16px -12px rgba(142, 29, 44, 0.45) !important;
+}
+[data-theme="city"] .sm-step span { color: #ffffff !important; }
+[data-theme="city"] .sm-step svg { color: #ffffff !important; fill: transparent !important; }
+[data-theme="city"] .sm-step[data-level="grandparents"] { background: #8e1d2c !important; }
+[data-theme="city"] .sm-step[data-level="nko"] { background: #a5293a !important; }
+[data-theme="city"] .sm-step[data-level="vuz"] { background: #be4456 !important; }
+[data-theme="city"] .sm-step[data-level="employer"] { background: #d06b7a !important; }
+[data-theme="city"] .sm-step[data-level="municipal"] { background: #e09aa4 !important; }
+[data-theme="city"] .sm-step[data-level="regional"] { background: #efc3c9 !important; }
+[data-theme="city"] .sm-step[data-level="federal"] { background: #f7d9dc !important; }
+/* Светлые ступени — тёмно-бордовый текст/иконки вместо белого */
+[data-theme="city"] .sm-step[data-level="municipal"] span, [data-theme="city"] .sm-step[data-level="municipal"] svg,
+[data-theme="city"] .sm-step[data-level="regional"] span, [data-theme="city"] .sm-step[data-level="regional"] svg,
+[data-theme="city"] .sm-step[data-level="federal"] span, [data-theme="city"] .sm-step[data-level="federal"] svg {
+  color: #8e1d2c !important;
+}
+
+/* Каталог ситуаций: бордовая черта под названием */
+[data-theme="city"] .sm-cat span:last-child { background: var(--brand) !important; }
+
+/* Шапка: убираем двухцветную полоску — чистая белая шапка как на макете */
+[data-theme="city"] header .h-1 { display: none !important; }
+
+/* Нижнее меню: белое со скруглённым верхом, бордовый активный пункт */
+[data-theme="city"] .sm-bottom-nav {
+  background: #ffffff !important;
+  border-top: 1px solid #e5e5e5 !important;
+  border-radius: 1rem 1rem 0 0 !important;
+}
+[data-theme="city"] .sm-bottom-nav .sm-nav-lucide { display: inline-block !important; }
+[data-theme="city"] .sm-bottom-nav .sm-nav-emoji { display: none !important; }
+[data-theme="city"] .sm-bottom-nav a { color: #6b6b6b !important; }
+[data-theme="city"] .sm-bottom-nav a[data-active="true"] { color: #8e1d2c !important; }
+[data-theme="city"] .sm-bottom-nav .sm-nav-indicator { background: #8e1d2c !important; }
 
 /* Появление секций на чистом CSS (см. components/motion.tsx). Контент виден
    по умолчанию; анимация не зависит от JS-гидратации. */

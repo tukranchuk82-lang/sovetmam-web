@@ -9,8 +9,7 @@ export default function AppLayout({
 }) {
   return (
     <div className="relative mx-auto flex h-dvh max-w-[480px] flex-col overflow-hidden bg-white shadow-2xl">
-
-      {/* Маленькая полоска-индикатор прототипа. Уберём после согласования. */}
+      {/* Маленькая полоска-индикатор прототипа — в самом верху. Уберём после согласования. */}
       <div className="shrink-0 bg-amber-50/80 px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-amber-800 backdrop-blur">
         Прототип · данные демонстрационные
       </div>

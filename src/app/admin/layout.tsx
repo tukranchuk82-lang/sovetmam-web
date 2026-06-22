@@ -4,6 +4,7 @@ import { getAdminTheme } from "@/lib/admin-theme";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { AdminThemeSwitcher } from "@/components/admin/theme-switcher";
 import { AdminNavLink } from "@/components/admin/nav-link";
+import { OrgName } from "@/components/org-name";
 
 export const metadata = {
   title: "Админ-панель",
@@ -36,7 +37,7 @@ export default async function AdminLayout({
               href="/admin"
               className="block truncate font-bold leading-none hover:text-primary"
             >
-              Совет матерей
+              <OrgName />
             </Link>
           </div>
           <div className="flex items-center gap-2">
