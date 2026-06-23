@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { LayoutGrid, MessageSquare, FolderInput, ArrowLeft } from "lucide-react";
-import { getAdminTheme } from "@/lib/admin-theme";
 import { countNewInquiries } from "@/lib/inquiries-db";
-import { AdminThemeSwitcher } from "@/components/admin/theme-switcher";
 import { AdminNavLink } from "@/components/admin/nav-link";
 import { OrgName } from "@/components/org-name";
 
@@ -19,12 +17,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const theme = await getAdminTheme();
   const newInquiries = await countNewInquiries();
 
   return (
     <div
-      data-admin-theme={theme}
+      data-admin-theme="city"
       className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col bg-background text-foreground shadow-2xl"
     >
       <header className="sticky top-0 z-10 border-b bg-card/95 px-4 py-3 backdrop-blur">
@@ -41,7 +38,6 @@ export default async function AdminLayout({
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <AdminThemeSwitcher current={theme} />
             <Link
               href="/profile"
               className="inline-flex items-center gap-1 rounded-lg border bg-background px-2.5 py-1.5 text-xs hover:bg-muted"
