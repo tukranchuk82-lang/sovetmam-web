@@ -96,9 +96,6 @@ const inter = Inter({
   display: "swap",
 });
 
-// Раннее применение выбранной темы (до отрисовки) — чтобы не было мигания.
-const THEME_INIT = `(function(){try{var q=new URLSearchParams(location.search).get('theme');var t=q||localStorage.getItem('sm-theme')||'city';document.documentElement.setAttribute('data-theme',t);if(q)localStorage.setItem('sm-theme',q);}catch(e){document.documentElement.setAttribute('data-theme','city');}})();`;
-
 export const metadata: Metadata = {
   title: {
     default: "Шпаргалка для родителей — меры поддержки семей с детьми",
@@ -123,12 +120,9 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      suppressHydrationWarning
+      data-theme="city"
       className={`${manrope.variable} ${ptSerif.variable} ${jetBrainsMono.variable} ${nunito.variable} ${caveat.variable} ${marckScript.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable} antialiased`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-      </head>
       <body className="min-h-dvh bg-slate-300">
         <script dangerouslySetInnerHTML={{ __html: INSTALL_PROMPT_CAPTURE }} />
         {children}
