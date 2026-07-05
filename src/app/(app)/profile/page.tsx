@@ -25,6 +25,7 @@ import { listInquiriesForUser } from "@/lib/inquiries-db";
 import { Avatar } from "@/components/avatar";
 import { AvatarEditor } from "@/components/avatar-editor";
 import { MessengerManager } from "@/components/messenger-manager";
+import { InstallAppButton } from "@/components/install-app-button";
 import { Badge } from "@/components/ui/badge";
 import { MotionFadeIn } from "@/components/motion";
 
@@ -199,6 +200,16 @@ export default async function ProfilePage() {
         </MotionFadeIn>
       )}
 
+      <section className="mt-7">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+          Приложение на устройстве
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Добавьте иконку на главный экран — открывать в один тап, без браузера.
+        </p>
+        <InstallAppButton />
+      </section>
+
       <form action={logoutDemoUser} className="mt-8">
         <button
           type="submit"
@@ -324,6 +335,16 @@ async function AppUserProfile({ user }: { user: AppUser }) {
         <div className="mt-3">
           <MessengerManager initial={initial} />
         </div>
+      </section>
+
+      <section className="mt-7">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+          Приложение на устройстве
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Добавьте иконку на главный экран — открывать в один тап, без браузера.
+        </p>
+        <InstallAppButton />
       </section>
 
       <form action={logout} className="mt-8">
