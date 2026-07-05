@@ -47,7 +47,12 @@ function detectBrowser(): Browser {
   return "other";
 }
 
-export function InstallAppButton() {
+/**
+ * Общая логика установки PWA: перехват beforeinstallprompt, определение
+ * платформы/браузера, признак «уже установлено» и запуск установки/подсказки.
+ * Используется и большой кнопкой, и пунктом нижнего меню.
+ */
+export function useInstallApp() {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -65,99 +70,6 @@ export function InstallAppButton() {
 
     // Событие могло прийти ещё до монтирования — ранний скрипт в layout
     // сохранил его в window.__deferredInstallPrompt.
-    const w = window as InstallWindow;
-    if (w.__deferredInstallPrompt) {
-      setInstallPrompt(w.__deferredInstallPrompt);
-    }
-
-    const captured = () => {
-      const ev = (window as InstallWindow).__deferredInstallPrompt;
-      if (ev) setInstallPrompt(ev);
-    };
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-    };
-    const installedHandler = () => {
-      setIsInstalled(true);
-      setInstallPrompt(null);
-    };
-
-    window.addEventListener("pwa-installable", captured);
-    window.addEventListener("beforeinstallprompt", handler);
-    window.addEventListener("appinstalled", installedHandler);
-    return () => {
-      window.removeEventListener("pwa-installable", captured);
-      window.removeEventListener("beforeinstallprompt", handler);
-      window.removeEventListener("appinstalled", installedHandler);
-    };
-  }, []);
-
-  if (isInstalled) return null;
-
-  async function handleClick() {
-    if (installPrompt) {
-      try {
-        await installPrompt.prompt();
-        await installPrompt.userChoice;
-      } catch {
-        // Событие одноразовое: при повторном prompt() браузер кинет ошибку —
-        // безопасно игнорируем.
-      }
-      // Событие израсходовано в любом случае (установил/отклонил).
-      setInstallPrompt(null);
-      (window as InstallWindow).__deferredInstallPrompt = null;
-    } else {
-      setShowInstructions(true);
-    }
-  }
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={handleClick}
-        className={cn(
-          "mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-brand/20 bg-brand/5 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/10",
-        )}
-      >
-        <Download className="size-4" />
-        Установить приложение
-      </button>
-
-      {showInstructions && (
-        <InstructionsModal
-          platform={platform}
-          browser={browser}
-          onClose={() => setShowInstructions(false)}
-        />
-      )}
-    </>
-  );
-}
-
-/**
- * Компактная иконка установки для шапки. Показывается только когда установка
- * реально возможна: на Chromium — при наличии перехваченного prompt, на iOS —
- * всегда (там ставят через «Поделиться»). Если приложение уже установлено
- * (запущено как standalone) — иконка исчезает.
- */
-export function InstallIconButton({ className }: { className?: string }) {
-  const [installPrompt, setInstallPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  const [showInstructions, setShowInstructions] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [platform, setPlatform] = useState<Platform>("unknown");
-  const [browser, setBrowser] = useState<Browser>("other");
-
-  useEffect(() => {
-    setPlatform(detectPlatform());
-    setBrowser(detectBrowser());
-
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsInstalled(true);
-    }
-
     const w = window as InstallWindow;
     if (w.__deferredInstallPrompt) setInstallPrompt(w.__deferredInstallPrompt);
 
@@ -186,11 +98,11 @@ export function InstallIconButton({ className }: { className?: string }) {
 
   const canPrompt = Boolean(installPrompt);
   const iosGuide = platform === "ios";
-  // Приложение уже стоит — иконки нет. Как и нечего предложить на десктопном
-  // Firefox/прочих браузерах без установки.
-  if (isInstalled || (!canPrompt && !iosGuide)) return null;
+  // Есть что предложить: не установлено и либо готов родной prompt, либо это
+  // iOS (там ставят через «Поделиться»).
+  const available = !isInstalled && (canPrompt || iosGuide);
 
-  async function handleClick() {
+  async function trigger() {
     if (installPrompt) {
       try {
         await installPrompt.prompt();
@@ -205,26 +117,47 @@ export function InstallIconButton({ className }: { className?: string }) {
     }
   }
 
+  return {
+    available,
+    isInstalled,
+    trigger,
+    platform,
+    browser,
+    showInstructions,
+    closeInstructions: () => setShowInstructions(false),
+  };
+}
+
+export function InstallAppButton() {
+  const {
+    isInstalled,
+    trigger,
+    platform,
+    browser,
+    showInstructions,
+    closeInstructions,
+  } = useInstallApp();
+
+  if (isInstalled) return null;
+
   return (
     <>
       <button
         type="button"
-        onClick={handleClick}
-        aria-label="Установить приложение"
-        title="Установить приложение"
+        onClick={trigger}
         className={cn(
-          "inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/25 text-white backdrop-blur-sm transition-colors hover:bg-white/35",
-          className,
+          "mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-brand/20 bg-brand/5 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/10",
         )}
       >
-        <Download className="size-5" />
+        <Download className="size-4" />
+        Установить приложение
       </button>
 
       {showInstructions && (
         <InstructionsModal
           platform={platform}
           browser={browser}
-          onClose={() => setShowInstructions(false)}
+          onClose={closeInstructions}
         />
       )}
     </>
@@ -238,7 +171,7 @@ const SUBTITLE: Record<Platform, string> = {
   unknown: "Иконка появится на вашем устройстве",
 };
 
-function InstructionsModal({
+export function InstructionsModal({
   platform,
   browser,
   onClose,

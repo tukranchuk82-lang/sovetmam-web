@@ -2,18 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Sparkles, Mail, User } from "lucide-react";
+import { Home, LayoutGrid, Sparkles, Mail, User, Download } from "lucide-react";
 import { Doodle } from "@/components/home/crayon-doodles";
 import { NAV_DOODLE } from "@/components/home/icons";
+import {
+  useInstallApp,
+  InstructionsModal,
+} from "@/components/install-app-button";
 import { cn } from "@/lib/utils";
 
-const tabs: {
+type Tab = {
   href: string;
   label: string;
   icon: typeof Home;
   emoji: string;
   match: (p: string) => boolean;
-}[] = [
+};
+
+const tabs: Tab[] = [
   {
     href: "/",
     label: "Главная",
@@ -42,19 +48,26 @@ const tabs: {
     emoji: "✉️",
     match: (p) => p.startsWith("/profile/inquiries"),
   },
-  {
-    href: "/profile",
-    label: "Профиль",
-    icon: User,
-    emoji: "🙎🏻",
-    match: (p) =>
-      (p.startsWith("/profile") && !p.startsWith("/profile/inquiries")) ||
-      p.startsWith("/login"),
-  },
 ];
+
+// Пятый слот меню: «Профиль» (по умолчанию) либо «Установить» (когда установка
+// приложения возможна и оно ещё не стоит на устройстве).
+const profileTab: Tab = {
+  href: "/profile",
+  label: "Профиль",
+  icon: User,
+  emoji: "🙎🏻",
+  match: (p) =>
+    (p.startsWith("/profile") && !p.startsWith("/profile/inquiries")) ||
+    p.startsWith("/login"),
+};
+
+const navClasses =
+  "relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium leading-none transition-all";
 
 export function BottomNav({ background }: { background?: string }) {
   const pathname = usePathname();
+  const install = useInstallApp();
 
   return (
     <nav
@@ -62,53 +75,76 @@ export function BottomNav({ background }: { background?: string }) {
       style={background ? ({ "--nav-bg": background } as React.CSSProperties) : undefined}
     >
       <div className="grid grid-cols-5">
-        {tabs.map((t) => {
-          const active = t.match(pathname);
-          const Icon = t.icon;
-          return (
-            <Link
-              key={t.href}
-              href={t.href}
-              data-active={active}
-              className={cn(
-                "relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium leading-none transition-all",
-                active ? "text-white" : "text-white/65 hover:text-white",
-              )}
-            >
-              {active && (
-                <span
-                  aria-hidden
-                  className="sm-nav-indicator absolute -top-px h-0.5 w-8 rounded-b-full bg-white"
-                />
-              )}
-              {/* Иконка: line-вариант (по умолчанию) + эмодзи (в теме «Яркий»). */}
-              <Icon
-                className={cn(
-                  "sm-nav-lucide size-5 transition-transform",
-                  active && "scale-110 drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]",
-                )}
-              />
-              <span
-                aria-hidden
-                className={cn(
-                  "sm-nav-emoji text-xl leading-none transition-transform",
-                  active && "scale-110",
-                )}
-              >
-                {t.emoji}
-              </span>
-              <Doodle
-                name={NAV_DOODLE[t.href]}
-                className={cn(
-                  "sm-nav-doodle size-6 transition-transform",
-                  active && "scale-110",
-                )}
-              />
-              <span className="mt-0.5">{t.label}</span>
-            </Link>
-          );
-        })}
+        {tabs.map((t) => (
+          <NavTab key={t.href} tab={t} active={t.match(pathname)} />
+        ))}
+
+        {/* Установить приложение вместо «Профиль», если это возможно. */}
+        {install.available ? (
+          <button type="button" onClick={install.trigger} className={cn(navClasses, "text-white/65 hover:text-white")}>
+            <Download className="sm-nav-lucide size-5 transition-transform" />
+            <span aria-hidden className="sm-nav-emoji text-xl leading-none">
+              ⬇️
+            </span>
+            <span className="mt-0.5">Установить</span>
+          </button>
+        ) : (
+          <NavTab tab={profileTab} active={profileTab.match(pathname)} />
+        )}
       </div>
+
+      {install.showInstructions && (
+        <InstructionsModal
+          platform={install.platform}
+          browser={install.browser}
+          onClose={install.closeInstructions}
+        />
+      )}
     </nav>
+  );
+}
+
+function NavTab({ tab, active }: { tab: Tab; active: boolean }) {
+  const Icon = tab.icon;
+  return (
+    <Link
+      href={tab.href}
+      data-active={active}
+      className={cn(
+        navClasses,
+        active ? "text-white" : "text-white/65 hover:text-white",
+      )}
+    >
+      {active && (
+        <span
+          aria-hidden
+          className="sm-nav-indicator absolute -top-px h-0.5 w-8 rounded-b-full bg-white"
+        />
+      )}
+      {/* Иконка: line-вариант (по умолчанию) + эмодзи (в теме «Яркий»). */}
+      <Icon
+        className={cn(
+          "sm-nav-lucide size-5 transition-transform",
+          active && "scale-110 drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]",
+        )}
+      />
+      <span
+        aria-hidden
+        className={cn(
+          "sm-nav-emoji text-xl leading-none transition-transform",
+          active && "scale-110",
+        )}
+      >
+        {tab.emoji}
+      </span>
+      <Doodle
+        name={NAV_DOODLE[tab.href]}
+        className={cn(
+          "sm-nav-doodle size-6 transition-transform",
+          active && "scale-110",
+        )}
+      />
+      <span className="mt-0.5">{tab.label}</span>
+    </Link>
   );
 }

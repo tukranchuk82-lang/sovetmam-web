@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { LogIn } from "lucide-react";
 import { OrgName } from "@/components/org-name";
 import { BottomNav } from "@/components/bottom-nav";
-import { InstallIconButton } from "@/components/install-app-button";
 
 // Единый каркас приложения с посекционным «характером».
 //
@@ -108,26 +107,23 @@ export function AppShell({
               </span>
             </Link>
 
-            <div className="flex shrink-0 items-center gap-2.5">
-              <InstallIconButton className="pointer-events-auto" />
-              {authed ? (
-                <Link
-                  href="/profile"
-                  aria-label="Личный кабинет"
-                  className="pointer-events-auto shrink-0"
-                >
-                  {avatarSlot}
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="pointer-events-auto inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/50 bg-white/30 px-5 text-sm font-semibold text-white backdrop-blur-sm"
-                >
-                  <LogIn className="size-4" />
-                  Войти
-                </Link>
-              )}
-            </div>
+            {authed ? (
+              <Link
+                href="/profile"
+                aria-label="Личный кабинет"
+                className="pointer-events-auto shrink-0"
+              >
+                {avatarSlot}
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="pointer-events-auto inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/50 bg-white/30 px-5 text-sm font-semibold text-white backdrop-blur-sm"
+              >
+                <LogIn className="size-4" />
+                Войти
+              </Link>
+            )}
           </div>
         </header>
 
