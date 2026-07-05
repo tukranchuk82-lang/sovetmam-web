@@ -6,6 +6,7 @@ import { CatalogMeasures } from "@/components/home/catalog-measures";
 import { Classification } from "@/components/home/classification";
 import { Directions } from "@/components/home/directions";
 import { PyramidSection } from "@/components/home/pyramid-section";
+import { InstallAppButton } from "@/components/install-app-button";
 
 // Акцентный цвет декоративных черт — бренд-бордовый.
 const ACCENT = "#8E1D2C";
@@ -161,6 +162,13 @@ export default function Home() {
           <ChevronRight className="size-5" />
         </span>
       </Link>
+
+      {/* Установка приложения на устройство. На Chrome/Edge/Android — родное
+          окно установки по клику; на iPhone — короткая подсказка. Если уже
+          установлено, компонент ничего не рендерит. */}
+      <div className="mx-5 -mt-1 mb-2">
+        <InstallAppButton />
+      </div>
 
       {/* Каталог мер поддержки — сетка жизненных ситуаций (по утв. макету) */}
       <CatalogMeasures />
