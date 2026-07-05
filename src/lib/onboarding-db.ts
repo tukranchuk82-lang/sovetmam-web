@@ -197,22 +197,6 @@ export async function setMessengerChoice(
   await sb.from("app_users").update({ messenger_choice: channel }).eq("id", userId);
 }
 
-/** Диагностический лог входящего вызова вебхука Salebot. */
-export async function logSalebotWebhook(e: {
-  method: string;
-  contentType: string;
-  query: string;
-  body: string;
-}): Promise<void> {
-  const sb = createSupabaseAdminClient();
-  await sb.from("salebot_webhook_log").insert({
-    method: e.method,
-    content_type: e.contentType,
-    query: e.query,
-    body: e.body,
-  });
-}
-
 /**
  * Отмечает фактическое подключение мессенджера — вызывается вебхуком Salebot,
  * когда человек зашёл в бота. Пишем канал, дату и id в мессенджере

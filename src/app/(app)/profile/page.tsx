@@ -211,8 +211,17 @@ export default async function ProfilePage() {
 }
 
 // Личный кабинет обычного (email) пользователя.
+const MESSENGER_LABEL: Record<string, string> = {
+  telegram: "Telegram",
+  vk: "ВКонтакте",
+  max: "MAX",
+};
+
 function AppUserProfile({ user }: { user: AppUser }) {
   const fullName = `${user.firstName} ${user.lastName}`;
+  const channel = user.messengerChoice
+    ? MESSENGER_LABEL[user.messengerChoice]
+    : null;
   return (
     <div className="px-4 py-5">
       <div className="flex items-center gap-3">
@@ -233,9 +242,14 @@ function AppUserProfile({ user }: { user: AppUser }) {
                   : "gap-1 text-amber-600"
               }
             >
-              {user.messengerConnected
-                ? "Мессенджер подключён"
-                : "Мессенджер не подключён"}
+              {user.messengerConnected ? (
+                <>
+                  <CheckCircle2 className="size-3" />
+                  Мессенджер подключён{channel ? `: ${channel}` : ""}
+                </>
+              ) : (
+                "Мессенджер не подключён"
+              )}
             </Badge>
           </div>
         </div>

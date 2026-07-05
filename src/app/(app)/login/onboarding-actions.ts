@@ -131,6 +131,18 @@ export async function chooseMessenger(
   return { ok: true, url };
 }
 
+/** Статус подключения мессенджера текущего пользователя (для опроса на /connect). */
+export async function messengerStatus(): Promise<{
+  connected: boolean;
+  choice: MessengerChannel | null;
+}> {
+  const user = await getCurrentAppUser();
+  return {
+    connected: Boolean(user?.messengerConnected),
+    choice: user?.messengerChoice ?? null,
+  };
+}
+
 /** Сохраняет ответы анкеты в профиль (только для залогиненного пользователя). */
 export async function saveSurveyAction(
   survey: Record<string, unknown>,
