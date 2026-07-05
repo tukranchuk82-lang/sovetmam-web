@@ -85,13 +85,20 @@ export function Classification() {
               key={item.label}
               type="button"
               onClick={() => setActive(item)}
-              className="flex flex-col items-center rounded-2xl border border-black/[0.04] bg-white px-2 py-4 shadow-[0_8px_20px_-10px_rgba(21,35,74,0.28)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_26px_-10px_rgba(21,35,74,0.34)] active:scale-95"
+              className="flex flex-col items-center rounded-2xl border border-black/[0.06] px-2 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_10px_24px_-12px_rgba(30,41,59,0.28)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_16px_30px_-12px_rgba(30,41,59,0.34)] active:scale-95"
+              style={{
+                background:
+                  "linear-gradient(160deg, #EDEFF2 0%, #D7DCE2 54%, #C3C9D1 100%)",
+              }}
             >
               <span
-                className="flex size-14 items-center justify-center rounded-full"
-                style={{ background: CIRCLE }}
+                className="flex size-14 items-center justify-center rounded-full ring-1 ring-white/40 shadow-[0_6px_14px_-6px_rgba(116,17,31,0.55)]"
+                style={{
+                  background:
+                    "linear-gradient(150deg, #A32334 0%, #8E1D2C 58%, #74111F 100%)",
+                }}
               >
-                <Icon size={26} strokeWidth={1.6} color={RED} aria-hidden />
+                <Icon size={26} strokeWidth={1.7} color="#FFFFFF" aria-hidden />
               </span>
               <span
                 className="mt-2.5 text-center text-[13px] font-semibold leading-tight"

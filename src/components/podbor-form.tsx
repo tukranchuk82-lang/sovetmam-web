@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { MeasureCard } from "@/components/measure-card";
+import { saveSurveyAction } from "@/app/(app)/login/onboarding-actions";
 import {
   matchMeasures,
   pluralMeasures,
@@ -29,10 +30,10 @@ function Choice({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors",
+        "flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all",
         active
-          ? "border-primary bg-primary text-primary-foreground"
-          : "bg-background hover:bg-muted",
+          ? "border-transparent bg-[#1B3A6B] text-white shadow-[0_4px_12px_-4px_rgba(27,58,107,0.45)]"
+          : "border-black/[0.08] bg-white text-[#4a4f57] hover:bg-[#f4f5f7]",
       )}
     >
       {children}
@@ -111,6 +112,9 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
       student: student ?? false,
     };
     setResults(matchMeasures(profile, measures));
+    // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли пользователь;
+    // при перезаполнении данные перезапишутся).
+    void saveSurveyAction(profile as unknown as Record<string, unknown>);
   }
 
   function reset() {
@@ -131,8 +135,13 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
 
         {results.length > 0 ? (
           <>
-            <h1 className="mt-3 text-xl font-extrabold tracking-tight">Вам может подойти</h1>
-            <p className="mt-1 text-sm font-medium text-muted-foreground">
+            <h1
+              className="mt-3 text-[26px] font-normal leading-tight text-[#1A1A1A]"
+              style={{ fontFamily: "var(--font-playfair), serif" }}
+            >
+              Вам может подойти
+            </h1>
+            <p className="mt-1 text-sm font-medium text-[#6b7078]">
               {pluralMeasures(results.length)}
             </p>
             <div className="mt-4 space-y-3">
@@ -146,7 +155,12 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
           </>
         ) : (
           <div className="py-10 text-center">
-            <h1 className="text-xl font-extrabold tracking-tight">Подходящих мер не нашлось</h1>
+            <h1
+              className="text-[24px] font-normal leading-tight text-[#1A1A1A]"
+              style={{ fontFamily: "var(--font-playfair), serif" }}
+            >
+              Подходящих мер не нашлось
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               По вашим ответам мы пока не нашли мер в нашей базе. База постоянно пополняется —
               загляните в полный каталог.
@@ -163,8 +177,13 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
   // Экран анкеты
   return (
     <div ref={topRef} className="px-4 py-5">
-      <h1 className="text-xl font-extrabold tracking-tight">Подбор мер поддержки</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <h1
+        className="text-[26px] font-normal leading-tight text-[#1A1A1A]"
+        style={{ fontFamily: "var(--font-playfair), serif" }}
+      >
+        Подбор мер поддержки
+      </h1>
+      <p className="mt-1 text-sm text-[#6b7078]">
         Ответьте на несколько вопросов о семье. Мы ничего не сохраняем — подбор работает прямо
         на вашем устройстве.
       </p>
@@ -219,18 +238,27 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
         {isCitizen === true && (
           <div>
             <p className="text-sm font-medium">Ваш регион</p>
-            <select
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="mt-2 w-full rounded-xl border bg-background px-4 py-2.5 text-sm"
-            >
-              <option value="">Не указывать</option>
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+            <div className="relative mt-2">
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                className={cn(
+                  "w-full appearance-none rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
+                  region ? "font-medium text-[#2b2f36]" : "text-[#7a808a]",
+                )}
+              >
+                <option value="">Не указывать</option>
+                {REGIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                aria-hidden
+                className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
+              />
+            </div>
           </div>
         )}
 

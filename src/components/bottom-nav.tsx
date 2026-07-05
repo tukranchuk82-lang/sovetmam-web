@@ -53,11 +53,14 @@ const tabs: {
   },
 ];
 
-export function BottomNav() {
+export function BottomNav({ background }: { background?: string }) {
   const pathname = usePathname();
 
   return (
-    <nav className="sm-bottom-nav relative z-20 shrink-0 rounded-t-3xl bg-brand shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.25)]">
+    <nav
+      className="sm-bottom-nav relative z-20 shrink-0 rounded-t-3xl bg-brand shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.25)] transition-[background] duration-300"
+      style={background ? ({ "--nav-bg": background } as React.CSSProperties) : undefined}
+    >
       <div className="grid grid-cols-5">
         {tabs.map((t) => {
           const active = t.match(pathname);

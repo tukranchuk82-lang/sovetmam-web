@@ -16,9 +16,14 @@ import {
   getCurrentDemoUser,
   ROLE_LABELS,
 } from "@/lib/demo-auth";
+import { getCurrentAppUser } from "@/lib/user-session";
 import { logoutDemoUser } from "@/app/(app)/login/actions";
+import { logout } from "@/app/(app)/login/onboarding-actions";
+import type { AppUser } from "@/lib/onboarding-db";
+import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
 import { Avatar } from "@/components/avatar";
+import { AvatarEditor } from "@/components/avatar-editor";
 import { Badge } from "@/components/ui/badge";
 import { MotionFadeIn } from "@/components/motion";
 
@@ -26,8 +31,12 @@ export const metadata = { title: "Личный кабинет" };
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const user = await getCurrentDemoUser();
-  if (!user) redirect("/login");
+  const demoUser = await getCurrentDemoUser();
+  const appUser = demoUser ? null : await getCurrentAppUser();
+  if (!demoUser && !appUser) redirect("/login");
+  if (appUser) return <AppUserProfile user={appUser} />;
+
+  const user = demoUser!;
 
   const isAdmin = user.role === "owner" || user.role === "tech";
   const inquiries = await listInquiriesForUser(user.id);
@@ -190,6 +199,67 @@ export default async function ProfilePage() {
       )}
 
       <form action={logoutDemoUser} className="mt-8">
+        <button
+          type="submit"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-muted-foreground hover:bg-stone-50"
+        >
+          <LogOut className="size-4" /> Выйти
+        </button>
+      </form>
+    </div>
+  );
+}
+
+// Личный кабинет обычного (email) пользователя.
+function AppUserProfile({ user }: { user: AppUser }) {
+  const fullName = `${user.firstName} ${user.lastName}`;
+  return (
+    <div className="px-4 py-5">
+      <div className="flex items-center gap-3">
+        <AvatarEditor avatar={resolveUserAvatar(user)} size={64} />
+        <div className="min-w-0">
+          <h1 className="truncate text-lg font-extrabold leading-tight">
+            {fullName}
+          </h1>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            {user.email}
+          </p>
+          <div className="mt-1.5">
+            <Badge
+              variant="outline"
+              className={
+                user.messengerConnected
+                  ? "gap-1 text-emerald-600"
+                  : "gap-1 text-amber-600"
+              }
+            >
+              {user.messengerConnected
+                ? "Мессенджер подключён"
+                : "Мессенджер не подключён"}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      {!user.messengerConnected && (
+        <Link
+          href="/connect"
+          className="mt-6 flex items-center gap-3 rounded-2xl bg-[#1B3A6B] p-4 text-white shadow-[0_10px_24px_-10px_rgba(27,58,107,0.5)] transition-all duration-200 ease-out hover:scale-[1.02]"
+        >
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
+            <MessageSquare className="size-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold leading-snug">Подключить мессенджер</p>
+            <p className="mt-0.5 text-xs text-white/75">
+              Для двустороннего общения — Telegram, ВК или MAX
+            </p>
+          </div>
+          <ChevronRight className="size-5 shrink-0 text-white/60" />
+        </Link>
+      )}
+
+      <form action={logout} className="mt-8">
         <button
           type="submit"
           className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-muted-foreground hover:bg-stone-50"

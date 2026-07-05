@@ -3,6 +3,7 @@ import { LogIn, Sparkles } from "lucide-react";
 import { PodborForm } from "@/components/podbor-form";
 import { getAllMeasures } from "@/lib/measures-db";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
+import { getCurrentAppUser } from "@/lib/user-session";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -10,9 +11,10 @@ export const metadata = { title: "Подбор по анкете" };
 export const dynamic = "force-dynamic";
 
 export default async function PodborPage() {
-  const user = await getCurrentDemoUser();
+  const demoUser = await getCurrentDemoUser();
+  const appUser = demoUser ? null : await getCurrentAppUser();
 
-  if (!user) {
+  if (!demoUser && !appUser) {
     return <AuthGate />;
   }
 
@@ -26,12 +28,15 @@ function AuthGate() {
       <div className="flex size-16 items-center justify-center rounded-2xl bg-brand text-white shadow-[0_10px_24px_-8px_rgba(142,29,44,0.55)]">
         <Sparkles className="size-8" />
       </div>
-      <h1 className="mt-5 text-xl font-extrabold tracking-tight">
-        Подбор мер — после входа
+      <h1
+        className="mt-5 text-[22px] font-normal leading-tight text-[#1A1A1A]"
+        style={{ fontFamily: "var(--font-playfair), serif" }}
+      >
+        Доступно только авторизованным пользователям
       </h1>
-      <p className="mt-2 max-w-[280px] text-sm text-muted-foreground">
-        Чтобы пройти анкету и сохранить результат в личном кабинете, войдите
-        через Telegram, ВКонтакте или MAX. Каталог можно смотреть без входа.
+      <p className="mt-2.5 max-w-[300px] text-sm leading-relaxed text-muted-foreground">
+        Чтобы мы могли подобрать все доступные меры под вашу индивидуальную
+        жизненную ситуацию, авторизуйтесь или пройдите регистрацию.
       </p>
       <Link
         href="/login?next=/podbor"

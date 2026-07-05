@@ -1,22 +1,31 @@
-import { AppHeader } from "@/components/app-header";
-import { BottomNav } from "@/components/bottom-nav";
+import { getCurrentDemoUser } from "@/lib/demo-auth";
+import { getCurrentAppUser } from "@/lib/user-session";
+import { resolveUserAvatar } from "@/lib/avatar";
+import { Avatar } from "@/components/avatar";
+import { UserAvatar } from "@/components/user-avatar";
+import { AppShell } from "@/components/app-shell";
+import { UtmCapture } from "@/components/utm-capture";
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Сессия читается на сервере; готовый аватар отдаём клиентскому каркасу.
+  const demoUser = await getCurrentDemoUser();
+  const appUser = demoUser ? null : await getCurrentAppUser();
+  const avatarSlot = demoUser ? (
+    <Avatar name={demoUser.name} color={demoUser.avatarColor} size={44} />
+  ) : appUser ? (
+    <UserAvatar avatar={resolveUserAvatar(appUser)} size={44} />
+  ) : null;
+
   return (
-    <div className="relative mx-auto flex h-dvh max-w-[480px] flex-col overflow-hidden bg-white shadow-2xl">
-      {/* Маленькая полоска-индикатор прототипа — в самом верху. Уберём после согласования. */}
-      <div className="shrink-0 bg-amber-50/80 px-3 py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-amber-800 backdrop-blur">
-        Прототип · данные демонстрационные
-      </div>
-      <AppHeader />
-      <main className="flex-1 overflow-y-auto overscroll-contain bg-background text-foreground">
+    <>
+      <AppShell avatarSlot={avatarSlot} authed={Boolean(demoUser || appUser)}>
         {children}
-      </main>
-      <BottomNav />
-    </div>
+      </AppShell>
+      <UtmCapture />
+    </>
   );
 }

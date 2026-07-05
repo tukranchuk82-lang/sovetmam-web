@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 220" fill="none">
+  <!-- мягкая тень под сценой -->
+  <ellipse cx="116" cy="198" rx="76" ry="11" fill="#1B3A6B" opacity="0.06"/>
+
+  <!-- пустой список (лист с парой строк — «почти ничего») -->
+  <g transform="rotate(-4 100 92)">
+    <rect x="44" y="30" width="106" height="122" rx="14" fill="#F4F8FD" stroke="#CBD9EC" stroke-width="3"/>
+    <rect x="63" y="52" width="70" height="9" rx="4.5" fill="#D7E3F3"/>
+    <rect x="63" y="73" width="54" height="9" rx="4.5" fill="#E2ECF8"/>
+    <rect x="63" y="94" width="40" height="9" rx="4.5" fill="#EBF1F9"/>
+  </g>
+
+  <!-- лупа -->
+  <circle cx="156" cy="120" r="42" fill="#FFFFFF" fill-opacity="0.92" stroke="#2E4470" stroke-width="10"/>
+  <!-- блик на стекле -->
+  <path d="M139 101 A42 42 0 0 1 173 97" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+  <!-- «…» внутри — искали, но пусто -->
+  <g fill="#9FB4D2">
+    <circle cx="142" cy="122" r="4.2"/>
+    <circle cx="156" cy="122" r="4.2"/>
+    <circle cx="170" cy="122" r="4.2"/>
+  </g>
+  <!-- ручка лупы, бордовый акцент -->
+  <line x1="186" y1="150" x2="212" y2="176" stroke="#8E1D2C" stroke-width="15" stroke-linecap="round"/>
+</svg>

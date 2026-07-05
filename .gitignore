@@ -43,3 +43,7 @@ next-env.d.ts
 # временные файлы загрузки региональных мер (не нужны в репозитории)
 /scripts/_regions_txt/
 /scripts/_regions.json
+
+# временные картинки от работы (не коммитить)
+.sm-*.png
+*.original.png

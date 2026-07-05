@@ -5,6 +5,7 @@ import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { getInquiry } from "@/lib/inquiries-db";
 import { getMeasureBySlug } from "@/lib/measures-db";
 import { Badge } from "@/components/ui/badge";
+import { BackLink } from "@/components/back-link";
 
 export const dynamic = "force-dynamic";
 
@@ -26,12 +27,7 @@ export default async function InquiryDetailPage({
 
   return (
     <article className="px-4 py-5">
-      <Link
-        href="/profile"
-        className="text-sm text-muted-foreground hover:text-foreground"
-      >
-        ← В личный кабинет
-      </Link>
+      <BackLink href="/profile" label="В кабинет" />
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         {inquiry.status === "new" ? (

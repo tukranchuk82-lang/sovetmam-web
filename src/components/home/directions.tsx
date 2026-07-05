@@ -120,8 +120,9 @@ export function Directions() {
         href="/podbor"
         className="mt-6 flex items-center gap-3 rounded-2xl px-5 py-4 text-white"
         style={{
-          background: "linear-gradient(to bottom, #B51234, #8E1D2C)",
-          boxShadow: "0 14px 28px -16px rgba(142,29,44,0.6)",
+          background:
+            "linear-gradient(135deg, #274A7E 0%, #172A4B 58%, #101D38 100%)",
+          boxShadow: "0 18px 34px -12px rgba(23,42,75,0.55)",
         }}
       >
         <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-white/15">

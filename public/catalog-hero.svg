@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 340" fill="none" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#CFE4F8"/>
+      <stop offset="0.55" stop-color="#E7F1FB"/>
+      <stop offset="1" stop-color="#F6FAFE"/>
+    </linearGradient>
+    <linearGradient id="mtnFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C3D8EE"/>
+      <stop offset="1" stop-color="#D8E7F5"/>
+    </linearGradient>
+    <linearGradient id="mtnNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#AEC9E7"/>
+      <stop offset="1" stop-color="#C6DCF0"/>
+    </linearGradient>
+    <linearGradient id="balloonPink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6D0D6"/>
+      <stop offset="1" stop-color="#EBAEB8"/>
+    </linearGradient>
+    <linearGradient id="balloonCream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBEEDA"/>
+      <stop offset="1" stop-color="#F3DCBE"/>
+    </linearGradient>
+    <linearGradient id="balloonBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B9CDE6"/>
+      <stop offset="1" stop-color="#9DB7D8"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- небо -->
+  <rect width="480" height="340" fill="url(#sky)"/>
+  <!-- мягкое солнце-свечение слева сверху -->
+  <circle cx="70" cy="60" r="120" fill="url(#sun)"/>
+
+  <!-- дальние горы -->
+  <path d="M300 340 L360 205 L405 250 L440 200 L480 245 L480 340 Z" fill="url(#mtnFar)"/>
+  <path d="M360 205 L378 231 L345 231 Z" fill="#F4FAFF" opacity="0.9"/>
+  <path d="M440 200 L458 226 L423 226 Z" fill="#F4FAFF" opacity="0.9"/>
+
+  <!-- ближние горы -->
+  <path d="M250 340 L330 235 L380 285 L430 245 L480 300 L480 340 Z" fill="url(#mtnNear)"/>
+  <path d="M330 235 L352 268 L305 268 Z" fill="#FBFDFF" opacity="0.95"/>
+
+  <!-- облака -->
+  <g fill="#FFFFFF">
+    <g opacity="0.9">
+      <ellipse cx="120" cy="120" rx="34" ry="17"/>
+      <ellipse cx="146" cy="126" rx="26" ry="15"/>
+      <ellipse cx="96" cy="128" rx="24" ry="14"/>
+    </g>
+    <g opacity="0.8">
+      <ellipse cx="392" cy="86" rx="30" ry="14"/>
+      <ellipse cx="414" cy="92" rx="22" ry="12"/>
+      <ellipse cx="372" cy="93" rx="20" ry="11"/>
+    </g>
+    <g opacity="0.7">
+      <ellipse cx="210" cy="182" rx="26" ry="12"/>
+      <ellipse cx="230" cy="187" rx="19" ry="10"/>
+    </g>
+    <g opacity="0.55">
+      <ellipse cx="60" cy="210" rx="30" ry="13"/>
+      <ellipse cx="84" cy="215" rx="21" ry="11"/>
+    </g>
+  </g>
+
+  <!-- воздушный шар -->
+  <g transform="translate(300 60)">
+    <!-- стропы -->
+    <g stroke="#B9834A" stroke-width="1.4" opacity="0.7">
+      <line x1="-26" y1="86" x2="-9" y2="120"/>
+      <line x1="26" y1="86" x2="9" y2="120"/>
+      <line x1="-10" y1="92" x2="-6" y2="120"/>
+      <line x1="10" y1="92" x2="6" y2="120"/>
+    </g>
+    <!-- купол -->
+    <path d="M0 -6 C-40 -6 -50 34 -30 74 C-22 90 -8 96 0 96 C8 96 22 90 30 74 C50 34 40 -6 0 -6 Z" fill="url(#balloonBlue)"/>
+    <path d="M0 -6 C-24 -6 -30 34 -18 78 C-12 92 -4 96 0 96 C4 96 4 92 4 78 L4 -6 Z" fill="url(#balloonCream)"/>
+    <path d="M0 -6 C-12 -6 -15 34 -9 80 C-6 92 -2 96 0 96 L0 -6 Z" fill="url(#balloonPink)"/>
+    <path d="M0 -6 C12 -6 15 34 9 80 C6 92 2 96 0 96 L0 -6 Z" fill="url(#balloonCream)"/>
+    <path d="M0 -6 C24 -6 30 34 18 78 C12 92 4 96 0 96 L0 -6 Z" fill="url(#balloonBlue)" opacity="0.55"/>
+    <!-- контур/блик -->
+    <path d="M-30 74 C-50 34 -40 -6 0 -6 C40 -6 50 34 30 74" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" fill="none"/>
+    <!-- корзина -->
+    <path d="M-9 120 L9 120 L7 134 L-7 134 Z" fill="#C08A54"/>
+    <rect x="-9" y="118" width="18" height="4" rx="2" fill="#9E6E3C"/>
+  </g>
+
+  <!-- маленькие искры/звёздочки -->
+  <g fill="#FFFFFF" opacity="0.85">
+    <circle cx="170" cy="70" r="2"/>
+    <circle cx="250" cy="110" r="1.6"/>
+    <circle cx="440" cy="140" r="2"/>
+    <circle cx="150" cy="165" r="1.4"/>
+  </g>
+</svg>

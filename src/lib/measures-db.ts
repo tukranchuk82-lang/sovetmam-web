@@ -53,14 +53,26 @@ const SELECT_FIELDS =
 
 export async function getAllMeasures(): Promise<SupportMeasure[]> {
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase
-    .from("measures")
-    .select(SELECT_FIELDS)
-    .eq("is_published", true)
-    .order("sort_order", { ascending: true });
+  // PostgREST отдаёт максимум ~1000 строк за запрос, а мер уже больше 2000 —
+  // поэтому листаем постранично. Сортируем по (sort_order, slug): slug
+  // уникален и даёт стабильный порядок между страницами (без пропусков/дублей).
+  const PAGE = 1000;
+  const all: MeasureRow[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("measures")
+      .select(SELECT_FIELDS)
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true })
+      .order("slug", { ascending: true })
+      .range(from, from + PAGE - 1);
 
-  if (error) throw error;
-  return (data as MeasureRow[]).map(fromRow);
+    if (error) throw error;
+    const rows = (data ?? []) as MeasureRow[];
+    all.push(...rows);
+    if (rows.length < PAGE) break;
+  }
+  return all.map(fromRow);
 }
 
 export async function getMeasureBySlug(

@@ -58,30 +58,35 @@ export default async function MeasurePage({
         ) : null}
         <p className="mt-3 text-muted-foreground">{m.shortDescription}</p>
 
-        <Separator className="my-6" />
+        {m.howToApply.length > 0 && (
+          <>
+            <Separator className="my-6" />
+            <section>
+              <h2 className="text-lg font-bold">Как оформить</h2>
+              <ol className="mt-3 space-y-3">
+                {m.howToApply.map((step, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-muted-foreground">{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </>
+        )}
 
-        <section>
-          <h2 className="text-lg font-bold">Как оформить</h2>
-          <ol className="mt-3 space-y-3">
-            {m.howToApply.map((step, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                  {i + 1}
-                </span>
-                <span className="text-sm text-muted-foreground">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="mt-6">
-          <h2 className="text-lg font-bold">Какие документы нужны</h2>
-          <ul className="mt-3 list-inside list-disc space-y-1.5 text-sm text-muted-foreground">
-            {m.documents.map((d, i) => (
-              <li key={i}>{d}</li>
-            ))}
-          </ul>
-        </section>
+        {m.documents.length > 0 && (
+          <section className="mt-6">
+            <h2 className="text-lg font-bold">Какие документы нужны</h2>
+            <ul className="mt-3 list-inside list-disc space-y-1.5 text-sm text-muted-foreground">
+              {m.documents.map((d, i) => (
+                <li key={i}>{d}</li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {m.tips.length > 0 && (
           <section className="mt-6 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200">
@@ -108,7 +113,7 @@ export default async function MeasurePage({
           href={inquiryHref}
           className={cn(
             buttonVariants(),
-            "h-11 w-full gap-2 px-5",
+            "h-11 w-full gap-2 px-5 bg-[#3A4D63] text-white hover:bg-[#2F3F52]",
           )}
         >
           <MessageSquarePlus className="size-4" />

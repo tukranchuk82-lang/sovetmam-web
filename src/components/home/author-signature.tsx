@@ -15,7 +15,7 @@ export function AuthorSignature({ className }: { className?: string }) {
       >
         Татьяна Буцкая
       </p>
-      <span className="mt-2 block h-1 w-[60px] rounded-full bg-[#B51234]" />
+      <span className="mt-2 block h-1 w-[60px] rounded-full bg-[#8E1D2C]" />
       <p
         className="mt-2 text-[12px] font-normal text-[#555555]"
         style={{ lineHeight: 1.6 }}

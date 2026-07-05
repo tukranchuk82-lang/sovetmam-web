@@ -1012,17 +1012,21 @@
 /* Шапка: убираем двухцветную полоску — чистая белая шапка как на макете */
 [data-theme="city"] header .h-1 { display: none !important; }
 
-/* Нижнее меню: белое со скруглённым верхом, бордовый активный пункт */
+/* Нижнее меню: графитовый градиент (в тон карточкам каталога) со скруглённым
+   верхом, волосяным кантом и верхним бликом; бордовый активный пункт */
 [data-theme="city"] .sm-bottom-nav {
-  background: #ffffff !important;
-  border-top: 1px solid #e5e5e5 !important;
+  /* Цвет задаётся посекционно через --nav-bg (см. app-shell.tsx); дефолт — бордовый. */
+  background: var(--nav-bg, linear-gradient(135deg, #A32334 0%, #8E1D2C 55%, #74111F 100%)) !important;
+  border: none !important;
   border-radius: 1rem 1rem 0 0 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 -8px 20px -8px rgba(116, 17, 31, 0.5) !important;
 }
 [data-theme="city"] .sm-bottom-nav .sm-nav-lucide { display: inline-block !important; }
 [data-theme="city"] .sm-bottom-nav .sm-nav-emoji { display: none !important; }
-[data-theme="city"] .sm-bottom-nav a { color: #6b6b6b !important; }
-[data-theme="city"] .sm-bottom-nav a[data-active="true"] { color: #8e1d2c !important; }
-[data-theme="city"] .sm-bottom-nav .sm-nav-indicator { background: #8e1d2c !important; }
+[data-theme="city"] .sm-bottom-nav a { color: rgba(255, 255, 255, 0.7) !important; }
+[data-theme="city"] .sm-bottom-nav a[data-active="true"] { color: #ffffff !important; }
+[data-theme="city"] .sm-bottom-nav .sm-nav-indicator { background: #ffffff !important; }
 
 /* Появление секций на чистом CSS (см. components/motion.tsx). Контент виден
    по умолчанию; анимация не зависит от JS-гидратации. */
