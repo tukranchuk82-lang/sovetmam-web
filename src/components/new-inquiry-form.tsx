@@ -12,11 +12,15 @@ export function NewInquiryForm({
   initialType,
   measureSlug,
   measureTitle,
+  regions,
+  defaultRegion,
 }: {
   action: (fd: FormData) => Promise<void>;
   initialType: InquiryType;
   measureSlug: string | null;
   measureTitle: string | null;
+  regions: readonly string[];
+  defaultRegion: string;
 }) {
   const [type, setType] = useState<InquiryType>(initialType);
   const [pending, startTransition] = useTransition();
@@ -54,6 +58,27 @@ export function NewInquiryForm({
           <span className="font-medium">{measureTitle}</span>
         </div>
       )}
+
+      <label className="block">
+        <span className="text-xs font-medium text-muted-foreground">
+          Регион <span className="text-brand">*</span>
+        </span>
+        <select
+          name="region"
+          required
+          defaultValue={defaultRegion}
+          className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+        >
+          <option value="" disabled>
+            Выберите регион
+          </option>
+          {regions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <label className="block">
         <span className="text-xs font-medium text-muted-foreground">

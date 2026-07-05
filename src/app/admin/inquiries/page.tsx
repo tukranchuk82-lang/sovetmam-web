@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, CheckCircle2, ChevronRight } from "lucide-react";
+import { Clock, CheckCircle2, ChevronRight, MapPin } from "lucide-react";
 import { listAllInquiries } from "@/lib/inquiries-db";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,8 @@ const CHANNEL_COLORS = {
   vk: "#0077FF",
   max: "#7C3AED",
 } as const;
+
+const DEFAULT_AVATAR_COLOR = "#1B3A6B";
 
 export default async function AdminInquiriesPage() {
   const inquiries = await listAllInquiries();
@@ -55,9 +57,17 @@ export default async function AdminInquiriesPage() {
               className="block rounded-xl border bg-card p-3 transition-colors hover:border-primary/50"
             >
               <div className="flex items-start gap-3">
-                <Avatar name={inq.userName} color={CHANNEL_COLORS[inq.userChannel]} size={36} />
+                <Avatar
+                  name={inq.userName}
+                  color={
+                    inq.userChannel
+                      ? CHANNEL_COLORS[inq.userChannel]
+                      : DEFAULT_AVATAR_COLOR
+                  }
+                  size={36}
+                />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {inq.status === "new" ? (
                       <Badge
                         variant="outline"
@@ -73,12 +83,20 @@ export default async function AdminInquiriesPage() {
                     <Badge variant="secondary" className="text-[10px]">
                       {inq.type === "question" ? "Вопрос" : "Идея"}
                     </Badge>
-                    <span
-                      className="text-[10px] font-semibold"
-                      style={{ color: CHANNEL_COLORS[inq.userChannel] }}
-                    >
-                      {CHANNEL_LABELS[inq.userChannel]}
-                    </span>
+                    {inq.region && (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground">
+                        <MapPin className="size-3" />
+                        {inq.region}
+                      </span>
+                    )}
+                    {inq.userChannel && (
+                      <span
+                        className="text-[10px] font-semibold"
+                        style={{ color: CHANNEL_COLORS[inq.userChannel] }}
+                      >
+                        {CHANNEL_LABELS[inq.userChannel]}
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1.5 font-semibold leading-snug">
                     {inq.subject}

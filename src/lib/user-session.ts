@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { getAppUserById, type AppUser } from "@/lib/onboarding-db";
+import { getAppUserById, isAppAdmin, type AppUser } from "@/lib/onboarding-db";
 
 // Сессия обычного пользователя: в httpOnly-cookie кладём id пользователя и
 // его HMAC-подпись (секрет — service-role ключ), чтобы cookie нельзя было
@@ -52,4 +52,13 @@ export async function getCurrentAppUser(): Promise<AppUser | null> {
   const sig = raw.slice(idx + 1);
   if (!verify(userId, sig)) return null;
   return getAppUserById(userId);
+}
+
+/**
+ * Текущий пользователь, если он админ (владелец/техспец), иначе null.
+ * Используется для защиты /admin и админских Server Actions.
+ */
+export async function getCurrentAdmin(): Promise<AppUser | null> {
+  const user = await getCurrentAppUser();
+  return isAppAdmin(user) ? user : null;
 }

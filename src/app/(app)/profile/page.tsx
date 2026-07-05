@@ -19,7 +19,7 @@ import {
 import { getCurrentAppUser } from "@/lib/user-session";
 import { logoutDemoUser } from "@/app/(app)/login/actions";
 import { logout } from "@/app/(app)/login/onboarding-actions";
-import type { AppUser } from "@/lib/onboarding-db";
+import { isAppAdmin, ROLE_LABELS as APP_ROLE_LABELS, type AppUser } from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
 import { Avatar } from "@/components/avatar";
@@ -336,6 +336,37 @@ async function AppUserProfile({ user }: { user: AppUser }) {
           <MessengerManager initial={initial} />
         </div>
       </section>
+
+      {isAppAdmin(user) && (
+        <section className="mt-7">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            Управление
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Доступно вам как {APP_ROLE_LABELS[user.role].toLowerCase()}
+          </p>
+          <div className="mt-3 space-y-2">
+            <AdminLink
+              href="/admin/inquiries"
+              icon={<MessageSquare className="size-5" />}
+              title="Обращения"
+              hint="Отвечать пользователям"
+            />
+            <AdminLink
+              href="/admin/knowledge"
+              icon={<FolderInput className="size-5" />}
+              title="База знаний"
+              hint="Загружать материалы для AI"
+            />
+            <AdminLink
+              href="/admin"
+              icon={<MessageSquare className="size-5" />}
+              title="Каталог мер"
+              hint="Добавлять и править меры"
+            />
+          </div>
+        </section>
+      )}
 
       <section className="mt-7">
         <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">

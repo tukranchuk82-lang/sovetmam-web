@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CheckCircle2, Clock, ExternalLink } from "lucide-react";
-import { getCurrentDemoUser } from "@/lib/demo-auth";
+import { getCurrentAppUser } from "@/lib/user-session";
 import { getInquiry } from "@/lib/inquiries-db";
 import { getMeasureBySlug } from "@/lib/measures-db";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ export default async function InquiryDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await getCurrentDemoUser();
+  const user = await getCurrentAppUser();
   if (!user) redirect("/login");
 
   const { id } = await params;
@@ -79,12 +79,14 @@ export default async function InquiryDetailPage({
         </div>
       ) : (
         <div className="mt-2 rounded-xl border border-dashed bg-muted/30 p-4 text-center text-sm text-muted-foreground">
-          Ваше обращение получено. Ответ придёт сюда, а также уведомлением в
-          бот {inquiry.userChannel === "telegram"
-            ? "Telegram"
+          Ваше обращение получено. Ответ придёт сюда, в личный кабинет
+          {inquiry.userChannel === "telegram"
+            ? ", а также в Telegram"
             : inquiry.userChannel === "vk"
-              ? "ВКонтакте"
-              : "MAX"}
+              ? ", а также во ВКонтакте"
+              : inquiry.userChannel === "max"
+                ? ", а также в MAX"
+                : ""}
           .
         </div>
       )}

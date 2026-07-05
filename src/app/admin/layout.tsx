@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LayoutGrid, MessageSquare, FolderInput, ArrowLeft } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
+import { getCurrentAdmin } from "@/lib/user-session";
 import { AdminNavLink } from "@/components/admin/nav-link";
 import { OrgName } from "@/components/org-name";
 
 export const metadata = {
   title: "Админ-панель",
-  // Без авторизации админка открыта по URL — закрываем от поисковиков.
   robots: { index: false, follow: false },
 };
 
@@ -17,6 +18,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Доступ только для владельца/техспеца. Остальных — на вход (там уже
+  // залогиненного, но не-админа, перекинет в личный кабинет).
+  const admin = await getCurrentAdmin();
+  if (!admin) redirect("/login?next=/admin");
+
   const newInquiries = await countNewInquiries();
 
   return (

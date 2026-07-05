@@ -3,12 +3,14 @@ import { createHash, randomInt } from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export type MessengerChannel = "telegram" | "vk" | "max";
+export type AppRole = "user" | "owner" | "tech";
 
 export interface AppUser {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
+  role: AppRole;
   emailVerifiedAt: string | null;
   messengerConnected: boolean;
   messengerChoice: MessengerChannel | null;
@@ -21,6 +23,17 @@ export interface AppUser {
   avatarBg: string | null;
   messengerAvatarUrl: string | null;
 }
+
+/** Владелец и техспец имеют доступ к админ-панели. */
+export function isAppAdmin(user: AppUser | null | undefined): boolean {
+  return user?.role === "owner" || user?.role === "tech";
+}
+
+export const ROLE_LABELS: Record<AppRole, string> = {
+  user: "Пользователь",
+  owner: "Владелец",
+  tech: "Техспец",
+};
 
 export interface Utm {
   utm_source?: string | null;
@@ -43,6 +56,7 @@ type Row = {
   email: string;
   first_name: string;
   last_name: string;
+  role: AppRole;
   email_verified_at: string | null;
   messenger_connected: boolean;
   messenger_choice: MessengerChannel | null;
@@ -62,6 +76,7 @@ function fromRow(r: Row): AppUser {
     email: r.email,
     firstName: r.first_name,
     lastName: r.last_name,
+    role: r.role,
     emailVerifiedAt: r.email_verified_at,
     messengerConnected: r.messenger_connected,
     messengerChoice: r.messenger_choice,
@@ -77,7 +92,7 @@ function fromRow(r: Row): AppUser {
 }
 
 const SELECT =
-  "id, email, first_name, last_name, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
 
 /** Подключён ли конкретный канал (по наличию id мессенджера). */
 export function channelConnected(u: AppUser, channel: MessengerChannel): boolean {

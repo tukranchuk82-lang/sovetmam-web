@@ -9,7 +9,8 @@ export interface Inquiry {
   id: string;
   userId: string;
   userName: string;
-  userChannel: InquiryChannel;
+  userChannel: InquiryChannel | null;
+  region: string | null;
   type: InquiryType;
   subject: string;
   body: string;
@@ -25,7 +26,8 @@ interface InquiryRow {
   id: string;
   user_id: string;
   user_name: string;
-  user_channel: InquiryChannel;
+  user_channel: InquiryChannel | null;
+  region: string | null;
   type: InquiryType;
   subject: string;
   body: string;
@@ -43,6 +45,7 @@ function fromRow(r: InquiryRow): Inquiry {
     userId: r.user_id,
     userName: r.user_name,
     userChannel: r.user_channel,
+    region: r.region,
     type: r.type,
     subject: r.subject,
     body: r.body,
@@ -58,7 +61,8 @@ function fromRow(r: InquiryRow): Inquiry {
 export interface NewInquiry {
   userId: string;
   userName: string;
-  userChannel: InquiryChannel;
+  userChannel: InquiryChannel | null;
+  region: string;
   type: InquiryType;
   subject: string;
   body: string;
@@ -73,6 +77,7 @@ export async function createInquiry(input: NewInquiry): Promise<Inquiry> {
       user_id: input.userId,
       user_name: input.userName,
       user_channel: input.userChannel,
+      region: input.region,
       type: input.type,
       subject: input.subject,
       body: input.body,

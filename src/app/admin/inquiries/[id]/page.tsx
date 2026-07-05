@@ -71,16 +71,20 @@ export default async function AdminInquiryDetailPage({
       <div className="mt-3 flex items-center gap-2.5 rounded-xl border bg-muted/30 p-2.5">
         <Avatar
           name={inquiry.userName}
-          color={CHANNEL_COLORS[inquiry.userChannel]}
+          color={
+            inquiry.userChannel
+              ? CHANNEL_COLORS[inquiry.userChannel]
+              : "#1B3A6B"
+          }
           size={36}
         />
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">{inquiry.userName}</p>
-          <p
-            className="text-xs font-medium"
-            style={{ color: CHANNEL_COLORS[inquiry.userChannel] }}
-          >
-            {CHANNEL_LABELS[inquiry.userChannel]} · {inquiry.userId}
+          <p className="truncate text-xs font-medium text-muted-foreground">
+            {inquiry.region ?? "Регион не указан"}
+            {inquiry.userChannel
+              ? ` · ${CHANNEL_LABELS[inquiry.userChannel]}`
+              : ""}
           </p>
         </div>
       </div>
