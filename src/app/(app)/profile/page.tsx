@@ -24,6 +24,7 @@ import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
 import { Avatar } from "@/components/avatar";
 import { AvatarEditor } from "@/components/avatar-editor";
+import { MessengerManager } from "@/components/messenger-manager";
 import { Badge } from "@/components/ui/badge";
 import { MotionFadeIn } from "@/components/motion";
 
@@ -211,17 +212,13 @@ export default async function ProfilePage() {
 }
 
 // Личный кабинет обычного (email) пользователя.
-const MESSENGER_LABEL: Record<string, string> = {
-  telegram: "Telegram",
-  vk: "ВКонтакте",
-  max: "MAX",
-};
-
 function AppUserProfile({ user }: { user: AppUser }) {
   const fullName = `${user.firstName} ${user.lastName}`;
-  const channel = user.messengerChoice
-    ? MESSENGER_LABEL[user.messengerChoice]
-    : null;
+  const initial = {
+    telegram: user.telegramId != null,
+    vk: user.vkId != null,
+    max: user.maxId != null,
+  };
   return (
     <div className="px-4 py-5">
       <div className="flex items-center gap-3">
@@ -233,45 +230,21 @@ function AppUserProfile({ user }: { user: AppUser }) {
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
             {user.email}
           </p>
-          <div className="mt-1.5">
-            <Badge
-              variant="outline"
-              className={
-                user.messengerConnected
-                  ? "gap-1 text-emerald-600"
-                  : "gap-1 text-amber-600"
-              }
-            >
-              {user.messengerConnected ? (
-                <>
-                  <CheckCircle2 className="size-3" />
-                  Мессенджер подключён{channel ? `: ${channel}` : ""}
-                </>
-              ) : (
-                "Мессенджер не подключён"
-              )}
-            </Badge>
-          </div>
         </div>
       </div>
 
-      {!user.messengerConnected && (
-        <Link
-          href="/connect"
-          className="mt-6 flex items-center gap-3 rounded-2xl bg-[#1B3A6B] p-4 text-white shadow-[0_10px_24px_-10px_rgba(27,58,107,0.5)] transition-all duration-200 ease-out hover:scale-[1.02]"
-        >
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
-            <MessageSquare className="size-6" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold leading-snug">Подключить мессенджер</p>
-            <p className="mt-0.5 text-xs text-white/75">
-              Для двустороннего общения — Telegram, ВК или MAX
-            </p>
-          </div>
-          <ChevronRight className="size-5 shrink-0 text-white/60" />
-        </Link>
-      )}
+      <section className="mt-6">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+          Мессенджеры
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Подключите один или несколько — так мы будем присылать подобранные
+          меры, ответы и напоминания. Любой можно отключить.
+        </p>
+        <div className="mt-3">
+          <MessengerManager initial={initial} />
+        </div>
+      </section>
 
       <form action={logout} className="mt-8">
         <button

@@ -9,6 +9,8 @@ import {
   verifyOtp,
   getAppUserByEmail,
   setMessengerChoice,
+  channelConnected,
+  disconnectMessengerChannel,
   saveSurvey,
   uploadAvatarFile,
   setAvatarImage,
@@ -131,16 +133,28 @@ export async function chooseMessenger(
   return { ok: true, url };
 }
 
-/** Статус подключения мессенджера текущего пользователя (для опроса на /connect). */
+/** Статус подключения мессенджеров текущего пользователя (для опроса). */
 export async function messengerStatus(): Promise<{
   connected: boolean;
-  choice: MessengerChannel | null;
+  channels: { telegram: boolean; vk: boolean; max: boolean };
 }> {
   const user = await getCurrentAppUser();
+  const on = (c: MessengerChannel) => (user ? channelConnected(user, c) : false);
   return {
     connected: Boolean(user?.messengerConnected),
-    choice: user?.messengerChoice ?? null,
+    channels: { telegram: on("telegram"), vk: on("vk"), max: on("max") },
   };
+}
+
+/** Отключение канала мессенджера в личном кабинете. */
+export async function disconnectMessengerAction(
+  channel: MessengerChannel,
+): Promise<{ ok: boolean }> {
+  const user = await getCurrentAppUser();
+  if (!user) return { ok: false };
+  await disconnectMessengerChannel(user.id, channel);
+  revalidatePath("/profile");
+  return { ok: true };
 }
 
 /** Сохраняет ответы анкеты в профиль (только для залогиненного пользователя). */

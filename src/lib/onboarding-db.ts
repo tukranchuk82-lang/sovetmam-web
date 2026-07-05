@@ -12,6 +12,9 @@ export interface AppUser {
   emailVerifiedAt: string | null;
   messengerConnected: boolean;
   messengerChoice: MessengerChannel | null;
+  telegramId: number | null;
+  vkId: number | null;
+  maxId: string | null;
   survey: Record<string, unknown> | null;
   avatarUrl: string | null;
   avatarEmoji: string | null;
@@ -43,6 +46,9 @@ type Row = {
   email_verified_at: string | null;
   messenger_connected: boolean;
   messenger_choice: MessengerChannel | null;
+  telegram_id: number | null;
+  vk_id: number | null;
+  max_id: string | null;
   survey: Record<string, unknown> | null;
   avatar_url: string | null;
   avatar_emoji: string | null;
@@ -59,6 +65,9 @@ function fromRow(r: Row): AppUser {
     emailVerifiedAt: r.email_verified_at,
     messengerConnected: r.messenger_connected,
     messengerChoice: r.messenger_choice,
+    telegramId: r.telegram_id,
+    vkId: r.vk_id,
+    maxId: r.max_id,
     survey: r.survey,
     avatarUrl: r.avatar_url,
     avatarEmoji: r.avatar_emoji,
@@ -68,7 +77,14 @@ function fromRow(r: Row): AppUser {
 }
 
 const SELECT =
-  "id, email, first_name, last_name, email_verified_at, messenger_connected, messenger_choice, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+  "id, email, first_name, last_name, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+
+/** Подключён ли конкретный канал (по наличию id мессенджера). */
+export function channelConnected(u: AppUser, channel: MessengerChannel): boolean {
+  if (channel === "telegram") return u.telegramId != null;
+  if (channel === "vk") return u.vkId != null;
+  return u.maxId != null;
+}
 
 export async function getAppUserById(id: string): Promise<AppUser | null> {
   const sb = createSupabaseAdminClient();
@@ -230,6 +246,33 @@ export async function markMessengerConnected(params: {
     .select("id")
     .maybeSingle();
   return Boolean(data) && !error;
+}
+
+/** Отключает канал: обнуляет его id и пересчитывает общий статус/выбор. */
+export async function disconnectMessengerChannel(
+  userId: string,
+  channel: MessengerChannel,
+): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  const user = await getAppUserById(userId);
+  if (!user) return;
+  const idCol =
+    channel === "telegram"
+      ? "telegram_id"
+      : channel === "vk"
+        ? "vk_id"
+        : "max_id";
+  const remaining = (["telegram", "vk", "max"] as MessengerChannel[]).filter(
+    (ch) => ch !== channel && channelConnected(user, ch),
+  );
+  const update: Record<string, unknown> = {
+    [idCol]: null,
+    messenger_connected: remaining.length > 0,
+  };
+  if (user.messengerChoice === channel)
+    update.messenger_choice = remaining[0] ?? null;
+  if (remaining.length === 0) update.messenger_connected_at = null;
+  await sb.from("app_users").update(update).eq("id", userId);
 }
 
 /** Сохраняет ответы анкеты (перезапись). */
