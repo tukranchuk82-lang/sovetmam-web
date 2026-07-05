@@ -163,13 +163,6 @@ export default function Home() {
         </span>
       </Link>
 
-      {/* Установка приложения на устройство. На Chrome/Edge/Android — родное
-          окно установки по клику; на iPhone — короткая подсказка. Если уже
-          установлено, компонент ничего не рендерит. */}
-      <div className="mx-5 -mt-1 mb-2">
-        <InstallAppButton />
-      </div>
-
       {/* Каталог мер поддержки — сетка жизненных ситуаций (по утв. макету) */}
       <CatalogMeasures />
 
@@ -182,8 +175,15 @@ export default function Home() {
       {/* Пирамида мер поддержки (4 трапеции-уровня) */}
       <PyramidSection />
 
+      {/* Установка приложения — в самом низу экрана. На Chrome/Edge/Android —
+          родное окно установки по клику; на iPhone — короткая подсказка. Если
+          приложение уже установлено, компонент ничего не рендерит. */}
+      <div className="mx-5 mt-6">
+        <InstallAppButton />
+      </div>
+
       {/* Силуэт города в самом низу — основание на 2px выше нижнего меню */}
-      <div className="px-5 pb-[2px]">
+      <div className="mt-4 px-5 pb-[2px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/city2-cut.png"

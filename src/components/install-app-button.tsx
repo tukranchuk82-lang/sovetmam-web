@@ -136,6 +136,101 @@ export function InstallAppButton() {
   );
 }
 
+/**
+ * Компактная иконка установки для шапки. Показывается только когда установка
+ * реально возможна: на Chromium — при наличии перехваченного prompt, на iOS —
+ * всегда (там ставят через «Поделиться»). Если приложение уже установлено
+ * (запущено как standalone) — иконка исчезает.
+ */
+export function InstallIconButton({ className }: { className?: string }) {
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [platform, setPlatform] = useState<Platform>("unknown");
+  const [browser, setBrowser] = useState<Browser>("other");
+
+  useEffect(() => {
+    setPlatform(detectPlatform());
+    setBrowser(detectBrowser());
+
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsInstalled(true);
+    }
+
+    const w = window as InstallWindow;
+    if (w.__deferredInstallPrompt) setInstallPrompt(w.__deferredInstallPrompt);
+
+    const captured = () => {
+      const ev = (window as InstallWindow).__deferredInstallPrompt;
+      if (ev) setInstallPrompt(ev);
+    };
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    const installedHandler = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener("pwa-installable", captured);
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", installedHandler);
+    return () => {
+      window.removeEventListener("pwa-installable", captured);
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
+  }, []);
+
+  const canPrompt = Boolean(installPrompt);
+  const iosGuide = platform === "ios";
+  // Приложение уже стоит — иконки нет. Как и нечего предложить на десктопном
+  // Firefox/прочих браузерах без установки.
+  if (isInstalled || (!canPrompt && !iosGuide)) return null;
+
+  async function handleClick() {
+    if (installPrompt) {
+      try {
+        await installPrompt.prompt();
+        await installPrompt.userChoice;
+      } catch {
+        // одноразовое событие — повторный prompt() безопасно игнорируем
+      }
+      setInstallPrompt(null);
+      (window as InstallWindow).__deferredInstallPrompt = null;
+    } else {
+      setShowInstructions(true);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label="Установить приложение"
+        title="Установить приложение"
+        className={cn(
+          "inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/25 text-white backdrop-blur-sm transition-colors hover:bg-white/35",
+          className,
+        )}
+      >
+        <Download className="size-5" />
+      </button>
+
+      {showInstructions && (
+        <InstructionsModal
+          platform={platform}
+          browser={browser}
+          onClose={() => setShowInstructions(false)}
+        />
+      )}
+    </>
+  );
+}
+
 const SUBTITLE: Record<Platform, string> = {
   ios: "Иконка появится на главном экране телефона",
   android: "Иконка появится на главном экране телефона",
