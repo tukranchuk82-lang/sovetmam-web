@@ -39,14 +39,18 @@ export function ConnectMessenger() {
   function connect(channel: MessengerChannel) {
     setError(null);
     setBusy(channel);
+    // Открываем новую вкладку СРАЗУ по клику (до await) — иначе попап-блокировщик
+    // её зарежет. Потом направим её на прокси-ссылку Salebot; само приложение
+    // остаётся открытым в текущей вкладке. Обратную связь (канал+дата) вернёт
+    // вебхук /api/salebot/connect из воронки Salebot.
+    const win = window.open("", "_blank");
     startTransition(async () => {
       const res = await chooseMessenger(channel);
       if (res.ok) {
-        // Уводим человека в бота по прокси-ссылке Salebot (с app_id/email).
-        // Обратно, какой канал и когда подключён, вернёт вебхук
-        // /api/salebot/connect из воронки Salebot.
-        window.location.href = res.url;
+        if (win && !win.closed) win.location.href = res.url;
+        else window.location.href = res.url; // попап заблокирован — уводим текущую
       } else {
+        win?.close();
         setError(res.error);
         setBusy(null);
       }
@@ -75,6 +79,11 @@ export function ConnectMessenger() {
       </div>
 
       {error && <p className="mt-3 text-center text-sm text-[#8E1D2C]">{error}</p>}
+
+      <p className="mt-4 text-center text-xs text-[#9aa0a8]">
+        Бот откроется в новой вкладке — приложение останется здесь. После
+        подключения вернитесь на эту вкладку.
+      </p>
     </div>
   );
 }
