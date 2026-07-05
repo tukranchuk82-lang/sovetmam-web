@@ -129,8 +129,7 @@ export default async function AdminInquiryDetailPage({
             Отправить ответ
           </button>
           <p className="text-center text-xs text-muted-foreground">
-            В прототипе уведомление в бот не уйдёт — просто появится у
-            пользователя в кабинете
+            Ответ появится у пользователя в личном кабинете
           </p>
         </form>
       )}
