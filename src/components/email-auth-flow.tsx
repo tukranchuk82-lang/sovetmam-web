@@ -174,6 +174,22 @@ export function EmailAuthFlow() {
 
   return (
     <div className="w-full max-w-[340px]">
+      {/* Заголовок — только на шаге ввода email */}
+      {step === "email" && (
+        <div className="mb-6 text-center">
+          <h1
+            className="text-[26px] font-normal leading-tight text-[#1A1A1A]"
+            style={{ fontFamily: "var(--font-playfair), serif" }}
+          >
+            Вход и регистрация
+          </h1>
+          <p className="mt-1.5 text-sm text-[#6b7078]">
+            Введите email. Если вы у нас впервые — быстро зарегистрируем, если
+            уже были — пришлём код для входа.
+          </p>
+        </div>
+      )}
+
       {/* ===== Шаг 1: email ===== */}
       {step === "email" && (
         <form onSubmit={submitEmail} className="space-y-3" noValidate>

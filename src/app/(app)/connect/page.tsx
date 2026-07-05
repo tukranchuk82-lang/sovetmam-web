@@ -6,15 +6,9 @@ import { ConnectMessenger } from "@/components/connect-messenger";
 export const metadata = { title: "Подключение мессенджера" };
 export const dynamic = "force-dynamic";
 
-export default async function ConnectPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ next?: string }>;
-}) {
+export default async function ConnectPage() {
   const user = await getCurrentAppUser();
   if (!user) redirect("/login");
-  const { next } = await searchParams;
-  const nextUrl = next && next.startsWith("/") ? next : "/";
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-6 py-8 text-center">
@@ -33,7 +27,7 @@ export default async function ConnectPage({
       </p>
 
       <div className="mt-6 w-full max-w-[340px]">
-        <ConnectMessenger next={nextUrl} />
+        <ConnectMessenger />
       </div>
     </div>
   );

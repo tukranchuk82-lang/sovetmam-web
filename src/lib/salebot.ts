@@ -2,19 +2,17 @@ import "server-only";
 import type { MessengerChannel } from "@/lib/onboarding-db";
 
 /**
- * Формирование прокси-ссылки Salebot: в неё кладём GET-параметры (id нашей БД,
- * email, имя, фамилия), Salebot сохранит их как переменные клиента и заведёт
- * человека в нужного бота. Обратная синхронизация (запись telegram_id/vk_id/
- * max_id в app_users) делается вебхуком из воронки Salebot — см. будущий
- * маршрут /api/salebot/link.
+ * Прокси-ссылки Salebot для каждого бота. В ссылку кладём GET-параметры
+ * (app_id — id пользователя в нашей БД, email, имя, фамилия). Salebot сохранит
+ * их как переменные клиента, и потом воронка Salebot дёрнет наш вебхук
+ * /api/salebot/connect, чтобы вернуть, какой мессенджер и когда подключён.
  *
- * ЗАГЛУШКА: базовые прокси-ссылки для каждого бота ещё не получены от Salebot.
- * Как только пришлёшь их (или API-ключ) — подставить в SALEBOT_PROXY_BASE.
+ * Хэш в ссылках — публичный идентификатор бота (не секрет).
  */
 const SALEBOT_PROXY_BASE: Record<MessengerChannel, string> = {
-  telegram: "https://salebot.pro/proxy/PLACEHOLDER_TG",
-  vk: "https://salebot.pro/proxy/PLACEHOLDER_VK",
-  max: "https://salebot.pro/proxy/PLACEHOLDER_MAX",
+  telegram: "https://s.salebot.pro/847c2b0819df8b14819a25d79c47d0a2_1",
+  vk: "https://salebot.pro/ref/847c2b0819df8b14819a25d79c47d0a2",
+  max: "https://s.salebot.pro/847c2b0819df8b14819a25d79c47d0a2_20",
 };
 
 export function buildSalebotProxyLink(

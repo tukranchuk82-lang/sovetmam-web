@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Send, Loader2 } from "lucide-react";
 import { chooseMessenger } from "@/app/(app)/login/onboarding-actions";
 import type { MessengerChannel } from "@/lib/onboarding-db";
@@ -32,8 +31,7 @@ const CHANNELS: {
   },
 ];
 
-export function ConnectMessenger({ next = "/" }: { next?: string }) {
-  const router = useRouter();
+export function ConnectMessenger() {
   const [pending, startTransition] = useTransition();
   const [busy, setBusy] = useState<MessengerChannel | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,10 +42,10 @@ export function ConnectMessenger({ next = "/" }: { next?: string }) {
     startTransition(async () => {
       const res = await chooseMessenger(channel);
       if (res.ok) {
-        // В боевом режиме здесь откроется прокси-ссылка Salebot (res.url) для
-        // привязки tg_id/vk_id/max_id. Пока Salebot — заглушка: фиксируем выбор
-        // канала и продолжаем в приложение.
-        router.push(next);
+        // Уводим человека в бота по прокси-ссылке Salebot (с app_id/email).
+        // Обратно, какой канал и когда подключён, вернёт вебхук
+        // /api/salebot/connect из воронки Salebot.
+        window.location.href = res.url;
       } else {
         setError(res.error);
         setBusy(null);

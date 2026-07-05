@@ -19,22 +19,11 @@ export default async function LoginPage() {
 
   return (
     <div className="flex min-h-full flex-col items-center justify-center px-6 py-10">
-      <h1
-        className="text-center text-[26px] font-normal leading-tight text-[#1A1A1A]"
-        style={{ fontFamily: "var(--font-playfair), serif" }}
-      >
-        Вход и регистрация
-      </h1>
-      <p className="mt-1.5 max-w-[300px] text-center text-sm text-[#6b7078]">
-        Введите email. Если вы у нас впервые — быстро зарегистрируем, если уже
-        были — пришлём код для входа.
-      </p>
-
-      <div className="mt-6">
-        <Suspense fallback={null}>
-          <EmailAuthFlow />
-        </Suspense>
-      </div>
+      {/* Заголовок и подпись живут внутри формы — на шагах регистрации/кода
+          они скрываются (см. EmailAuthFlow). */}
+      <Suspense fallback={null}>
+        <EmailAuthFlow />
+      </Suspense>
 
       <Link
         href="/catalog"

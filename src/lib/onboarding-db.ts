@@ -197,6 +197,41 @@ export async function setMessengerChoice(
   await sb.from("app_users").update({ messenger_choice: channel }).eq("id", userId);
 }
 
+/**
+ * Отмечает фактическое подключение мессенджера — вызывается вебхуком Salebot,
+ * когда человек зашёл в бота. Пишем канал, дату и id в мессенджере
+ * (telegram_id/vk_id — числа, max_id — строка), плюс salebot_client_id.
+ * Возвращает false, если пользователь не найден / ошибка.
+ */
+export async function markMessengerConnected(params: {
+  appId: string;
+  channel: MessengerChannel;
+  messengerId?: string | null;
+  salebotClientId?: string | null;
+}): Promise<boolean> {
+  const sb = createSupabaseAdminClient();
+  const update: Record<string, unknown> = {
+    messenger_connected: true,
+    messenger_choice: params.channel,
+    messenger_connected_at: new Date().toISOString(),
+  };
+  if (params.salebotClientId) update.salebot_client_id = params.salebotClientId;
+  if (params.messengerId) {
+    if (params.channel === "telegram")
+      update.telegram_id = Number(params.messengerId) || null;
+    else if (params.channel === "vk")
+      update.vk_id = Number(params.messengerId) || null;
+    else update.max_id = String(params.messengerId);
+  }
+  const { data, error } = await sb
+    .from("app_users")
+    .update(update)
+    .eq("id", params.appId)
+    .select("id")
+    .maybeSingle();
+  return Boolean(data) && !error;
+}
+
 /** Сохраняет ответы анкеты (перезапись). */
 export async function saveSurvey(
   userId: string,
