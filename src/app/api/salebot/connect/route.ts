@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   markMessengerConnected,
+  logSalebotWebhook,
   type MessengerChannel,
 } from "@/lib/onboarding-db";
 
@@ -18,22 +19,41 @@ const CHANNELS = ["telegram", "vk", "max"] as const;
 
 async function handle(request: Request): Promise<Response> {
   const sp = new URL(request.url).searchParams;
+  const ct = request.headers.get("content-type") ?? "";
 
+  // Читаем сырое тело и пытаемся распарсить как JSON, потом как form —
+  // не полагаемся на content-type (Salebot может слать по-своему).
+  let raw = "";
   let body: Record<string, unknown> = {};
   if (request.method === "POST") {
-    const ct = request.headers.get("content-type") ?? "";
     try {
-      if (ct.includes("application/json")) {
-        body = (await request.json()) as Record<string, unknown>;
-      } else if (ct.includes("form")) {
-        const fd = await request.formData();
-        body = Object.fromEntries(
-          [...fd.entries()].map(([k, v]) => [k, String(v)]),
-        );
-      }
+      raw = await request.text();
     } catch {
-      // тело не распарсилось — работаем только с query-параметрами
+      /* тела нет */
     }
+    if (raw) {
+      try {
+        body = JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        try {
+          body = Object.fromEntries(new URLSearchParams(raw));
+        } catch {
+          /* не распарсилось — остаются query-параметры */
+        }
+      }
+    }
+  }
+
+  // Диагностический лог: что реально пришло (не роняем обработчик при ошибке).
+  try {
+    await logSalebotWebhook({
+      method: request.method,
+      contentType: ct,
+      query: sp.toString(),
+      body: raw,
+    });
+  } catch {
+    /* лог не критичен */
   }
 
   const get = (k: string): string =>
