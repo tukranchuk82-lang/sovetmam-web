@@ -190,6 +190,8 @@ export const REGIONS = [
 
 /** Условия, при которых мера подходит пользователю (движок правил). */
 export interface EligibilityCriteria {
+  /** Мера для семьи: подходит, если пользователь ждёт ребёнка ИЛИ уже есть дети. */
+  requiresFamily?: boolean;
   requiresPregnancy?: boolean;
   requiresChildren?: boolean;
   minChildren?: number;
@@ -255,6 +257,21 @@ export function getSegment(id: string): Segment | undefined {
 export function isEligible(profile: UserProfile, m: SupportMeasure): boolean {
   const c = m.criteria;
 
+  // Региональные меры показываем ТОЛЬКО при совпадении региона. Источник региона —
+  // criteria.regions (если задан) или колонка region. Без выбранного региона
+  // региональные меры не показываем вовсе — иначе в выдачу попадают чужие регионы.
+  if (m.level === "regional") {
+    if (!profile.region) return false;
+    const allowed =
+      c.regions && c.regions.length > 0
+        ? c.regions
+        : m.region
+          ? [m.region]
+          : [];
+    if (allowed.length > 0 && !allowed.includes(profile.region)) return false;
+  }
+
+  if (c.requiresFamily && !profile.pregnant && !profile.hasChildren) return false;
   if (c.requiresPregnancy && !profile.pregnant) return false;
   if (c.requiresChildren && !profile.hasChildren) return false;
   if (c.minChildren && profile.childrenCount < c.minChildren) return false;
