@@ -25,7 +25,7 @@ export default function Home() {
       style={{ fontFamily: "var(--font-inter), sans-serif" }}
     >
       {/* ГЕРОЙ: текст слева, портрет справа с наложением */}
-      <section className="relative min-h-[720px] flex-1 overflow-hidden px-6 pt-7">
+      <section className="relative min-h-[600px] flex-1 overflow-hidden px-6 pt-7">
         {/* ЭКСПЕРИМЕНТ: карта России как фон за заголовком, по центру сверху.
            Для отката вернуть серый круг:
            <div className="absolute right-[-62px] top-[202px] z-0 size-[300px] rounded-full bg-[#EAE6E6] blur-[6px]" /> */}
@@ -62,15 +62,15 @@ export default function Home() {
 
         {/* Портрет — крупный, справа; плечо уходит за правый край, верх головы
            на уровне красной черты */}
-        <Portrait className="absolute right-[-44px] top-[230px] z-10 w-[62%] max-w-[300px] object-contain" />
+        <Portrait className="absolute right-[-8px] top-[200px] z-10 w-[clamp(120px,calc(72vw_-_150px),240px)] object-contain" />
 
         {/* Подпись автора прямо у портрета (без карточки) */}
-        <AuthorSignature className="absolute left-[54%] right-2 bottom-[16px] z-20" />
+        <AuthorSignature className="absolute left-[58%] right-2 bottom-[16px] z-20" />
 
         {/* Текстовый блок (поверх, слева) */}
         <div className="relative z-20">
           <h1
-            className="text-[32px] font-normal leading-[1.12] text-[#1A1A1A]"
+            className="text-[clamp(26px,7.8vw,32px)] font-normal leading-[1.12] text-[#1A1A1A]"
             style={{
               fontFamily: "var(--font-playfair), serif",
               textShadow:
@@ -99,8 +99,9 @@ export default function Home() {
             style={{ background: ACCENT }}
           />
 
-          {/* Три преимущества (текст держим слева от портрета) */}
-          <ul className="mt-6 flex flex-col gap-5 pr-[42%]">
+          {/* Три преимущества (текст держим слева от портрета; правый отступ
+              совпадает с шириной портрета, чтобы текст не заезжал под фото) */}
+          <ul className="mt-6 flex flex-col gap-5 pr-[clamp(128px,calc(72vw_-_138px),248px)]">
             {FEATURES.map(({ img, lines }) => (
               <li key={lines[0]} className="flex items-center gap-3.5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

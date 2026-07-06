@@ -1069,8 +1069,15 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Не даём мобильным браузерам «раздувать» шрифт в узких колонках (iOS/Telegram). */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Страховка от горизонтальной прокрутки на узких экранах. */
+    overflow-x: hidden;
   }
   html {
     @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 }

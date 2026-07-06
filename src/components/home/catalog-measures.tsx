@@ -83,7 +83,7 @@ function CatalogCard({ s }: { s: CatalogSituation }) {
   return (
     <Link
       href={s.href}
-      className="relative z-10 flex h-[64px] items-center gap-2.5 rounded-[18px] border border-black/[0.06] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_24px_-12px_rgba(30,41,59,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:border-black/[0.10] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_16px_30px_-12px_rgba(30,41,59,0.34)] active:scale-[0.98]"
+      className="relative z-10 flex min-h-[64px] items-center gap-2.5 rounded-[18px] border border-black/[0.06] px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_24px_-12px_rgba(30,41,59,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:border-black/[0.10] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_16px_30px_-12px_rgba(30,41,59,0.34)] active:scale-[0.98]"
       style={{ background: CARD_BG }}
     >
       <Icon
@@ -110,7 +110,7 @@ export function CatalogMeasures() {
       style={{ fontFamily: "var(--font-inter), sans-serif" }}
     >
       <h2
-        className="text-[30px] font-normal leading-[1.1] text-[#1A1A1A]"
+        className="text-[clamp(24px,7.4vw,30px)] font-normal leading-[1.1] text-[#1A1A1A]"
         style={{ fontFamily: "var(--font-playfair), serif" }}
       >
         Каталог мер поддержки

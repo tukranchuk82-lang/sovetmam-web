@@ -10,7 +10,7 @@ export function AuthorSignature({ className }: { className?: string }) {
       style={{ fontFamily: "var(--font-inter), sans-serif", marginLeft: "1ch" }}
     >
       <p
-        className="whitespace-nowrap text-[24px] leading-tight text-[#1A1A1A]"
+        className="whitespace-nowrap text-[clamp(16px,5vw,24px)] leading-tight text-[#1A1A1A]"
         style={{ fontFamily: "var(--font-marck), cursive" }}
       >
         Татьяна Буцкая

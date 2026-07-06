@@ -88,10 +88,10 @@ export function AppShell({
               />
               <span className="flex min-w-0 flex-col leading-tight">
                 <span
-                  className="whitespace-nowrap font-semibold leading-none text-white"
+                  className="font-semibold leading-tight text-white"
                   style={{
                     fontFamily: "var(--font-playfair), serif",
-                    fontSize: "clamp(13px, 4vw, 20px)",
+                    fontSize: "clamp(15px, 4.4vw, 20px)",
                     textShadow:
                       "0 1px 2px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25)",
                   }}

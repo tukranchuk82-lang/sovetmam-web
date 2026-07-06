@@ -211,17 +211,23 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
               </Choice>
             </Question>
 
-            <Question label="Возраст младшего ребёнка?">
-              <Choice active={youngestAge === 0} onClick={() => setYoungestAge(0)}>
-                до 1 года
-              </Choice>
-              <Choice active={youngestAge === 2} onClick={() => setYoungestAge(2)}>
-                1–3 года
-              </Choice>
-              <Choice active={youngestAge === 5} onClick={() => setYoungestAge(5)}>
-                старше 3 лет
-              </Choice>
-            </Question>
+            <div>
+              <p className="text-sm font-medium">Возраст младшего ребёнка?</p>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <Choice active={youngestAge === 0} onClick={() => setYoungestAge(0)}>
+                  до 1 года
+                </Choice>
+                <Choice active={youngestAge === 2} onClick={() => setYoungestAge(2)}>
+                  1–3 года
+                </Choice>
+                <Choice active={youngestAge === 6} onClick={() => setYoungestAge(6)}>
+                  3–7 лет
+                </Choice>
+                <Choice active={youngestAge === 8} onClick={() => setYoungestAge(8)}>
+                  старше 7 лет
+                </Choice>
+              </div>
+            </div>
           </>
         )}
 
