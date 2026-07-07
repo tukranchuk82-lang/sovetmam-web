@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { RotateCcw, ChevronDown } from "lucide-react";
+import { RotateCcw, ChevronDown, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { MeasureCard } from "@/components/measure-card";
@@ -76,25 +76,62 @@ function YesNo({
   );
 }
 
-export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
-  const [pregnant, setPregnant] = useState<boolean | null>(null);
-  const [hasChildren, setHasChildren] = useState<boolean | null>(null);
-  const [childrenCount, setChildrenCount] = useState<number | null>(null);
-  const [youngestAge, setYoungestAge] = useState<number | null>(null);
-  const [isCitizen, setIsCitizen] = useState<boolean | null>(null);
-  const [region, setRegion] = useState("");
-  const [lowIncome, setLowIncome] = useState<boolean | null>(null);
-  const [mortgageIntent, setMortgageIntent] = useState<boolean | null>(null);
-  const [singleParent, setSingleParent] = useState<boolean | null>(null);
-  const [svoFamily, setSvoFamily] = useState<boolean | null>(null);
-  const [student, setStudent] = useState<boolean | null>(null);
-  const [disabledChild, setDisabledChild] = useState<boolean | null>(null);
+// Нормализует сохранённую анкету (jsonb из профиля) в полный UserProfile.
+function toProfile(v: Partial<UserProfile>): UserProfile {
+  return {
+    pregnant: !!v.pregnant,
+    hasChildren: !!v.hasChildren,
+    childrenCount: Number(v.childrenCount) || 0,
+    youngestChildAgeYears:
+      v.youngestChildAgeYears == null ? null : Number(v.youngestChildAgeYears),
+    region: String(v.region ?? ""),
+    lowIncome: !!v.lowIncome,
+    disabledChild: !!v.disabledChild,
+    mortgageIntent: !!v.mortgageIntent,
+    svoFamily: !!v.svoFamily,
+    singleParent: !!v.singleParent,
+    student: !!v.student,
+  };
+}
 
-  const [results, setResults] = useState<SupportMeasure[] | null>(null);
+export function PodborForm({
+  measures,
+  savedSurvey,
+}: {
+  measures: SupportMeasure[];
+  savedSurvey?: Record<string, unknown> | null;
+}) {
+  // Прошлые ответы из профиля (если анкета уже заполнялась) — восстанавливаем
+  // и форму, и результат, чтобы подбор не слетал при возврате к странице.
+  const saved = (savedSurvey ?? null) as Partial<UserProfile> | null;
+  const hasSaved = !!saved && typeof saved.hasChildren === "boolean";
+
+  const [pregnant, setPregnant] = useState<boolean | null>(saved?.pregnant ?? null);
+  const [hasChildren, setHasChildren] = useState<boolean | null>(saved?.hasChildren ?? null);
+  const [childrenCount, setChildrenCount] = useState<number | null>(saved?.childrenCount ?? null);
+  const [youngestAge, setYoungestAge] = useState<number | null>(saved?.youngestChildAgeYears ?? null);
+  const [isCitizen, setIsCitizen] = useState<boolean | null>(saved ? (saved.region ? true : null) : null);
+  const [region, setRegion] = useState(saved?.region ?? "");
+  const [lowIncome, setLowIncome] = useState<boolean | null>(saved?.lowIncome ?? null);
+  const [mortgageIntent, setMortgageIntent] = useState<boolean | null>(saved?.mortgageIntent ?? null);
+  const [singleParent, setSingleParent] = useState<boolean | null>(saved?.singleParent ?? null);
+  const [svoFamily, setSvoFamily] = useState<boolean | null>(saved?.svoFamily ?? null);
+  const [student, setStudent] = useState<boolean | null>(saved?.student ?? null);
+  const [disabledChild, setDisabledChild] = useState<boolean | null>(saved?.disabledChild ?? null);
+
+  // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
+  const [results, setResults] = useState<SupportMeasure[] | null>(() =>
+    hasSaved ? matchMeasures(toProfile(saved!), measures) : null,
+  );
+  const submitted = useRef(false);
   const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (results) topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Прокручиваем наверх только после отправки анкеты пользователем,
+    // а не при первичном показе сохранённого результата.
+    if (results && submitted.current) {
+      topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }, [results]);
 
   function handleSubmit() {
@@ -111,6 +148,7 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
       singleParent: singleParent ?? false,
       student: student ?? false,
     };
+    submitted.current = true;
     setResults(matchMeasures(profile, measures));
     // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли пользователь;
     // при перезаполнении данные перезапишутся).
@@ -144,6 +182,16 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
             <p className="mt-1 text-sm font-medium text-[#6b7078]">
               {pluralMeasures(results.length)}
             </p>
+            {/* Кнопка «Посмотреть все меры» — до списка, чтобы не листать вниз. */}
+            <Link
+              href="/catalog"
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "mt-4 h-11 w-full gap-2 border-[#1B3A6B]/25 text-[#1B3A6B]",
+              )}
+            >
+              <LayoutGrid className="size-4" /> Посмотреть все меры
+            </Link>
             <div className="mt-4 space-y-3">
               {results.map((m) => (
                 <MeasureCard key={m.slug} measure={m} />
@@ -184,8 +232,8 @@ export function PodborForm({ measures }: { measures: SupportMeasure[] }) {
         Подбор мер поддержки
       </h1>
       <p className="mt-1 text-sm text-[#6b7078]">
-        Ответьте на несколько вопросов о семье. Мы ничего не сохраняем — подбор работает прямо
-        на вашем устройстве.
+        Ответьте на несколько вопросов о семье. Мы сохраним ваш подбор — сможете
+        вернуться к нему в любой момент.
       </p>
 
       <div className="mt-6 space-y-6">

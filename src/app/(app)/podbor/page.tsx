@@ -19,7 +19,10 @@ export default async function PodborPage() {
   }
 
   const measures = await getAllMeasures();
-  return <PodborForm measures={measures} />;
+  // Восстанавливаем последнюю заполненную анкету, чтобы подбор не слетал после
+  // перехода к мере и обратно (сохраняется в app_users.survey при отправке).
+  const savedSurvey = appUser?.survey ?? null;
+  return <PodborForm measures={measures} savedSurvey={savedSurvey} />;
 }
 
 function AuthGate() {
