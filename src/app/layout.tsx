@@ -103,12 +103,17 @@ export const metadata: Metadata = {
   },
   description:
     "Шпаргалка для родителей от «Совета матерей»: все меры поддержки семей с детьми — федеральные, региональные, муниципальные, от работодателя и вузов. Пройдите анкету и узнайте, что положено именно вам.",
-  icons: { icon: "/logo.png", apple: "/icon-192.png" },
+  // iOS игнорирует manifest.json и берёт apple-touch-icon, причём прозрачность
+  // в нём не поддерживает — подставляет под неё чёрный фон. Поэтому
+  // apple-touch-icon.png нарисован на непрозрачной белой подложке.
+  // Маскируемые иконки для Android — в manifest.json (purpose: maskable).
+  // Было "/logo.png" — такого файла в public/ нет, ссылка вела в 404.
+  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "«Совет матерей»",
+    title: "Шпаргалка",
   },
 };
 
