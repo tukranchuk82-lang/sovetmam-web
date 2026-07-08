@@ -1,12 +1,11 @@
 {
-  "name": "Совет матерей",
-  "short_name": "СоветМамы",
+  "name": "«Совет матерей». Шпаргалка для родителей",
+  "short_name": "Шпаргалка",
   "description": "Каталог мер государственной поддержки семей с детьми",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#c9002f",
   "lang": "ru",
   "icons": [
     {
