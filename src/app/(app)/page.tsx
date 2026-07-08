@@ -24,8 +24,34 @@ export default function Home() {
       className="flex min-h-full flex-col bg-[#F8F7F6]"
       style={{ fontFamily: "var(--font-inter), sans-serif" }}
     >
-      {/* ГЕРОЙ: текст слева, портрет справа с наложением */}
-      <section className="relative min-h-[600px] flex-1 overflow-hidden px-6 pt-7">
+      {/* ГЕРОЙ: текст слева, портрет справа с наложением.
+
+          Масштабирование. Каркас приложения ограничен 480px (см. app-shell),
+          поэтому «эталонный» размер героя — при ширине контента 432px
+          (480 − px-6 с двух сторон). Ниже этой ширины ВСЯ композиция
+          (иконки, отступы, портрет, город) ужимается одним коэффициентом
+          --s, обрезанным сверху эталоном.
+          Считаем в cqw, а не в vw: на десктопе vw — ширина окна, а не каркаса,
+          и портрет «распухал» отдельно от остальных элементов — из-за этого
+          на телефоне схлопывалось только фото, а иконки лезли на город.
+
+          --s — это «пиксель героя»: длина, равная 1px при ширине контента 432px
+          и пропорционально меньшая на узких экранах. Длина, а не безразмерное
+          число, потому что min(1, <длина>) — невалидный CSS: смешивать число и
+          длину нельзя. Поэтому размеры пишем как calc(42 * var(--s)).
+
+          --col — ширина правой колонки (портрет + подпись под ним). Одна
+          колонка на оба элемента гарантирует, что их ширины совпадают. */}
+      <section
+        className="relative min-h-[600px] flex-1 overflow-hidden px-6 pt-7"
+        style={
+          {
+            containerType: "inline-size",
+            "--s": "min(1px, calc(100cqw / 432))",
+            "--col": "calc(194 * var(--s))",
+          } as React.CSSProperties
+        }
+      >
         {/* ЭКСПЕРИМЕНТ: карта России как фон за заголовком, по центру сверху.
            Для отката вернуть серый круг:
            <div className="absolute right-[-62px] top-[202px] z-0 size-[300px] rounded-full bg-[#EAE6E6] blur-[6px]" /> */}
@@ -39,13 +65,17 @@ export default function Home() {
         />
 
         {/* Силуэт города снизу слева (как было изначально): правый край левее
-           подписи, зазор 1ch — текст справа на него не наползает. */}
+           подписи, зазор 1ch — текст справа на него не наползает.
+           city-trim.png — с обрезанными пустыми полями (было 1899×828 при
+           контенте 1832×651), поэтому нижний край силуэта = нижний край
+           картинки и ровно совпадает с низом подписи «автор проекта»
+           (обе на bottom-4). Ширина в % — уменьшается вместе с экраном. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/city.png"
+          src="/city-trim.png?v=1"
           alt=""
           aria-hidden
-          className="pointer-events-none absolute bottom-[9px] right-[calc(46%_+_1ch_-_5px)] z-0 w-[88%] opacity-50"
+          className="pointer-events-none absolute bottom-4 right-[calc(46%_+_1ch_-_5px)] z-0 w-[85%] opacity-50"
           style={{ mixBlendMode: "multiply" }}
         />
 
@@ -60,12 +90,14 @@ export default function Home() {
           }}
         />
 
-        {/* Портрет — крупный, справа; плечо уходит за правый край, верх головы
-           на уровне красной черты */}
-        <Portrait className="absolute right-[-8px] top-[200px] z-10 w-[clamp(120px,calc(72vw_-_150px),240px)] object-contain" />
-
-        {/* Подпись автора прямо у портрета (без карточки) */}
-        <AuthorSignature className="absolute left-[58%] right-2 bottom-[16px] z-20" />
+        {/* Правая колонка: портрет и подпись под ним. Ширина задана один раз
+           (--col), поэтому фото и текст всегда совпадают по левому и правому
+           краю. Колонка прижата к низу героя — низ подписи задаёт уровень,
+           по которому выравнивается силуэт города. */}
+        <div className="absolute bottom-4 right-2 z-10 w-[var(--col)]">
+          <Portrait className="block w-full" />
+          <AuthorSignature className="relative z-20 mt-1" />
+        </div>
 
         {/* Текстовый блок (поверх, слева) */}
         <div className="relative z-20">
@@ -95,23 +127,28 @@ export default function Home() {
 
           {/* Красная декоративная линия */}
           <span
-            className="mt-[65px] block h-[3px] w-10 rounded-full"
+            className="mt-[calc(65_*_var(--s))] block h-[3px] w-10 rounded-full"
             style={{ background: ACCENT }}
           />
 
-          {/* Три преимущества (текст держим слева от портрета; правый отступ
-              совпадает с шириной портрета, чтобы текст не заезжал под фото) */}
-          <ul className="mt-6 flex flex-col gap-5 pr-[clamp(128px,calc(72vw_-_138px),248px)]">
+          {/* Три преимущества. Иконки, отступы и кегль ужимаются вместе с
+              экраном (--s), поэтому список не наползает на силуэт города.
+              Шрифт не опускаем ниже 12px — читаемость важнее пропорции.
+              Правый отступ = ширина колонки с портретом + зазор. */}
+          <ul className="mt-[calc(24_*_var(--s))] flex flex-col gap-[calc(20_*_var(--s))] pr-[calc(var(--col)_-_4px)]">
             {FEATURES.map(({ img, lines }) => (
-              <li key={lines[0]} className="flex items-center gap-3.5">
+              <li
+                key={lines[0]}
+                className="flex items-center gap-[calc(14_*_var(--s))]"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img}
                   alt=""
                   aria-hidden
-                  className="size-[42px] shrink-0 object-contain"
+                  className="size-[calc(42_*_var(--s))] shrink-0 object-contain"
                 />
-                <span className="text-[14px] leading-snug text-[#1A1A1A]">
+                <span className="text-[max(12px,calc(14_*_var(--s)))] leading-snug text-[#1A1A1A]">
                   {lines[0]}
                   <br />
                   {lines[1]}
