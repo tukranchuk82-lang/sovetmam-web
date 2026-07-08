@@ -78,6 +78,8 @@ console.log(
 );
 
 // --- Проверка safe zone: не вылезает ли рисунок за круг 80% ------------------
+// Заодно запоминаем долю холста под контентом — она нужна значку вкладки.
+let contentPct = 1;
 if (READY) {
   const cx = info.width / 2;
   const cy = info.height / 2;
@@ -91,9 +93,9 @@ if (READY) {
       if (r > maxR) maxR = r;
     }
   }
-  const pct = (2 * maxR) / info.width;
-  const verdict = pct <= 0.8 ? "✓ внутри safe zone (80%)" : "✗ ВЫЛЕЗАЕТ за safe zone — срежется!";
-  console.log(`Контент занимает ${(pct * 100).toFixed(0)}% холста — ${verdict}`);
+  contentPct = (2 * maxR) / info.width;
+  const verdict = contentPct <= 0.8 ? "✓ внутри safe zone (80%)" : "✗ ВЫЛЕЗАЕТ за safe zone — срежется!";
+  console.log(`Контент занимает ${(contentPct * 100).toFixed(0)}% холста — ${verdict}`);
 }
 console.log("");
 
@@ -101,33 +103,99 @@ console.log("");
 // и trim срезал бы его начисто (например, красную плашку вокруг эмблемы).
 const source = READY ? SRC : await sharp(SRC).trim({ threshold: 2 }).toBuffer();
 
-/** Рисунок по центру квадратного холста. bg=null → прозрачный фон. */
-async function render(out, size, scale, bg) {
-  let buf;
+/** PNG-буфер: рисунок по центру квадратного холста. bg=null → прозрачный фон. */
+async function make(size, scale, bg) {
   if (scale === 1 && bg) {
     // Готовая иконка: только масштаб. flatten убирает сглаживание по краям,
     // иначе iOS зальёт полупрозрачные пиксели чёрным.
-    buf = await sharp(source)
+    return sharp(source)
       .resize(size, size)
       .flatten({ background: bg })
       .png({ compressionLevel: 9, effort: 10 })
       .toBuffer();
-  } else {
-    const inner = Math.round(size * scale);
-    const logo = await sharp(source)
-      .resize({ width: inner, height: inner, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-      .toBuffer();
-    const pad = Math.round((size - inner) / 2);
-    buf = await sharp({
-      create: { width: size, height: size, channels: 4, background: bg ?? { r: 0, g: 0, b: 0, alpha: 0 } },
-    })
-      .composite([{ input: logo, top: pad, left: pad }])
-      .png({ compressionLevel: 9, effort: 10 })
-      .toBuffer();
   }
+  const inner = Math.round(size * scale);
+  const logo = await sharp(source)
+    .resize({ width: inner, height: inner, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .toBuffer();
+  const pad = Math.round((size - inner) / 2);
+  return sharp({
+    create: { width: size, height: size, channels: 4, background: bg ?? { r: 0, g: 0, b: 0, alpha: 0 } },
+  })
+    .composite([{ input: logo, top: pad, left: pad }])
+    .png({ compressionLevel: 9, effort: 10 })
+    .toBuffer();
+}
+
+async function render(out, size, scale, bg) {
+  const buf = await make(size, scale, bg);
   writeFileSync(`public/${out}`, buf);
   console.log(`  public/${out.padEnd(26)} ${size}x${size}  ${Math.round(buf.length / 1024)} KB`);
 }
+
+/**
+ * Значок вкладки. sharp не умеет писать .ico, но ICO — это контейнер:
+ * заголовок + оглавление + сами картинки, и с Vista внутрь кладут обычные PNG.
+ * Собираем такой контейнер руками, иначе вкладка осталась бы со старым
+ * значком, а иконка приложения — с новым.
+ */
+async function renderFavicon(out, sizes, bg) {
+  // Значок вкладки маской не режется, поэтому поля вокруг рисунка тут только
+  // мешают: на 16x16 эмблема в них тонет. Подрезаем холст до самого рисунка
+  // (с полем 6%), и он занимает почти всю плитку.
+  let src = source;
+  if (READY && contentPct < 0.95) {
+    const keep = Math.min(1, contentPct * 1.06);
+    const side = Math.round(info.width * keep);
+    const off = Math.round((info.width - side) / 2);
+    src = await sharp(source).extract({ left: off, top: off, width: side, height: side }).toBuffer();
+  }
+  // fit: contain — обрезанный логотип может быть не квадратным, растягивать нельзя.
+  // ensureAlpha обязателен: flatten отдаёт RGB без альфа-канала, а Next при
+  // сборке разбирает favicon.ico и падает с «The PNG is not in RGBA format».
+  const pngs = await Promise.all(
+    sizes.map((s) => {
+      const img = sharp(src).resize({
+        width: s,
+        height: s,
+        fit: "contain",
+        background: bg ?? { r: 0, g: 0, b: 0, alpha: 0 },
+      });
+      return (bg ? img.flatten({ background: bg }) : img)
+        .ensureAlpha()
+        .png({ compressionLevel: 9 })
+        .toBuffer();
+    }),
+  );
+
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0); // reserved
+  header.writeUInt16LE(1, 2); // 1 = icon
+  header.writeUInt16LE(sizes.length, 4);
+
+  let offset = 6 + 16 * sizes.length;
+  const entries = sizes.map((s, i) => {
+    const e = Buffer.alloc(16);
+    e.writeUInt8(s >= 256 ? 0 : s, 0); // 0 означает 256
+    e.writeUInt8(s >= 256 ? 0 : s, 1);
+    e.writeUInt8(0, 2); // палитра не используется
+    e.writeUInt8(0, 3); // reserved
+    e.writeUInt16LE(1, 4); // color planes
+    e.writeUInt16LE(32, 6); // бит на пиксель
+    e.writeUInt32LE(pngs[i].length, 8);
+    e.writeUInt32LE(offset, 12);
+    offset += pngs[i].length;
+    return e;
+  });
+
+  const ico = Buffer.concat([header, ...entries, ...pngs]);
+  writeFileSync(out, ico);
+  console.log(`  ${out.padEnd(33)} ${sizes.join("/")}  ${Math.round(ico.length / 1024)} KB`);
+}
+
+// Размеры внутри favicon.ico: 16 — вкладка, 32 — панель закладок и Retina,
+// 48 — ярлык на рабочем столе Windows.
+const FAVICON_SIZES = [16, 32, 48];
 
 if (READY) {
   // Компоновка уже верная — во все файлы кладём картинку целиком.
@@ -136,12 +204,14 @@ if (READY) {
   await render("icon-maskable-192.png", 192, 1, BG);
   await render("icon-maskable-512.png", 512, 1, BG);
   await render("apple-touch-icon.png", 180, 1, BG);
+  await renderFavicon("src/app/favicon.ico", FAVICON_SIZES, BG);
 } else {
   await render("icon-192.png", 192, 1, null); // "any": обрезки нет, фон прозрачный
   await render("icon-512.png", 512, 1, null);
   await render("icon-maskable-192.png", 192, MASKABLE_SCALE, BG);
   await render("icon-maskable-512.png", 512, MASKABLE_SCALE, BG);
   await render("apple-touch-icon.png", 180, APPLE_SCALE, BG);
+  await renderFavicon("src/app/favicon.ico", FAVICON_SIZES, null);
 }
 
 console.log("\nГотово. Проверить обрезку: node scripts/preview-icons.mjs");
