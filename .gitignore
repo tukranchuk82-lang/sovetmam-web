@@ -47,3 +47,6 @@ next-env.d.ts
 # временные картинки от работы (не коммитить)
 .sm-*.png
 *.original.png
+
+# превью иконок (scripts/preview-icons.mjs) — временный файл
+icons-preview.png
