@@ -1,7 +1,10 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-export type InquiryType = "question" | "proposal";
+// Тип обращения живёт в @/lib/inquiries — он нужен и клиентским компонентам,
+// а этот модуль server-only.
+export type { InquiryType } from "@/lib/inquiries";
+import type { InquiryType } from "@/lib/inquiries";
 export type InquiryStatus = "new" | "answered";
 export type InquiryChannel = "telegram" | "vk" | "max";
 

@@ -1,3 +1,4 @@
+import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CheckCircle2, Clock, ExternalLink } from "lucide-react";
@@ -40,7 +41,7 @@ export default async function InquiryDetailPage({
           </Badge>
         )}
         <Badge variant="secondary">
-          {inquiry.type === "question" ? "Вопрос" : "Идея"}
+          {INQUIRY_TYPE_LABEL[inquiry.type]}
         </Badge>
         <span className="text-xs text-muted-foreground">
           · {new Date(inquiry.createdAt).toLocaleDateString("ru-RU")}

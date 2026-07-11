@@ -6,6 +6,7 @@ import { REGIONS } from "@/lib/measures";
 import { REGION_COOKIE } from "@/lib/region";
 import { createInquiryAction } from "@/app/(app)/profile/inquiries/actions";
 import { NewInquiryForm } from "@/components/new-inquiry-form";
+import type { InquiryType } from "@/lib/inquiries";
 import { BackLink } from "@/components/back-link";
 
 export const metadata = { title: "Новое обращение" };
@@ -23,8 +24,12 @@ export default async function NewInquiryPage({
 
   const sp = await searchParams;
   const measure = sp.measure ? await getMeasureBySlug(sp.measure) : null;
-  const initialType =
-    sp.type === "proposal" ? "proposal" : ("question" as const);
+  const initialType: InquiryType =
+    sp.type === "proposal"
+      ? "proposal"
+      : sp.type === "clarification"
+        ? "clarification"
+        : "question";
 
   // Регион по умолчанию — из cookie (если пользователь уже выбирал его в каталоге).
   const c = await cookies();

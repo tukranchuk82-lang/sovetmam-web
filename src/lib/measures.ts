@@ -222,7 +222,19 @@ export interface EligibilityCriteria {
    * чей доход не выше 2 ПМ, то есть и группе «до 1 ПМ», и «до 1,5 ПМ».
    */
   maxIncomePm?: IncomePm;
+  /** Ребёнок-инвалид (установлена инвалидность). */
   requiresDisabledChild?: boolean;
+  /**
+   * Ребёнок с ОВЗ (ограниченные возможности здоровья) — статус в образовании,
+   * инвалидности при этом может не быть.
+   *
+   * Такие меры подходят и семьям с ребёнком-инвалидом: в базе это школьное
+   * питание, обучение и соцуслуги, которые почти везде оформлены сразу «для
+   * детей с ОВЗ и детей-инвалидов». Ставить обе метки на одну меру нельзя —
+   * критерии в анкете складываются через И, и мера потребовала бы сразу
+   * инвалидность И ОВЗ. См. isEligible.
+   */
+  requiresSpecialNeedsChild?: boolean;
   requiresMortgageIntent?: boolean;
   requiresSvoFamily?: boolean;
   requiresSingleParent?: boolean;
@@ -293,7 +305,10 @@ export interface UserProfile {
    * requiresLowIncome. Всегда выводится из incomePm — отдельно не задавать.
    */
   lowIncome: boolean;
+  /** Ребёнок-инвалид. */
   disabledChild: boolean;
+  /** Ребёнок с ОВЗ (инвалидности может не быть). */
+  specialNeedsChild: boolean;
   mortgageIntent: boolean;
   svoFamily: boolean;
   singleParent: boolean;
@@ -319,13 +334,23 @@ export function getSegment(id: string): Segment | undefined {
 }
 
 /** Подходит ли мера пользователю по его ответам. */
-export function isEligible(profile: UserProfile, m: SupportMeasure): boolean {
+/**
+ * @param ignoreRegion не отсекать региональные меры по региону профиля. Нужно
+ * экрану результатов подбора: там регион переключается прямо в выдаче (и его
+ * можно указать, если в анкете не указывали), поэтому фильтрацию по региону
+ * берёт на себя список мер, а не движок.
+ */
+export function isEligible(
+  profile: UserProfile,
+  m: SupportMeasure,
+  { ignoreRegion = false }: { ignoreRegion?: boolean } = {},
+): boolean {
   const c = m.criteria;
 
   // Региональные меры показываем ТОЛЬКО при совпадении региона. Источник региона —
   // criteria.regions (если задан) или колонка region. Без выбранного региона
   // региональные меры не показываем вовсе — иначе в выдачу попадают чужие регионы.
-  if (m.level === "regional") {
+  if (m.level === "regional" && !ignoreRegion) {
     if (!profile.region) return false;
     const allowed =
       c.regions && c.regions.length > 0
@@ -354,6 +379,17 @@ export function isEligible(profile: UserProfile, m: SupportMeasure): boolean {
     if (profile.incomePm == null || profile.incomePm > c.maxIncomePm) return false;
   }
   if (c.requiresDisabledChild && !profile.disabledChild) return false;
+  // Мера «для детей с ОВЗ» подходит и семьям с ребёнком-инвалидом: в базе такие
+  // меры (питание, обучение, соцуслуги) почти всегда адресованы обеим группам
+  // сразу, а инвалидность у ребёнка школьного возраста практически всегда даёт
+  // и статус ОВЗ. Лучше показать лишнее, чем скрыть положенное.
+  if (
+    c.requiresSpecialNeedsChild &&
+    !profile.specialNeedsChild &&
+    !profile.disabledChild
+  ) {
+    return false;
+  }
   if (c.requiresMortgageIntent && !profile.mortgageIntent) return false;
   if (c.requiresSvoFamily && !profile.svoFamily) return false;
   if (c.requiresSingleParent && !profile.singleParent) return false;
@@ -363,7 +399,10 @@ export function isEligible(profile: UserProfile, m: SupportMeasure): boolean {
   if (c.requiresEntrepreneur && !profile.entrepreneur) return false;
   if (c.requiresDisabledParent && !profile.disabledParent) return false;
   if (c.requiresFosterParent && !profile.fosterParent) return false;
-  if (c.regions && c.regions.length > 0) {
+  // Вторая (страховочная) проверка региона: мера могла указать regions, будучи
+  // помечена федеральной. Тоже уважает ignoreRegion — иначе региональные меры
+  // отсеиваются здесь, даже если выше их пропустили.
+  if (!ignoreRegion && c.regions && c.regions.length > 0) {
     if (!profile.region || !c.regions.includes(profile.region)) return false;
   }
   return true;
@@ -373,6 +412,7 @@ export function isEligible(profile: UserProfile, m: SupportMeasure): boolean {
 export function matchMeasures(
   profile: UserProfile,
   measures: SupportMeasure[],
+  opts: { ignoreRegion?: boolean } = {},
 ): SupportMeasure[] {
-  return measures.filter((m) => isEligible(profile, m));
+  return measures.filter((m) => isEligible(profile, m, opts));
 }

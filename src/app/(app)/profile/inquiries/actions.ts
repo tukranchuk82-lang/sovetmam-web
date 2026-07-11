@@ -24,6 +24,11 @@ export async function createInquiryAction(fd: FormData) {
   if (!region) {
     throw new Error("Укажите регион");
   }
+  // У уточнения тема — это и есть мера, о которой речь: без неё обращение
+  // бесполезно, разбирать будет нечего.
+  if (type === "clarification" && !subject) {
+    throw new Error("Укажите, о какой мере поддержки идёт речь");
+  }
 
   await createInquiry({
     userId: user.id,

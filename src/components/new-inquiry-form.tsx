@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Send, MessageCircle, Lightbulb } from "lucide-react";
+import { Send, MessageCircle, Lightbulb, FileEdit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-
-type InquiryType = "question" | "proposal";
+import { FEDERAL_REGION, type InquiryType } from "@/lib/inquiries";
 
 export function NewInquiryForm({
   action,
@@ -25,6 +24,8 @@ export function NewInquiryForm({
   const [type, setType] = useState<InquiryType>(initialType);
   const [pending, startTransition] = useTransition();
 
+  const isClarification = type === "clarification";
+
   return (
     <form
       action={(fd) => startTransition(() => action(fd))}
@@ -35,7 +36,7 @@ export function NewInquiryForm({
         <input type="hidden" name="measureSlug" value={measureSlug} />
       )}
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <TypeChip
           active={type === "question"}
           onClick={() => setType("question")}
@@ -47,8 +48,15 @@ export function NewInquiryForm({
           active={type === "proposal"}
           onClick={() => setType("proposal")}
           icon={<Lightbulb className="size-5" />}
-          title="Предложение"
+          title="Идея"
           hint="внедрить меру"
+        />
+        <TypeChip
+          active={isClarification}
+          onClick={() => setType("clarification")}
+          icon={<FileEdit className="size-5" />}
+          title="Уточнение"
+          hint="по мере поддержки"
         />
       </div>
 
@@ -59,9 +67,27 @@ export function NewInquiryForm({
         </div>
       )}
 
+      {/* Уточнение всегда о конкретной мере: если пришли не со страницы меры,
+          спрашиваем её название первым делом. */}
+      {isClarification && !measureTitle && (
+        <label className="block">
+          <span className="text-xs font-medium text-muted-foreground">
+            О какой мере поддержки <span className="text-brand">*</span>
+          </span>
+          <input
+            name="subject"
+            required
+            maxLength={160}
+            placeholder="например: «Единое пособие на детей до 17 лет»"
+            className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
+      )}
+
       <label className="block">
         <span className="text-xs font-medium text-muted-foreground">
-          Регион <span className="text-brand">*</span>
+          {isClarification ? "Регион меры" : "Регион"}{" "}
+          <span className="text-brand">*</span>
         </span>
         <select
           name="region"
@@ -72,6 +98,10 @@ export function NewInquiryForm({
           <option value="" disabled>
             Выберите регион
           </option>
+          {/* Уточнение может касаться федеральной меры — тогда региона у неё нет. */}
+          {isClarification && (
+            <option value={FEDERAL_REGION}>{FEDERAL_REGION} (действует по всей стране)</option>
+          )}
           {regions.map((r) => (
             <option key={r} value={r}>
               {r}
@@ -80,26 +110,41 @@ export function NewInquiryForm({
         </select>
       </label>
 
-      <label className="block">
-        <span className="text-xs font-medium text-muted-foreground">
-          {type === "question" ? "Кратко о вашей ситуации" : "Название идеи"}
-        </span>
-        <input
-          name="subject"
-          required
-          maxLength={120}
-          placeholder={
-            type === "question"
-              ? "например: «многодетная семья, переезд в Москву»"
-              : "например: «компенсация за детский лагерь»"
-          }
-          className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
-      </label>
+      {/* У уточнения роль «темы» играет название меры — второй раз не спрашиваем. */}
+      {!(isClarification && !measureTitle) && (
+        <label className="block">
+          <span className="text-xs font-medium text-muted-foreground">
+            {type === "question"
+              ? "Кратко о вашей ситуации"
+              : isClarification
+                ? "Кратко о чём уточнение"
+                : "Название идеи"}
+          </span>
+          <input
+            name="subject"
+            required
+            maxLength={160}
+            defaultValue={isClarification && measureTitle ? measureTitle : undefined}
+            placeholder={
+              type === "question"
+                ? "например: «многодетная семья, переезд в Москву»"
+                : isClarification
+                  ? "например: «изменилась сумма выплаты»"
+                  : "например: «компенсация за детский лагерь»"
+            }
+            className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </label>
+      )}
 
       <label className="block">
         <span className="text-xs font-medium text-muted-foreground">
-          {type === "question" ? "Подробнее" : "Описание"}
+          {type === "question"
+            ? "Подробнее"
+            : isClarification
+              ? "Ваши уточнения"
+              : "Описание"}{" "}
+          <span className="text-brand">*</span>
         </span>
         <textarea
           name="body"
@@ -108,7 +153,9 @@ export function NewInquiryForm({
           placeholder={
             type === "question"
               ? "Опишите ситуацию: возраст детей, регион, чем нужна помощь…"
-              : "Какая мера поддержки была бы полезна? Кому она нужна?"
+              : isClarification
+                ? "Что не так с мерой: устарела сумма, изменились условия, неверная ссылка? Если знаете источник — приложите ссылку."
+                : "Какая мера поддержки была бы полезна? Кому она нужна?"
           }
           className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
@@ -151,25 +198,25 @@ function TypeChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2.5 rounded-xl border p-3 text-left transition-colors",
-        active
-          ? "border-primary bg-primary/10"
-          : "bg-background hover:bg-muted",
+        "flex flex-col gap-1.5 rounded-xl border p-2.5 text-left transition-colors",
+        active ? "border-primary bg-primary/10" : "bg-background hover:bg-muted",
       )}
     >
       <span
         className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-lg",
+          "flex size-8 shrink-0 items-center justify-center rounded-lg",
           active ? "bg-primary text-primary-foreground" : "bg-muted",
         )}
       >
         {icon}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold leading-tight">
+      <span className="min-w-0">
+        <span className="block text-[13px] font-semibold leading-tight">
           {title}
         </span>
-        <span className="text-[11px] text-muted-foreground">{hint}</span>
+        <span className="text-[11px] leading-tight text-muted-foreground">
+          {hint}
+        </span>
       </span>
     </button>
   );

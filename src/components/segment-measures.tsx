@@ -41,16 +41,24 @@ function persistRegion(r: string) {
   )}; path=/; max-age=${REGION_COOKIE_MAX_AGE}; samesite=lax`;
 }
 
+// Сколько мер показываем сразу; остальное — по кнопке «Показать ещё».
+// В разделах бывает и 500+ мер: вываливать их разом бессмысленно и тяжело.
+const PAGE_SIZE = 10;
+
 export function SegmentMeasures({
   measures,
   initialRegion,
+  footer,
 }: {
   measures: SupportMeasure[];
   initialRegion: string | null;
+  /** Блок под списком (после кнопки «Показать ещё») — например, плашки обращений. */
+  footer?: React.ReactNode;
 }) {
   const [level, setLevel] = useState<Level>("");
   const [region, setRegion] = useState<string | null>(initialRegion);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [shown, setShown] = useState(PAGE_SIZE);
 
   const hasRegional = measures.some((m) => m.level === "regional");
   const needsRegion = level !== "federal";
@@ -68,14 +76,17 @@ export function SegmentMeasures({
     // каждого уровня (sort_order) не меняется.
     .sort((a, b) => (a.level === "federal" ? 0 : 1) - (b.level === "federal" ? 0 : 1));
 
+  // Сменили фильтр — список другой, показываем его с начала.
   function chooseRegion(r: string) {
     setRegion(r);
     persistRegion(r);
     setPickerOpen(false);
+    setShown(PAGE_SIZE);
   }
 
   function selectLevel(v: Level) {
     setLevel(v);
+    setShown(PAGE_SIZE);
     // Регион спрашиваем именно при выборе «Региональные», если он ещё не задан.
     if (v === "regional" && !region && hasRegional) {
       setPickerOpen(true);
@@ -126,10 +137,26 @@ export function SegmentMeasures({
       </p>
 
       <div className="mt-3 space-y-3">
-        {visible.map((m) => (
+        {visible.slice(0, shown).map((m) => (
           <MeasureCard key={m.slug} measure={m} />
         ))}
       </div>
+
+      {visible.length > shown && (
+        <button
+          type="button"
+          onClick={() => setShown((n) => n + PAGE_SIZE)}
+          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-brand/25 bg-brand/5 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/10 active:scale-[0.99]"
+        >
+          Показать ещё
+          <span className="text-brand/60">
+            ({Math.min(PAGE_SIZE, visible.length - shown)} из{" "}
+            {visible.length - shown})
+          </span>
+        </button>
+      )}
+
+      {footer}
 
       {/* Пустые состояния-подсказки */}
       {visible.length === 0 && (

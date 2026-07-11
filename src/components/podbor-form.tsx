@@ -2,14 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { RotateCcw, ChevronDown, LayoutGrid } from "lucide-react";
+import {
+  RotateCcw,
+  ChevronDown,
+  LayoutGrid,
+  MessageCircle,
+  FileEdit,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { MeasureCard } from "@/components/measure-card";
+import { SegmentMeasures } from "@/components/segment-measures";
 import { saveSurveyAction } from "@/app/(app)/login/onboarding-actions";
 import {
   matchMeasures,
-  pluralMeasures,
   REGIONS,
   type IncomePm,
   type SupportMeasure,
@@ -43,6 +48,35 @@ function Choice({
 }
 
 /** Блок вопроса: подпись + варианты ответа. */
+/**
+ * Две плашки под подборкой: обращение в свободной форме и уточнение по мере.
+ * Оба ведут в общую форму обращений — и попадают в один раздел админки.
+ */
+function InquiryLinks() {
+  return (
+    <div className="mt-5 grid grid-cols-2 gap-2.5">
+      <Link
+        href="/profile/inquiries/new?type=question"
+        className="flex flex-col rounded-2xl border border-black/[0.07] bg-white p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+      >
+        <MessageCircle className="size-5 text-brand" />
+        <span className="mt-2 text-[13px] font-semibold leading-snug">
+          Появились вопросы? Напишите нам
+        </span>
+      </Link>
+      <Link
+        href="/profile/inquiries/new?type=clarification"
+        className="flex flex-col rounded-2xl border border-black/[0.07] bg-white p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+      >
+        <FileEdit className="size-5 text-brand" />
+        <span className="mt-2 text-[13px] font-semibold leading-snug">
+          Сообщить уточнения по мерам поддержки
+        </span>
+      </Link>
+    </div>
+  );
+}
+
 /** Выпадающий список возраста ребёнка: 0…18, где 18 — «18 и старше». */
 function AgeSelect({
   value,
@@ -177,6 +211,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     incomePm,
     lowIncome: incomePm === 1,
     disabledChild: !!v.disabledChild,
+    specialNeedsChild: !!v.specialNeedsChild,
     mortgageIntent: !!v.mortgageIntent,
     svoFamily: !!v.svoFamily,
     singleParent: !!v.singleParent,
@@ -231,6 +266,9 @@ export function PodborForm({
   const [svoFamily, setSvoFamily] = useState<boolean | null>(saved?.svoFamily ?? null);
   const [student, setStudent] = useState<boolean | null>(saved?.student ?? null);
   const [disabledChild, setDisabledChild] = useState<boolean | null>(saved?.disabledChild ?? null);
+  const [specialNeedsChild, setSpecialNeedsChild] = useState<boolean | null>(
+    saved?.specialNeedsChild ?? null,
+  );
   const [parentUnder35, setParentUnder35] = useState<boolean | null>(saved?.parentUnder35 ?? null);
   const [selfEmployed, setSelfEmployed] = useState<boolean | null>(saved?.selfEmployed ?? null);
   const [entrepreneur, setEntrepreneur] = useState<boolean | null>(saved?.entrepreneur ?? null);
@@ -271,7 +309,12 @@ export function PodborForm({
 
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
   const [results, setResults] = useState<SupportMeasure[] | null>(() =>
-    hasSaved ? matchMeasures(toProfile(saved!), measures) : null,
+    // ignoreRegion: региональные меры не отсекаем по региону из анкеты — этим
+    // занимается сам список (там регион переключается, и его можно указать,
+    // если в анкете не указывали).
+    hasSaved
+      ? matchMeasures(toProfile(saved!), measures, { ignoreRegion: true })
+      : null,
   );
   const submitted = useRef(false);
   const topRef = useRef<HTMLDivElement>(null);
@@ -298,6 +341,7 @@ export function PodborForm({
       // requiresLowIncome, и «ниже ПМ» — это ровно группа «до 1 ПМ».
       lowIncome: incomePm === 1,
       disabledChild: disabledChild ?? false,
+      specialNeedsChild: specialNeedsChild ?? false,
       mortgageIntent: mortgageIntent ?? false,
       svoFamily: svoFamily ?? false,
       singleParent: singleParent ?? false,
@@ -309,7 +353,7 @@ export function PodborForm({
       fosterParent: fosterParent ?? false,
     };
     submitted.current = true;
-    setResults(matchMeasures(profile, measures));
+    setResults(matchMeasures(profile, measures, { ignoreRegion: true }));
     // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли пользователь;
     // при перезаполнении данные перезапишутся).
     void saveSurveyAction(profile as unknown as Record<string, unknown>);
@@ -339,9 +383,6 @@ export function PodborForm({
             >
               Вам может подойти
             </h1>
-            <p className="mt-1 text-sm font-medium text-[#6b7078]">
-              {pluralMeasures(results.length)}
-            </p>
             {/* Кнопка «Посмотреть все меры» — до списка, чтобы не листать вниз. */}
             <Link
               href="/catalog"
@@ -352,14 +393,15 @@ export function PodborForm({
             >
               <LayoutGrid className="size-4" /> Посмотреть все меры
             </Link>
-            <div className="mt-4 space-y-3">
-              {results.map((m) => (
-                <MeasureCard key={m.slug} measure={m} />
-              ))}
-            </div>
-            <p className="mt-6 text-center text-xs text-muted-foreground">
-              Это предварительный подбор. Точные условия уточняйте в официальных источниках.
-            </p>
+
+            {/* Тот же список, что и в разделах каталога: фильтр «Все /
+                Федеральные / Региональные», выбор региона (если в анкете его не
+                указали — можно указать прямо здесь) и выдача по 10 штук. */}
+            <SegmentMeasures
+              measures={results}
+              initialRegion={region || null}
+              footer={<InquiryLinks />}
+            />
           </>
         ) : (
           <div className="py-10 text-center">
@@ -626,9 +668,22 @@ export function PodborForm({
           <YesNo value={student} onChange={setStudent} />
         </Question>
 
-        <Question label="В семье есть ребёнок-инвалид или человек с ОВЗ?">
+        <Question label="В семье есть ребёнок-инвалид?">
           <YesNo value={disabledChild} onChange={setDisabledChild} />
         </Question>
+
+        <div>
+          <p className="text-sm font-medium">
+            В семье есть ребёнок с ОВЗ (ограниченными возможностями здоровья)?
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Статус ОВЗ даёт психолого-медико-педагогическая комиссия. Инвалидности
+            при этом может не быть.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <YesNo value={specialNeedsChild} onChange={setSpecialNeedsChild} />
+          </div>
+        </div>
 
         <Question label="Кто-то из родителей имеет инвалидность?">
           <YesNo value={disabledParent} onChange={setDisabledParent} />

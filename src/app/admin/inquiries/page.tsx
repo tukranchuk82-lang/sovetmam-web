@@ -1,3 +1,4 @@
+import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import Link from "next/link";
 import { Clock, CheckCircle2, ChevronRight, MapPin } from "lucide-react";
 import { listAllInquiries } from "@/lib/inquiries-db";
@@ -81,7 +82,7 @@ export default async function AdminInquiriesPage() {
                       </Badge>
                     )}
                     <Badge variant="secondary" className="text-[10px]">
-                      {inq.type === "question" ? "Вопрос" : "Идея"}
+                      {INQUIRY_TYPE_LABEL[inq.type]}
                     </Badge>
                     {inq.region && (
                       <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground">

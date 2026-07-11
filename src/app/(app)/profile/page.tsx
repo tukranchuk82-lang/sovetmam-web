@@ -1,3 +1,4 @@
+import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -148,7 +149,7 @@ export default async function ProfilePage() {
                           </Badge>
                         )}
                         <Badge variant="secondary" className="text-[10px]">
-                          {inq.type === "question" ? "Вопрос" : "Идея"}
+                          {INQUIRY_TYPE_LABEL[inq.type]}
                         </Badge>
                       </div>
                       <p className="mt-1.5 font-semibold leading-snug">
@@ -306,7 +307,7 @@ async function AppUserProfile({ user }: { user: AppUser }) {
                         </Badge>
                       )}
                       <Badge variant="secondary" className="text-[10px]">
-                        {inq.type === "question" ? "Вопрос" : "Идея"}
+                        {INQUIRY_TYPE_LABEL[inq.type]}
                       </Badge>
                     </div>
                     <p className="mt-1.5 font-semibold leading-snug">
