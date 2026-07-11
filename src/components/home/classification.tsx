@@ -1,11 +1,5 @@
 import Link from "next/link";
-import {
-  Gift,
-  BadgePercent,
-  RussianRuble,
-  ChevronRight,
-  type LucideIcon,
-} from "lucide-react";
+import { Gift, BadgePercent, RussianRuble, type LucideIcon } from "lucide-react";
 
 // Экран «Классификация мер поддержки» — по референсу заказчика.
 // Готовые иллюстрации берём из public: family.png (семья сверху) и way.png
@@ -44,10 +38,10 @@ const WAY_HOTSPOTS: {
   width: string;
   height: string;
 }[] = [
-  { key: "once-life", label: "1 раз в жизни", left: "14%", top: "5%", width: "48%", height: "21%" },
-  { key: "once-year", label: "1 раз в год", left: "46%", top: "25%", width: "38%", height: "24%" },
-  { key: "once-month", label: "1 раз в месяц", left: "18%", top: "49%", width: "42%", height: "19%" },
-  { key: "situational", label: "По ситуации", left: "51%", top: "66%", width: "43%", height: "30%" },
+  { key: "once-life", label: "1 раз в жизни", left: "14%", top: "5%", width: "48%", height: "18%" },
+  { key: "once-year", label: "1 раз в год", left: "46%", top: "25%", width: "37%", height: "16%" },
+  { key: "once-month", label: "1 раз в месяц", left: "18%", top: "49%", width: "42%", height: "16%" },
+  { key: "situational", label: "По ситуации", left: "51%", top: "66%", width: "43%", height: "27%" },
 ];
 
 export function Classification() {
@@ -133,24 +127,18 @@ export function Classification() {
           alt="Путь: классификация мер по частоте получения — 1 раз в жизни, 1 раз в год, 1 раз в месяц, по ситуации"
           className="w-full mix-blend-multiply"
         />
-        {/* Подложка с рамкой и шевроном: сами пины нарисованы внутри картинки и
-            выглядят как иллюстрация, поэтому кликабельность нужно показать
-            явно — иначе люди не догадываются нажать. */}
+        {/* Области кликабельны, но невидимы: рамки и шевроны поверх пинов
+            заказчик отверг — они портили иллюстрацию. О кликабельности говорит
+            подпись-подсказка над картинкой. */}
         {WAY_HOTSPOTS.map((h) => (
           <Link
             key={h.key}
             href={`/class/${h.key}`}
             aria-label={`Меры поддержки: ${h.label}`}
             title={h.label}
-            // Шеврон — в правом нижнем углу: справа от подписи он наезжал на её
-            // последние буквы, а под ней у всех четырёх пунктов пусто.
-            className="group absolute flex items-end justify-end rounded-2xl bg-[#8E1D2C]/[0.04] p-1.5 ring-1 ring-[#8E1D2C]/20 transition-all duration-150 hover:bg-[#8E1D2C]/[0.09] hover:ring-[#8E1D2C]/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8E1D2C]/60 active:scale-[0.98] active:bg-[#8E1D2C]/[0.14]"
+            className="absolute rounded-2xl transition-colors duration-150 hover:bg-[#8E1D2C]/[0.07] focus-visible:bg-[#8E1D2C]/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8E1D2C]/40 active:bg-[#8E1D2C]/[0.12]"
             style={{ left: h.left, top: h.top, width: h.width, height: h.height }}
-          >
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#8E1D2C] text-white shadow-[0_4px_10px_-4px_rgba(142,29,44,0.7)] transition-transform duration-150 group-hover:translate-x-0.5">
-              <ChevronRight size={15} strokeWidth={2.5} aria-hidden />
-            </span>
-          </Link>
+          />
         ))}
       </div>
     </section>

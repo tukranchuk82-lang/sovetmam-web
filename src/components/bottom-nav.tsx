@@ -72,7 +72,14 @@ export function BottomNav({ background }: { background?: string }) {
   return (
     <nav
       className="sm-bottom-nav relative z-20 shrink-0 rounded-t-3xl bg-brand shadow-[0_-6px_16px_-6px_rgba(0,0,0,0.25)] transition-[background] duration-300"
-      style={background ? ({ "--nav-bg": background } as React.CSSProperties) : undefined}
+      // В fullscreen окно доходит до самого низа экрана: подкладываем safe-area,
+      // иначе подписи вкладок налезают на зону системного жеста.
+      style={
+        {
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          ...(background ? { "--nav-bg": background } : {}),
+        } as React.CSSProperties
+      }
     >
       <div className="grid grid-cols-5">
         {tabs.map((t) => (

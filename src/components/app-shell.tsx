@@ -59,8 +59,13 @@ export function AppShell({
         <header
           ref={headerRef}
           className="pointer-events-none absolute inset-x-0 top-0 z-30 transition-[background,box-shadow] duration-300"
-          style={
-            transparent
+          // Приложение установлено в fullscreen: окно занимает весь экран,
+          // включая область выреза камеры. Отступаем сверху на safe-area, иначе
+          // логотип уезжает под «чёлку». Распорка под шапкой считается по
+          // offsetHeight, так что этот отступ она учитывает сама.
+          style={{
+            paddingTop: "env(safe-area-inset-top, 0px)",
+            ...(transparent
               ? {
                   // Прозрачная шапка: лёгкая синяя вуаль сверху, чтобы текст
                   // читался поверх иллюстрации героя.
@@ -70,8 +75,8 @@ export function AppShell({
               : {
                   background: NAVY,
                   boxShadow: "0 10px 24px -6px rgba(23,42,75,0.45)",
-                }
-          }
+                }),
+          }}
         >
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <Link

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Manrope,
   PT_Serif,
@@ -115,6 +115,16 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Шпаргалка",
   },
+};
+
+// Приложение установлено как fullscreen (manifest.json): системные полосы
+// Android скрыты, окно занимает весь экран — включая область выреза камеры.
+// viewportFit: "cover" включает env(safe-area-inset-*), которыми шапка и нижнее
+// меню отступают от выреза и от зоны системного жеста.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
