@@ -88,11 +88,29 @@ function toIncomePm(v: Partial<UserProfile>): IncomePm | null {
   return v.lowIncome ? 1 : null;
 }
 
+// Очерёдность ожидаемого ребёнка. 10 означает «10 и более» — дальше дробить
+// незачем, мер, привязанных к конкретному числу выше десяти, не бывает.
+const EXPECTING_OPTIONS: { value: number; label: string }[] = [
+  { value: 1, label: "1" },
+  { value: 2, label: "2" },
+  { value: 3, label: "3" },
+  { value: 4, label: "4" },
+  { value: 5, label: "5" },
+  { value: 6, label: "6" },
+  { value: 7, label: "7" },
+  { value: 8, label: "8" },
+  { value: 9, label: "9" },
+  { value: 10, label: "10 и более" },
+];
+
 // Нормализует сохранённую анкету (jsonb из профиля) в полный UserProfile.
 function toProfile(v: Partial<UserProfile>): UserProfile {
   const incomePm = toIncomePm(v);
+  const expecting = Number(v.expectingChildNumber);
   return {
     pregnant: !!v.pregnant,
+    expectingChildNumber:
+      v.pregnant && expecting >= 1 && expecting <= 10 ? expecting : null,
     hasChildren: !!v.hasChildren,
     childrenCount: Number(v.childrenCount) || 0,
     youngestChildAgeYears:
@@ -126,6 +144,9 @@ export function PodborForm({
   const hasSaved = !!saved && typeof saved.hasChildren === "boolean";
 
   const [pregnant, setPregnant] = useState<boolean | null>(saved?.pregnant ?? null);
+  const [expectingNumber, setExpectingNumber] = useState<number | null>(
+    saved?.expectingChildNumber ?? null,
+  );
   const [hasChildren, setHasChildren] = useState<boolean | null>(saved?.hasChildren ?? null);
   const [childrenCount, setChildrenCount] = useState<number | null>(saved?.childrenCount ?? null);
   const [youngestAge, setYoungestAge] = useState<number | null>(saved?.youngestChildAgeYears ?? null);
@@ -166,6 +187,7 @@ export function PodborForm({
   function handleSubmit() {
     const profile: UserProfile = {
       pregnant: pregnant ?? false,
+      expectingChildNumber: pregnant ? expectingNumber : null,
       hasChildren: hasChildren ?? false,
       childrenCount: hasChildren ? (childrenCount ?? 1) : 0,
       youngestChildAgeYears: hasChildren ? youngestAge : null,
@@ -275,8 +297,33 @@ export function PodborForm({
 
       <div className="mt-6 space-y-6">
         <Question label="Вы в ожидании ребёнка?">
-          <YesNo value={pregnant} onChange={setPregnant} />
+          <YesNo
+            value={pregnant}
+            onChange={(v) => {
+              setPregnant(v);
+              // Ответили «нет» — очерёдность теряет смысл, сбрасываем её,
+              // иначе в профиль уедет ответ от прошлого «да».
+              if (!v) setExpectingNumber(null);
+            }}
+          />
         </Question>
+
+        {pregnant && (
+          <div>
+            <p className="text-sm font-medium">Какого по счёту ребёнка ожидаете?</p>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {EXPECTING_OPTIONS.map((o) => (
+                <Choice
+                  key={o.value}
+                  active={expectingNumber === o.value}
+                  onClick={() => setExpectingNumber(o.value)}
+                >
+                  {o.label}
+                </Choice>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Question label="У вас есть дети?">
           <YesNo value={hasChildren} onChange={setHasChildren} />

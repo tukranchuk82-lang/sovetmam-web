@@ -261,6 +261,16 @@ export interface SupportMeasure {
 /** Ответы пользователя из анкеты. */
 export interface UserProfile {
   pregnant: boolean;
+  /**
+   * Какого по счёту ребёнка ждут: 1…10, где 10 — «10 и более».
+   * `null` — не в ожидании либо не ответили.
+   *
+   * Сейчас только записывается в профиль: движок подбора (isEligible) им пока
+   * не пользуется — меры для ожидающих размечены критерием requiresPregnancy
+   * без привязки к очерёдности. Поле нужно, чтобы позже подбирать меры именно
+   * по числу детей (маткапитал на первого/третьего и т.п.).
+   */
+  expectingChildNumber: number | null;
   hasChildren: boolean;
   childrenCount: number;
   youngestChildAgeYears: number | null;
