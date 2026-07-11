@@ -12,7 +12,6 @@ import { Gift, BadgePercent, RussianRuble, type LucideIcon } from "lucide-react"
 // меры, а призыв к анкете стоит на самой странице списка.
 
 const T1 = "#15234A"; // тёмно-синий текст
-const T2 = "#5E6785"; // вторичный текст
 
 interface TypeItem {
   icon: LucideIcon;
@@ -43,6 +42,45 @@ const WAY_HOTSPOTS: {
   { key: "once-month", label: "1 раз в месяц", left: "18%", top: "49%", width: "42%", height: "16%" },
   { key: "situational", label: "По ситуации", left: "51%", top: "66%", width: "43%", height: "27%" },
 ];
+
+// Пульсирующие пины. Сами пины нарисованы внутри way.png, отдельными элементами
+// их нет — поэтому каждый вырезан в прозрачный спрайт (scripts/build-pins.mjs) и
+// положен ТОЧНО поверх нарисованного. Спрайт только увеличивается (scale >= 1),
+// никогда не уменьшается, поэтому оригинал под ним всегда скрыт и шва не видно.
+// Координаты — в % от размеров картинки, тянутся вместе с ней.
+const WAY_PINS: {
+  key: string;
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+}[] = [
+  { key: "once-life", left: "17.418%", top: "7.410%", width: "11.872%", height: "14.160%" },
+  { key: "once-year", left: "47.834%", top: "25.092%", width: "11.872%", height: "14.087%" },
+  { key: "once-month", left: "18.804%", top: "48.643%", width: "12.478%", height: "14.527%" },
+  { key: "situational", left: "52.426%", top: "66.031%", width: "12.565%", height: "14.820%" },
+];
+
+// Два пульса подряд, потом пауза 2 с — и по кругу, пока экран открыт.
+// Цикл 3,4 с: пульс 0,7 с + пульс 0,7 с + покой 2 с. Точка роста — у острия
+// пина (низ по центру), чтобы он не «отрывался» от дороги.
+const PULSE_CSS = `
+@keyframes sm-pin-pulse {
+  0%   { transform: scale(1); }
+  10%  { transform: scale(1.07); }
+  21%  { transform: scale(1); }
+  31%  { transform: scale(1.07); }
+  41%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+.sm-pin {
+  transform-origin: 50% 92%;
+  animation: sm-pin-pulse 3.4s ease-in-out infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sm-pin { animation: none; }
+}`;
 
 export function Classification() {
   return (
@@ -117,9 +155,7 @@ export function Classification() {
       >
         По частоте получения
       </h3>
-      <p className="mt-1 text-[13px] leading-snug" style={{ color: T2 }}>
-        Нажмите на пин — покажем меры
-      </p>
+      <style>{PULSE_CSS}</style>
       <div className="relative mx-auto mt-3 w-full max-w-[420px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -127,9 +163,24 @@ export function Classification() {
           alt="Путь: классификация мер по частоте получения — 1 раз в жизни, 1 раз в год, 1 раз в месяц, по ситуации"
           className="w-full mix-blend-multiply"
         />
+
+        {/* Пины-спрайты поверх нарисованных — только чтобы пульсировать.
+            Кликами занимаются ссылки ниже, поэтому события мыши не ловят. */}
+        {WAY_PINS.map((p) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={p.key}
+            src={`/pins/pin-${p.key}.png`}
+            alt=""
+            aria-hidden
+            className="sm-pin pointer-events-none absolute"
+            style={{ left: p.left, top: p.top, width: p.width, height: p.height }}
+          />
+        ))}
+
         {/* Области кликабельны, но невидимы: рамки и шевроны поверх пинов
             заказчик отверг — они портили иллюстрацию. О кликабельности говорит
-            подпись-подсказка над картинкой. */}
+            сама пульсация пинов. */}
         {WAY_HOTSPOTS.map((h) => (
           <Link
             key={h.key}

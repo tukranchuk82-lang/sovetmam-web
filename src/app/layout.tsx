@@ -112,7 +112,12 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    // iOS не умеет display: "fullscreen" из манифеста — статус-бар там скрыть
+    // нельзя. Максимум, что доступно: "black-translucent" — контент уходит ПОД
+    // статус-бар, и часы с батареей ложатся прямо на нашу синюю шапку, а не на
+    // отдельную белую полосу. Отступ под них даёт env(safe-area-inset-top)
+    // в шапке (см. app-shell.tsx).
+    statusBarStyle: "black-translucent",
     title: "Шпаргалка",
   },
 };
