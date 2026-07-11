@@ -1,54 +1,49 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import {
-  Gift,
-  BadgePercent,
-  RussianRuble,
-  X,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { Gift, BadgePercent, RussianRuble, type LucideIcon } from "lucide-react";
 
 // Экран «Классификация мер поддержки» — по референсу заказчика.
 // Готовые иллюстрации берём из public: family.png (семья сверху) и way.png
 // (целиком блок «По частоте получения» — путь с пинами и подписями).
 // Дорисованная часть — заголовок и блок «По типу помощи» (3 карточки).
-// Карточки кликабельны → попап с предложением подобрать меры по анкете.
+//
+// И карточки, и пины на картинке ведут в /class/[key] — список мер по этому
+// признаку (метки class-* в segments). Раньше карточки открывали попап с
+// предложением пройти анкету; теперь они делают то, что обещают, — показывают
+// меры, а призыв к анкете стоит на самой странице списка.
 
-const RED = "#D9415D"; // коралловый акцент (иконки)
-const CIRCLE = "#FBE8EC"; // светлый розовый кружок под иконкой
 const T1 = "#15234A"; // тёмно-синий текст
-const T2 = "#5E6785"; // вторичный текст
 
 interface TypeItem {
   icon: LucideIcon;
   label: string;
-  note: string;
+  key: string;
 }
 
 const TYPE_ITEMS: TypeItem[] = [
-  {
-    icon: Gift,
-    label: "Бесплатно",
-    note: "услуги и вещи, которые предоставляют безвозмездно",
-  },
-  {
-    icon: BadgePercent,
-    label: "Со скидкой",
-    note: "льготы на оплату услуг, проезда и ЖКУ",
-  },
-  {
-    icon: RussianRuble,
-    label: "Выплаты",
-    note: "пособия, выплаты и капиталы",
-  },
+  { icon: Gift, label: "Бесплатно", key: "free" },
+  { icon: BadgePercent, label: "Со скидкой", key: "discount" },
+  { icon: RussianRuble, label: "Выплаты", key: "money" },
+];
+
+// Кликабельные области поверх way.png. Картинка — растр 1153×1345, четыре
+// пункта нарисованы внутри неё, DOM-элементов у них нет. Чтобы не переверстывать
+// утверждённую заказчиком иллюстрацию, накрываем каждый пункт (пин + подпись)
+// прозрачной ссылкой. Координаты в % от размеров картинки — тянутся вместе с ней.
+const WAY_HOTSPOTS: {
+  key: string;
+  label: string;
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+}[] = [
+  { key: "once-life", label: "1 раз в жизни", left: "14%", top: "5%", width: "48%", height: "18%" },
+  { key: "once-year", label: "1 раз в год", left: "46%", top: "25%", width: "37%", height: "16%" },
+  { key: "once-month", label: "1 раз в месяц", left: "18%", top: "49%", width: "42%", height: "16%" },
+  { key: "situational", label: "По ситуации", left: "51%", top: "66%", width: "43%", height: "27%" },
 ];
 
 export function Classification() {
-  const [active, setActive] = useState<TypeItem | null>(null);
-
   return (
     <section
       className="px-5 pb-10 pt-6"
@@ -81,10 +76,9 @@ export function Classification() {
         {TYPE_ITEMS.map((item) => {
           const Icon = item.icon;
           return (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => setActive(item)}
+            <Link
+              key={item.key}
+              href={`/class/${item.key}`}
               className="flex flex-col items-center rounded-2xl border border-black/[0.06] px-2 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_10px_24px_-12px_rgba(30,41,59,0.28)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_16px_30px_-12px_rgba(30,41,59,0.34)] active:scale-95"
               style={{
                 background:
@@ -106,7 +100,7 @@ export function Classification() {
               >
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </div>
@@ -118,67 +112,24 @@ export function Classification() {
       >
         По частоте получения
       </h3>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/way.png"
-        alt="Путь: классификация мер по частоте получения — 1 раз в жизни, 1 раз в год, 1 раз в месяц, по ситуации"
-        className="mx-auto mt-3 w-full max-w-[420px] mix-blend-multiply"
-      />
-
-      {/* ---------- Попап: подбор мер по анкете ---------- */}
-      {active && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-4 sm:items-center"
-          onClick={() => setActive(null)}
-        >
-          <div
-            className="w-full max-w-[360px] rounded-2xl bg-white p-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className="inline-flex size-10 shrink-0 items-center justify-center rounded-full"
-                style={{ background: CIRCLE }}
-              >
-                <active.icon size={20} strokeWidth={1.6} color={RED} aria-hidden />
-              </span>
-              <h4
-                className="flex-1 pt-1 text-[17px] font-semibold leading-tight"
-                style={{ color: T1 }}
-              >
-                Подберём меры под вашу ситуацию
-              </h4>
-              <button
-                type="button"
-                onClick={() => setActive(null)}
-                aria-label="Закрыть"
-                className="shrink-0 rounded-full p-1 transition-colors hover:bg-black/5"
-              >
-                <X size={18} color={T2} />
-              </button>
-            </div>
-
-            <p className="mt-3 text-[14px] leading-relaxed" style={{ color: T2 }}>
-              «{active.label}» — это {active.note}. Чтобы узнать, что положено
-              именно вашей семье, пройдите короткую анкету — мы подберём меры
-              индивидуально под вашу ситуацию.
-            </p>
-
-            <Link
-              href="/podbor"
-              onClick={() => setActive(null)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[15px] font-semibold text-white"
-              style={{
-                background: "linear-gradient(to bottom, #B51234, #8E1D2C)",
-                boxShadow: "0 12px 24px -14px rgba(142,29,44,0.6)",
-              }}
-            >
-              <Sparkles size={18} aria-hidden />
-              Подберём меры
-            </Link>
-          </div>
-        </div>
-      )}
+      <div className="relative mx-auto mt-3 w-full max-w-[420px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/way.png"
+          alt="Путь: классификация мер по частоте получения — 1 раз в жизни, 1 раз в год, 1 раз в месяц, по ситуации"
+          className="w-full mix-blend-multiply"
+        />
+        {WAY_HOTSPOTS.map((h) => (
+          <Link
+            key={h.key}
+            href={`/class/${h.key}`}
+            aria-label={`Меры поддержки: ${h.label}`}
+            title={h.label}
+            className="absolute rounded-2xl transition-colors duration-150 hover:bg-[#8E1D2C]/[0.07] focus-visible:bg-[#8E1D2C]/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8E1D2C]/40 active:bg-[#8E1D2C]/[0.12]"
+            style={{ left: h.left, top: h.top, width: h.width, height: h.height }}
+          />
+        ))}
+      </div>
     </section>
   );
 }
