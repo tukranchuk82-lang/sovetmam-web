@@ -155,9 +155,17 @@ export function Classification() {
       </div>
 
       {/* ---------- По частоте получения ---------- */}
+      {/* Свой якорь: кнопка «назад» с /class/once-* и /class/situational ведёт
+          сюда, а не к началу всей «Классификации» — человек уходил с дороги с
+          пинами, к ней и возвращаем. */}
       <h3
+        id="frequency"
         className="mt-8 text-[20px] font-semibold"
-        style={{ fontFamily: "var(--font-playfair), serif", color: T1 }}
+        style={{
+          fontFamily: "var(--font-playfair), serif",
+          color: T1,
+          scrollMarginTop: "calc(var(--hdr-h, 76px) + 8px)",
+        }}
       >
         По частоте получения
       </h3>

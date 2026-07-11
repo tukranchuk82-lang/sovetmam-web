@@ -49,7 +49,13 @@ interface ClassCfg {
   title: string;
   short: string;
   icon: LucideIcon;
+  backHref: string;
 }
+
+// Якоря на главной: TYPE — начало блока «Классификация» (там карточки типа),
+// FREQ — заголовок «По частоте получения» (там дорога с пинами).
+const TYPE = "/#classification";
+const FREQ = "/#frequency";
 
 const CLASSES: Record<string, ClassCfg> = {
   free: {
@@ -57,42 +63,49 @@ const CLASSES: Record<string, ClassCfg> = {
     short:
       "Услуги и вещи, которые семья получает безвозмездно: питание и проезд, путёвки и лекарства, кружки и секции, жильё и участки.",
     icon: Gift,
+    backHref: TYPE,
   },
   discount: {
     title: "Со скидкой",
     short:
       "Льготы, компенсации, субсидии и вычеты — всё, что снижает ваши расходы на услуги, проезд, ЖКУ, обучение и ипотеку.",
     icon: Percent,
+    backHref: TYPE,
   },
   money: {
     title: "Выплаты",
     short:
       "Деньги, которые приходят вам: пособия, единовременные и ежемесячные выплаты, материнский и региональные капиталы, стипендии.",
     icon: Wallet,
+    backHref: TYPE,
   },
   "once-life": {
     title: "1 раз в жизни",
     short:
       "Однократные меры при важном событии: рождение или усыновление ребёнка, материнский и региональный капитал, земельный участок, погашение ипотеки.",
     icon: Baby,
+    backHref: FREQ,
   },
   "once-year": {
     title: "1 раз в год",
     short:
       "Меры, которые оформляют ежегодно: выплата к учебному году, путёвка в лагерь, ежегодные компенсации.",
     icon: CalendarDays,
+    backHref: FREQ,
   },
   "once-month": {
     title: "1 раз в месяц",
     short:
       "Ежемесячные пособия, выплаты и доплаты — деньги, которые приходят каждый месяц.",
     icon: CalendarClock,
+    backHref: FREQ,
   },
   situational: {
     title: "По ситуации",
     short:
       "Меры, которые действуют, пока у семьи есть право: бесплатный проезд и питание, налоговый вычет, льготы и первоочередное зачисление. И помощь в трудной жизненной ситуации.",
     icon: LifeBuoy,
+    backHref: FREQ,
   },
 };
 
@@ -134,9 +147,10 @@ export default async function ClassPage({
 
   return (
     <div className="px-4 py-5">
-      {/* Возвращаем на сам блок «Классификация», а не на верх главной: сюда
-          проваливаются только оттуда, и прокручивать страницу заново обидно. */}
-      <BackLink href="/#classification" label="Назад" />
+      {/* Возвращаем ровно туда, откуда пришли: с карточек типа — к началу
+          «Классификации», с пинов — к дороге «По частоте получения». На верх
+          главной не отправляем: прокручивать её заново обидно. */}
+      <BackLink href={cfg.backHref} label="Назад" />
 
       <div className="mt-3 flex items-center gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(142,29,44,0.5)]">
