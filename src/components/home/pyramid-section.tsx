@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 // Секция «Пирамида мер поддержки».
 // Одна «идеальная» пирамида (вершина → полная ширина основания) нарезана на
 // 6 полос с зазорами — поэтому угол боковых сторон у всех уровней одинаковый.
 // Верхняя полоса — треугольник, остальные — трапеции. Растянута на всю ширину.
-// Уровни кликабельны → /pyramid.
+//
+// Пирамида НЕкликабельна: она объясняет, где искать меры (Госуслуги, МФЦ,
+// работодатель, вуз, НКО), а не фильтрует каталог. Раньше клик уводил на
+// /catalog без всякого фильтра — это вводило в заблуждение. Уровни для
+// муниципальных, работодателя, вуза и НКО в базе вообще не заведены (есть
+// только federal/regional), фильтровать по ним нечего.
+// Подсказка при наведении/тапе остаётся — она и есть смысл блока.
 
 const T_TEXT = "#333333";
 const ACCENT = "#B21F3A";
@@ -130,7 +135,6 @@ function roundedPath(pts: [number, number][], r: number): string {
 }
 
 export function PyramidSection() {
-  const router = useRouter();
   const [hovered, setHovered] = useState<number | null>(null);
 
   return (
@@ -138,7 +142,11 @@ export function PyramidSection() {
       className="px-5 pb-10 pt-2"
       style={{ fontFamily: "var(--font-inter), sans-serif", color: T_TEXT }}
     >
-      <style>{`.pyr-lvl{transition:transform .15s ease;transform-box:fill-box;transform-origin:center;cursor:pointer}.pyr-lvl:hover{transform:scale(1.02)}.pyr-lvl:active{transform:scale(.99)}`}</style>
+      {/* cursor:help вместо pointer — уровень не ведёт никуда, но по наведению
+          (на телефоне — по тапу) показывает подсказку. Эффект нажатия :active
+          убран: он обещал переход, которого нет. Лёгкое увеличение при
+          наведении оставлено — подсказывает, что тут есть что посмотреть. */}
+      <style>{`.pyr-lvl{transition:transform .15s ease;transform-box:fill-box;transform-origin:center;cursor:help}.pyr-lvl:hover{transform:scale(1.02)}`}</style>
 
       <h2
         className="text-center text-[28px] font-normal leading-[1.12]"
@@ -157,7 +165,6 @@ export function PyramidSection() {
                 className="pyr-lvl"
                 d={roundedPath(lvl.pts, R)}
                 fill={lvl.color}
-                onClick={() => router.push("/catalog")}
                 onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
               />
