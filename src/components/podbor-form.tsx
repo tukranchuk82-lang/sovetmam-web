@@ -43,6 +43,39 @@ function Choice({
 }
 
 /** Блок вопроса: подпись + варианты ответа. */
+/** Выпадающий список возраста ребёнка: 0…18, где 18 — «18 и старше». */
+function AgeSelect({
+  value,
+  onChange,
+}: {
+  value: number | null;
+  onChange: (v: number | null) => void;
+}) {
+  return (
+    <div className="relative mt-1">
+      <select
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+        className={cn(
+          "w-full appearance-none rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
+          value != null ? "font-medium text-[#2b2f36]" : "text-[#7a808a]",
+        )}
+      >
+        <option value="">Возраст</option>
+        {AGE_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
+      />
+    </div>
+  );
+}
+
 function Question({
   label,
   children,
@@ -103,18 +136,43 @@ const EXPECTING_OPTIONS: { value: number; label: string }[] = [
   { value: 10, label: "10 и более" },
 ];
 
+// Больше 20 детей вводить незачем: ни одна мера не различает 20 и 25 детей,
+// а поле «сколько именно» должно оставаться защищённым от случайного ввода.
+const MAX_CHILDREN = 20;
+
+// «Сколько у вас детей»: 1…9 и «10 и более» (10 — маркер, точное число потом
+// спрашиваем отдельным полем).
+const MANY_CHILDREN = 10;
+const COUNT_OPTIONS: { value: number; label: string }[] = [
+  ...Array.from({ length: 9 }, (_, i) => ({ value: i + 1, label: String(i + 1) })),
+  { value: MANY_CHILDREN, label: "10 и более" },
+];
+
+// Возраст ребёнка: 0…18, где 18 — «18 и старше».
+const AGE_OPTIONS: { value: number; label: string }[] = Array.from(
+  { length: 19 },
+  (_, i) => ({ value: i, label: i === 18 ? "18 и старше" : String(i) }),
+);
+
 // Нормализует сохранённую анкету (jsonb из профиля) в полный UserProfile.
 function toProfile(v: Partial<UserProfile>): UserProfile {
   const incomePm = toIncomePm(v);
   const expecting = Number(v.expectingChildNumber);
+  const ages = Array.isArray(v.childrenAges) ? v.childrenAges.map(Number) : [];
+  const youngest =
+    v.youngestChildAgeYears != null
+      ? Number(v.youngestChildAgeYears)
+      : ages.length
+        ? Math.min(...ages)
+        : null;
   return {
     pregnant: !!v.pregnant,
     expectingChildNumber:
       v.pregnant && expecting >= 1 && expecting <= 10 ? expecting : null,
     hasChildren: !!v.hasChildren,
     childrenCount: Number(v.childrenCount) || 0,
-    youngestChildAgeYears:
-      v.youngestChildAgeYears == null ? null : Number(v.youngestChildAgeYears),
+    childrenAges: ages,
+    youngestChildAgeYears: youngest,
     region: String(v.region ?? ""),
     incomePm,
     lowIncome: incomePm === 1,
@@ -148,8 +206,18 @@ export function PodborForm({
     saved?.expectingChildNumber ?? null,
   );
   const [hasChildren, setHasChildren] = useState<boolean | null>(saved?.hasChildren ?? null);
-  const [childrenCount, setChildrenCount] = useState<number | null>(saved?.childrenCount ?? null);
-  const [youngestAge, setYoungestAge] = useState<number | null>(saved?.youngestChildAgeYears ?? null);
+  // Выбор в плитках «Сколько у вас детей»: 1…9 либо MANY_CHILDREN («10 и более»).
+  // Сохранённое число 10+ разворачиваем обратно в «10 и более» + точное поле.
+  const savedCount = saved?.childrenCount ?? null;
+  const [childrenCount, setChildrenCount] = useState<number | null>(
+    savedCount == null ? null : savedCount >= MANY_CHILDREN ? MANY_CHILDREN : savedCount,
+  );
+  const [exactCount, setExactCount] = useState<string>(
+    savedCount != null && savedCount >= MANY_CHILDREN ? String(savedCount) : "",
+  );
+  const [childrenAges, setChildrenAges] = useState<(number | null)[]>(
+    Array.isArray(saved?.childrenAges) ? saved.childrenAges.map(Number) : [],
+  );
   const [isCitizen, setIsCitizen] = useState<boolean | null>(saved ? (saved.region ? true : null) : null);
   const [region, setRegion] = useState(saved?.region ?? "");
   // «Выше 2 ПМ» — это не отсутствие ответа, поэтому шкала хранит отдельный
@@ -168,6 +236,38 @@ export function PodborForm({
   const [entrepreneur, setEntrepreneur] = useState<boolean | null>(saved?.entrepreneur ?? null);
   const [disabledParent, setDisabledParent] = useState<boolean | null>(saved?.disabledParent ?? null);
   const [fosterParent, setFosterParent] = useState<boolean | null>(saved?.fosterParent ?? null);
+
+  // Сколько окошек возраста показывать. При «10 и более» число берётся из
+  // отдельного поля; пока оно пустое или больше 20 — окошек нет.
+  const exactNum = exactCount.trim() === "" ? null : Number(exactCount);
+  const tooManyChildren = exactNum != null && exactNum > MAX_CHILDREN;
+  const childCount =
+    childrenCount == null
+      ? 0
+      : childrenCount < MANY_CHILDREN
+        ? childrenCount
+        : exactNum != null && exactNum >= 1 && exactNum <= MAX_CHILDREN
+          ? exactNum
+          : 0;
+
+  // Длина списка возрастов идёт за числом детей: добавили ребёнка — появилось
+  // пустое окошко, убавили — лишние отброшены (ответы оставшихся сохраняются).
+  useEffect(() => {
+    setChildrenAges((prev) => {
+      if (prev.length === childCount) return prev;
+      const next = prev.slice(0, childCount);
+      while (next.length < childCount) next.push(null);
+      return next;
+    });
+  }, [childCount]);
+
+  // Движок подбора смотрит на возраст младшего — выводим его из ответов.
+  const filledAges = childrenAges.filter((a): a is number => a != null);
+  const youngestAge = filledAges.length ? Math.min(...filledAges) : null;
+
+  function setAgeAt(i: number, value: number | null) {
+    setChildrenAges((prev) => prev.map((a, idx) => (idx === i ? value : a)));
+  }
 
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
   const [results, setResults] = useState<SupportMeasure[] | null>(() =>
@@ -189,7 +289,8 @@ export function PodborForm({
       pregnant: pregnant ?? false,
       expectingChildNumber: pregnant ? expectingNumber : null,
       hasChildren: hasChildren ?? false,
-      childrenCount: hasChildren ? (childrenCount ?? 1) : 0,
+      childrenCount: hasChildren ? (childCount || 1) : 0,
+      childrenAges: hasChildren ? filledAges : [],
       youngestChildAgeYears: hasChildren ? youngestAge : null,
       region,
       incomePm,
@@ -331,35 +432,80 @@ export function PodborForm({
 
         {hasChildren && (
           <>
-            <Question label="Сколько у вас детей?">
-              <Choice active={childrenCount === 1} onClick={() => setChildrenCount(1)}>
-                1
-              </Choice>
-              <Choice active={childrenCount === 2} onClick={() => setChildrenCount(2)}>
-                2
-              </Choice>
-              <Choice active={childrenCount === 3} onClick={() => setChildrenCount(3)}>
-                3 и больше
-              </Choice>
-            </Question>
-
             <div>
-              <p className="text-sm font-medium">Возраст младшего ребёнка?</p>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <Choice active={youngestAge === 0} onClick={() => setYoungestAge(0)}>
-                  до 1 года
-                </Choice>
-                <Choice active={youngestAge === 2} onClick={() => setYoungestAge(2)}>
-                  1–3 года
-                </Choice>
-                <Choice active={youngestAge === 6} onClick={() => setYoungestAge(6)}>
-                  3–7 лет
-                </Choice>
-                <Choice active={youngestAge === 8} onClick={() => setYoungestAge(8)}>
-                  старше 7 лет
-                </Choice>
+              <p className="text-sm font-medium">Сколько у вас детей?</p>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {COUNT_OPTIONS.map((o) => (
+                  <Choice
+                    key={o.value}
+                    active={childrenCount === o.value}
+                    onClick={() => {
+                      setChildrenCount(o.value);
+                      // Ушли с «10 и более» — точное число больше не нужно.
+                      if (o.value !== MANY_CHILDREN) setExactCount("");
+                    }}
+                  >
+                    {o.label}
+                  </Choice>
+                ))}
               </div>
             </div>
+
+            {childrenCount === MANY_CHILDREN && (
+              <div>
+                <p className="text-sm font-medium">Укажите точное число детей</p>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={MANY_CHILDREN}
+                  max={MAX_CHILDREN}
+                  value={exactCount}
+                  onChange={(e) => setExactCount(e.target.value)}
+                  placeholder="например, 11"
+                  aria-invalid={tooManyChildren}
+                  className={cn(
+                    "mt-2 w-full rounded-xl border bg-white py-2.5 pl-3 pr-3 text-sm shadow-sm focus:outline-none",
+                    tooManyChildren
+                      ? "border-red-500 text-red-700 focus:border-red-600"
+                      : "border-black/[0.08] focus:border-[#1B3A6B]/40",
+                  )}
+                />
+                {tooManyChildren && (
+                  <p role="alert" className="mt-2 text-sm font-medium text-red-600">
+                    Максимальное число для ввода — 20. Если детей больше, впишите
+                    20. Подбор мер от этого не изменится.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {childCount === 1 && (
+              <div>
+                <p className="text-sm font-medium">Укажите возраст ребёнка</p>
+                <div className="mt-2">
+                  <AgeSelect
+                    value={childrenAges[0] ?? null}
+                    onChange={(v) => setAgeAt(0, v)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {childCount > 1 && (
+              <div>
+                <p className="text-sm font-medium">Укажите возраст каждого ребёнка</p>
+                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2.5">
+                  {childrenAges.map((age, i) => (
+                    <label key={i} className="block">
+                      <span className="text-xs text-muted-foreground">
+                        {i + 1}-й ребёнок
+                      </span>
+                      <AgeSelect value={age} onChange={(v) => setAgeAt(i, v)} />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -501,10 +647,17 @@ export function PodborForm({
         </Question>
       </div>
 
+      {/* Пока в «точном числе детей» стоит больше 20, окошки возраста не
+          показываются — отправлять такую анкету нечему. */}
       <button
         type="button"
         onClick={handleSubmit}
-        className={cn(buttonVariants(), "mt-8 h-12 w-full text-base")}
+        disabled={tooManyChildren}
+        className={cn(
+          buttonVariants(),
+          "mt-8 h-12 w-full text-base",
+          tooManyChildren && "pointer-events-none opacity-50",
+        )}
       >
         Показать подходящие меры
       </button>

@@ -273,6 +273,14 @@ export interface UserProfile {
   expectingChildNumber: number | null;
   hasChildren: boolean;
   childrenCount: number;
+  /**
+   * Возраст каждого ребёнка по отдельности (лет), 0…18, где 18 — «18 и старше».
+   * Длина совпадает с childrenCount; незаполненные позиции сюда не попадают.
+   * Движок подбора смотрит на youngestChildAgeYears — он выводится отсюда как
+   * минимум, — но сами возрасты нужны, чтобы позже подбирать меры, привязанные
+   * к возрасту конкретного ребёнка (школьные, дошкольные, студенческие).
+   */
+  childrenAges: number[];
   youngestChildAgeYears: number | null;
   region: string;
   /**
