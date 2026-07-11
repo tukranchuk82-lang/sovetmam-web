@@ -41,12 +41,24 @@ function getCriteria(fd: FormData): MeasureInput["criteria"] {
   if (fd.get("criteria_requiresSvoFamily")) c.requiresSvoFamily = true;
   if (fd.get("criteria_requiresSingleParent")) c.requiresSingleParent = true;
   if (fd.get("criteria_requiresStudent")) c.requiresStudent = true;
+  if (fd.get("criteria_requiresParentUnder35")) c.requiresParentUnder35 = true;
+  if (fd.get("criteria_requiresDisabledParent")) c.requiresDisabledParent = true;
+  if (fd.get("criteria_requiresFosterParent")) c.requiresFosterParent = true;
+  if (fd.get("criteria_requiresSelfEmployed")) c.requiresSelfEmployed = true;
+  if (fd.get("criteria_requiresEntrepreneur")) c.requiresEntrepreneur = true;
 
   const minChildren = getOptionalString(fd, "criteria_minChildren");
   if (minChildren) c.minChildren = Number(minChildren);
 
   const maxAge = getOptionalString(fd, "criteria_maxYoungestChildAgeYears");
   if (maxAge) c.maxYoungestChildAgeYears = Number(maxAge);
+
+  // Шкала дохода: только 1 / 1.5 / 2 ПМ — иначе движок правил сравнивает
+  // с порогом, которого нет ни в одном варианте анкеты.
+  const maxIncomePm = getOptionalString(fd, "criteria_maxIncomePm");
+  if (maxIncomePm === "1" || maxIncomePm === "1.5" || maxIncomePm === "2") {
+    c.maxIncomePm = Number(maxIncomePm) as 1 | 1.5 | 2;
+  }
 
   const regions = getList(fd, "criteria_regions");
   if (regions.length > 0) c.regions = regions;

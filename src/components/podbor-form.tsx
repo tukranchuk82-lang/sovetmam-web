@@ -11,6 +11,7 @@ import {
   matchMeasures,
   pluralMeasures,
   REGIONS,
+  type IncomePm,
   type SupportMeasure,
   type UserProfile,
 } from "@/lib/measures";
@@ -76,8 +77,20 @@ function YesNo({
   );
 }
 
+/**
+ * Доход из сохранённой анкеты. Анкеты, заполненные до появления шкалы, знают
+ * только булев lowIncome: «да» означало «ниже ПМ», то есть группу «до 1 ПМ».
+ * «Нет» не говорит ничего о кратности (1,5 или 2 ПМ) — оставляем null, пока
+ * пользователь не переответит.
+ */
+function toIncomePm(v: Partial<UserProfile>): IncomePm | null {
+  if (v.incomePm === 1 || v.incomePm === 1.5 || v.incomePm === 2) return v.incomePm;
+  return v.lowIncome ? 1 : null;
+}
+
 // Нормализует сохранённую анкету (jsonb из профиля) в полный UserProfile.
 function toProfile(v: Partial<UserProfile>): UserProfile {
+  const incomePm = toIncomePm(v);
   return {
     pregnant: !!v.pregnant,
     hasChildren: !!v.hasChildren,
@@ -85,12 +98,18 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     youngestChildAgeYears:
       v.youngestChildAgeYears == null ? null : Number(v.youngestChildAgeYears),
     region: String(v.region ?? ""),
-    lowIncome: !!v.lowIncome,
+    incomePm,
+    lowIncome: incomePm === 1,
     disabledChild: !!v.disabledChild,
     mortgageIntent: !!v.mortgageIntent,
     svoFamily: !!v.svoFamily,
     singleParent: !!v.singleParent,
     student: !!v.student,
+    parentUnder35: !!v.parentUnder35,
+    selfEmployed: !!v.selfEmployed,
+    entrepreneur: !!v.entrepreneur,
+    disabledParent: !!v.disabledParent,
+    fosterParent: !!v.fosterParent,
   };
 }
 
@@ -112,12 +131,22 @@ export function PodborForm({
   const [youngestAge, setYoungestAge] = useState<number | null>(saved?.youngestChildAgeYears ?? null);
   const [isCitizen, setIsCitizen] = useState<boolean | null>(saved ? (saved.region ? true : null) : null);
   const [region, setRegion] = useState(saved?.region ?? "");
-  const [lowIncome, setLowIncome] = useState<boolean | null>(saved?.lowIncome ?? null);
+  // «Выше 2 ПМ» — это не отсутствие ответа, поэтому шкала хранит отдельный
+  // флаг «ответил» (incomeAnswered) рядом со значением (null = выше 2 ПМ).
+  const [incomePm, setIncomePm] = useState<IncomePm | null>(saved ? toIncomePm(saved) : null);
+  const [incomeAnswered, setIncomeAnswered] = useState(
+    saved ? saved.incomePm !== undefined || !!saved.lowIncome : false,
+  );
   const [mortgageIntent, setMortgageIntent] = useState<boolean | null>(saved?.mortgageIntent ?? null);
   const [singleParent, setSingleParent] = useState<boolean | null>(saved?.singleParent ?? null);
   const [svoFamily, setSvoFamily] = useState<boolean | null>(saved?.svoFamily ?? null);
   const [student, setStudent] = useState<boolean | null>(saved?.student ?? null);
   const [disabledChild, setDisabledChild] = useState<boolean | null>(saved?.disabledChild ?? null);
+  const [parentUnder35, setParentUnder35] = useState<boolean | null>(saved?.parentUnder35 ?? null);
+  const [selfEmployed, setSelfEmployed] = useState<boolean | null>(saved?.selfEmployed ?? null);
+  const [entrepreneur, setEntrepreneur] = useState<boolean | null>(saved?.entrepreneur ?? null);
+  const [disabledParent, setDisabledParent] = useState<boolean | null>(saved?.disabledParent ?? null);
+  const [fosterParent, setFosterParent] = useState<boolean | null>(saved?.fosterParent ?? null);
 
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
   const [results, setResults] = useState<SupportMeasure[] | null>(() =>
@@ -141,12 +170,20 @@ export function PodborForm({
       childrenCount: hasChildren ? (childrenCount ?? 1) : 0,
       youngestChildAgeYears: hasChildren ? youngestAge : null,
       region,
-      lowIncome: lowIncome ?? false,
+      incomePm,
+      // Выводим из шкалы, а не спрашиваем отдельно: 46 мер размечены
+      // requiresLowIncome, и «ниже ПМ» — это ровно группа «до 1 ПМ».
+      lowIncome: incomePm === 1,
       disabledChild: disabledChild ?? false,
       mortgageIntent: mortgageIntent ?? false,
       svoFamily: svoFamily ?? false,
       singleParent: singleParent ?? false,
       student: student ?? false,
+      parentUnder35: parentUnder35 ?? false,
+      selfEmployed: selfEmployed ?? false,
+      entrepreneur: entrepreneur ?? false,
+      disabledParent: disabledParent ?? false,
+      fosterParent: fosterParent ?? false,
     };
     submitted.current = true;
     setResults(matchMeasures(profile, measures));
@@ -324,8 +361,60 @@ export function PodborForm({
           </p>
         )}
 
-        <Question label="Доход на человека ниже прожиточного минимума?">
-          <YesNo value={lowIncome} onChange={setLowIncome} />
+        {/* Доход — шкала, а не да/нет: меры задают потолок «до 1 / 1,5 / 2 ПМ»,
+            и мера с потолком 2 ПМ должна показываться и тем, у кого доход
+            ниже 1 ПМ. Выбранное значение — верхняя граница группы. */}
+        <div>
+          <p className="text-sm font-medium">
+            Доход на человека в семье (в прожиточных минимумах)
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Choice
+              active={incomeAnswered && incomePm === 1}
+              onClick={() => {
+                setIncomePm(1);
+                setIncomeAnswered(true);
+              }}
+            >
+              до 1 ПМ
+            </Choice>
+            <Choice
+              active={incomeAnswered && incomePm === 1.5}
+              onClick={() => {
+                setIncomePm(1.5);
+                setIncomeAnswered(true);
+              }}
+            >
+              от 1 до 1,5 ПМ
+            </Choice>
+            <Choice
+              active={incomeAnswered && incomePm === 2}
+              onClick={() => {
+                setIncomePm(2);
+                setIncomeAnswered(true);
+              }}
+            >
+              от 1,5 до 2 ПМ
+            </Choice>
+            <Choice
+              active={incomeAnswered && incomePm === null}
+              onClick={() => {
+                setIncomePm(null);
+                setIncomeAnswered(true);
+              }}
+            >
+              выше 2 ПМ
+            </Choice>
+          </div>
+        </div>
+
+        <Question label="Возраст родителей">
+          <Choice active={parentUnder35 === true} onClick={() => setParentUnder35(true)}>
+            до 35 лет
+          </Choice>
+          <Choice active={parentUnder35 === false} onClick={() => setParentUnder35(false)}>
+            35 лет и старше
+          </Choice>
         </Question>
 
         <Question label="Планируете покупку жилья или ипотеку?">
@@ -346,6 +435,22 @@ export function PodborForm({
 
         <Question label="В семье есть ребёнок-инвалид или человек с ОВЗ?">
           <YesNo value={disabledChild} onChange={setDisabledChild} />
+        </Question>
+
+        <Question label="Кто-то из родителей имеет инвалидность?">
+          <YesNo value={disabledParent} onChange={setDisabledParent} />
+        </Question>
+
+        <Question label="Вы приёмный родитель, опекун или усыновитель?">
+          <YesNo value={fosterParent} onChange={setFosterParent} />
+        </Question>
+
+        <Question label="Вы самозанятый?">
+          <YesNo value={selfEmployed} onChange={setSelfEmployed} />
+        </Question>
+
+        <Question label="Вы индивидуальный предприниматель?">
+          <YesNo value={entrepreneur} onChange={setEntrepreneur} />
         </Question>
       </div>
 

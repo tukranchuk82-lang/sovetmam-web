@@ -16,7 +16,9 @@ type IconType = ComponentType<{ className?: string }>;
 export const SEGMENT_ICONS: Record<SegmentId, IconType> = {
   "expecting-first": Baby,
   "expecting-second": Baby,
-  "expecting-third-plus": Users,
+  "expecting-third": Users,
+  "expecting-fourth": Users,
+  "expecting-fifth-plus": Users,
   "student-family": GraduationCap,
   "single-parent": User,
   "svo-family": Shield,

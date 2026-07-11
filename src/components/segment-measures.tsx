@@ -55,12 +55,18 @@ export function SegmentMeasures({
   const hasRegional = measures.some((m) => m.level === "regional");
   const needsRegion = level !== "federal";
 
-  const visible = measures.filter((m) => {
-    if (m.level === "federal") return level !== "regional";
-    // региональная мера
-    if (level === "federal") return false;
-    return regionMatches(m, region);
-  });
+  const visible = measures
+    .filter((m) => {
+      if (m.level === "federal") return level !== "regional";
+      // региональная мера
+      if (level === "federal") return false;
+      return regionMatches(m, region);
+    })
+    // Федеральные меры — всегда раньше региональных. Без этого порядок
+    // определялся sort_order из базы, где уровни могли идти вперемешку.
+    // Array.prototype.sort стабилен (ES2019+), так что порядок мер внутри
+    // каждого уровня (sort_order) не меняется.
+    .sort((a, b) => (a.level === "federal" ? 0 : 1) - (b.level === "federal" ? 0 : 1));
 
   function chooseRegion(r: string) {
     setRegion(r);

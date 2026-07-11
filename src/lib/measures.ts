@@ -9,7 +9,9 @@ export type SupportLevel = "federal" | "regional";
 export type SegmentId =
   | "expecting-first"
   | "expecting-second"
-  | "expecting-third-plus"
+  | "expecting-third"
+  | "expecting-fourth"
+  | "expecting-fifth-plus"
   | "student-family"
   | "single-parent"
   | "svo-family"
@@ -35,9 +37,19 @@ export const SEGMENTS: Segment[] = [
     short: "Поддержка при рождении второго малыша.",
   },
   {
-    id: "expecting-third-plus",
-    title: "В ожидании третьего и последующих детей",
-    short: "Меры для будущих многодетных семей.",
+    id: "expecting-third",
+    title: "В ожидании третьего ребёнка",
+    short: "Меры для семей, готовящихся стать многодетными.",
+  },
+  {
+    id: "expecting-fourth",
+    title: "В ожидании четвёртого ребёнка",
+    short: "Поддержка многодетных семей при рождении четвёртого малыша.",
+  },
+  {
+    id: "expecting-fifth-plus",
+    title: "В ожидании пятого и последующих детей",
+    short: "Меры для больших многодетных семей.",
   },
   {
     id: "student-family",
@@ -188,6 +200,13 @@ export const REGIONS = [
   "Ярославская область",
 ] as const;
 
+/**
+ * Доход семьи на человека, в прожиточных минимумах — то, что выбрал
+ * пользователь. Хранится верхняя граница его группы; `null` — «выше 2 ПМ»
+ * либо вопрос не заполнен.
+ */
+export type IncomePm = 1 | 1.5 | 2;
+
 /** Условия, при которых мера подходит пользователю (движок правил). */
 export interface EligibilityCriteria {
   /** Мера для семьи: подходит, если пользователь ждёт ребёнка ИЛИ уже есть дети. */
@@ -196,12 +215,26 @@ export interface EligibilityCriteria {
   requiresChildren?: boolean;
   minChildren?: number;
   maxYoungestChildAgeYears?: number;
+  /** Доход ниже прожиточного минимума. Эквивалент maxIncomePm: 1. */
   requiresLowIncome?: boolean;
+  /**
+   * Потолок дохода на человека в ПМ. Мера с `maxIncomePm: 2` подходит всем,
+   * чей доход не выше 2 ПМ, то есть и группе «до 1 ПМ», и «до 1,5 ПМ».
+   */
+  maxIncomePm?: IncomePm;
   requiresDisabledChild?: boolean;
   requiresMortgageIntent?: boolean;
   requiresSvoFamily?: boolean;
   requiresSingleParent?: boolean;
   requiresStudent?: boolean;
+  /** Мера только для родителей младше 35 лет («молодая семья»). */
+  requiresParentUnder35?: boolean;
+  requiresSelfEmployed?: boolean;
+  requiresEntrepreneur?: boolean;
+  /** Инвалидность у самого родителя (не у ребёнка — для того requiresDisabledChild). */
+  requiresDisabledParent?: boolean;
+  /** Приёмные родители, опекуны, попечители, усыновители. */
+  requiresFosterParent?: boolean;
   /** Только для региональных мер: список регионов, где мера действует. */
   regions?: string[];
 }
@@ -232,12 +265,26 @@ export interface UserProfile {
   childrenCount: number;
   youngestChildAgeYears: number | null;
   region: string;
+  /**
+   * Доход на человека: верхняя граница выбранной группы в ПМ.
+   * `null` — «выше 2 ПМ» либо пользователь не ответил.
+   */
+  incomePm: IncomePm | null;
+  /**
+   * Устаревшее: доход ниже ПМ. Оставлено, потому что 46 мер размечены
+   * requiresLowIncome. Всегда выводится из incomePm — отдельно не задавать.
+   */
   lowIncome: boolean;
   disabledChild: boolean;
   mortgageIntent: boolean;
   svoFamily: boolean;
   singleParent: boolean;
   student: boolean;
+  parentUnder35: boolean;
+  selfEmployed: boolean;
+  entrepreneur: boolean;
+  disabledParent: boolean;
+  fosterParent: boolean;
 }
 
 /** Правильное склонение: «1 мера», «2 меры», «5 мер». */
@@ -283,11 +330,21 @@ export function isEligible(profile: UserProfile, m: SupportMeasure): boolean {
     return false;
   }
   if (c.requiresLowIncome && !profile.lowIncome) return false;
+  // Порог дохода: мера видна, если доход пользователя не выше её потолка.
+  // Неизвестный доход (null = выше 2 ПМ или без ответа) не проходит ни один порог.
+  if (c.maxIncomePm != null) {
+    if (profile.incomePm == null || profile.incomePm > c.maxIncomePm) return false;
+  }
   if (c.requiresDisabledChild && !profile.disabledChild) return false;
   if (c.requiresMortgageIntent && !profile.mortgageIntent) return false;
   if (c.requiresSvoFamily && !profile.svoFamily) return false;
   if (c.requiresSingleParent && !profile.singleParent) return false;
   if (c.requiresStudent && !profile.student) return false;
+  if (c.requiresParentUnder35 && !profile.parentUnder35) return false;
+  if (c.requiresSelfEmployed && !profile.selfEmployed) return false;
+  if (c.requiresEntrepreneur && !profile.entrepreneur) return false;
+  if (c.requiresDisabledParent && !profile.disabledParent) return false;
+  if (c.requiresFosterParent && !profile.fosterParent) return false;
   if (c.regions && c.regions.length > 0) {
     if (!profile.region || !c.regions.includes(profile.region)) return false;
   }

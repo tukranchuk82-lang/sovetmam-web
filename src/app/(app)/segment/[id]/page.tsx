@@ -7,7 +7,7 @@ import { SegmentMeasures } from "@/components/segment-measures";
 import { SEGMENT_ICONS } from "@/components/segment-icon";
 import { SEGMENTS, getSegment, type SegmentId } from "@/lib/measures";
 import { getMeasuresBySegment } from "@/lib/measures-db";
-import { getCurrentDemoUser } from "@/lib/demo-auth";
+import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
 
 export function generateStaticParams() {
@@ -36,12 +36,19 @@ export default async function SegmentPage({
   const list = await getMeasuresBySegment(segment.id as SegmentId);
   const Icon = SEGMENT_ICONS[segment.id];
 
-  // Регион: сначала из cookie (выбор пользователя), иначе — из профиля
-  // авторизованного пользователя. Нет ни там, ни там → спросим на клиенте.
+  // Регион: сначала из cookie (пользователь явно выбрал регион на этом
+  // экране), иначе — из анкеты подбора (app_users.survey.region), если
+  // пользователь авторизован и её заполнял. Нет ни там, ни там → спросим
+  // на клиенте.
+  // Было getCurrentDemoUser() — демо-режим сняли в июле, эта функция больше
+  // никогда не возвращает пользователя, поэтому регион реальных
+  // авторизованных пользователей тут никогда не подхватывался.
   const cookieStore = await cookies();
-  const user = await getCurrentDemoUser();
+  const user = await getCurrentAppUser();
+  const surveyRegion =
+    typeof user?.survey?.region === "string" ? user.survey.region : null;
   const initialRegion =
-    cookieStore.get(REGION_COOKIE)?.value ?? user?.region ?? null;
+    cookieStore.get(REGION_COOKIE)?.value || surveyRegion || null;
 
   return (
     <div className="px-4 py-5">

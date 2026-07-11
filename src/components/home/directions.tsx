@@ -30,34 +30,38 @@ const CIRCLE = "#bbc1cc"; // фоновый круг
 const T1 = "#15234A";
 const T2 = "#5E6785";
 
+// Направления — это те же 15 тем, что и плитки-«лепестки» (LIFE_CATEGORIES),
+// поэтому ведут на тот же роут /topic/[key]. Раньше вели на
+// /catalog?category=…, но каталог параметр не читал (открывался полный список),
+// а маппинг на 9 значений `category` был лоссовым: ЖКХ и Жильё давали
+// одинаковую выдачу, Вузы = Образование, а Спорт/Магазины/Товары пары не имели
+// вовсе. У /topic/[key] разметка мульти-категорийная и точная.
 interface Direction {
   icon: LucideIcon;
   label: string;
-  category?: string; // категория меры в БД (для фильтра каталога)
+  topic: string; // ключ темы, см. src/app/(app)/topic/[key]/page.tsx
 }
 
 const DIRECTIONS: Direction[] = [
-  { icon: RussianRuble, label: "Деньги", category: "Выплаты и пособия" },
-  { icon: Heart, label: "Здоровье", category: "Здоровье" },
-  { icon: Home, label: "Жильё", category: "Жильё и ипотека" },
-  { icon: Droplet, label: "ЖКХ", category: "Жильё и ипотека" },
-  { icon: Bus, label: "Проезд", category: "Транспорт" },
-  { icon: BookOpen, label: "Образование", category: "Образование" },
-  { icon: Users, label: "Работодатели", category: "Работа и занятость" },
-  { icon: GraduationCap, label: "Вузы", category: "Образование" },
-  { icon: Sun, label: "Отдых", category: "Культура и отдых" },
-  { icon: Drama, label: "Культура", category: "Культура и отдых" },
-  { icon: Dumbbell, label: "Спорт" },
-  { icon: Calculator, label: "Налоги", category: "Налоги и льготы" },
-  { icon: HandHeart, label: "Соцподдержка", category: "Помощь и сопровождение" },
-  { icon: ShoppingBag, label: "Магазины" },
-  { icon: Baby, label: "Товары для детей" },
+  { icon: RussianRuble, label: "Деньги", topic: "money" },
+  { icon: Heart, label: "Здоровье", topic: "health" },
+  { icon: Home, label: "Жильё", topic: "housing" },
+  { icon: Droplet, label: "ЖКХ", topic: "utilities" },
+  { icon: Bus, label: "Проезд", topic: "transport" },
+  { icon: BookOpen, label: "Образование", topic: "education" },
+  { icon: Users, label: "Работодатели", topic: "employers" },
+  { icon: GraduationCap, label: "Вузы", topic: "vuz" },
+  { icon: Sun, label: "Отдых", topic: "leisure" },
+  { icon: Drama, label: "Культура", topic: "culture" },
+  { icon: Dumbbell, label: "Спорт", topic: "sport" },
+  { icon: Calculator, label: "Налоги", topic: "taxes" },
+  { icon: HandHeart, label: "Соцподдержка", topic: "social" },
+  { icon: ShoppingBag, label: "Магазины", topic: "shops" },
+  { icon: Baby, label: "Товары для детей", topic: "kids-goods" },
 ];
 
 function hrefFor(d: Direction) {
-  return d.category
-    ? `/catalog?category=${encodeURIComponent(d.category)}`
-    : "/catalog";
+  return `/topic/${d.topic}`;
 }
 
 export function Directions() {

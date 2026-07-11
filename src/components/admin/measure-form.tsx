@@ -31,12 +31,17 @@ function Field({
 const CRITERIA_FLAGS: Array<{ key: string; label: string }> = [
   { key: "requiresPregnancy", label: "беременность" },
   { key: "requiresChildren", label: "есть дети" },
-  { key: "requiresLowIncome", label: "низкий доход" },
+  { key: "requiresLowIncome", label: "низкий доход (до 1 ПМ)" },
   { key: "requiresDisabledChild", label: "ребёнок-инвалид" },
   { key: "requiresMortgageIntent", label: "планирует ипотеку" },
   { key: "requiresSvoFamily", label: "семья участника СВО" },
   { key: "requiresSingleParent", label: "единственный родитель" },
   { key: "requiresStudent", label: "родители-студенты" },
+  { key: "requiresParentUnder35", label: "родители до 35 лет" },
+  { key: "requiresDisabledParent", label: "родитель-инвалид" },
+  { key: "requiresFosterParent", label: "приёмный родитель / опекун" },
+  { key: "requiresSelfEmployed", label: "самозанятый" },
+  { key: "requiresEntrepreneur", label: "ИП" },
 ];
 
 export function MeasureForm({
@@ -196,6 +201,23 @@ export function MeasureForm({
               defaultValue={initial?.criteria.maxYoungestChildAgeYears ?? ""}
               className={inputCls}
             />
+          </Field>
+        </div>
+        <div className="mt-3">
+          <Field
+            label="Потолок дохода на человека"
+            hint="Мера подойдёт всем, чей доход не выше указанного порога. «До 1 ПМ» — то же, что галочка «низкий доход»."
+          >
+            <select
+              name="criteria_maxIncomePm"
+              defaultValue={initial?.criteria.maxIncomePm?.toString() ?? ""}
+              className={inputCls}
+            >
+              <option value="">не ограничен</option>
+              <option value="1">до 1 ПМ</option>
+              <option value="1.5">до 1,5 ПМ</option>
+              <option value="2">до 2 ПМ</option>
+            </select>
           </Field>
         </div>
         <Field label="Регионы (по одному на строку, для региональных правил)">

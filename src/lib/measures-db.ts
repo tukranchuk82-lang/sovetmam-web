@@ -105,6 +105,55 @@ export async function getMeasuresBySegment(
   return (data as MeasureRow[]).map(fromRow);
 }
 
+/**
+ * Меры, относящиеся к семье с детьми (для плиток «Семья с N детьми» /
+ * «Многодетная семья»). Считаем мерой про семью с детьми, если она требует
+ * детей/семью, размечена сегментом или задаёт порог по числу детей. Меры
+ * стадии беременности (requiresPregnancy) — это домен плиток «Ждём N-го»,
+ * у сложившейся семьи их не показываем.
+ */
+async function getFamilyMeasures(): Promise<SupportMeasure[]> {
+  // Через getAllMeasures — у него уже правильная постраничная загрузка
+  // (иначе PostgREST молча вернёт только первые ~1000 из 2000+ мер).
+  const measures = await getAllMeasures();
+  return measures.filter((m) => {
+    const c = m.criteria;
+    if (c.requiresPregnancy) return false;
+    return Boolean(
+      c.requiresChildren ||
+        c.requiresFamily ||
+        c.minChildren != null ||
+        (m.segments?.length ?? 0) > 0,
+    );
+  });
+}
+
+/**
+ * Плитки «Семья с N детьми». Мера подходит семье с N детьми, если требует
+ * не больше N детей: (minChildren ?? 1) ≤ N. Порог считаем по количеству,
+ * возраст ребёнка не важен (мера про школьника доступна и семье с 1 ребёнком).
+ */
+export async function getMeasuresForFamilySize(
+  childrenCount: number,
+): Promise<SupportMeasure[]> {
+  const measures = await getFamilyMeasures();
+  return measures.filter((m) => (m.criteria.minChildren ?? 1) <= childrenCount);
+}
+
+/**
+ * «Многодетная семья» — по ВИТРИННОЙ категории `many-children`, а не по порогу
+ * minChildren ≥ 3. Разница принципиальная: мера «многодетным ИЛИ малоимущим»
+ * многодетным положена, но порог по числу детей у неё не стоит (иначе анкета
+ * зря потребовала бы многодетность от малоимущей семьи с одним ребёнком).
+ * По порогу такая мера из плитки выпадала; по категории — попадает.
+ */
+export async function getMeasuresForManyChildren(): Promise<SupportMeasure[]> {
+  const measures = await getFamilyMeasures();
+  return measures.filter((m) =>
+    (m.segments as unknown as string[]).includes("many-children"),
+  );
+}
+
 /** Считает кол-во опубликованных мер для каждого сегмента (один SQL-запрос). */
 export async function getMeasureCountsBySegment(): Promise<
   Record<string, number>
