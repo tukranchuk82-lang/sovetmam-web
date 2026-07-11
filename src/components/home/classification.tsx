@@ -89,8 +89,14 @@ export function Classification() {
       // /#classification, чтобы вернуть человека к дороге с пинами, а не на
       // самый верх главной.
       id="classification"
-      className="scroll-mt-4 px-5 pb-10 pt-6"
-      style={{ fontFamily: "var(--font-inter), sans-serif", color: T1 }}
+      className="px-5 pb-10 pt-6"
+      style={{
+        fontFamily: "var(--font-inter), sans-serif",
+        color: T1,
+        // Запас под плавающую шапку: без него якорь подводит верх секции ровно
+        // под неё, и заголовок оказывается скрыт.
+        scrollMarginTop: "calc(var(--hdr-h, 76px) + 8px)",
+      }}
     >
       {/* Заголовок */}
       <h2

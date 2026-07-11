@@ -40,6 +40,7 @@ export function AppShell({
   const transparent = section === "catalog";
 
   const headerRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
   const [headerH, setHeaderH] = useState(76);
 
   useEffect(() => {
@@ -51,6 +52,21 @@ export function AppShell({
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  // Прокрутка живёт в <main>, а не в окне. Next при переходе прокручивает окно —
+  // а оно не прокручивается, поэтому main оставался там же, где его бросили на
+  // прошлом экране: новая страница открывалась с середины, заголовок оказывался
+  // под шапкой. Сбрасываем прокрутку сами.
+  // Если в адресе есть якорь (кнопка «назад» ведёт на /#classification) —
+  // прокручиваем к нему, а не наверх.
+  useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const hash = window.location.hash;
+    const target = hash ? document.querySelector(hash) : null;
+    if (target) target.scrollIntoView();
+    else el.scrollTop = 0;
+  }, [pathname]);
 
   return (
     <div className="relative mx-auto flex h-dvh max-w-[480px] flex-col overflow-hidden bg-white shadow-2xl">
@@ -133,6 +149,7 @@ export function AppShell({
         </header>
 
         <main
+          ref={mainRef}
           className="absolute inset-0 overflow-y-auto overscroll-contain bg-background text-foreground"
           style={{ "--hdr-h": `${headerH}px` } as React.CSSProperties}
         >
