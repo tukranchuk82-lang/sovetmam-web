@@ -236,6 +236,15 @@ export interface EligibilityCriteria {
   requiresPregnancy?: boolean;
   requiresChildren?: boolean;
   minChildren?: number;
+  /**
+   * Сколько детей должны УЧИТЬСЯ В ШКОЛЕ ОДНОВРЕМЕННО (возраст 7–17 лет).
+   *
+   * Это не то же самое, что число детей в семье. Например, в Мордовии пособие к
+   * учебному году положено, только если в школе учатся сразу четверо детей: мама
+   * шестерых, у которой школьник один, права на него не имеет. Считается по
+   * возрастам детей из анкеты.
+   */
+  minSchoolChildren?: number;
   maxYoungestChildAgeYears?: number;
   /** Доход ниже прожиточного минимума. Эквивалент maxIncomePm: 1. */
   requiresLowIncome?: boolean;
@@ -404,6 +413,15 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   if (c.requiresPregnancy && !profile.pregnant) return false;
   if (c.requiresChildren && !profile.hasChildren) return false;
   if (c.minChildren && profile.childrenCount < c.minChildren) return false;
+  // Школьники — дети 7–17 лет. Если возрасты в анкете не заполнены, требование
+  // не проверяем: иначе мера пропала бы у тех, кто просто не указал возраст.
+  if (c.minSchoolChildren) {
+    const ages = profile.childrenAges ?? [];
+    if (ages.length > 0) {
+      const schoolKids = ages.filter((a) => a >= 7 && a <= 17).length;
+      if (schoolKids < c.minSchoolChildren) return false;
+    }
+  }
   if (
     c.maxYoungestChildAgeYears != null &&
     (profile.youngestChildAgeYears == null ||
