@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutGrid, MessageSquare, FolderInput, ArrowLeft } from "lucide-react";
+import {
+  LayoutGrid,
+  MessageSquare,
+  FolderInput,
+  ArrowLeft,
+  CalendarCheck,
+} from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { getCurrentAdmin } from "@/lib/user-session";
 import { AdminNavLink } from "@/components/admin/nav-link";
@@ -63,6 +69,12 @@ export default async function AdminLayout({
           </AdminNavLink>
           <AdminNavLink href="/admin" icon={<LayoutGrid className="size-4" />} exact>
             Каталог мер
+          </AdminNavLink>
+          <AdminNavLink
+            href="/admin/verification"
+            icon={<CalendarCheck className="size-4" />}
+          >
+            Сверка
           </AdminNavLink>
         </nav>
       </header>

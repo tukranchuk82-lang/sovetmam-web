@@ -28,8 +28,10 @@ const src = readFileSync("src/lib/measures.ts", "utf8");
 const block = src.match(/export const REGIONS = \[([\s\S]*?)\] as const;/);
 const REGIONS = [...block[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
 
-/** Что сверяем в этот день месяца. */
-export function planFor(day) {
+// Разбивка та же, что в src/lib/verification.ts (её использует админка).
+// Логика продублирована намеренно: скрипт запускается голым node, без сборщика,
+// и импортировать .ts не может. Если правишь здесь — правь и там.
+function planFor(day) {
   if (day === 1) return { kind: "federal", title: "Федеральные меры" };
   const chunks = [];
   let i = 0;
