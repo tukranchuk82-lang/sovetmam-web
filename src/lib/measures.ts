@@ -207,8 +207,30 @@ export const REGIONS = [
  */
 export type IncomePm = 1 | 1.5 | 2;
 
-/** Условия, при которых мера подходит пользователю (движок правил). */
+/**
+ * Условия, при которых мера подходит пользователю (движок правил).
+ *
+ * Все поля складываются через И: мера с requiresChildren + requiresLowIncome
+ * подойдёт только семье, у которой есть дети И низкий доход.
+ *
+ * Но огромная часть мер адресована нескольким группам сразу — «многодетным,
+ * малоимущим и семьям с детьми-инвалидами». Такую меру нельзя описать через И:
+ * она потребовала бы от человека быть всем одновременно. Раньше их оставляли
+ * вовсе без условий — и они вываливались в подбор каждому, из-за чего люди
+ * получали десятки чужих мер. Для них есть `anyOf` — «хотя бы одна из групп».
+ */
 export interface EligibilityCriteria {
+  /**
+   * Мера подходит, если выполнен ХОТЯ БЫ ОДИН из наборов условий.
+   * Проверяется вместе с остальными полями: те по-прежнему через И.
+   *
+   * Пример — «помощь многодетным, малоимущим и семьям с детьми-инвалидами»:
+   *   { requiresChildren: true,
+   *     anyOf: [{ minChildren: 3 }, { requiresLowIncome: true },
+   *             { requiresDisabledChild: true }] }
+   * Дети нужны в любом случае, а дальше достаточно попасть в одну из трёх групп.
+   */
+  anyOf?: EligibilityCriteria[];
   /** Мера для семьи: подходит, если пользователь ждёт ребёнка ИЛИ уже есть дети. */
   requiresFamily?: boolean;
   requiresPregnancy?: boolean;
@@ -361,6 +383,23 @@ export function isEligible(
     if (allowed.length > 0 && !allowed.includes(profile.region)) return false;
   }
 
+  if (!matchesCriteria(profile, c)) return false;
+
+  // Вторая (страховочная) проверка региона: мера могла указать regions, будучи
+  // помечена федеральной. Тоже уважает ignoreRegion — иначе региональные меры
+  // отсеиваются здесь, даже если выше их пропустили.
+  if (!ignoreRegion && c.regions && c.regions.length > 0) {
+    if (!profile.region || !c.regions.includes(profile.region)) return false;
+  }
+  return true;
+}
+
+/**
+ * Проверка набора условий (без региона — им занимается isEligible).
+ * Все поля — через И; `anyOf` — «хотя бы один из вложенных наборов».
+ * Вынесено отдельной функцией, чтобы anyOf проверялся теми же правилами.
+ */
+function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean {
   if (c.requiresFamily && !profile.pregnant && !profile.hasChildren) return false;
   if (c.requiresPregnancy && !profile.pregnant) return false;
   if (c.requiresChildren && !profile.hasChildren) return false;
@@ -399,11 +438,11 @@ export function isEligible(
   if (c.requiresEntrepreneur && !profile.entrepreneur) return false;
   if (c.requiresDisabledParent && !profile.disabledParent) return false;
   if (c.requiresFosterParent && !profile.fosterParent) return false;
-  // Вторая (страховочная) проверка региона: мера могла указать regions, будучи
-  // помечена федеральной. Тоже уважает ignoreRegion — иначе региональные меры
-  // отсеиваются здесь, даже если выше их пропустили.
-  if (!ignoreRegion && c.regions && c.regions.length > 0) {
-    if (!profile.region || !c.regions.includes(profile.region)) return false;
+
+  // «Хотя бы одна из групп» — для мер, адресованных нескольким категориям сразу
+  // («многодетным, малоимущим и семьям с детьми-инвалидами»).
+  if (c.anyOf && c.anyOf.length > 0) {
+    if (!c.anyOf.some((sub) => matchesCriteria(profile, sub))) return false;
   }
   return true;
 }
