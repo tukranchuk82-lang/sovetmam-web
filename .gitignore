@@ -50,3 +50,4 @@ next-env.d.ts
 
 # превью иконок (scripts/preview-icons.mjs) — временный файл
 icons-preview.png
+verification/
