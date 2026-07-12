@@ -53,19 +53,50 @@ export function AppShell({
     return () => ro.disconnect();
   }, []);
 
-  // Прокрутка живёт в <main>, а не в окне. Next при переходе прокручивает окно —
-  // а оно не прокручивается, поэтому main оставался там же, где его бросили на
-  // прошлом экране: новая страница открывалась с середины, заголовок оказывался
-  // под шапкой. Сбрасываем прокрутку сами.
-  // Если в адресе есть якорь (кнопка «назад» ведёт на /#classification) —
-  // прокручиваем к нему, а не наверх.
+  // Прокрутка живёт в <main>, а не в окне, поэтому и «наверх при переходе», и
+  // «вернуть на место при возврате» браузер за нас не сделает — окно не
+  // прокручивается вовсе.
+  //
+  // Новый экран открываем сверху. А вот при возврате НАЗАД восстанавливаем то
+  // место, где человек был: иначе, посмотрев меру из списка и нажав «назад», он
+  // попадал в начало списка и листал заново.
+  //
+  // Позицию запоминаем при уходе со страницы; браузерный «назад» узнаём по
+  // событию popstate (Next не даёт этого напрямую).
+  const scrollPos = useRef<Map<string, number>>(new Map());
+  const isPop = useRef(false);
+  const prevPath = useRef(pathname);
+
+  useEffect(() => {
+    const onPop = () => {
+      isPop.current = true;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
+
+    // Запомнили, где стояли на прошлой странице.
+    if (prevPath.current !== pathname) {
+      scrollPos.current.set(prevPath.current, el.scrollTop);
+      prevPath.current = pathname;
+    }
+
     const hash = window.location.hash;
     const target = hash ? document.querySelector(hash) : null;
-    if (target) target.scrollIntoView();
-    else el.scrollTop = 0;
+    const saved = scrollPos.current.get(pathname);
+
+    if (isPop.current && saved != null) {
+      el.scrollTop = saved; // вернулись назад — на то же место
+    } else if (target) {
+      target.scrollIntoView(); // якорь (кнопка «назад» ведёт на /#classification)
+    } else {
+      el.scrollTop = 0; // обычный переход — с начала страницы
+    }
+    isPop.current = false;
   }, [pathname]);
 
   return (

@@ -115,13 +115,27 @@ export function CatalogBrowser({
   }, [query, level, region, category]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    // Ищем ПО СЛОВАМ, а не по фразе целиком: запрос «Питание для многодетных
+    // Татарстан» не встречается подряд ни в одном заголовке, и поиск подстрокой
+    // не находил ничего. Теперь мера подходит, если в ней есть каждое слово
+    // запроса — где угодно: в названии, описании, регионе или категории.
+    // Слова короче 3 букв («на», «до», «и») пропускаем: они есть везде и только
+    // мешают. Ё/е не различаем — люди набирают и так, и так.
+    const norm = (s: string) => s.toLowerCase().replace(/ё/g, "е");
+    const words = norm(query)
+      .split(/[^a-zа-я0-9]+/i)
+      .filter((w) => w.length >= 3);
+
     return measures.filter((m) => {
       if (level && m.level !== level) return false;
       if (region && m.region !== region) return false;
       if (category && m.category !== category) return false;
-      if (q && !(m.title + " " + m.shortDescription).toLowerCase().includes(q))
-        return false;
+      if (words.length) {
+        const haystack = norm(
+          [m.title, m.shortDescription, m.region ?? "", m.category].join(" "),
+        );
+        if (!words.every((w) => haystack.includes(w))) return false;
+      }
       return true;
     });
   }, [measures, query, level, region, category]);
@@ -377,6 +391,31 @@ export function CatalogBrowser({
           >
             Сбросить фильтры
           </button>
+
+          {/* Поиск не нашёл — предлагаем подбор: человек искал не название меры,
+              а ответ на вопрос «что мне положено». */}
+          <Link
+            href="/podbor"
+            className="mt-5 flex w-full max-w-[340px] items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-white"
+            style={{
+              background:
+                "linear-gradient(135deg, #274A7E 0%, #172A4B 58%, #101D38 100%)",
+              boxShadow: "0 14px 28px -12px rgba(23,42,75,0.55)",
+            }}
+          >
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-white/15">
+              <Sparkles className="size-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold leading-tight">
+                Не нашли нужное? Подберём меры
+              </span>
+              <span className="mt-0.5 block text-[12px] leading-snug text-white/85">
+                Ответьте на вопросы — покажем, что положено вашей семье
+              </span>
+            </span>
+            <ChevronRight className="size-5 shrink-0 text-white/60" />
+          </Link>
         </div>
       )}
       </div>
