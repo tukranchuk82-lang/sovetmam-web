@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { LogIn } from "lucide-react";
 import { OrgName } from "@/components/org-name";
 import { BottomNav } from "@/components/bottom-nav";
+import { InstallBanner } from "@/components/install-banner";
 
 // Единый каркас приложения с посекционным «характером».
 //
@@ -189,7 +190,14 @@ export function AppShell({
               на var(--hdr-h). */}
           {!transparent && <div style={{ height: headerH }} aria-hidden />}
           {children}
+          {/* Запас снизу, чтобы плашка установки не накрывала последнюю карточку */}
+          <div className="h-16" aria-hidden />
         </main>
+
+        {/* Плашка «установите приложение» — над нижним меню, поверх прокрутки.
+            Сама решает, показываться ли: скрыта, если приложение уже стоит или
+            его некуда ставить, и после того, как её закрыли крестиком. */}
+        <InstallBanner />
       </div>
 
       <BottomNav background={NAVY} />
