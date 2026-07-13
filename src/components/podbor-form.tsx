@@ -212,6 +212,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     lowIncome: incomePm === 1,
     disabledChild: !!v.disabledChild,
     specialNeedsChild: !!v.specialNeedsChild,
+    lossOfBreadwinner: !!v.lossOfBreadwinner,
     mortgageIntent: !!v.mortgageIntent,
     svoFamily: !!v.svoFamily,
     singleParent: !!v.singleParent,
@@ -268,6 +269,9 @@ export function PodborForm({
   const [disabledChild, setDisabledChild] = useState<boolean | null>(saved?.disabledChild ?? null);
   const [specialNeedsChild, setSpecialNeedsChild] = useState<boolean | null>(
     saved?.specialNeedsChild ?? null,
+  );
+  const [lossOfBreadwinner, setLossOfBreadwinner] = useState<boolean | null>(
+    saved?.lossOfBreadwinner ?? null,
   );
   const [parentUnder35, setParentUnder35] = useState<boolean | null>(saved?.parentUnder35 ?? null);
   const [selfEmployed, setSelfEmployed] = useState<boolean | null>(saved?.selfEmployed ?? null);
@@ -342,6 +346,7 @@ export function PodborForm({
       lowIncome: incomePm === 1,
       disabledChild: disabledChild ?? false,
       specialNeedsChild: specialNeedsChild ?? false,
+      lossOfBreadwinner: lossOfBreadwinner ?? false,
       mortgageIntent: mortgageIntent ?? false,
       svoFamily: svoFamily ?? false,
       singleParent: singleParent ?? false,
@@ -658,6 +663,13 @@ export function PodborForm({
 
         <Question label="Вы единственный родитель (неполная семья)?">
           <YesNo value={singleParent} onChange={setSingleParent} />
+        </Question>
+
+        {/* Отдельный вопрос: «единственный родитель» и «потеря кормильца» —
+            разные вещи. Из-за того, что мы не спрашивали про второе, пенсия по
+            случаю потери кормильца предлагалась полным семьям. */}
+        <Question label="Кто-то из детей потерял одного или обоих родителей?">
+          <YesNo value={lossOfBreadwinner} onChange={setLossOfBreadwinner} />
         </Question>
 
         <Question label="Кто-то из членов семьи является участником СВО?">

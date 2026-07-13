@@ -246,6 +246,28 @@ export interface EligibilityCriteria {
    */
   minSchoolChildren?: number;
   maxYoungestChildAgeYears?: number;
+  /**
+   * В семье есть ребёнок В ВОЗРАСТЕ ОТ … ДО … лет (включительно).
+   *
+   * Не путать с maxYoungestChildAgeYears — там про самого младшего. Здесь —
+   * «хоть один ребёнок подходящего возраста»: Пушкинская карта нужна подростку
+   * 14–22 лет, неонатальный скрининг — новорождённому, образовательный кредит —
+   * выпускнику. Считается по возрастам детей из анкеты.
+   */
+  hasChildAgedFrom?: number;
+  hasChildAgedTo?: number;
+  /** В семье есть дети, потерявшие одного или обоих родителей (кормильца). */
+  requiresLossOfBreadwinner?: boolean;
+  /**
+   * Мера НЕ участвует в подборе — только в каталоге.
+   *
+   * Есть меры, право на которые зависит от обстоятельств, о которых мы в анкете
+   * не спрашиваем и спрашивать не будем: льготы чернобыльцам, «Гектар» на
+   * Дальнем Востоке, выплаты от работодателя, жильё на селе, социальное такси.
+   * Без этого флага они лезли в подбор каждому и создавали ощущение, что подбор
+   * «выдаёт что попало». В каталоге и в тематических разделах они остаются.
+   */
+  excludeFromMatching?: boolean;
   /** Доход ниже прожиточного минимума. Эквивалент maxIncomePm: 1. */
   requiresLowIncome?: boolean;
   /**
@@ -340,6 +362,8 @@ export interface UserProfile {
   disabledChild: boolean;
   /** Ребёнок с ОВЗ (инвалидности может не быть). */
   specialNeedsChild: boolean;
+  /** В семье есть дети, потерявшие одного или обоих родителей (кормильца). */
+  lossOfBreadwinner: boolean;
   mortgageIntent: boolean;
   svoFamily: boolean;
   singleParent: boolean;
@@ -409,10 +433,20 @@ export function isEligible(
  * Вынесено отдельной функцией, чтобы anyOf проверялся теми же правилами.
  */
 function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean {
+  // Мера показывается только в каталоге — в подборе её быть не должно.
+  if (c.excludeFromMatching) return false;
+
   if (c.requiresFamily && !profile.pregnant && !profile.hasChildren) return false;
   if (c.requiresPregnancy && !profile.pregnant) return false;
   if (c.requiresChildren && !profile.hasChildren) return false;
-  if (c.minChildren && profile.childrenCount < c.minChildren) return false;
+  // Число детей. Для тех, кто ждёт ребёнка, считаем будущее число: женщина,
+  // ожидающая третьего, должна видеть меры «на третьего ребёнка» — оформлять их
+  // всё равно после родов, но знать о них нужно заранее. Отсюда и вопрос анкеты
+  // «какого по счёту ребёнка ожидаете».
+  const effectiveChildren = profile.pregnant
+    ? Math.max(profile.childrenCount + 1, profile.expectingChildNumber ?? 0)
+    : profile.childrenCount;
+  if (c.minChildren && effectiveChildren < c.minChildren) return false;
   // Школьники — дети 7–17 лет. Если возрасты в анкете не заполнены, требование
   // не проверяем: иначе мера пропала бы у тех, кто просто не указал возраст.
   if (c.minSchoolChildren) {
@@ -429,6 +463,22 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   ) {
     return false;
   }
+  // «Есть ребёнок в возрасте от … до …».
+  // Если детей нет вовсе — условие не выполнено (Пушкинская карта не нужна той,
+  // кто только ждёт первенца). Если дети есть, но возрасты в анкете не заполнены,
+  // требование не проверяем — иначе мера пропала бы у того, кто просто не указал
+  // возраст. Меры, которые нужны и будущим родителям, ставят это условие внутрь
+  // anyOf рядом с requiresPregnancy — см. пособие при рождении.
+  if (c.hasChildAgedFrom != null || c.hasChildAgedTo != null) {
+    if (!profile.hasChildren) return false;
+    const ages = profile.childrenAges ?? [];
+    if (ages.length > 0) {
+      const from = c.hasChildAgedFrom ?? 0;
+      const to = c.hasChildAgedTo ?? 18;
+      if (!ages.some((a) => a >= from && a <= to)) return false;
+    }
+  }
+  if (c.requiresLossOfBreadwinner && !profile.lossOfBreadwinner) return false;
   if (c.requiresLowIncome && !profile.lowIncome) return false;
   // Порог дохода: мера видна, если доход пользователя не выше её потолка.
   // Неизвестный доход (null = выше 2 ПМ или без ответа) не проходит ни один порог.
