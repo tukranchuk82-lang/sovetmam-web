@@ -198,12 +198,26 @@ async function renderFavicon(out, sizes, bg) {
 const FAVICON_SIZES = [16, 32, 48];
 
 if (READY) {
-  // Компоновка уже верная — во все файлы кладём картинку целиком.
+  // Обычная иконка ("any") маской не режется — кладём картинку целиком.
   await render("icon-192.png", 192, 1, BG);
   await render("icon-512.png", 512, 1, BG);
-  await render("icon-maskable-192.png", 192, 1, BG);
-  await render("icon-maskable-512.png", 512, 1, BG);
-  await render("apple-touch-icon.png", 180, 1, BG);
+
+  // А маскируемую Android рисует под круглой маской и срезает всё, что дальше
+  // 40% от центра. Раньше и её клали целиком («компоновка уже верная») — и на
+  // круге у логотипа срезало низ надписи. Если рисунок выходит за safe zone,
+  // ужимаем его ровно настолько, чтобы вписаться. Фон при этом не страдает: он
+  // сплошной, и уменьшённая картинка ложится на подложку того же цвета.
+  const fit = contentPct > 0.8 ? Math.min(1, 0.8 / contentPct) : 1;
+  if (fit < 1) {
+    console.log(
+      `  (маскируемую ужимаю до ${(fit * 100).toFixed(0)}%, иначе на круглой маске срежется)`,
+    );
+  }
+  await render("icon-maskable-192.png", 192, fit, BG);
+  await render("icon-maskable-512.png", 512, fit, BG);
+
+  // iOS обрезает углы скруглением, но не кругом — ему запаса нужно меньше.
+  await render("apple-touch-icon.png", 180, Math.min(1, fit + 0.1), BG);
   await renderFavicon("src/app/favicon.ico", FAVICON_SIZES, BG);
 } else {
   await render("icon-192.png", 192, 1, null); // "any": обрезки нет, фон прозрачный
