@@ -57,7 +57,7 @@ export default function Home() {
            <div className="absolute right-[-62px] top-[202px] z-0 size-[300px] rounded-full bg-[#EAE6E6] blur-[6px]" /> */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/country-cut.png"
+          src="/country-map.png"
           alt=""
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-[6px] z-0 w-[98%] -translate-x-1/2 opacity-40"
