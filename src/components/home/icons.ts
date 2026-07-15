@@ -25,6 +25,7 @@ import {
   HandHeart,
   ShoppingCart,
   Baby,
+  Store,
 } from "lucide-react";
 
 /** Иконки уровней пирамиды (по id из PYRAMID_LEVELS). */
@@ -35,6 +36,7 @@ export const PYRAMID_ICONS: Record<string, LucideIcon> = {
   employer: Briefcase,
   vuz: GraduationCap,
   nko: Heart,
+  business: Store,
 };
 
 /** Иконки типов мер (по id из MEASURE_TYPES). */

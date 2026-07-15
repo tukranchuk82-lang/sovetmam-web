@@ -993,6 +993,7 @@
 [data-theme="city"] .sm-step span { color: #ffffff !important; }
 [data-theme="city"] .sm-step svg { color: #ffffff !important; fill: transparent !important; }
 [data-theme="city"] .sm-step[data-level="grandparents"] { background: #8e1d2c !important; }
+[data-theme="city"] .sm-step[data-level="business"] { background: #99243a !important; }
 [data-theme="city"] .sm-step[data-level="nko"] { background: #a5293a !important; }
 [data-theme="city"] .sm-step[data-level="vuz"] { background: #be4456 !important; }
 [data-theme="city"] .sm-step[data-level="employer"] { background: #d06b7a !important; }

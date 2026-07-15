@@ -5,7 +5,7 @@ import { SectionHeading } from "./section-heading";
 import { cn } from "@/lib/utils";
 
 // Ширина «ступеней» сверху вниз (%, узкая вершина → широкое основание).
-const WIDTHS = [56, 65, 74, 83, 92, 100];
+const WIDTHS = [50, 57, 65, 74, 83, 92, 100];
 
 // Пастельная радуга по уровням (классы Tailwind — литералами). Как у «Бабушек
 // и дедушек»: чёткая рамка в тон фона + иконка, полностью залитая тем же
@@ -21,6 +21,7 @@ const LEVEL_TINT: Record<
   employer: { box: "border-green-300 bg-green-100", icon: "fill-green-400 text-green-500", fg: "text-green-700" },
   vuz: { box: "border-pink-300 bg-pink-100", icon: "fill-pink-400 text-pink-500", fg: "text-pink-700" },
   nko: { box: "border-blue-300 bg-blue-100", icon: "fill-blue-400 text-blue-500", fg: "text-blue-700" },
+  business: { box: "border-teal-300 bg-teal-100", icon: "fill-teal-400 text-teal-500", fg: "text-teal-700" },
 };
 
 /**

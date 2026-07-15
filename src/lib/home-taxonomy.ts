@@ -16,7 +16,7 @@ export interface PyramidLevel {
   href: string;
 }
 
-/** Снизу вверх: фундамент — федеральные, вершина — НКО. */
+/** Снизу вверх: фундамент — федеральные, вершина — бизнес. */
 export const PYRAMID_LEVELS: PyramidLevel[] = [
   {
     id: "federal",
@@ -59,6 +59,13 @@ export const PYRAMID_LEVELS: PyramidLevel[] = [
     source: "Интернет (сайты и порталы НКО)",
     color: "#d97706",
     href: "/catalog?level=nko",
+  },
+  {
+    id: "business",
+    title: "Бизнес",
+    source: "Коммерческие компании · магазины · сервисы",
+    color: "#0d9488",
+    href: "/catalog?level=business",
   },
 ];
 
