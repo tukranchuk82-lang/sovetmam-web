@@ -372,13 +372,29 @@ export function PodborForm({
   if (results) {
     return (
       <div ref={topRef} className="px-4 py-5">
-        <button
-          type="button"
-          onClick={reset}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <RotateCcw className="size-4" /> Изменить ответы
-        </button>
+        {/* Подборка уже составлена по сохранённой анкете — говорим об этом прямо
+            и даём заметную кнопку сменить ответы, а не бледную строчку. */}
+        <div className="flex items-start gap-3 rounded-2xl border border-[#1B3A6B]/15 bg-[#1B3A6B]/[0.05] p-3.5">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#1B3A6B]/10 text-[#1B3A6B]">
+            <FileEdit className="size-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-[#1A1A1A]">
+              У вас уже есть подборка
+            </p>
+            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+              Меры подобраны по вашей анкете. Если что-то изменилось — обновите
+              ответы, и мы пересоберём список.
+            </p>
+            <button
+              type="button"
+              onClick={reset}
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-[#1B3A6B] px-3.5 py-2 text-xs font-semibold text-white shadow-[0_4px_12px_-4px_rgba(27,58,107,0.45)] transition-all hover:bg-[#16305a] active:scale-[0.98]"
+            >
+              <RotateCcw className="size-3.5" /> Изменить ответы
+            </button>
+          </div>
+        </div>
 
         {results.length > 0 ? (
           <>
