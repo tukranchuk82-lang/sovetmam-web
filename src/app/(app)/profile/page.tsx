@@ -5,6 +5,7 @@ import {
   LogOut,
   MessageSquare,
   FolderInput,
+  CalendarCheck,
   ChevronRight,
   Clock,
   CheckCircle2,
@@ -195,6 +196,12 @@ export default async function ProfilePage() {
                 icon={<MessageSquare className="size-5" />}
                 title="Каталог мер"
                 hint="Добавлять и править меры"
+              />
+              <AdminLink
+                href="/admin/verification"
+                icon={<CalendarCheck className="size-5" />}
+                title="Сверка"
+                hint="Проверять меры по графику"
               />
             </div>
           </section>
