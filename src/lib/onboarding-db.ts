@@ -239,6 +239,7 @@ export async function markMessengerConnected(params: {
   channel: MessengerChannel;
   messengerId?: string | null;
   salebotClientId?: string | null;
+  avatarUrl?: string | null;
 }): Promise<boolean> {
   const sb = createSupabaseAdminClient();
   const update: Record<string, unknown> = {
@@ -247,6 +248,12 @@ export async function markMessengerConnected(params: {
     messenger_connected_at: new Date().toISOString(),
   };
   if (params.salebotClientId) update.salebot_client_id = params.salebotClientId;
+  // Фото из мессенджера пишем, только если оно пришло: пустое значение не должно
+  // затирать уже сохранённую аватарку (мессенджер мог прислать «фото есть» в один
+  // заход и «фото нет» в другой). Свою загруженную фотку/смайлик оно не перебьёт —
+  // за приоритет отвечает resolveUserAvatar.
+  if (params.avatarUrl && /^https?:\/\//i.test(params.avatarUrl))
+    update.messenger_avatar_url = params.avatarUrl;
   if (params.messengerId) {
     if (params.channel === "telegram")
       update.telegram_id = Number(params.messengerId) || null;

@@ -60,7 +60,7 @@ export default async function AdminLayout({
           </div>
         </div>
 
-        <nav className="-mx-1 mt-3 flex gap-1 overflow-x-auto">
+        <nav className="mt-3 flex flex-wrap gap-1.5">
           <AdminNavLink href="/admin/inquiries" icon={<MessageSquare className="size-4" />} badge={newInquiries}>
             Обращения
           </AdminNavLink>

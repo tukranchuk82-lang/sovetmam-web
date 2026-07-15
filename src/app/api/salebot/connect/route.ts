@@ -11,6 +11,9 @@ import {
 //   channel           — telegram | vk | max
 //   messenger_id      — id человека в мессенджере (tg_id / vk_id / max)  [опц.]
 //   salebot_client_id — id клиента в Salebot                            [опц.]
+//   avatar_url        — ссылка на аватарку из мессенджера               [опц.]
+//                       (в Salebot передаём переменную с фото профиля;
+//                        синонимы: photo_url / avatar / photo)
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -62,11 +65,16 @@ async function handle(request: Request): Promise<Response> {
     );
   }
 
+  // Ссылку на фото Salebot может слать под разными именами — принимаем любое.
+  const avatarUrl =
+    get("avatar_url") || get("photo_url") || get("avatar") || get("photo") || null;
+
   const ok = await markMessengerConnected({
     appId,
     channel,
     messengerId: get("messenger_id") || null,
     salebotClientId: get("salebot_client_id") || null,
+    avatarUrl,
   });
   if (!ok) {
     return NextResponse.json(
