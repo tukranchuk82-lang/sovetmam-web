@@ -134,6 +134,32 @@ async function render(out, size, scale, bg) {
 }
 
 /**
+ * READY-иконка крупно и с ровными полями. Обрезаем сплошной фон до эмблемы и
+ * кладём её по центру на квадрат того же цвета, заполняя долю `fill` по большей
+ * стороне. Так композиция максимально крупная, а поля одинаковые со всех сторон.
+ *
+ * Вписываем габаритную РАМКУ эмблемы, а не описанную окружность: у нашей иконки
+ * фон сплошной красный и полей у эмблемы поровну, поэтому под круглой маской
+ * срежутся только красные (пустые) углы — сам рисунок остаётся внутри.
+ */
+async function composeReady(out, size, fill, bg) {
+  const tight = await sharp(SRC).trim({ background: bg, threshold: 28 }).toBuffer();
+  const inner = Math.round(size * fill);
+  const emblem = await sharp(tight)
+    .resize({ width: inner, height: inner, fit: "inside" })
+    .toBuffer();
+  const buf = await sharp({
+    create: { width: size, height: size, channels: 3, background: bg },
+  })
+    .composite([{ input: emblem, gravity: "center" }])
+    .flatten({ background: bg })
+    .png({ compressionLevel: 9, effort: 10 })
+    .toBuffer();
+  writeFileSync(`public/${out}`, buf);
+  console.log(`  public/${out.padEnd(26)} ${size}x${size}  ${Math.round(buf.length / 1024)} KB  (fill ${(fill * 100).toFixed(0)}%)`);
+}
+
+/**
  * Значок вкладки. sharp не умеет писать .ico, но ICO — это контейнер:
  * заголовок + оглавление + сами картинки, и с Vista внутрь кладут обычные PNG.
  * Собираем такой контейнер руками, иначе вкладка осталась бы со старым
@@ -198,26 +224,19 @@ async function renderFavicon(out, sizes, bg) {
 const FAVICON_SIZES = [16, 32, 48];
 
 if (READY) {
-  // Обычная иконка ("any") маской не режется — кладём картинку целиком.
-  await render("icon-192.png", 192, 1, BG);
-  await render("icon-512.png", 512, 1, BG);
+  // «any» (вкладка/сплэш) и apple-touch маска не режет — делаем крупно, поля ~5%.
+  await composeReady("icon-192.png", 192, 0.9, BG);
+  await composeReady("icon-512.png", 512, 0.9, BG);
 
-  // А маскируемую Android рисует под круглой маской и срезает всё, что дальше
-  // 40% от центра. Раньше и её клали целиком («компоновка уже верная») — и на
-  // круге у логотипа срезало низ надписи. Если рисунок выходит за safe zone,
-  // ужимаем его ровно настолько, чтобы вписаться. Фон при этом не страдает: он
-  // сплошной, и уменьшённая картинка ложится на подложку того же цвета.
-  const fit = contentPct > 0.8 ? Math.min(1, 0.8 / contentPct) : 1;
-  if (fit < 1) {
-    console.log(
-      `  (маскируемую ужимаю до ${(fit * 100).toFixed(0)}%, иначе на круглой маске срежется)`,
-    );
-  }
-  await render("icon-maskable-192.png", 192, fit, BG);
-  await render("icon-maskable-512.png", 512, fit, BG);
+  // Маскируемую Android режет под круг/squircle. Эмблему вписываем на 82% по
+  // большей стороне: реальный рисунок остаётся внутри круга, а красные углы
+  // срезаются незаметно (фон сплошной). Это заметно крупнее прежних ~58%.
+  void contentPct; // safe zone теперь считаем по габариту, а не по окружности
+  await composeReady("icon-maskable-192.png", 192, 0.82, BG);
+  await composeReady("icon-maskable-512.png", 512, 0.82, BG);
 
-  // iOS обрезает углы скруглением, но не кругом — ему запаса нужно меньше.
-  await render("apple-touch-icon.png", 180, Math.min(1, fit + 0.1), BG);
+  // iOS скругляет углы, но не режет кругом — можно почти под обрез.
+  await composeReady("apple-touch-icon.png", 180, 0.92, BG);
   await renderFavicon("src/app/favicon.ico", FAVICON_SIZES, BG);
 } else {
   await render("icon-192.png", 192, 1, null); // "any": обрезки нет, фон прозрачный
