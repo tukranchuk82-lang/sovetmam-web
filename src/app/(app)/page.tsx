@@ -6,7 +6,6 @@ import { CatalogMeasures } from "@/components/home/catalog-measures";
 import { Classification } from "@/components/home/classification";
 import { Directions } from "@/components/home/directions";
 import { PyramidSection } from "@/components/home/pyramid-section";
-import { InstallAppButton } from "@/components/install-app-button";
 
 // Акцентный цвет декоративных черт — бренд-бордовый.
 const ACCENT = "#8E1D2C";
@@ -212,13 +211,6 @@ export default function Home() {
 
       {/* Пирамида мер поддержки (4 трапеции-уровня) */}
       <PyramidSection />
-
-      {/* Установка приложения — в самом низу экрана. На Chrome/Edge/Android —
-          родное окно установки по клику; на iPhone — короткая подсказка. Если
-          приложение уже установлено, компонент ничего не рендерит. */}
-      <div className="mx-5 mt-6">
-        <InstallAppButton />
-      </div>
 
       {/* Силуэт города в самом низу — основание на 2px выше нижнего меню */}
       <div className="mt-4 px-5 pb-[2px]">

@@ -1,5 +1,4 @@
-import { Star } from "lucide-react";
-import { PYRAMID_LEVELS, PYRAMID_CROWN } from "@/lib/home-taxonomy";
+import { PYRAMID_LEVELS } from "@/lib/home-taxonomy";
 import { PYRAMID_ICONS } from "./icons";
 import { SectionHeading } from "./section-heading";
 import { cn } from "@/lib/utils";
@@ -26,7 +25,7 @@ const LEVEL_TINT: Record<
 
 /**
  * Пирамида мер поддержки в стиле «Шпаргалки»: белые ступени, расширяющиеся
- * книзу. Сверху — звезда (неформальная поддержка), внизу — федеральные.
+ * книзу. Сверху — бизнес, внизу — федеральные.
  *
  * НЕкликабельна — как и пирамида на главной (pyramid-section.tsx). Ступени
  * объясняют, КТО помогает на каждом уровне, а не фильтруют каталог: в базе
@@ -36,7 +35,7 @@ const LEVEL_TINT: Record<
  * заблуждение.
  */
 export function SupportPyramid() {
-  // Рисуем сверху вниз: вершина — последний уровень массива (НКО).
+  // Рисуем сверху вниз: вершина — последний уровень массива (Бизнес).
   const topToBottom = [...PYRAMID_LEVELS].reverse();
 
   return (
@@ -46,18 +45,6 @@ export function SupportPyramid() {
       </SectionHeading>
 
       <div className="mt-5 flex flex-col items-center gap-2">
-        {/* Венец — звезда (бабушки и дедушки) */}
-        <div
-          data-level="grandparents"
-          style={{ width: "46%" }}
-          className="sm-step sm-pop flex items-center justify-center gap-2 rounded-lg border border-orange-300 bg-orange-100 px-3 py-2.5 shadow-sm"
-        >
-          <Star className="size-4 shrink-0 fill-orange-400 text-orange-500" />
-          <span className="text-center text-[11px] font-bold uppercase leading-tight tracking-wide text-orange-700">
-            {PYRAMID_CROWN.title}
-          </span>
-        </div>
-
         {topToBottom.map((lvl, i) => {
           const Icon = PYRAMID_ICONS[lvl.id];
           const tint = LEVEL_TINT[lvl.id];

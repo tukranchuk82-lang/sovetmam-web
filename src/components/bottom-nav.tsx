@@ -2,13 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Sparkles, Mail, User, Download } from "lucide-react";
+import { Home, LayoutGrid, Sparkles, Mail, User } from "lucide-react";
 import { Doodle } from "@/components/home/crayon-doodles";
 import { NAV_DOODLE } from "@/components/home/icons";
-import {
-  useInstallApp,
-  InstructionsModal,
-} from "@/components/install-app-button";
 import { cn } from "@/lib/utils";
 
 type Tab = {
@@ -67,7 +63,6 @@ const navClasses =
 
 export function BottomNav({ background }: { background?: string }) {
   const pathname = usePathname();
-  const install = useInstallApp();
 
   return (
     <nav
@@ -86,27 +81,10 @@ export function BottomNav({ background }: { background?: string }) {
           <NavTab key={t.href} tab={t} active={t.match(pathname)} />
         ))}
 
-        {/* Установить приложение вместо «Профиль», если это возможно. */}
-        {install.available ? (
-          <button type="button" onClick={install.trigger} className={cn(navClasses, "text-white/65 hover:text-white")}>
-            <Download className="sm-nav-lucide size-5 transition-transform" />
-            <span aria-hidden className="sm-nav-emoji text-xl leading-none">
-              ⬇️
-            </span>
-            <span className="mt-0.5">Установить</span>
-          </button>
-        ) : (
-          <NavTab tab={profileTab} active={profileTab.match(pathname)} />
-        )}
+        {/* Пятый слот — всегда «Профиль». Установка приложения предлагается
+            отдельной всплывающей плашкой (InstallBanner), а не пунктом меню. */}
+        <NavTab tab={profileTab} active={profileTab.match(pathname)} />
       </div>
-
-      {install.showInstructions && (
-        <InstructionsModal
-          platform={install.platform}
-          browser={install.browser}
-          onClose={install.closeInstructions}
-        />
-      )}
     </nav>
   );
 }
