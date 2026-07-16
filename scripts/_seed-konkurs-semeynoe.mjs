@@ -53,7 +53,9 @@ const row = {
   source_name: "Конкурс «Это у нас семейное» (платформа «Россия — страна возможностей»)",
   source_url: "https://family.rsv.ru/",
   updated_at_label: "2026",
-  is_published: true,
+  // СНЯТО С ПУБЛИКАЦИИ: сезон-2027 официально не подтверждён. Вернуть
+  // (is_published: true) и обновить сроки, когда анонсируют новый сезон.
+  is_published: false,
   sort_order: 0,
   verified_at: "2026-07-17T12:00:00+03:00",
   verified_by: "sverka",
