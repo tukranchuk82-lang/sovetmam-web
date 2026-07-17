@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { SaveHeart } from "@/components/save-heart";
 import { getAllMeasureSlugs, getMeasureBySlug } from "@/lib/measures-db";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
 
@@ -109,16 +110,19 @@ export default async function MeasurePage({
 
         <Separator className="my-6" />
 
-        <Link
-          href={inquiryHref}
-          className={cn(
-            buttonVariants(),
-            "h-11 w-full gap-2 px-5 bg-[#3A4D63] text-white hover:bg-[#2F3F52]",
-          )}
-        >
-          <MessageSquarePlus className="size-4" />
-          Задать вопрос про эту меру
-        </Link>
+        <div className="space-y-2.5">
+          <SaveHeart slug={m.slug} variant="button" />
+          <Link
+            href={inquiryHref}
+            className={cn(
+              buttonVariants(),
+              "h-11 w-full gap-2 px-5 bg-[#3A4D63] text-white hover:bg-[#2F3F52]",
+            )}
+          >
+            <MessageSquarePlus className="size-4" />
+            Задать вопрос про эту меру
+          </Link>
+        </div>
       </article>
     </div>
   );

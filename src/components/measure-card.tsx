@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { categoryMeta } from "@/lib/category-meta";
+import { SaveHeart } from "@/components/save-heart";
 
 // Карточке достаточно этих полей — принимаем и полную меру, и «облегчённую»
 // (например, из клиентского каталога). category держим как string, чтобы
@@ -25,12 +26,20 @@ export function MeasureCard({ measure }: { measure: MeasureCardData }) {
   const isFederal = measure.level === "federal";
   const cat = categoryMeta(measure.category);
   return (
-    <Link
-      href={`/catalog/${measure.slug}`}
-      className="group block rounded-xl border border-[#E5E0D6] bg-[#FCFBF9] p-4 shadow-[0_1px_2px_rgba(30,30,40,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#1B3A6B]/30 hover:shadow-[0_12px_26px_-16px_rgba(27,58,107,0.3)] active:scale-[0.995]"
-    >
-      {/* Мета: категория (navy) · уровень (бордовый) */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+    <div className="group relative transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.995]">
+      {/* Сердечко «в избранное» — поверх карточки, вне ссылки (иначе кнопка
+          внутри <a> ломает и разметку, и клик). Само гасит переход. */}
+      <SaveHeart
+        slug={measure.slug}
+        className="absolute right-3 top-3 z-10"
+      />
+      <Link
+        href={`/catalog/${measure.slug}`}
+        className="block rounded-xl border border-[#E5E0D6] bg-[#FCFBF9] p-4 shadow-[0_1px_2px_rgba(30,30,40,0.04)] transition-colors duration-200 hover:border-[#1B3A6B]/30 hover:shadow-[0_12px_26px_-16px_rgba(27,58,107,0.3)]"
+      >
+      {/* Мета: категория (navy) · уровень (бордовый). Справа оставляем место
+          под сердечко, чтобы длинная подпись не залезала под него. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pr-9 text-[11px]">
         <span className="inline-flex items-center gap-1.5 font-semibold text-[#1B3A6B]">
           <cat.icon className="size-3.5" strokeWidth={2} />
           {measure.category}
@@ -64,6 +73,7 @@ export function MeasureCard({ measure }: { measure: MeasureCardData }) {
           <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
-    </Link>
+      </Link>
+    </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Sparkles,
   MapPin,
+  Heart,
 } from "lucide-react";
 import {
   CHANNEL_COLORS,
@@ -24,6 +25,7 @@ import { logout } from "@/app/(app)/login/onboarding-actions";
 import { isAppAdmin, ROLE_LABELS as APP_ROLE_LABELS, type AppUser } from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
+import { listSavedSlugs } from "@/lib/saved-measures-db";
 import { Avatar } from "@/components/avatar";
 import { AvatarEditor } from "@/components/avatar-editor";
 import { MessengerManager } from "@/components/messenger-manager";
@@ -228,6 +230,7 @@ async function AppUserProfile({ user }: { user: AppUser }) {
     max: user.maxId != null,
   };
   const inquiries = await listInquiriesForUser(user.id);
+  const savedCount = (await listSavedSlugs(user.id)).length;
   return (
     <div className="px-4 py-5">
       <div className="flex items-center gap-3">
@@ -259,6 +262,25 @@ async function AppUserProfile({ user }: { user: AppUser }) {
           </p>
         </div>
         <ChevronRight className="size-5 shrink-0 text-white/60" />
+      </Link>
+
+      {/* Избранное: быстрый вход в сохранённые меры */}
+      <Link
+        href="/saved"
+        className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-3.5 text-foreground shadow-[0_8px_22px_-10px_rgba(0,0,0,0.18)] ring-1 ring-stone-100 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_12px_26px_-8px_rgba(0,0,0,0.25)]"
+      >
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#8E1D2C]/10 text-[#8E1D2C]">
+          <Heart className="size-5 fill-current" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold leading-snug">Избранное</p>
+          <p className="text-xs text-muted-foreground">
+            {savedCount > 0
+              ? `Сохранённых мер: ${savedCount}`
+              : "Пока ничего не сохранено"}
+          </p>
+        </div>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
       </Link>
 
       <section className="mt-6">

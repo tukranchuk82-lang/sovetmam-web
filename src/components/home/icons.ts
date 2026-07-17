@@ -188,6 +188,7 @@ export const NAV_DOODLE: Record<string, string> = {
   "/podbor": "star",
   "/profile/inquiries/new": "heart",
   "/profile": "bear",
+  "/saved": "heart",
 };
 
 /** Иконки жизненных категорий (по id из LIFE_CATEGORIES). */

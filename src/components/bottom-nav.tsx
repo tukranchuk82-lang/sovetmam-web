@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Sparkles, Mail, User } from "lucide-react";
+import { Home, LayoutGrid, Sparkles, Mail, Heart } from "lucide-react";
 import { Doodle } from "@/components/home/crayon-doodles";
 import { NAV_DOODLE } from "@/components/home/icons";
 import { cn } from "@/lib/utils";
@@ -46,16 +46,14 @@ const tabs: Tab[] = [
   },
 ];
 
-// Пятый слот меню: «Профиль» (по умолчанию) либо «Установить» (когда установка
-// приложения возможна и оно ещё не стоит на устройстве).
-const profileTab: Tab = {
-  href: "/profile",
-  label: "Профиль",
-  icon: User,
-  emoji: "🙎🏻",
-  match: (p) =>
-    (p.startsWith("/profile") && !p.startsWith("/profile/inquiries")) ||
-    p.startsWith("/login"),
+// Пятый слот меню: «Избранное». Личный кабинет открывается по тапу на аватар
+// в шапке — отдельной вкладки под него больше нет.
+const savedTab: Tab = {
+  href: "/saved",
+  label: "Избранное",
+  icon: Heart,
+  emoji: "❤️",
+  match: (p) => p.startsWith("/saved"),
 };
 
 const navClasses =
@@ -81,9 +79,8 @@ export function BottomNav({ background }: { background?: string }) {
           <NavTab key={t.href} tab={t} active={t.match(pathname)} />
         ))}
 
-        {/* Пятый слот — всегда «Профиль». Установка приложения предлагается
-            отдельной всплывающей плашкой (InstallBanner), а не пунктом меню. */}
-        <NavTab tab={profileTab} active={profileTab.match(pathname)} />
+        {/* Пятый слот — «Избранное». Профиль — по аватару в шапке. */}
+        <NavTab tab={savedTab} active={savedTab.match(pathname)} />
       </div>
     </nav>
   );

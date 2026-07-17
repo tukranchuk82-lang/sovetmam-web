@@ -90,6 +90,29 @@ export async function getMeasureBySlug(
   return data ? fromRow(data as MeasureRow) : null;
 }
 
+/**
+ * Меры по списку слагов (для избранного). Порядок исходного списка сохраняем
+ * сами — PostgREST его не гарантирует. Несуществующие/снятые с публикации слаги
+ * просто выпадают из результата.
+ */
+export async function getMeasuresBySlugs(
+  slugs: string[],
+): Promise<SupportMeasure[]> {
+  if (slugs.length === 0) return [];
+  const supabase = createSupabaseAnonClient();
+  const { data, error } = await supabase
+    .from("measures")
+    .select(SELECT_FIELDS)
+    .eq("is_published", true)
+    .in("slug", slugs);
+
+  if (error) throw error;
+  const bySlug = new Map(
+    (data as MeasureRow[]).map((r) => [r.slug, fromRow(r)]),
+  );
+  return slugs.map((s) => bySlug.get(s)).filter(Boolean) as SupportMeasure[];
+}
+
 export async function getMeasuresBySegment(
   segmentId: SegmentId,
 ): Promise<SupportMeasure[]> {

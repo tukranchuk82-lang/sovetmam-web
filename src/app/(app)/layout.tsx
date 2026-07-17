@@ -4,6 +4,7 @@ import { resolveUserAvatar } from "@/lib/avatar";
 import { Avatar } from "@/components/avatar";
 import { UserAvatar } from "@/components/user-avatar";
 import { AppShell } from "@/components/app-shell";
+import { SavedProvider } from "@/components/saved-provider";
 import { UtmCapture } from "@/components/utm-capture";
 
 export default async function AppLayout({
@@ -20,11 +21,17 @@ export default async function AppLayout({
     <UserAvatar avatar={resolveUserAvatar(appUser)} size={44} />
   ) : null;
 
+  // Сохранять меры может только «настоящий» (email) пользователь — на него и
+  // завязано избранное. Демо-роли (заказчик/техспец) — служебные.
+  const canSave = Boolean(appUser);
+
   return (
     <>
-      <AppShell avatarSlot={avatarSlot} authed={Boolean(demoUser || appUser)}>
-        {children}
-      </AppShell>
+      <SavedProvider authed={canSave}>
+        <AppShell avatarSlot={avatarSlot} authed={Boolean(demoUser || appUser)}>
+          {children}
+        </AppShell>
+      </SavedProvider>
       <UtmCapture />
     </>
   );
