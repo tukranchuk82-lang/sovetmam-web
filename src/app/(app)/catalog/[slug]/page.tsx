@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MessageSquarePlus, Lightbulb } from "lucide-react";
-import { BackLink } from "@/components/back-link";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -40,7 +39,6 @@ export default async function MeasurePage({
 
   return (
     <div className="px-4 py-5">
-      <BackLink href="/catalog" label="В каталог" />
 
       <article className="mt-3 rounded-2xl bg-white p-5 text-foreground shadow-[0_12px_32px_-12px_rgba(0,0,0,0.4)]">
         <div className="flex flex-wrap items-center gap-1.5">

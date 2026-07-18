@@ -13,7 +13,6 @@ import {
   LifeBuoy,
   type LucideIcon,
 } from "lucide-react";
-import { BackLink } from "@/components/back-link";
 import { SegmentMeasures } from "@/components/segment-measures";
 import { getAllMeasures } from "@/lib/measures-db";
 import { getCurrentAppUser } from "@/lib/user-session";
@@ -150,7 +149,6 @@ export default async function ClassPage({
       {/* Возвращаем ровно туда, откуда пришли: с карточек типа — к началу
           «Классификации», с пинов — к дороге «По частоте получения». На верх
           главной не отправляем: прокручивать её заново обидно. */}
-      <BackLink href={cfg.backHref} label="Назад" />
 
       <div className="mt-3 flex items-center gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(142,29,44,0.5)]">

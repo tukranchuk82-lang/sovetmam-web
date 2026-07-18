@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Sparkles, MessageSquareHeart, ChevronRight } from "lucide-react";
-import { BackLink } from "@/components/back-link";
 import { MotionFadeIn, MotionStagger } from "@/components/motion";
 import { OrgName } from "@/components/org-name";
 
@@ -14,7 +13,6 @@ export default function OwnSituationPage() {
   return (
     <div className="px-4 py-5">
       <MotionFadeIn>
-        <BackLink href="/" label="На главную" />
         <h1 className="mt-4 text-xl font-extrabold tracking-tight">
           Своя жизненная ситуация
         </h1>

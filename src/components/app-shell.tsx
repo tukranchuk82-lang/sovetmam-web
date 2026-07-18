@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LogIn } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LogIn, ChevronLeft } from "lucide-react";
 import { OrgName } from "@/components/org-name";
 import { BottomNav } from "@/components/bottom-nav";
 import { InstallBanner } from "@/components/install-banner";
@@ -37,8 +37,23 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const section = sectionOf(pathname);
   const transparent = section === "catalog";
+
+  // Глобальная кнопка «Назад» — на всех экранах, кроме двух «корневых» с
+  // собственным героем: главной и списка каталога (там возвращаться некуда, а
+  // прозрачная шапка не терпит плашку). На всех остальных — всегда видна.
+  const showBack = pathname !== "/" && pathname !== "/catalog";
+
+  // Возвращаемся по истории, если она есть (тот же список, тот же скролл —
+  // восстановит логика ниже). Если в приложение зашли по прямой ссылке (из бота,
+  // из поиска), истории нет — тогда ведём на главную, а не наружу из приложения.
+  // Наличие истории проверяем в момент клика, чтобы не держать состояние.
+  const goBack = () => {
+    if (window.history.length > 1) router.back();
+    else router.push("/");
+  };
 
   const headerRef = useRef<HTMLElement>(null);
   const mainRef = useRef<HTMLElement>(null);
@@ -189,6 +204,22 @@ export function AppShell({
               ставим распорку на её высоту. В «Каталоге» герой сам отступает
               на var(--hdr-h). */}
           {!transparent && <div style={{ height: headerH }} aria-hidden />}
+          {showBack && (
+            <div
+              className="sticky z-20 -mb-1 flex bg-background/85 px-4 pb-1 pt-3 backdrop-blur-sm"
+              style={{ top: "var(--hdr-h, 76px)" }}
+            >
+              <button
+                type="button"
+                onClick={goBack}
+                aria-label="Назад"
+                className="inline-flex items-center gap-1 rounded-full bg-stone-100 py-1.5 pl-2 pr-3.5 text-sm font-medium text-foreground shadow-sm ring-1 ring-stone-200 transition-all hover:bg-stone-200 active:scale-95"
+              >
+                <ChevronLeft className="size-4 text-brand" />
+                Назад
+              </button>
+            </div>
+          )}
           {children}
           {/* Запас снизу, чтобы плашка установки не накрывала последнюю карточку */}
           <div className="h-16" aria-hidden />

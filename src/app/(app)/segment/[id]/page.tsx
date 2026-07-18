@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Sparkles, ChevronRight } from "lucide-react";
-import { BackLink } from "@/components/back-link";
 import { SegmentMeasures } from "@/components/segment-measures";
 import { SEGMENT_ICONS } from "@/components/segment-icon";
 import { SEGMENTS, getSegment, type SegmentId } from "@/lib/measures";
@@ -52,7 +51,6 @@ export default async function SegmentPage({
 
   return (
     <div className="px-4 py-5">
-      <BackLink href="/" label="На главную" />
 
       <div className="mt-3 flex items-center gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_6px_16px_-6px_rgba(142,29,44,0.5)]">

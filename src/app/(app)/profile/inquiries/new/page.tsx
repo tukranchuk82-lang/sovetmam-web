@@ -7,7 +7,6 @@ import { REGION_COOKIE } from "@/lib/region";
 import { createInquiryAction } from "@/app/(app)/profile/inquiries/actions";
 import { NewInquiryForm } from "@/components/new-inquiry-form";
 import type { InquiryType } from "@/lib/inquiries";
-import { BackLink } from "@/components/back-link";
 
 export const metadata = { title: "Новое обращение" };
 export const dynamic = "force-dynamic";
@@ -41,7 +40,6 @@ export default async function NewInquiryPage({
 
   return (
     <div className="px-4 py-5">
-      <BackLink href="/profile" label="В кабинет" />
       <h1 className="mt-3 text-xl font-extrabold tracking-tight">
         Новое обращение
       </h1>

@@ -1,12 +1,10 @@
 export const metadata = { title: "Об организации" };
 
 import { OrgName } from "@/components/org-name";
-import { BackLink } from "@/components/back-link";
 
 export default function AboutPage() {
   return (
     <div className="px-4 py-5">
-      <BackLink href="/profile" label="В кабинет" />
       <h1 className="mt-3 text-xl font-extrabold tracking-tight">Об организации</h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Общероссийская общественная организация <OrgName /> помогает семьям с детьми и будущим
