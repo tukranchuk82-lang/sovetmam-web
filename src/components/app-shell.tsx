@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogIn, ChevronLeft } from "lucide-react";
 import { OrgName } from "@/components/org-name";
 import { BottomNav } from "@/components/bottom-nav";
 import { InstallBanner } from "@/components/install-banner";
+
+// useLayoutEffect на сервере ругается — на SSR подменяем его на useEffect.
+// Восстановление скролла должно идти синхронно (до отрисовки), поэтому в
+// браузере нужен именно layout-эффект.
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 // Единый каркас приложения с посекционным «характером».
 //
@@ -77,13 +83,26 @@ export function AppShell({
   // место, где человек был: иначе, посмотрев меру из списка и нажав «назад», он
   // попадал в начало списка и листал заново.
   //
-  // Позицию запоминаем при уходе со страницы; браузерный «назад» узнаём по
-  // событию popstate (Next не даёт этого напрямую).
+  // Позицию текущей страницы пишем ЖИВЫМ слушателем скролла — иначе, если
+  // запоминать её в момент перехода, контент уже подменился на короткую карточку
+  // меры, scrollTop контейнера «схлопнулся» к нулю, и в память списка попадал 0.
+  // Ключ — путь на момент события (curPath), а не тот, что был при монтировании.
   const scrollPos = useRef<Map<string, number>>(new Map());
   const isPop = useRef(false);
-  const prevPath = useRef(pathname);
+  const curPath = useRef(pathname);
 
   useEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      scrollPos.current.set(curPath.current, el.scrollTop);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    // Браузерный «назад» (и наша кнопка через router.back()) узнаём по popstate.
     const onPop = () => {
       isPop.current = true;
     };
@@ -91,15 +110,13 @@ export function AppShell({
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  useEffect(() => {
+  // Layout-эффект: curPath обновляем СИНХРОННО (до того, как «схлопывание»
+  // scrollTop отправит событие scroll под старым путём), и восстанавливаем
+  // позицию до отрисовки — без мигания «сначала верх, потом прыжок вниз».
+  useIsoLayoutEffect(() => {
     const el = mainRef.current;
     if (!el) return;
-
-    // Запомнили, где стояли на прошлой странице.
-    if (prevPath.current !== pathname) {
-      scrollPos.current.set(prevPath.current, el.scrollTop);
-      prevPath.current = pathname;
-    }
+    curPath.current = pathname;
 
     const hash = window.location.hash;
     const target = hash ? document.querySelector(hash) : null;
