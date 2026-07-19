@@ -224,19 +224,21 @@ async function renderFavicon(out, sizes, bg) {
 const FAVICON_SIZES = [16, 32, 48];
 
 if (READY) {
-  // «any» (вкладка/сплэш) и apple-touch маска не режет — делаем крупно, поля ~5%.
-  await composeReady("icon-192.png", 192, 0.9, BG);
-  await composeReady("icon-512.png", 512, 0.9, BG);
+  // «any» (вкладка/сплэш) и apple-touch маска не режет — делаем крупно, поля ~10%.
+  // Композицию уменьшили на ~5% (0.9→0.855) по просьбе: на телефоне была великовата.
+  await composeReady("icon-192.png", 192, 0.855, BG);
+  await composeReady("icon-512.png", 512, 0.855, BG);
 
-  // Маскируемую Android режет под круг/squircle. Эмблему вписываем на 82% по
+  // Маскируемую Android режет под круг/squircle. Эмблему вписываем на 78% по
   // большей стороне: реальный рисунок остаётся внутри круга, а красные углы
-  // срезаются незаметно (фон сплошной). Это заметно крупнее прежних ~58%.
+  // срезаются незаметно (фон сплошной). Ужали на ~5% (0.82→0.78) — было крупновато.
   void contentPct; // safe zone теперь считаем по габариту, а не по окружности
-  await composeReady("icon-maskable-192.png", 192, 0.82, BG);
-  await composeReady("icon-maskable-512.png", 512, 0.82, BG);
+  await composeReady("icon-maskable-192.png", 192, 0.78, BG);
+  await composeReady("icon-maskable-512.png", 512, 0.78, BG);
 
   // iOS скругляет углы, но не режет кругом — можно почти под обрез.
-  await composeReady("apple-touch-icon.png", 180, 0.92, BG);
+  // Тоже ужали на ~5% (0.92→0.87).
+  await composeReady("apple-touch-icon.png", 180, 0.87, BG);
   await renderFavicon("src/app/favicon.ico", FAVICON_SIZES, BG);
 } else {
   await render("icon-192.png", 192, 1, null); // "any": обрезки нет, фон прозрачный
