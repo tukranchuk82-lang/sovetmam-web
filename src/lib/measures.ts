@@ -237,6 +237,13 @@ export interface EligibilityCriteria {
   requiresChildren?: boolean;
   minChildren?: number;
   /**
+   * Многоплодные роды: мера положена, только если за одни роды родилось не менее
+   * N детей (двойня → 2, тройня → 3, четверни → 4). Это НЕ то же, что minChildren:
+   * семья с тремя погодками под «тройню» не подходит, а семья, где одновременно
+   * родилась тройня, — подходит. Считается по ответу анкеты «многоплодные роды».
+   */
+  minSimultaneousBirth?: number;
+  /**
    * Сколько детей должны УЧИТЬСЯ В ШКОЛЕ ОДНОВРЕМЕННО (возраст 7–17 лет).
    *
    * Это не то же самое, что число детей в семье. Например, в Мордовии пособие к
@@ -347,6 +354,12 @@ export interface UserProfile {
    */
   childrenAges: number[];
   youngestChildAgeYears: number | null;
+  /**
+   * Сколько детей родилось за одни (самые «многоплодные») роды: 1 — обычные роды,
+   * 2 — двойня, 3 — тройня, 4 — четверни и более. Нужно для мер, положенных
+   * именно при многоплодных родах (criteria.minSimultaneousBirth).
+   */
+  multipleBirthCount: number;
   region: string;
   /**
    * Доход на человека: верхняя граница выбранной группы в ПМ.
@@ -447,6 +460,15 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
     ? Math.max(profile.childrenCount + 1, profile.expectingChildNumber ?? 0)
     : profile.childrenCount;
   if (c.minChildren && effectiveChildren < c.minChildren) return false;
+  // Многоплодные роды: нужно, чтобы за одни роды родилось не меньше N детей.
+  // Незаполненный ответ считаем обычными родами (1) — мера про двойню/тройню не
+  // покажется тому, кто про многоплодные роды не отметил.
+  if (
+    c.minSimultaneousBirth &&
+    (profile.multipleBirthCount ?? 1) < c.minSimultaneousBirth
+  ) {
+    return false;
+  }
   // Школьники — дети 7–17 лет. Если возрасты в анкете не заполнены, требование
   // не проверяем: иначе мера пропала бы у тех, кто просто не указал возраст.
   if (c.minSchoolChildren) {

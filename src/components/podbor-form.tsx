@@ -182,6 +182,14 @@ const COUNT_OPTIONS: { value: number; label: string }[] = [
   { value: MANY_CHILDREN, label: "10 и более" },
 ];
 
+// Многоплодные роды: сколько детей родилось за одни роды (1 — обычные роды).
+const MULTIPLE_BIRTH_OPTIONS: { value: number; label: string }[] = [
+  { value: 1, label: "Нет" },
+  { value: 2, label: "Двойня" },
+  { value: 3, label: "Тройня" },
+  { value: 4, label: "4 и более" },
+];
+
 // Возраст ребёнка: 0…18, где 18 — «18 и старше».
 const AGE_OPTIONS: { value: number; label: string }[] = Array.from(
   { length: 19 },
@@ -207,6 +215,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     childrenCount: Number(v.childrenCount) || 0,
     childrenAges: ages,
     youngestChildAgeYears: youngest,
+    multipleBirthCount: Number(v.multipleBirthCount) || 1,
     region: String(v.region ?? ""),
     incomePm,
     lowIncome: incomePm === 1,
@@ -253,6 +262,10 @@ export function PodborForm({
   );
   const [childrenAges, setChildrenAges] = useState<(number | null)[]>(
     Array.isArray(saved?.childrenAges) ? saved.childrenAges.map(Number) : [],
+  );
+  // Многоплодные роды: 1 — обычные, 2 — двойня, 3 — тройня, 4 — четверни и более.
+  const [multipleBirthCount, setMultipleBirthCount] = useState<number | null>(
+    saved?.multipleBirthCount ?? null,
   );
   const [isCitizen, setIsCitizen] = useState<boolean | null>(saved ? (saved.region ? true : null) : null);
   const [region, setRegion] = useState(saved?.region ?? "");
@@ -339,6 +352,7 @@ export function PodborForm({
       childrenCount: hasChildren ? (childCount || 1) : 0,
       childrenAges: hasChildren ? filledAges : [],
       youngestChildAgeYears: hasChildren ? youngestAge : null,
+      multipleBirthCount: pregnant || hasChildren ? (multipleBirthCount ?? 1) : 1,
       region,
       incomePm,
       // Выводим из шкалы, а не спрашиваем отдельно: 46 мер размечены
@@ -570,6 +584,29 @@ export function PodborForm({
               </div>
             )}
           </>
+        )}
+
+        {(pregnant || hasChildren) && (
+          <div>
+            <p className="text-sm font-medium">
+              Были ли многоплодные роды (двойня, тройня и более)?
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Есть меры именно для семей, где за одни роды родилось несколько
+              детей.
+            </p>
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              {MULTIPLE_BIRTH_OPTIONS.map((o) => (
+                <Choice
+                  key={o.value}
+                  active={multipleBirthCount === o.value}
+                  onClick={() => setMultipleBirthCount(o.value)}
+                >
+                  {o.label}
+                </Choice>
+              ))}
+            </div>
+          </div>
         )}
 
         <Question label="Вы гражданин РФ?">
