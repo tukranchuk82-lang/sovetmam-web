@@ -90,11 +90,15 @@ export function AppShell({
   const scrollPos = useRef<Map<string, number>>(new Map());
   const isPop = useRef(false);
   const curPath = useRef(pathname);
+  // Пока возвращаем позицию — не даём слушателю затирать её промежуточными
+  // (схлопнутыми) значениями scrollTop.
+  const restoring = useRef(false);
 
   useEffect(() => {
     const el = mainRef.current;
     if (!el) return;
     const onScroll = () => {
+      if (restoring.current) return;
       scrollPos.current.set(curPath.current, el.scrollTop);
     };
     el.addEventListener("scroll", onScroll, { passive: true });
@@ -111,8 +115,7 @@ export function AppShell({
   }, []);
 
   // Layout-эффект: curPath обновляем СИНХРОННО (до того, как «схлопывание»
-  // scrollTop отправит событие scroll под старым путём), и восстанавливаем
-  // позицию до отрисовки — без мигания «сначала верх, потом прыжок вниз».
+  // scrollTop отправит событие scroll под старым путём).
   useIsoLayoutEffect(() => {
     const el = mainRef.current;
     if (!el) return;
@@ -121,15 +124,39 @@ export function AppShell({
     const hash = window.location.hash;
     const target = hash ? document.querySelector(hash) : null;
     const saved = scrollPos.current.get(pathname);
+    const pop = isPop.current;
+    isPop.current = false;
 
-    if (isPop.current && saved != null) {
-      el.scrollTop = saved; // вернулись назад — на то же место
+    if (pop && saved != null) {
+      // Контент списка после «назад» дорисовывается асинхронно (стриминг,
+      // пагинация «по 10»): в момент перехода высота ещё мала и scrollTop
+      // схлопывается к нулю, а иногда позиция сбрасывается уже после установки.
+      // Поэтому УДЕРЖИВАЕМ позицию: возвращаем scrollTop каждый кадр, пока она
+      // не станет стабильной (3 кадра подряд) либо не выйдет лимит (~800 мс).
+      restoring.current = true;
+      el.scrollTop = saved;
+      let frames = 0;
+      let stable = 0;
+      const hold = () => {
+        if (Math.abs(el.scrollTop - saved) > 2) {
+          el.scrollTop = saved;
+          stable = 0;
+        } else {
+          stable++;
+        }
+        if (stable < 3 && ++frames < 48) {
+          requestAnimationFrame(hold);
+        } else {
+          restoring.current = false;
+        }
+      };
+      requestAnimationFrame(hold);
     } else if (target) {
+      el.scrollTop = 0;
       target.scrollIntoView(); // якорь (кнопка «назад» ведёт на /#classification)
     } else {
       el.scrollTop = 0; // обычный переход — с начала страницы
     }
-    isPop.current = false;
   }, [pathname]);
 
   return (
