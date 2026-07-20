@@ -42,6 +42,7 @@ const CRITERIA_FLAGS: Array<{ key: string; label: string }> = [
   { key: "requiresFosterParent", label: "приёмный родитель / опекун" },
   { key: "requiresSelfEmployed", label: "самозанятый" },
   { key: "requiresEntrepreneur", label: "ИП" },
+  { key: "requiresTeacher", label: "учитель" },
 ];
 
 export function MeasureForm({

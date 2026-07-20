@@ -303,6 +303,14 @@ export interface EligibilityCriteria {
   requiresParentUnder35?: boolean;
   requiresSelfEmployed?: boolean;
   requiresEntrepreneur?: boolean;
+  /**
+   * Родитель работает учителем.
+   *
+   * Появилось под Указ Президента от 20.07.2026 № 498: у учителей есть свой
+   * набор мер (музеи, «Ветеран труда» за 25 лет стажа, бесплатная юрпомощь),
+   * а часть мер адресована их детям — например, первоочередной приём в детсад.
+   */
+  requiresTeacher?: boolean;
   /** Инвалидность у самого родителя (не у ребёнка — для того requiresDisabledChild). */
   requiresDisabledParent?: boolean;
   /** Приёмные родители, опекуны, попечители, усыновители. */
@@ -386,6 +394,8 @@ export interface UserProfile {
   entrepreneur: boolean;
   disabledParent: boolean;
   fosterParent: boolean;
+  /** Работает учителем — см. criteria.requiresTeacher. */
+  teacher: boolean;
 }
 
 /** Правильное склонение: «1 мера», «2 меры», «5 мер». */
@@ -528,6 +538,7 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   if (c.requiresEntrepreneur && !profile.entrepreneur) return false;
   if (c.requiresDisabledParent && !profile.disabledParent) return false;
   if (c.requiresFosterParent && !profile.fosterParent) return false;
+  if (c.requiresTeacher && !profile.teacher) return false;
 
   // «Хотя бы одна из групп» — для мер, адресованных нескольким категориям сразу
   // («многодетным, малоимущим и семьям с детьми-инвалидами»).

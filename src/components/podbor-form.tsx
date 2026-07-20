@@ -231,6 +231,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     entrepreneur: !!v.entrepreneur,
     disabledParent: !!v.disabledParent,
     fosterParent: !!v.fosterParent,
+    teacher: !!v.teacher,
   };
 }
 
@@ -291,6 +292,7 @@ export function PodborForm({
   const [entrepreneur, setEntrepreneur] = useState<boolean | null>(saved?.entrepreneur ?? null);
   const [disabledParent, setDisabledParent] = useState<boolean | null>(saved?.disabledParent ?? null);
   const [fosterParent, setFosterParent] = useState<boolean | null>(saved?.fosterParent ?? null);
+  const [teacher, setTeacher] = useState<boolean | null>(saved?.teacher ?? null);
 
   // Сколько окошек возраста показывать. При «10 и более» число берётся из
   // отдельного поля; пока оно пустое или больше 20 — окошек нет.
@@ -370,6 +372,7 @@ export function PodborForm({
       entrepreneur: entrepreneur ?? false,
       disabledParent: disabledParent ?? false,
       fosterParent: fosterParent ?? false,
+      teacher: teacher ?? false,
     };
     submitted.current = true;
     setResults(matchMeasures(profile, measures, { ignoreRegion: true }));
@@ -764,6 +767,10 @@ export function PodborForm({
 
         <Question label="Вы индивидуальный предприниматель?">
           <YesNo value={entrepreneur} onChange={setEntrepreneur} />
+        </Question>
+
+        <Question label="Вы работаете учителем?">
+          <YesNo value={teacher} onChange={setTeacher} />
         </Question>
       </div>
 
