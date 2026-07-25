@@ -160,8 +160,10 @@ export const LIFE_CATEGORIES: LifeCategory[] = [
   { id: "sport", title: "Спорт", href: "/topic/sport" },
   { id: "taxes", title: "Налоги", href: "/topic/taxes" },
   { id: "social", title: "Соцподдержка", href: "/topic/social" },
-  { id: "shops", title: "Магазины", href: "/topic/shops" },
-  { id: "kids-goods", title: "Товары для детей", href: "/topic/kids-goods" },
+  // Заменили «Магазины» и «Товары для детей» — см. комментарий в
+  // src/components/home/directions.tsx.
+  { id: "business", title: "Бизнес", href: "/topic/business" },
+  { id: "nko", title: "НКО", href: "/topic/nko" },
 ];
 
 export interface CatalogSituation {

@@ -23,9 +23,8 @@ import {
   Dumbbell,
   ReceiptText,
   HandHeart,
-  ShoppingCart,
-  Baby,
   Store,
+  HeartHandshake,
 } from "lucide-react";
 
 /** Иконки уровней пирамиды (по id из PYRAMID_LEVELS). */
@@ -79,8 +78,8 @@ export const LIFE_CATEGORY_EMOJI: Record<string, string> = {
   sport: "⚽",
   taxes: "🧾",
   social: "🤝",
-  shops: "🛒",
-  "kids-goods": "🧸",
+  business: "🏪",
+  nko: "🎗️",
 };
 
 /** Мультяшные эмодзи жизненных ситуаций (по id из CATALOG_SITUATIONS). */
@@ -143,8 +142,8 @@ export const LIFE_CATEGORY_DOODLE: Record<string, string> = {
   sport: "ball",
   taxes: "doc",
   social: "bear",
-  shops: "bag",
-  "kids-goods": "bunny",
+  business: "bag",
+  nko: "heart",
 };
 
 /** Карандашные дудлы — жизненные ситуации (id из CATALOG_SITUATIONS). */
@@ -206,6 +205,6 @@ export const LIFE_CATEGORY_ICONS: Record<string, LucideIcon> = {
   sport: Dumbbell,
   taxes: ReceiptText,
   social: HandHeart,
-  shops: ShoppingCart,
-  "kids-goods": Baby,
+  business: Store,
+  nko: HeartHandshake,
 };

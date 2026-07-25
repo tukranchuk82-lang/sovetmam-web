@@ -13,8 +13,8 @@ import {
   Dumbbell,
   Calculator,
   HandHeart,
-  ShoppingBag,
-  Baby,
+  Store,
+  HeartHandshake,
   Sparkles,
   ChevronRight,
   type LucideIcon,
@@ -56,8 +56,12 @@ const DIRECTIONS: Direction[] = [
   { icon: Dumbbell, label: "Спорт", topic: "sport" },
   { icon: Calculator, label: "Налоги", topic: "taxes" },
   { icon: HandHeart, label: "Соцподдержка", topic: "social" },
-  { icon: ShoppingBag, label: "Магазины", topic: "shops" },
-  { icon: Baby, label: "Товары для детей", topic: "kids-goods" },
+  // Раньше здесь были «Магазины» и «Товары для детей». Заменены на «Бизнес»
+  // (преференции от бизнеса: скидки и кешбэк в торговых сетях) и «НКО» (помощь
+  // от фондов и некоммерческих организаций). Сами темы shops/kids-goods в
+  // /topic/[key] остались рабочими — просто с главной на них больше не ведём.
+  { icon: Store, label: "Бизнес", topic: "business" },
+  { icon: HeartHandshake, label: "НКО", topic: "nko" },
 ];
 
 function hrefFor(d: Direction) {
