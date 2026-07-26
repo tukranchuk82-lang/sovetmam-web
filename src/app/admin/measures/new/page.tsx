@@ -6,9 +6,9 @@ export const metadata = { title: "Новая мера" };
 
 export default function NewMeasurePage() {
   return (
-    <div className="px-4 py-5">
+    <div className="px-4 py-5 md:px-6">
       <Link
-        href="/admin"
+        href="/admin/measures"
         className="text-sm text-muted-foreground hover:text-foreground"
       >
         ← К списку мер

@@ -34,3 +34,45 @@ export function buildSalebotProxyLink(
   // Остальные — обычные query-параметры через «?».
   return base.includes("#") ? `${base}&${enc}` : `${base}?${enc}`;
 }
+
+/**
+ * Уведомление в мессенджер через Salebot.
+ *
+ * Мы не составляем текст сообщения — его собирает воронка на стороне Salebot.
+ * Наше дело: дёрнуть клиента по его salebot_client_id, передать кодовое слово
+ * (по нему в Salebot стартует нужный блок) и переменные, которые в этом блоке
+ * можно подставить в текст: тема обращения и ссылка на ответ в приложении.
+ *
+ * Ошибки наружу не бросаем: не доставленное уведомление не повод ронять
+ * сохранение ответа — ответ уже лежит в базе и виден человеку в приложении.
+ */
+export async function notifySalebotAnswer(params: {
+  clientId: string;
+  subject: string;
+  link: string;
+}): Promise<{ ok: boolean; detail: string }> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return { ok: false, detail: "SALEBOT_API_KEY не задан" };
+
+  // Кодовое слово, по которому в Salebot стартует блок с уведомлением.
+  const trigger = process.env.SALEBOT_ANSWER_TRIGGER ?? "new_answer";
+
+  try {
+    const res = await fetch(`https://chatter.salebot.pro/api/${key}/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: params.clientId,
+        message: trigger,
+        // Переменные клиента — их видно в блоке Salebot как #{inquiry_subject}
+        // и #{inquiry_link}.
+        inquiry_subject: params.subject,
+        inquiry_link: params.link,
+      }),
+    });
+    const text = await res.text();
+    return { ok: res.ok, detail: `${res.status} ${text.slice(0, 300)}` };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}

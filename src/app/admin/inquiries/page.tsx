@@ -1,9 +1,11 @@
 import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import Link from "next/link";
-import { Clock, CheckCircle2, ChevronRight, MapPin } from "lucide-react";
+import { Clock, CheckCircle2, ChevronRight, MapPin, MessageSquare, Mail } from "lucide-react";
 import { listAllInquiries } from "@/lib/inquiries-db";
+import { resendAllNewInquiriesAction } from "./actions";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
+import { AdminPageHeader } from "@/components/admin/page-header";
 
 export const metadata = { title: "Обращения" };
 export const dynamic = "force-dynamic";
@@ -22,27 +24,55 @@ const CHANNEL_COLORS = {
 
 const DEFAULT_AVATAR_COLOR = "#1B3A6B";
 
-export default async function AdminInquiriesPage() {
+export default async function AdminInquiriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sent?: string }>;
+}) {
+  const { sent } = await searchParams;
   const inquiries = await listAllInquiries();
   const newCount = inquiries.filter((i) => i.status === "new").length;
 
   return (
-    <div className="px-4 py-5">
-      <h1 className="text-xl font-extrabold tracking-tight">Обращения</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Всего: {inquiries.length}
-        {newCount > 0 && (
+    <div className="px-4 py-5 md:px-6">
+      <AdminPageHeader
+        icon={<MessageSquare />}
+        title="Обращения"
+        description={
           <>
-            {" · "}
-            <span className="font-semibold text-amber-600">
-              новых: {newCount}
-            </span>
+            Всего: {inquiries.length}
+            {newCount > 0 && (
+              <>
+                {" · "}
+                <span className="font-semibold text-amber-600">
+                  новых: {newCount}
+                </span>
+              </>
+            )}
           </>
-        )}
-      </p>
+        }
+      />
+
+      {sent && (
+        <p className="mt-3 rounded-xl border border-emerald-300/60 bg-emerald-50/60 px-3 py-2 text-xs text-emerald-800">
+          Письма поставлены в отправку: {sent}. Дойдут в течение минуты.
+        </p>
+      )}
+
+      {newCount > 0 && (
+        <form action={resendAllNewInquiriesAction} className="mt-3">
+          <button
+            type="submit"
+            className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs font-medium hover:bg-muted"
+          >
+            <Mail className="size-3.5" />
+            Отправить письмом все новые ({newCount})
+          </button>
+        </form>
+      )}
 
       {inquiries.length === 0 ? (
-        <div className="mt-6 rounded-xl border border-dashed bg-muted/40 px-4 py-10 text-center">
+        <div className="mt-6 rounded-2xl border border-dashed bg-muted/40 px-4 py-10 text-center">
           <p className="text-sm font-medium">Пока обращений нет</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Когда пользователь оставит вопрос или предложение — он появится
@@ -55,7 +85,7 @@ export default async function AdminInquiriesPage() {
             <Link
               key={inq.id}
               href={`/admin/inquiries/${inq.id}`}
-              className="block rounded-xl border bg-card p-3 transition-colors hover:border-primary/50"
+              className="block rounded-2xl border bg-card p-3 transition-colors hover:border-primary/50"
             >
               <div className="flex items-start gap-3">
                 <Avatar

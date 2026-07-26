@@ -1,16 +1,17 @@
+import { FolderInput } from "lucide-react";
 import { KnowledgeUploadStub } from "@/components/admin/knowledge-upload-stub";
+import { AdminPageHeader } from "@/components/admin/page-header";
 
 export const metadata = { title: "База знаний" };
 
 export default function KnowledgePage() {
   return (
-    <div className="px-4 py-5">
-      <h1 className="text-xl font-extrabold tracking-tight">База знаний</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Загружайте PDF, DOC, картинки и видео с описанием мер поддержки.
-        AI разберёт содержимое и автоматически свяжет с подходящими мерами в
-        каталоге.
-      </p>
+    <div className="px-4 py-5 md:px-6">
+      <AdminPageHeader
+        icon={<FolderInput />}
+        title="База знаний"
+        description="Загружайте PDF, DOC, картинки и видео с описанием мер поддержки. AI разберёт содержимое и автоматически свяжет с подходящими мерами в каталоге."
+      />
 
       <div className="mt-5">
         <KnowledgeUploadStub />

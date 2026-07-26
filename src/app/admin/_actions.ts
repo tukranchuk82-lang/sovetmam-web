@@ -95,6 +95,7 @@ function revalidate(slug: string) {
   revalidatePath("/catalog");
   revalidatePath(`/catalog/${slug}`);
   revalidatePath("/admin");
+  revalidatePath("/admin/measures");
   revalidatePath(`/admin/measures/${slug}`);
   // Сегменты затронуты любой правкой — перевалидируем все.
   revalidatePath("/segment/[id]", "page");
@@ -124,5 +125,5 @@ export async function updateMeasureAction(originalSlug: string, fd: FormData) {
 export async function deleteMeasureAction(slug: string) {
   await dbDeleteMeasure(slug);
   revalidate(slug);
-  redirect("/admin");
+  redirect("/admin/measures");
 }

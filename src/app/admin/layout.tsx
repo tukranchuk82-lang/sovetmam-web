@@ -4,12 +4,14 @@ import {
   LayoutGrid,
   MessageSquare,
   FolderInput,
-  ArrowLeft,
   CalendarCheck,
+  Users,
+  Gauge,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { getCurrentAdmin } from "@/lib/user-session";
 import { AdminNavLink } from "@/components/admin/nav-link";
+import { ViewModeSwitch } from "@/components/view-mode-switch";
 import { OrgName } from "@/components/org-name";
 
 export const metadata = {
@@ -49,32 +51,32 @@ export default async function AdminLayout({
               <OrgName />
             </Link>
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/profile"
-              className="inline-flex items-center gap-1 rounded-lg border bg-background px-2.5 py-1.5 text-xs hover:bg-muted"
-            >
-              <ArrowLeft className="size-3" />
-              В кабинет
-            </Link>
-          </div>
+          {/* Переключатель режима: уводит в личный кабинет и запоминает выбор,
+              чтобы кабинет открывался как у обычного пользователя. */}
+          <ViewModeSwitch mode="admin" className="shrink-0" />
         </div>
 
         <nav className="mt-3 flex flex-wrap gap-1.5">
+          <AdminNavLink href="/admin" icon={<Gauge className="size-4" />} exact>
+            Сводка
+          </AdminNavLink>
+          <AdminNavLink href="/admin/measures" icon={<LayoutGrid className="size-4" />}>
+            Каталог мер
+          </AdminNavLink>
+          <AdminNavLink href="/admin/users" icon={<Users className="size-4" />}>
+            Пользователи
+          </AdminNavLink>
           <AdminNavLink href="/admin/inquiries" icon={<MessageSquare className="size-4" />} badge={newInquiries}>
             Обращения
-          </AdminNavLink>
-          <AdminNavLink href="/admin/knowledge" icon={<FolderInput className="size-4" />}>
-            База знаний
-          </AdminNavLink>
-          <AdminNavLink href="/admin" icon={<LayoutGrid className="size-4" />} exact>
-            Каталог мер
           </AdminNavLink>
           <AdminNavLink
             href="/admin/verification"
             icon={<CalendarCheck className="size-4" />}
           >
             Сверка
+          </AdminNavLink>
+          <AdminNavLink href="/admin/knowledge" icon={<FolderInput className="size-4" />}>
+            База знаний
           </AdminNavLink>
         </nav>
       </header>

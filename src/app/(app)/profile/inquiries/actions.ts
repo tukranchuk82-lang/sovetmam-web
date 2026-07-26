@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { createInquiry, type InquiryType } from "@/lib/inquiries-db";
+import { notifyStaffAboutInquiry } from "@/lib/inquiry-notify";
 
 export async function createInquiryAction(fd: FormData) {
   const user = await getCurrentAppUser();
@@ -30,7 +32,7 @@ export async function createInquiryAction(fd: FormData) {
     throw new Error("Укажите, о какой мере поддержки идёт речь");
   }
 
-  await createInquiry({
+  const inquiry = await createInquiry({
     userId: user.id,
     userName: `${user.firstName} ${user.lastName}`.trim(),
     userChannel: user.messengerChoice, // канал для уведомления, если подключён
@@ -40,6 +42,10 @@ export async function createInquiryAction(fd: FormData) {
     body,
     measureSlug: measureSlug || null,
   });
+
+  // Письмо отправляем после ответа страницы: SMTP бывает медленным, а человек
+  // не должен ждать письмо, чтобы увидеть «обращение отправлено».
+  after(() => notifyStaffAboutInquiry(inquiry));
 
   revalidatePath("/profile");
   revalidatePath("/profile/inquiries");
