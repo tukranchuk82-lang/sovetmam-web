@@ -42,7 +42,7 @@ export default function Home() {
           --col — ширина правой колонки (портрет + подпись под ним). Одна
           колонка на оба элемента гарантирует, что их ширины совпадают. */}
       <section
-        className="relative min-h-[600px] flex-1 overflow-hidden px-6 pt-7"
+        className="relative min-h-[436px] flex-1 overflow-hidden px-6 pt-5"
         style={
           {
             containerType: "inline-size",
@@ -51,17 +51,14 @@ export default function Home() {
           } as React.CSSProperties
         }
       >
-        {/* ЭКСПЕРИМЕНТ: карта России как фон за заголовком, по центру сверху.
-           Для отката вернуть серый круг:
-           <div className="absolute right-[-62px] top-[202px] z-0 size-[300px] rounded-full bg-[#EAE6E6] blur-[6px]" /> */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/country-map.png"
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-[6px] z-0 w-[98%] -translate-x-1/2 opacity-40"
-          style={{ mixBlendMode: "multiply" }}
-        />
+        {/* Карта России фоном и крупный заголовок сняты по просьбе заказчика
+           (2026-07): первый экран должен начинаться с блока об авторе проекта,
+           чтобы вместе с ним в него попадала плашка «Подбор мер поддержки».
+           Для отката вернуть:
+           <img src="/country-map.png" alt="" aria-hidden
+                className="pointer-events-none absolute left-1/2 top-[6px] z-0 w-[98%] -translate-x-1/2 opacity-40"
+                style={{ mixBlendMode: "multiply" }} />
+           и видимый <h1> с подзаголовком (см. ниже). */}
 
         {/* Силуэт города снизу слева (как было изначально): правый край левее
            подписи, зазор 1ch — текст справа на него не наползает.
@@ -78,17 +75,6 @@ export default function Home() {
           style={{ mixBlendMode: "multiply" }}
         />
 
-        {/* Светлая вуаль между картой и текстом — мягко высветляет карту под
-           заголовком для читаемости, к краям сходит на нет. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-[300px]"
-          style={{
-            background:
-              "radial-gradient(115% 75% at 32% 26%, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.45) 42%, rgba(255,255,255,0) 72%)",
-          }}
-        />
-
         {/* Правая колонка: портрет и подпись под ним. Ширина задана один раз
            (--col), поэтому фото и текст всегда совпадают по левому и правому
            краю. Колонка прижата к низу героя — низ подписи задаёт уровень,
@@ -100,33 +86,16 @@ export default function Home() {
 
         {/* Текстовый блок (поверх, слева) */}
         <div className="relative z-20">
-          <h1
-            className="text-[clamp(26px,7.8vw,32px)] font-normal leading-[1.12] text-[#1A1A1A]"
-            style={{
-              fontFamily: "var(--font-playfair), serif",
-              textShadow:
-                "0 1px 2px rgba(255,255,255,0.9), 0 0 10px rgba(255,255,255,0.85)",
-            }}
-          >
-            Индивидуальная
-            <br />
-            семейная политика —
-            <br />
-            помощь для каждой семьи
+          {/* Заголовок остаётся в разметке для поисковиков и скринридеров,
+              визуально скрыт (см. комментарий об откате выше). */}
+          <h1 className="sr-only">
+            Индивидуальная семейная политика — помощь для каждой семьи. Единый
+            навигатор мер поддержки для каждой семьи.
           </h1>
-
-          <p
-            className="mt-4 text-[15px] leading-relaxed text-[#4D4D4D]"
-            style={{ textShadow: "0 1px 2px rgba(255,255,255,0.9)" }}
-          >
-            Единый навигатор мер поддержки
-            <br />
-            для каждой семьи.
-          </p>
 
           {/* Красная декоративная линия */}
           <span
-            className="mt-[calc(65_*_var(--s))] block h-[3px] w-10 rounded-full"
+            className="block h-[3px] w-10 rounded-full"
             style={{ background: ACCENT }}
           />
 
