@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Проверка мини-приложения</title>
+<!--
+  Пустая страница для проверки Telegram Mini App.
+
+  Если приложение открывается по этому адресу, значит бот, домен и сертификат
+  настроены верно, а причину «страница не загрузилась» надо искать в самом
+  приложении. Если и она не открывается — дело в настройках бота у BotFather.
+
+  Ничего не подгружает и не регистрирует service worker намеренно.
+-->
+<body style="margin:0;font:16px/1.6 system-ui,sans-serif;background:#F3F1EC;color:#1A1A1A">
+  <div style="max-width:420px;margin:0 auto;padding:32px 20px">
+    <p style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#8E1D2C;margin:0 0 8px">
+      Проверка связи
+    </p>
+    <h1 style="font-size:22px;line-height:1.3;margin:0 0 12px">Страница открылась</h1>
+    <p style="margin:0 0 8px">
+      Значит бот, домен и сертификат настроены правильно.
+    </p>
+    <p id="env" style="margin:0;color:#6b7078;font-size:14px"></p>
+  </div>
+
+  <script>
+    // Показываем, видит ли страница Telegram — это отличает запуск из бота
+    // от обычного открытия в браузере.
+    var tg = window.Telegram && window.Telegram.WebApp;
+    document.getElementById("env").textContent = tg
+      ? "Открыто из Telegram, версия " + (tg.version || "неизвестна")
+      : "Открыто в обычном браузере, не из Telegram.";
+    if (tg && tg.ready) tg.ready();
+  </script>
+</body>
