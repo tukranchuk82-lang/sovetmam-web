@@ -301,6 +301,16 @@ export interface EligibilityCriteria {
   requiresStudent?: boolean;
   /** Мера только для родителей младше 35 лет («молодая семья»). */
   requiresParentUnder35?: boolean;
+  /**
+   * Предельный возраст заявителя — для мер с цензом жёстче «молодой семьи»:
+   * «маме до 25 лет», «женщине до 28 лет» и подобных.
+   *
+   * Считается по возрасту того, кто заполняет анкету: такие выплаты назначают
+   * лично матери, а не семье. Если возраст не указан (анкету заполняли до
+   * того, как мы стали его спрашивать), условие пропускаем — иначе у людей
+   * молча пропали бы меры, которые они уже видели.
+   */
+  maxParentAge?: number;
   requiresSelfEmployed?: boolean;
   requiresEntrepreneur?: boolean;
   /**
@@ -567,6 +577,16 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   if (c.requiresStudent && !profile.student) return false;
   // Молодая семья: ценз должны проходить оба супруга — см. parentUnder35.
   if (c.requiresParentUnder35 && !isYoungFamily(profile)) return false;
+
+  // Возрастной ценз лично для заявителя («маме до 25 лет»). Возраст не
+  // указан — условие не проверяем, см. комментарий у maxParentAge.
+  if (
+    c.maxParentAge != null &&
+    profile.parentAge != null &&
+    profile.parentAge > c.maxParentAge
+  ) {
+    return false;
+  }
   if (c.requiresSelfEmployed && !profile.selfEmployed) return false;
   if (c.requiresEntrepreneur && !profile.entrepreneur) return false;
   if (c.requiresDisabledParent && !profile.disabledParent) return false;
