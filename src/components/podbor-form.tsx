@@ -16,6 +16,7 @@ import { saveSurveyAction } from "@/app/(app)/login/onboarding-actions";
 import {
   matchMeasures,
   REGIONS,
+  YOUNG_FAMILY_MAX_AGE,
   type IncomePm,
   type SupportMeasure,
   type UserProfile,
@@ -196,6 +197,45 @@ const AGE_OPTIONS: { value: number; label: string }[] = Array.from(
   (_, i) => ({ value: i, label: i === 18 ? "18 и старше" : String(i) }),
 );
 
+// Возраст родителей: от 16 до 60, дальше «60 и старше» — точное число там уже
+// ни на одну меру не влияет, а список не стоит делать бесконечным.
+const PARENT_AGE_OPTIONS = Array.from({ length: 45 }, (_, i) => {
+  const age = 16 + i;
+  return { value: age, label: age === 60 ? "60 и старше" : String(age) };
+});
+
+function ParentAgeSelect({
+  value,
+  onChange,
+}: {
+  value: number | null;
+  onChange: (v: number | null) => void;
+}) {
+  return (
+    <div className="relative mt-1">
+      <select
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
+        className={cn(
+          "w-full appearance-none rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
+          value != null ? "font-medium text-[#2b2f36]" : "text-[#7a808a]",
+        )}
+      >
+        <option value="">Возраст</option>
+        {PARENT_AGE_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+      />
+    </div>
+  );
+}
+
 // Нормализует сохранённую анкету (jsonb из профиля) в полный UserProfile.
 function toProfile(v: Partial<UserProfile>): UserProfile {
   const incomePm = toIncomePm(v);
@@ -226,6 +266,8 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     svoFamily: !!v.svoFamily,
     singleParent: !!v.singleParent,
     student: !!v.student,
+    parentAge: typeof v.parentAge === "number" ? v.parentAge : null,
+    spouseAge: typeof v.spouseAge === "number" ? v.spouseAge : null,
     parentUnder35: !!v.parentUnder35,
     selfEmployed: !!v.selfEmployed,
     entrepreneur: !!v.entrepreneur,
@@ -287,7 +329,18 @@ export function PodborForm({
   const [lossOfBreadwinner, setLossOfBreadwinner] = useState<boolean | null>(
     saved?.lossOfBreadwinner ?? null,
   );
-  const [parentUnder35, setParentUnder35] = useState<boolean | null>(saved?.parentUnder35 ?? null);
+  const [parentAge, setParentAge] = useState<number | null>(
+    typeof saved?.parentAge === "number" ? saved.parentAge : null,
+  );
+  const [spouseAge, setSpouseAge] = useState<number | null>(
+    typeof saved?.spouseAge === "number" ? saved.spouseAge : null,
+  );
+  // null — не спрашивали, false — супруга нет. Отдельный флаг нужен, чтобы
+  // отличить «супруга нет» от «возраст супруга не заполнили». В анкету он не
+  // сохраняется: для подбора хватает самих возрастов.
+  const [hasSpouse, setHasSpouse] = useState<boolean | null>(
+    savedSurvey?.singleParent === true ? false : null,
+  );
   const [selfEmployed, setSelfEmployed] = useState<boolean | null>(saved?.selfEmployed ?? null);
   const [entrepreneur, setEntrepreneur] = useState<boolean | null>(saved?.entrepreneur ?? null);
   const [disabledParent, setDisabledParent] = useState<boolean | null>(saved?.disabledParent ?? null);
@@ -321,6 +374,14 @@ export function PodborForm({
   // Движок подбора смотрит на возраст младшего — выводим его из ответов.
   const filledAges = childrenAges.filter((a): a is number => a != null);
   const youngestAge = filledAges.length ? Math.min(...filledAges) : null;
+
+  // «Молодая семья» — если ценз проходят оба супруга. Возраст не указан вовсе —
+  // считаем, что не проходят: лучше не предложить, чем обнадёжить зря.
+  const parentAges = [parentAge, hasSpouse === false ? null : spouseAge].filter(
+    (a): a is number => a != null,
+  );
+  const youngFamily =
+    parentAges.length > 0 && parentAges.every((a) => a <= YOUNG_FAMILY_MAX_AGE);
 
   function setAgeAt(i: number, value: number | null) {
     setChildrenAges((prev) => prev.map((a, idx) => (idx === i ? value : a)));
@@ -367,7 +428,12 @@ export function PodborForm({
       svoFamily: svoFamily ?? false,
       singleParent: singleParent ?? false,
       student: student ?? false,
-      parentUnder35: parentUnder35 ?? false,
+      parentAge,
+      spouseAge: hasSpouse === false ? null : spouseAge,
+      // Флаг выводим по старшему из супругов — см. isYoungFamily. Если
+      // возраст не указали вовсе, меры для молодых семей не показываем:
+      // лучше не предложить подходящее, чем обнадёжить зря.
+      parentUnder35: youngFamily,
       selfEmployed: selfEmployed ?? false,
       entrepreneur: entrepreneur ?? false,
       disabledParent: disabledParent ?? false,
@@ -704,14 +770,46 @@ export function PodborForm({
           </div>
         </div>
 
-        <Question label="Возраст родителей">
-          <Choice active={parentUnder35 === true} onClick={() => setParentUnder35(true)}>
-            до 35 лет
-          </Choice>
-          <Choice active={parentUnder35 === false} onClick={() => setParentUnder35(false)}>
-            35 лет и старше
-          </Choice>
-        </Question>
+        {/* Возраст спрашиваем у каждого супруга отдельно: программы для
+            молодых семей требуют ценз от обоих, и на общий вопрос «до 35?»
+            семья, где одному 33, а другому 37, отвечала «да». */}
+        <div>
+          <p className="text-sm font-medium">Возраст родителей</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Программы для молодых семей действуют, только если обоим супругам
+            не больше 35 лет.
+          </p>
+
+          <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2.5">
+            <label className="block">
+              <span className="text-xs text-muted-foreground">Ваш возраст</span>
+              <ParentAgeSelect value={parentAge} onChange={setParentAge} />
+            </label>
+
+            {hasSpouse !== false && (
+              <label className="block">
+                <span className="text-xs text-muted-foreground">Возраст супруга</span>
+                <ParentAgeSelect value={spouseAge} onChange={setSpouseAge} />
+              </label>
+            )}
+          </div>
+
+          {/* Кнопка стоит под колонкой супруга — чтобы читалось как ответ
+              именно на этот вопрос, а не на весь блок. */}
+          <div className="mt-2.5 grid grid-cols-2 gap-x-3">
+            <div />
+            <Choice
+              active={hasSpouse === false}
+              onClick={() => {
+                const next = hasSpouse === false ? null : false;
+                setHasSpouse(next);
+                if (next === false) setSpouseAge(null);
+              }}
+            >
+              супруга нет
+            </Choice>
+          </div>
+        </div>
 
         <Question label="Планируете покупку жилья или ипотеку?">
           <YesNo value={mortgageIntent} onChange={setMortgageIntent} />

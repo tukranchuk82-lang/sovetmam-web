@@ -389,6 +389,19 @@ export interface UserProfile {
   svoFamily: boolean;
   singleParent: boolean;
   student: boolean;
+  /** Возраст того, кто заполняет анкету. `null` — не ответили. */
+  parentAge: number | null;
+  /** Возраст супруга. `null` — супруга нет либо не ответили. */
+  spouseAge: number | null;
+  /**
+   * Оба родителя моложе 36 лет.
+   *
+   * Программы для молодых семей требуют, чтобы возрастной ценз проходили ОБА
+   * супруга: если одному 33, а второму 37, семья права не имеет. Поэтому флаг
+   * выводится из возрастов и по старшему из супругов, а не спрашивается
+   * отдельно — раньше на один вопрос «до 35 лет» отвечали за двоих, и меры
+   * показывались семьям, которым не полагались.
+   */
   parentUnder35: boolean;
   selfEmployed: boolean;
   entrepreneur: boolean;
@@ -448,6 +461,25 @@ export function isEligible(
     if (!profile.region || !c.regions.includes(profile.region)) return false;
   }
   return true;
+}
+
+/** Предельный возраст супругов в программах для молодых семей. */
+export const YOUNG_FAMILY_MAX_AGE = 35;
+
+/**
+ * Проходит ли семья возрастной ценз «молодой семьи».
+ *
+ * Считаем по старшему из супругов: программа требует, чтобы обоим было не
+ * больше 35 лет. Если возрасты не заполнены (анкета старая), опираемся на
+ * прежний ответ «до 35 лет» — иначе у людей, заполнивших анкету раньше,
+ * молча пропали бы подходящие меры.
+ */
+export function isYoungFamily(profile: UserProfile): boolean {
+  const { parentAge, spouseAge } = profile;
+  if (parentAge == null && spouseAge == null) return profile.parentUnder35;
+
+  const ages = [parentAge, spouseAge].filter((a): a is number => a != null);
+  return ages.every((a) => a <= YOUNG_FAMILY_MAX_AGE);
 }
 
 /**
@@ -533,7 +565,8 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   if (c.requiresSvoFamily && !profile.svoFamily) return false;
   if (c.requiresSingleParent && !profile.singleParent) return false;
   if (c.requiresStudent && !profile.student) return false;
-  if (c.requiresParentUnder35 && !profile.parentUnder35) return false;
+  // Молодая семья: ценз должны проходить оба супруга — см. parentUnder35.
+  if (c.requiresParentUnder35 && !isYoungFamily(profile)) return false;
   if (c.requiresSelfEmployed && !profile.selfEmployed) return false;
   if (c.requiresEntrepreneur && !profile.entrepreneur) return false;
   if (c.requiresDisabledParent && !profile.disabledParent) return false;
