@@ -303,8 +303,16 @@ export function PodborForm({
   const [exactCount, setExactCount] = useState<string>(
     savedCount != null && savedCount >= MANY_CHILDREN ? String(savedCount) : "",
   );
-  const [childrenAges, setChildrenAges] = useState<(number | null)[]>(
-    Array.isArray(saved?.childrenAges) ? saved.childrenAges.map(Number) : [],
+  // Возрасты детей держим не списком, а ответами по номеру ребёнка: список
+  // нужной длины выводится из числа детей при отрисовке. Раньше длину
+  // подгонял эффект, и React справедливо ругался на состояние, которое
+  // правится следом за другим состоянием.
+  const [agesByChild, setAgesByChild] = useState<Record<number, number | null>>(() =>
+    Object.fromEntries(
+      (Array.isArray(saved?.childrenAges) ? saved.childrenAges.map(Number) : []).map(
+        (age, i) => [i, age],
+      ),
+    ),
   );
   // Многоплодные роды: 1 — обычные, 2 — двойня, 3 — тройня, 4 — четверни и более.
   const [multipleBirthCount, setMultipleBirthCount] = useState<number | null>(
@@ -360,16 +368,12 @@ export function PodborForm({
           ? exactNum
           : 0;
 
-  // Длина списка возрастов идёт за числом детей: добавили ребёнка — появилось
-  // пустое окошко, убавили — лишние отброшены (ответы оставшихся сохраняются).
-  useEffect(() => {
-    setChildrenAges((prev) => {
-      if (prev.length === childCount) return prev;
-      const next = prev.slice(0, childCount);
-      while (next.length < childCount) next.push(null);
-      return next;
-    });
-  }, [childCount]);
+  // Список окошек идёт за числом детей: добавили ребёнка — появилось пустое,
+  // убавили — лишние скрылись, а ответы оставшихся сохранились.
+  const childrenAges = Array.from(
+    { length: childCount },
+    (_, i) => agesByChild[i] ?? null,
+  );
 
   // Движок подбора смотрит на возраст младшего — выводим его из ответов.
   const filledAges = childrenAges.filter((a): a is number => a != null);
@@ -384,7 +388,7 @@ export function PodborForm({
     parentAges.length > 0 && parentAges.every((a) => a <= YOUNG_FAMILY_MAX_AGE);
 
   function setAgeAt(i: number, value: number | null) {
-    setChildrenAges((prev) => prev.map((a, idx) => (idx === i ? value : a)));
+    setAgesByChild((prev) => ({ ...prev, [i]: value }));
   }
 
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
