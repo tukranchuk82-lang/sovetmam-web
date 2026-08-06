@@ -20,6 +20,7 @@ import {
   type MessengerChannel,
 } from "@/lib/onboarding-db";
 import { setUserSession, clearUserSession, getCurrentAppUser } from "@/lib/user-session";
+import { applyPendingBotIdentity } from "@/lib/from-bot";
 import { sendOtpEmail } from "@/lib/notify/email";
 import { buildSalebotProxyLink } from "@/lib/salebot";
 
@@ -90,7 +91,11 @@ export async function requestCode(input: {
   return { ok: true, devCode };
 }
 
-export type VerifyCodeResult = { ok: true } | { ok: false; error: string };
+/** messengerConnected — мессенджер уже подключён (пришли из бота), шаг с
+ *  подключением показывать не нужно. */
+export type VerifyCodeResult =
+  | { ok: true; messengerConnected: boolean }
+  | { ok: false; error: string };
 
 export async function verifyCode(input: {
   email: string;
@@ -114,7 +119,10 @@ export async function verifyCode(input: {
   const user = await getAppUserByEmail(email);
   if (!user) return { ok: false, error: "Пользователь не найден." };
   await setUserSession(user.id);
-  return { ok: true };
+  // Если человек пришёл из бота и только теперь вошёл — подключаем мессенджер
+  // молча, без похода в бота и без сообщения оттуда.
+  const fromBot = await applyPendingBotIdentity(user.id);
+  return { ok: true, messengerConnected: fromBot || user.messengerConnected };
 }
 
 /** Выбор мессенджера: сохраняем канал и отдаём прокси-ссылку Salebot. */

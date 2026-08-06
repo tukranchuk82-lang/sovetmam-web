@@ -7,6 +7,7 @@ import { LogIn, ChevronLeft } from "lucide-react";
 import { OrgName } from "@/components/org-name";
 import { BottomNav } from "@/components/bottom-nav";
 import { InstallBanner } from "@/components/install-banner";
+import { MessengerConnectedToast } from "@/components/messenger-connected-toast";
 
 // useLayoutEffect на сервере ругается — на SSR подменяем его на useEffect.
 // Восстановление скролла должно идти синхронно (до отрисовки), поэтому в
@@ -273,6 +274,9 @@ export function AppShell({
             Сама решает, показываться ли: скрыта, если приложение уже стоит или
             его некуда ставить, и после того, как её закрыли крестиком. */}
         <InstallBanner />
+
+        {/* Сообщение о подключении мессенджера после перехода из бота. */}
+        <MessengerConnectedToast />
       </div>
 
       <BottomNav background={NAVY} />

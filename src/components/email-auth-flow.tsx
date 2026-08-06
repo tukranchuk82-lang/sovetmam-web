@@ -150,8 +150,9 @@ export function EmailAuthFlow() {
     startTransition(async () => {
       const res = await verifyCode({ email, code });
       if (!res.ok) return setError(res.error);
-      // После регистрации — обязательный шаг подключения мессенджера.
-      if (mode === "register") {
+      // После регистрации — шаг подключения мессенджера. Кроме случая, когда
+      // человек пришёл из бота: там мессенджер уже подключён.
+      if (mode === "register" && !res.messengerConnected) {
         router.push(`/connect?next=${encodeURIComponent(next)}`);
       } else {
         router.push(next);
