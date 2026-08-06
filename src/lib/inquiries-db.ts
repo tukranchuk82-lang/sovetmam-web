@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { addMessage } from "@/lib/inquiry-thread";
 
 // Тип обращения живёт в @/lib/inquiries — он нужен и клиентским компонентам,
 // а этот модуль server-only.
@@ -89,7 +90,16 @@ export async function createInquiry(input: NewInquiry): Promise<Inquiry> {
     .select()
     .single();
   if (error) throw error;
-  return fromRow(data as InquiryRow);
+
+  const inquiry = fromRow(data as InquiryRow);
+  // Первое сообщение ленты — сам вопрос: дальше разговор продолжается в ней.
+  await addMessage({
+    inquiryId: inquiry.id,
+    author: "user",
+    authorName: inquiry.userName,
+    body: inquiry.body,
+  });
+  return inquiry;
 }
 
 export async function listInquiriesForUser(userId: string): Promise<Inquiry[]> {
@@ -141,6 +151,14 @@ export async function respondToInquiry(
     })
     .eq("id", id);
   if (error) throw error;
+
+  // Тот же ответ кладём в ленту — переписка должна быть целиком в одном месте.
+  await addMessage({
+    inquiryId: id,
+    author: "staff",
+    authorName: respondedByName,
+    body: response,
+  });
 }
 
 export async function countNewInquiries(): Promise<number> {

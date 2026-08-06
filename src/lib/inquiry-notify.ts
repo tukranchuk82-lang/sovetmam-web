@@ -2,10 +2,15 @@ import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import { getMeasureBySlug } from "@/lib/measures-db";
-import { sendNewInquiryEmail, sendInquiryAnswerEmail } from "@/lib/notify/email";
+import {
+  sendNewInquiryEmail,
+  sendInquiryAnswerEmail,
+  sendInquiryFollowUpEmail,
+} from "@/lib/notify/email";
 import { notifySalebotAnswer } from "@/lib/salebot";
 import { appUrl, buildReplyUrl } from "@/lib/inquiry-token";
 import type { Inquiry } from "@/lib/inquiries-db";
+import { getThread } from "@/lib/inquiry-thread";
 
 /**
  * Уведомления по обращениям.
@@ -65,6 +70,7 @@ export async function notifyStaffAboutInquiry(inquiry: Inquiry): Promise<void> {
       : null;
 
     const data = {
+      inquiryId: inquiry.id,
       userName: inquiry.userName,
       userEmail: userEmail ?? "почта не указана",
       region: inquiry.region,
@@ -126,5 +132,50 @@ export async function notifyUserAboutAnswer(inquiry: Inquiry): Promise<void> {
     }
   } catch (e) {
     log(`сбой уведомления об ответе: ${e instanceof Error ? e.message : e}`);
+  }
+}
+
+/**
+ * Человек написал в уже созданное обращение — зовём тех, кто отвечает.
+ *
+ * Письмо уходит в ту же ветку, что и первое: в почте это выглядит как
+ * продолжение переписки, а не новое обращение без контекста.
+ */
+export async function notifyStaffAboutFollowUp(
+  inquiry: Inquiry,
+  message: { body: string },
+): Promise<void> {
+  try {
+    const recipients = await inquiryRecipients();
+    if (recipients.length === 0) {
+      log("некому отправлять: владельцев с почтой не нашлось");
+      return;
+    }
+
+    // Показываем всё, что было до этого сообщения, — кроме него самого.
+    const thread = await getThread(inquiry.id);
+    const history = thread
+      .filter((m) => m.body !== message.body)
+      .map((m) => ({ author: m.author, body: m.body, createdAt: m.createdAt }));
+
+    const data = {
+      inquiryId: inquiry.id,
+      subject: inquiry.subject,
+      userName: inquiry.userName,
+      body: message.body,
+      history,
+    };
+    const replyUrl = buildReplyUrl(inquiry.id);
+
+    for (const to of recipients) {
+      try {
+        await sendInquiryFollowUpEmail(to, data, replyUrl);
+        log(`письмо о продолжении переписки отправлено: ${to}`);
+      } catch (e) {
+        log(`письмо не ушло на ${to}: ${e instanceof Error ? e.message : e}`);
+      }
+    }
+  } catch (e) {
+    log(`сбой уведомления о продолжении: ${e instanceof Error ? e.message : e}`);
   }
 }

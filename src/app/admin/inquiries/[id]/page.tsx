@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle2, Clock, ExternalLink, Send } from "lucide-react";
 import { getInquiry } from "@/lib/inquiries-db";
+import { getThread, markThreadRead } from "@/lib/inquiry-thread";
 import { getMeasureBySlug } from "@/lib/measures-db";
 import { replyInquiryAction } from "@/app/admin/inquiries/actions";
 import { Avatar } from "@/components/avatar";
@@ -32,6 +33,11 @@ export default async function AdminInquiryDetailPage({
   const { id } = await params;
   const inquiry = await getInquiry(id);
   if (!inquiry) notFound();
+
+  // Открыли обращение — сообщения человека считаем прочитанными.
+  const messages = await getThread(inquiry.id);
+  await markThreadRead(inquiry.id, "staff");
+  const waitingForUs = messages.at(-1)?.author === "user";
 
   const measure = inquiry.measureSlug
     ? await getMeasureBySlug(inquiry.measureSlug)
@@ -99,45 +105,64 @@ export default async function AdminInquiryDetailPage({
         </Link>
       )}
 
-      <p className="mt-4 whitespace-pre-line rounded-xl border bg-card p-4 text-sm">
-        {inquiry.body}
-      </p>
+      {/* Переписка целиком: вопрос, ответы и уточнения человека подряд. */}
+      <section className="mt-4 space-y-3">
+        {messages.map((m) => (
+          <div
+            key={m.id}
+            className={cn("flex", m.author === "staff" ? "justify-end" : "justify-start")}
+          >
+            <div
+              className={cn(
+                "max-w-[86%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+                m.author === "staff"
+                  ? "bg-[#1B3A6B] text-white"
+                  : "border bg-card text-foreground",
+              )}
+            >
+              <p
+                className={cn(
+                  "mb-1 text-[11px]",
+                  m.author === "staff" ? "text-white/70" : "text-muted-foreground",
+                )}
+              >
+                {m.author === "staff" ? (m.authorName ?? "Мы") : inquiry.userName} ·{" "}
+                {new Date(m.createdAt).toLocaleString("ru-RU", {
+                  day: "2-digit",
+                  month: "long",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              {m.body}
+            </div>
+          </div>
+        ))}
+      </section>
 
       <h2 className="mt-6 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-        {inquiry.status === "answered" ? "Ваш ответ" : "Ответить"}
+        {waitingForUs ? "Ответить" : "Написать ещё"}
       </h2>
 
-      {inquiry.status === "answered" ? (
-        <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 text-sm">
-          <p className="whitespace-pre-line">{inquiry.response}</p>
-          <p className="mt-3 text-xs text-emerald-700">
-            {inquiry.respondedByName} ·{" "}
-            {inquiry.respondedAt
-              ? new Date(inquiry.respondedAt).toLocaleString("ru-RU")
-              : ""}
-          </p>
-        </div>
-      ) : (
-        <form action={reply} className="mt-2 space-y-3">
-          <textarea
-            name="response"
-            required
-            rows={6}
-            placeholder="Напишите ответ пользователю. Текст придёт в личный кабинет и уведомлением в его бот."
-            className="w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-          <button
-            type="submit"
-            className={cn(buttonVariants(), "h-11 w-full gap-2 text-base")}
-          >
-            <Send className="size-4" />
-            Отправить ответ
-          </button>
-          <p className="text-center text-xs text-muted-foreground">
-            Ответ появится у пользователя в личном кабинете
-          </p>
-        </form>
-      )}
+      <form action={reply} className="mt-2 space-y-3">
+        <textarea
+          name="response"
+          required
+          rows={6}
+          placeholder="Напишите ответ. Он придёт человеку в личный кабинет, на почту и в его бот."
+          className="w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        <button
+          type="submit"
+          className={cn(buttonVariants(), "h-11 w-full gap-2 text-base")}
+        >
+          <Send className="size-4" />
+          Отправить ответ
+        </button>
+        <p className="text-center text-xs text-muted-foreground">
+          Человек сможет ответить в этой же переписке
+        </p>
+      </form>
     </article>
   );
 }

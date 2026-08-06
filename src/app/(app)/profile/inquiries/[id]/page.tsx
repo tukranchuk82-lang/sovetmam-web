@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { CheckCircle2, Clock, ExternalLink } from "lucide-react";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { getInquiry } from "@/lib/inquiries-db";
+import { getThread, markThreadRead } from "@/lib/inquiry-thread";
+import { InquiryThread } from "@/components/inquiry-thread";
 import { getMeasureBySlug } from "@/lib/measures-db";
 import { Badge } from "@/components/ui/badge";
 
@@ -20,6 +22,10 @@ export default async function InquiryDetailPage({
   const { id } = await params;
   const inquiry = await getInquiry(id);
   if (!inquiry || inquiry.userId !== user.id) notFound();
+
+  // Человек открыл переписку — значит ответы прочитаны: гасим счётчик.
+  const messages = await getThread(inquiry.id);
+  await markThreadRead(inquiry.id, "user");
 
   const measure = inquiry.measureSlug
     ? await getMeasureBySlug(inquiry.measureSlug)
@@ -59,26 +65,13 @@ export default async function InquiryDetailPage({
         </Link>
       )}
 
-      <p className="mt-4 whitespace-pre-line rounded-xl border bg-card p-4 text-sm">
-        {inquiry.body}
-      </p>
+      {/* Всё содержимое обращения теперь живёт в ленте: первый вопрос —
+          такое же сообщение, как и остальные. */}
+      <InquiryThread inquiryId={inquiry.id} messages={messages} />
 
-      <h2 className="mt-6 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-        Ответ
-      </h2>
-      {inquiry.status === "answered" && inquiry.response ? (
-        <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 text-sm">
-          <p className="whitespace-pre-line">{inquiry.response}</p>
-          <p className="mt-3 text-xs text-emerald-700">
-            {inquiry.respondedByName ?? "Заказчик"} ·{" "}
-            {inquiry.respondedAt
-              ? new Date(inquiry.respondedAt).toLocaleDateString("ru-RU")
-              : ""}
-          </p>
-        </div>
-      ) : (
-        <div className="mt-2 rounded-xl border border-dashed bg-muted/30 p-4 text-center text-sm text-muted-foreground">
-          Ваше обращение получено. Ответ придёт сюда, в личный кабинет
+      {messages.length === 1 && (
+        <p className="mt-4 rounded-xl border border-dashed bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+          Обращение получено. Ответ придёт сюда, в личный кабинет
           {inquiry.userChannel === "telegram"
             ? ", а также в Telegram"
             : inquiry.userChannel === "vk"
@@ -87,8 +80,9 @@ export default async function InquiryDetailPage({
                 ? ", а также в MAX"
                 : ""}
           .
-        </div>
+        </p>
       )}
+
     </article>
   );
 }

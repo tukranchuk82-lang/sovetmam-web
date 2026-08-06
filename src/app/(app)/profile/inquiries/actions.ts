@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { getCurrentAppUser } from "@/lib/user-session";
-import { createInquiry, type InquiryType } from "@/lib/inquiries-db";
-import { notifyStaffAboutInquiry } from "@/lib/inquiry-notify";
+import { createInquiry, getInquiry, type InquiryType } from "@/lib/inquiries-db";
+import { addMessage } from "@/lib/inquiry-thread";
+import { notifyStaffAboutInquiry, notifyStaffAboutFollowUp } from "@/lib/inquiry-notify";
 
 export async function createInquiryAction(fd: FormData) {
   const user = await getCurrentAppUser();
@@ -51,4 +52,46 @@ export async function createInquiryAction(fd: FormData) {
   revalidatePath("/profile/inquiries");
   revalidatePath("/admin/inquiries");
   redirect("/profile");
+}
+
+export type ReplyState = { error: string | null; ok: boolean };
+
+/**
+ * Человек продолжает разговор в своём обращении.
+ *
+ * Обращение возвращается в состояние «ждёт ответа» (это делает addMessage), а
+ * тем, кто разбирает обращения, уходит письмо в ту же ветку переписки.
+ */
+export async function replyToInquiryAction(
+  inquiryId: string,
+  _prev: ReplyState,
+  fd: FormData,
+): Promise<ReplyState> {
+  const user = await getCurrentAppUser();
+  if (!user) return { error: "Войдите, чтобы продолжить переписку", ok: false };
+
+  const body = String(fd.get("body") ?? "").trim();
+  if (body.length < 2) return { error: "Напишите сообщение", ok: false };
+
+  const inquiry = await getInquiry(inquiryId);
+  // Чужую переписку продолжать нельзя — проверяем владельца, а не только вход.
+  if (!inquiry || inquiry.userId !== user.id) {
+    return { error: "Обращение не найдено", ok: false };
+  }
+
+  const message = await addMessage({
+    inquiryId,
+    author: "user",
+    authorName: inquiry.userName,
+    body,
+  });
+  if (!message) return { error: "Не получилось отправить сообщение", ok: false };
+
+  after(() => notifyStaffAboutFollowUp(inquiry, { body }));
+
+  revalidatePath(`/profile/inquiries/${inquiryId}`);
+  revalidatePath("/profile");
+  revalidatePath("/admin/inquiries");
+  revalidatePath(`/admin/inquiries/${inquiryId}`);
+  return { error: null, ok: true };
 }

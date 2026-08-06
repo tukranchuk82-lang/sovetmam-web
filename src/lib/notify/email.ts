@@ -107,6 +107,7 @@ function row(label: string, value: string): string {
 }
 
 export interface InquiryEmailData {
+  inquiryId: string;
   userName: string;
   userEmail: string;
   region: string | null;
@@ -115,6 +116,22 @@ export interface InquiryEmailData {
   body: string;
   measureTitle: string | null;
   createdAt: string;
+}
+
+/**
+ * Опознавательный знак письма по обращению.
+ *
+ * Почтовые клиенты собирают переписку в одну ветку по этим заголовкам. Все
+ * письма одного обращения ссылаются на первое — тогда продолжение разговора
+ * приходит Татьяне в ту же цепочку, а не отдельным письмом без контекста.
+ */
+export function inquiryThreadId(inquiryId: string): string {
+  return `<inquiry-${inquiryId}@sovetmam.ru>`;
+}
+
+/** Заголовок письма обращения: одинаковый у всей ветки, у продолжений — с «Re:». */
+function inquirySubject(subject: string, followUp = false): string {
+  return `${followUp ? "Re: " : ""}Новое обращение: ${subject}`;
 }
 
 /**
@@ -166,7 +183,9 @@ export async function sendNewInquiryEmail(
   await transport.sendMail({
     from: fromAddress(),
     to,
-    subject: `Новое обращение: ${data.subject}`,
+    subject: inquirySubject(data.subject),
+    // Первое письмо задаёт ветку: продолжения будут ссылаться на него.
+    messageId: inquiryThreadId(data.inquiryId),
     text:
       `Новое обращение в приложении.\n\n` +
       `От кого: ${data.userName} (${data.userEmail})\n` +
@@ -176,6 +195,90 @@ export async function sendNewInquiryEmail(
       `Когда: ${date}\n\n` +
       `Тема: ${data.subject}\n\n${data.body}\n\n` +
       `Ответить: ${replyUrl}`,
+    html,
+  });
+}
+
+/**
+ * Продолжение разговора: человек написал в уже созданное обращение.
+ *
+ * Письмо уходит в ту же ветку, что и первое, — Татьяна видит переписку целиком
+ * в одном месте почты, а не отдельным письмом без контекста. Для верности
+ * прикладываем предыдущие сообщения прямо в тексте: почтовые клиенты сворачивают
+ * цитату, но она есть, если письмо открыли отдельно.
+ */
+export async function sendInquiryFollowUpEmail(
+  to: string,
+  data: {
+    inquiryId: string;
+    subject: string;
+    userName: string;
+    body: string;
+    history: { author: "user" | "staff"; body: string; createdAt: string }[];
+  },
+  replyUrl: string,
+): Promise<void> {
+  const transport = getTransport();
+
+  if (!transport) {
+    console.log(`[Обращение][stub] ${to}: продолжение «${data.subject}» — ${replyUrl}`);
+    return;
+  }
+
+  const when = (iso: string) =>
+    new Date(iso).toLocaleString("ru-RU", {
+      day: "2-digit",
+      month: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const historyHtml = data.history
+    .map(
+      (m) => `
+      <div style="margin:0 0 10px">
+        <p style="font-size:12px;color:#9aa0a8;margin:0 0 3px">
+          ${m.author === "user" ? esc(data.userName) : "Мы"} · ${esc(when(m.createdAt))}
+        </p>
+        <div style="background:${m.author === "user" ? "#F3F1EC" : "#EEF3EE"};border-radius:10px;
+                    padding:10px 12px;font-size:14px;line-height:1.5;white-space:pre-wrap">${esc(m.body)}</div>
+      </div>`,
+    )
+    .join("");
+
+  const html = shell(`
+    <p style="font-size:13px;color:#6b7078;margin:0 0 4px">Человек написал в обращение</p>
+    <h1 style="font-size:19px;line-height:1.35;margin:0 0 16px">${esc(data.subject)}</h1>
+
+    <div style="background:#F3F1EC;border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.55;white-space:pre-wrap">${esc(data.body)}</div>
+
+    <p style="margin:22px 0 8px">${button(replyUrl, "Ответить")}</p>
+
+    ${
+      data.history.length
+        ? `<p style="font-size:12px;color:#9aa0a8;margin:22px 0 8px">Что было раньше:</p>${historyHtml}`
+        : ""
+    }
+  `);
+
+  await transport.sendMail({
+    from: fromAddress(),
+    to,
+    subject: inquirySubject(data.subject, true),
+    // Ссылка на первое письмо обращения — по ней почта собирает ветку.
+    inReplyTo: inquiryThreadId(data.inquiryId),
+    references: inquiryThreadId(data.inquiryId),
+    text:
+      `${data.userName} написал в обращение «${data.subject}»:\n\n${data.body}\n\n` +
+      `Ответить: ${replyUrl}\n\n` +
+      (data.history.length
+        ? `Что было раньше:\n${data.history
+            .map(
+              (m) =>
+                `\n[${m.author === "user" ? data.userName : "Мы"}, ${when(m.createdAt)}]\n${m.body}`,
+            )
+            .join("\n")}`
+        : ""),
     html,
   });
 }
