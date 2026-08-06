@@ -4,6 +4,7 @@ import {
   LayoutGrid,
   MessageSquare,
   FolderInput,
+  Share2,
   CalendarCheck,
   Users,
   Gauge,
@@ -74,6 +75,9 @@ export default async function AdminLayout({
             icon={<CalendarCheck className="size-4" />}
           >
             Сверка
+          </AdminNavLink>
+          <AdminNavLink href="/admin/share" icon={<Share2 className="size-4" />}>
+            Поделились
           </AdminNavLink>
           <AdminNavLink href="/admin/knowledge" icon={<FolderInput className="size-4" />}>
             База знаний

@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { AppShell } from "@/components/app-shell";
 import { SavedProvider } from "@/components/saved-provider";
 import { UtmCapture } from "@/components/utm-capture";
+import { ShareArrival } from "@/components/share-arrival";
 import { countUnreadForUser } from "@/lib/inquiry-thread";
 import { AppBadge } from "@/components/app-badge";
 
@@ -42,6 +43,8 @@ export default async function AppLayout({
         </AppShell>
       </SavedProvider>
       <UtmCapture />
+      {/* Отметка о приходе по размеченной ссылке — считает пересылки и рассылки. */}
+      <ShareArrival />
       {/* Кружок на иконке установленного приложения. */}
       <AppBadge count={unread} />
     </>

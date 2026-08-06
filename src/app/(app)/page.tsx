@@ -6,6 +6,7 @@ import { CatalogMeasures } from "@/components/home/catalog-measures";
 import { Classification } from "@/components/home/classification";
 import { Directions } from "@/components/home/directions";
 import { PyramidSection } from "@/components/home/pyramid-section";
+import { ShareSection } from "@/components/home/share-section";
 import { JsonLd } from "@/components/json-ld";
 import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 
@@ -210,6 +211,9 @@ export default function Home() {
 
       {/* Пирамида мер поддержки (4 трапеции-уровня) */}
       <PyramidSection />
+
+      {/* Приглашение поделиться приложением */}
+      <ShareSection />
 
       {/* Силуэт города в самом низу — основание на 2px выше нижнего меню */}
       <div className="mt-4 px-5 pb-[2px]">

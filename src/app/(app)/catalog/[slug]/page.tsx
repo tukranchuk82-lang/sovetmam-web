@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { SaveHeart } from "@/components/save-heart";
+import { ShareButton } from "@/components/share-button";
 import { getAllMeasureSlugs, getMeasureBySlug } from "@/lib/measures-db";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { JsonLd } from "@/components/json-ld";
@@ -180,6 +181,11 @@ export default async function MeasurePage({
 
         <div className="space-y-2.5">
           <SaveHeart slug={m.slug} variant="button" />
+          <ShareButton
+            path={`/catalog/${m.slug}`}
+            title={m.title}
+            text={m.amount ? `${m.title} — ${m.amount}` : m.title}
+          />
           <Link
             href={inquiryHref}
             className={cn(
