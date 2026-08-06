@@ -37,10 +37,13 @@ const NAVY = "linear-gradient(135deg, #274A7E 0%, #1B3A6B 55%, #101D38 100%)";
 export function AppShell({
   avatarSlot,
   authed,
+  unread = 0,
   children,
 }: {
   avatarSlot: React.ReactNode;
   authed: boolean;
+  /** Непрочитанные ответы на обращения — кружок в меню и на иконке. */
+  unread?: number;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -279,7 +282,7 @@ export function AppShell({
         <MessengerConnectedToast />
       </div>
 
-      <BottomNav background={NAVY} />
+      <BottomNav background={NAVY} unread={unread} />
     </div>
   );
 }

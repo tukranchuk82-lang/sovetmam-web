@@ -10,7 +10,8 @@ import {
 import { notifySalebotAnswer } from "@/lib/salebot";
 import { appUrl, buildReplyUrl } from "@/lib/inquiry-token";
 import type { Inquiry } from "@/lib/inquiries-db";
-import { getThread } from "@/lib/inquiry-thread";
+import { countUnreadForUser, getThread } from "@/lib/inquiry-thread";
+import { sendPushToUser } from "@/lib/push";
 
 /**
  * Уведомления по обращениям.
@@ -95,11 +96,29 @@ export async function notifyStaffAboutInquiry(inquiry: Inquiry): Promise<void> {
   }
 }
 
-/** На обращение ответили — уведомляем человека: почта плюс мессенджер. */
+/**
+ * На обращение ответили — уведомляем человека всеми доступными путями:
+ * почта, мессенджер и пуш на устройство. Ни один не заменяет остальные:
+ * почту читают не все, мессенджер подключён не у всех, а уведомления
+ * разрешают тем более не все.
+ */
 export async function notifyUserAboutAnswer(inquiry: Inquiry): Promise<void> {
   try {
     const { email, salebotClientId } = await userContacts(inquiry.userId);
     const link = `${appUrl()}/profile/inquiries/${inquiry.id}`;
+
+    try {
+      const unread = await countUnreadForUser(inquiry.userId);
+      const sent = await sendPushToUser(inquiry.userId, {
+        title: "Ответ на ваше обращение",
+        body: inquiry.subject,
+        url: `/profile/inquiries/${inquiry.id}`,
+        badge: unread,
+      });
+      if (sent) log(`пуш об ответе доставлен на устройств: ${sent}`);
+    } catch (e) {
+      log(`пуш не ушёл: ${e instanceof Error ? e.message : e}`);
+    }
 
     if (email) {
       try {

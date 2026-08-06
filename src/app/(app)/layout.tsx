@@ -6,6 +6,8 @@ import { UserAvatar } from "@/components/user-avatar";
 import { AppShell } from "@/components/app-shell";
 import { SavedProvider } from "@/components/saved-provider";
 import { UtmCapture } from "@/components/utm-capture";
+import { countUnreadForUser } from "@/lib/inquiry-thread";
+import { AppBadge } from "@/components/app-badge";
 
 export default async function AppLayout({
   children,
@@ -25,14 +27,23 @@ export default async function AppLayout({
   // завязано избранное. Демо-роли (заказчик/техспец) — служебные.
   const canSave = Boolean(appUser);
 
+  // Кружок на «Обращении»: сколько ответов человек ещё не открывал.
+  const unread = appUser ? await countUnreadForUser(appUser.id) : 0;
+
   return (
     <>
       <SavedProvider authed={canSave}>
-        <AppShell avatarSlot={avatarSlot} authed={Boolean(demoUser || appUser)}>
+        <AppShell
+          avatarSlot={avatarSlot}
+          authed={Boolean(demoUser || appUser)}
+          unread={unread}
+        >
           {children}
         </AppShell>
       </SavedProvider>
       <UtmCapture />
+      {/* Кружок на иконке установленного приложения. */}
+      <AppBadge count={unread} />
     </>
   );
 }

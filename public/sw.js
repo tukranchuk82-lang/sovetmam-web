@@ -5,7 +5,7 @@
 // service worker с обработчиком события fetch. Заодно даём базовую офлайн-
 // устойчивость по стратегии network-first для собственных страниц.
 
-const CACHE = "sovetmam-v2";
+const CACHE = "sovetmam-v3";
 
 self.addEventListener("install", () => {
   // Новый SW активируется сразу, не дожидаясь закрытия старых вкладок.
@@ -64,5 +64,57 @@ self.addEventListener("fetch", (event) => {
         }
         return new Response("", { status: 504, statusText: "offline" });
       }),
+  );
+});
+
+// ── Пуш-уведомления ────────────────────────────────────────────────────────
+// Приходят, даже когда приложение закрыто: браузер будит service worker,
+// показывает уведомление, а по нажатию открывает нужную страницу.
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    // Пуш без разбираемого тела — покажем общее уведомление, чем промолчим.
+  }
+
+  const title = data.title || "«Совет матерей»";
+  const options = {
+    body: data.body || "Есть новости в приложении",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    // Тег склеивает уведомления одного типа: три ответа подряд не превратятся
+    // в три отдельные плашки.
+    tag: data.tag || "sovetmam",
+    data: { url: data.url || "/" },
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options).then(() => {
+      // Кружок с числом на иконке приложения, если система это умеет.
+      if (typeof data.badge === "number" && self.navigator.setAppBadge) {
+        return self.navigator.setAppBadge(data.badge).catch(() => {});
+      }
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/";
+
+  // Если приложение уже открыто — переводим на нужную страницу, а не плодим
+  // вторую вкладку.
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes(self.location.origin)) {
+          client.focus();
+          return client.navigate(url);
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
   );
 });

@@ -59,7 +59,14 @@ const savedTab: Tab = {
 const navClasses =
   "relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium leading-none transition-all";
 
-export function BottomNav({ background }: { background?: string }) {
+export function BottomNav({
+  background,
+  unread = 0,
+}: {
+  background?: string;
+  /** Сколько ответов человек ещё не прочитал — кружок на «Обращении». */
+  unread?: number;
+}) {
   const pathname = usePathname();
 
   return (
@@ -76,17 +83,30 @@ export function BottomNav({ background }: { background?: string }) {
     >
       <div className="grid grid-cols-5">
         {tabs.map((t) => (
-          <NavTab key={t.href} tab={t} active={t.match(pathname)} />
+          <NavTab
+            key={t.href}
+            tab={t}
+            active={t.match(pathname)}
+            badge={t.href.startsWith("/profile/inquiries") ? unread : 0}
+          />
         ))}
 
         {/* Пятый слот — «Избранное». Профиль — по аватару в шапке. */}
-        <NavTab tab={savedTab} active={savedTab.match(pathname)} />
+        <NavTab tab={savedTab} active={savedTab.match(pathname)} badge={0} />
       </div>
     </nav>
   );
 }
 
-function NavTab({ tab, active }: { tab: Tab; active: boolean }) {
+function NavTab({
+  tab,
+  active,
+  badge = 0,
+}: {
+  tab: Tab;
+  active: boolean;
+  badge?: number;
+}) {
   const Icon = tab.icon;
   return (
     <Link
@@ -103,6 +123,17 @@ function NavTab({ tab, active }: { tab: Tab; active: boolean }) {
           className="sm-nav-indicator absolute -top-px h-0.5 w-8 rounded-b-full bg-white"
         />
       )}
+      {/* Кружок с числом непрочитанных ответов. Показываем только там, где
+          он что-то значит, — на «Обращении». */}
+      {badge > 0 && (
+        <span
+          className="absolute right-[18%] top-1 z-10 grid min-w-[18px] place-items-center rounded-full bg-[#E4374B] px-1 text-[10px] font-bold leading-[18px] text-white shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+          aria-label={`Непрочитанных ответов: ${badge}`}
+        >
+          {badge > 9 ? "9+" : badge}
+        </span>
+      )}
+
       {/* Иконка: line-вариант (по умолчанию) + эмодзи (в теме «Яркий»). */}
       <Icon
         className={cn(

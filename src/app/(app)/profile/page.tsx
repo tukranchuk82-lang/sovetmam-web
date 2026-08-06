@@ -34,6 +34,7 @@ import { listSavedSlugs } from "@/lib/saved-measures-db";
 import { Avatar } from "@/components/avatar";
 import { AvatarEditor } from "@/components/avatar-editor";
 import { MessengerManager } from "@/components/messenger-manager";
+import { PushToggle } from "@/components/push-toggle";
 import { Badge } from "@/components/ui/badge";
 import { MotionFadeIn } from "@/components/motion";
 
@@ -385,6 +386,12 @@ async function AppUserProfile({ user }: { user: AppUser }) {
           </p>
           <div className="mt-3">
             <MessengerManager initial={initial} />
+          </div>
+
+          {/* Уведомления в самом устройстве — рядом с мессенджерами: это про
+              то же самое, как до человека доходят ответы. */}
+          <div className="mt-3">
+            <PushToggle />
           </div>
         </section>
       )}
