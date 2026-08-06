@@ -5,7 +5,7 @@ import { getCurrentAppUser } from "@/lib/user-session";
 import { listSavedSlugs } from "@/lib/saved-measures-db";
 import { getMeasuresBySlugs } from "@/lib/measures-db";
 
-export const metadata = { title: "Избранное" };
+export const metadata = { title: "Избранное", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 function Header() {

@@ -2,7 +2,12 @@ import { CatalogBrowser, type SlimMeasure } from "@/components/catalog-browser";
 import { CATEGORIES, REGIONS } from "@/lib/measures";
 import { getAllMeasures } from "@/lib/measures-db";
 
-export const metadata = { title: "Каталог мер поддержки" };
+export const metadata = {
+  title: "Каталог мер поддержки семей с детьми",
+  description:
+    "Полный каталог мер поддержки для семей с детьми: пособия и выплаты, льготы, компенсации, материнский капитал. Федеральные и региональные меры с условиями, суммами и порядком оформления.",
+  alternates: { canonical: "/catalog" },
+};
 
 export default async function CatalogPage() {
   const measures = await getAllMeasures();

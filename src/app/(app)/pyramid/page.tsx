@@ -2,7 +2,12 @@ import Link from "next/link";
 import { SupportPyramid } from "@/components/home/support-pyramid";
 import { MotionFadeIn } from "@/components/motion";
 
-export const metadata = { title: "Пирамида мер поддержки" };
+export const metadata = {
+  title: "Пирамида мер поддержки семей",
+  description:
+    "Как устроена поддержка семей с детьми: федеральные, региональные и муниципальные меры, помощь работодателей, вузов и некоммерческих организаций — по уровням, от общего к частному.",
+  alternates: { canonical: "/pyramid" },
+};
 
 export default function PyramidPage() {
   return (

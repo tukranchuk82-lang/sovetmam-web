@@ -18,6 +18,7 @@ import { getAllMeasures } from "@/lib/measures-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
 import type { SupportMeasure } from "@/lib/measures";
+import { CLASS_KEYS, type ClassKey } from "@/lib/taxonomy";
 
 /**
  * Блок «Классификация» на главной: по типу помощи (Бесплатно / Со скидкой /
@@ -56,7 +57,7 @@ interface ClassCfg {
 const TYPE = "/#classification";
 const FREQ = "/#frequency";
 
-const CLASSES: Record<string, ClassCfg> = {
+const CLASSES: Record<ClassKey, ClassCfg> = {
   free: {
     title: "Бесплатно",
     short:
@@ -109,7 +110,7 @@ const CLASSES: Record<string, ClassCfg> = {
 };
 
 export function generateStaticParams() {
-  return Object.keys(CLASSES).map((key) => ({ key }));
+  return CLASS_KEYS.map((key) => ({ key }));
 }
 
 export async function generateMetadata({
@@ -118,8 +119,13 @@ export async function generateMetadata({
   params: Promise<{ key: string }>;
 }) {
   const { key } = await params;
-  const cfg = CLASSES[key];
-  return { title: cfg ? cfg.title : "Меры поддержки" };
+  const cfg = CLASSES[key as ClassKey];
+  if (!cfg) return { title: "Меры поддержки" };
+  return {
+    title: cfg.title,
+    description: cfg.short,
+    alternates: { canonical: `/class/${key}` },
+  };
 }
 
 export default async function ClassPage({
@@ -128,7 +134,7 @@ export default async function ClassPage({
   params: Promise<{ key: string }>;
 }) {
   const { key } = await params;
-  const cfg = CLASSES[key];
+  const cfg = CLASSES[key as ClassKey];
   if (!cfg) notFound();
 
   const all = await getAllMeasures();

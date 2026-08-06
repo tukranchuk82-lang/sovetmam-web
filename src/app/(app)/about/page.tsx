@@ -1,4 +1,9 @@
-export const metadata = { title: "Об организации" };
+export const metadata = {
+  title: "Об организации «Совет матерей»",
+  description:
+    "Общероссийская общественная организация «Совет матерей» помогает семьям с детьми и будущим родителям разобраться в мерах государственной поддержки.",
+  alternates: { canonical: "/about" },
+};
 
 import { OrgName } from "@/components/org-name";
 

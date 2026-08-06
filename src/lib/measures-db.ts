@@ -200,11 +200,25 @@ export async function getMeasureCountsBySegment(): Promise<
 
 export async function getAllMeasureSlugs(): Promise<string[]> {
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase
-    .from("measures")
-    .select("slug")
-    .eq("is_published", true);
+  // Листаем постранично по той же причине, что и getAllMeasures: без range
+  // PostgREST молча отдаёт первую тысячу строк. Здесь это было особенно
+  // незаметно — страницы «лишних» мер открывались как ни в чём не бывало,
+  // просто собирались не заранее, а по первому запросу. А вот в карте сайта
+  // их бы не оказалось вовсе, и поисковик о них не узнал бы.
+  const PAGE = 1000;
+  const slugs: string[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("measures")
+      .select("slug")
+      .eq("is_published", true)
+      .order("slug", { ascending: true })
+      .range(from, from + PAGE - 1);
 
-  if (error) throw error;
-  return (data as { slug: string }[]).map((r) => r.slug);
+    if (error) throw error;
+    const rows = (data ?? []) as { slug: string }[];
+    slugs.push(...rows.map((r) => r.slug));
+    if (rows.length < PAGE) break;
+  }
+  return slugs;
 }

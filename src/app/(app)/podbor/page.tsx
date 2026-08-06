@@ -7,7 +7,12 @@ import { getCurrentAppUser } from "@/lib/user-session";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-export const metadata = { title: "Подбор по анкете" };
+export const metadata = {
+  title: "Подбор мер поддержки по вашей ситуации",
+  description:
+    "Ответьте на несколько вопросов о семье, детях и регионе — и узнайте, какие выплаты, льготы и компенсации положены именно вам.",
+  alternates: { canonical: "/podbor" },
+};
 export const dynamic = "force-dynamic";
 
 export default async function PodborPage() {

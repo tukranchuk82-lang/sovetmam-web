@@ -7,6 +7,7 @@ import { getAllMeasures } from "@/lib/measures-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
 import type { SupportMeasure } from "@/lib/measures";
+import { SITUATION_KEYS, type SituationKey } from "@/lib/taxonomy";
 
 // Один роут на все ситуационные плитки с главной: ключ → {заголовок, фильтр}.
 // Статический /situation/own (развилка «своя ситуация») живёт рядом и имеет
@@ -25,7 +26,7 @@ function cat(m: SupportMeasure, category: string): boolean {
 }
 
 const SITUATIONS: Record<
-  string,
+  SituationKey,
   { title: string; short: string; filter: (m: SupportMeasure) => boolean }
 > = {
   // ВИТРИНЫ фильтруются по КАТЕГОРИЯМ (segments), а не по criteria. Это важно:
@@ -117,7 +118,7 @@ const SITUATIONS: Record<
 };
 
 export function generateStaticParams() {
-  return Object.keys(SITUATIONS).map((key) => ({ key }));
+  return SITUATION_KEYS.map((key) => ({ key }));
 }
 
 export async function generateMetadata({
@@ -126,8 +127,13 @@ export async function generateMetadata({
   params: Promise<{ key: string }>;
 }) {
   const { key } = await params;
-  const cfg = SITUATIONS[key];
-  return { title: cfg ? cfg.title : "Меры поддержки" };
+  const cfg = SITUATIONS[key as SituationKey];
+  if (!cfg) return { title: "Меры поддержки" };
+  return {
+    title: cfg.title,
+    description: cfg.short,
+    alternates: { canonical: `/situation/${key}` },
+  };
 }
 
 export default async function SituationPage({
@@ -136,7 +142,7 @@ export default async function SituationPage({
   params: Promise<{ key: string }>;
 }) {
   const { key } = await params;
-  const cfg = SITUATIONS[key];
+  const cfg = SITUATIONS[key as SituationKey];
   if (!cfg) notFound();
 
   const all = await getAllMeasures();

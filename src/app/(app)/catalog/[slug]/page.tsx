@@ -8,6 +8,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { SaveHeart } from "@/components/save-heart";
 import { getAllMeasureSlugs, getMeasureBySlug } from "@/lib/measures-db";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
+import { JsonLd } from "@/components/json-ld";
+import { absoluteUrl } from "@/lib/site";
 
 export async function generateStaticParams() {
   const slugs = await getAllMeasureSlugs();
@@ -21,7 +23,30 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const m = await getMeasureBySlug(slug);
-  return { title: m ? m.title : "Мера поддержки" };
+  if (!m) return { title: "Мера поддержки" };
+
+  // Описание для выдачи: сумма впереди, если она известна. Именно её человек
+  // ищет глазами в списке результатов — «сколько платят».
+  const description = [m.amount, m.shortDescription].filter(Boolean).join(". ");
+
+  // Регион в заголовке помогает найтись по запросу «пособие + область», но у
+  // многих мер он уже вписан в название — тогда второй раз не добавляем.
+  const title =
+    m.region && !m.title.includes(m.region)
+      ? `${m.title} — ${m.region}`
+      : m.title;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/catalog/${m.slug}` },
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url: `/catalog/${m.slug}`,
+    },
+  };
 }
 
 export default async function MeasurePage({
@@ -37,8 +62,53 @@ export default async function MeasurePage({
     ? `/profile/inquiries/new?measure=${m.slug}`
     : `/login?next=/profile/inquiries/new?measure=${m.slug}`;
 
+  // Паспорт меры для поисковика. GovernmentService — тип как раз для
+  // госуслуг и мер поддержки: у него есть и «кто предоставляет», и «кому
+  // положено». Хлебные крошки рисуют под ссылкой в выдаче путь
+  // «Каталог → название меры» вместо голого адреса.
+  const measureSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "GovernmentService",
+        name: m.title,
+        description: m.shortDescription,
+        url: absoluteUrl(`/catalog/${m.slug}`),
+        serviceType: m.category,
+        inLanguage: "ru-RU",
+        provider: {
+          "@type": "GovernmentOrganization",
+          name: m.sourceName,
+          ...(m.sourceUrl ? { url: m.sourceUrl } : {}),
+        },
+        areaServed: {
+          "@type": m.level === "federal" ? "Country" : "AdministrativeArea",
+          name: m.level === "federal" ? "Россия" : (m.region ?? "Россия"),
+        },
+        audience: {
+          "@type": "PeopleAudience",
+          audienceType: "Семьи с детьми",
+        },
+        ...(m.amount ? { award: m.amount } : {}),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Каталог мер поддержки",
+            item: absoluteUrl("/catalog"),
+          },
+          { "@type": "ListItem", position: 2, name: m.title },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="px-4 py-5">
+      <JsonLd data={measureSchema} />
 
       <article className="mt-3 rounded-2xl bg-white p-5 text-foreground shadow-[0_12px_32px_-12px_rgba(0,0,0,0.4)]">
         <div className="flex flex-wrap items-center gap-1.5">

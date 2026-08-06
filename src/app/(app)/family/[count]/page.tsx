@@ -9,13 +9,14 @@ import {
 } from "@/lib/measures-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
+import { FAMILY_KEYS, type FamilyKey } from "@/lib/taxonomy";
 
 // Плитки «Семья с N детьми» и «Многодетная семья» с главной. В отличие от
 // плиток «Ждём N-го» (они про рождение и фильтруются по segments), эти — про
 // СЛОЖИВШУЮСЯ семью и фильтруются по количеству детей (criteria.minChildren):
 // семья с N детьми видит меры, требующие не больше N. См. measures-db.ts.
 const FAMILY: Record<
-  string,
+  FamilyKey,
   { title: string; short: string; count: number | "many" }
 > = {
   "1": {
@@ -51,7 +52,7 @@ const FAMILY: Record<
 };
 
 export function generateStaticParams() {
-  return Object.keys(FAMILY).map((count) => ({ count }));
+  return FAMILY_KEYS.map((count) => ({ count }));
 }
 
 export async function generateMetadata({
@@ -60,8 +61,13 @@ export async function generateMetadata({
   params: Promise<{ count: string }>;
 }) {
   const { count } = await params;
-  const cfg = FAMILY[count];
-  return { title: cfg ? cfg.title : "Меры поддержки" };
+  const cfg = FAMILY[count as FamilyKey];
+  if (!cfg) return { title: "Меры поддержки" };
+  return {
+    title: cfg.title,
+    description: cfg.short,
+    alternates: { canonical: `/family/${count}` },
+  };
 }
 
 export default async function FamilyPage({
@@ -70,7 +76,7 @@ export default async function FamilyPage({
   params: Promise<{ count: string }>;
 }) {
   const { count } = await params;
-  const cfg = FAMILY[count];
+  const cfg = FAMILY[count as FamilyKey];
   if (!cfg) notFound();
 
   const list =

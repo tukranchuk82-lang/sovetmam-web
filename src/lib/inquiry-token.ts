@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { siteUrl } from "@/lib/site";
 
 /**
  * Одноразовая ссылка на форму ответа для письма.
@@ -59,19 +60,7 @@ export function buildReplyUrl(inquiryId: string): string {
 }
 
 /**
- * Базовый адрес приложения. В письме нужна абсолютная ссылка, а Next о своём
- * домене не знает — берём из env, иначе боевой адрес по умолчанию.
- *
- * Сначала смотрим APP_URL и только потом NEXT_PUBLIC_APP_URL. Переменные с
- * префиксом NEXT_PUBLIC_ Next подставляет в код на сборке, поэтому в Coolify
- * их пришлось бы помечать как build-переменную и пересобирать образ. Ссылки
- * в письмах строит только сервер — обычной серверной переменной достаточно,
- * и она подхватывается простым перезапуском.
+ * Базовый адрес приложения. Один на всё приложение — живёт в lib/site.ts, здесь
+ * оставлен реэкспорт, чтобы не переписывать места, где его уже берут отсюда.
  */
-export function appUrl(): string {
-  const raw =
-    process.env.APP_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
-    "https://app.sovetmam.ru";
-  return raw.replace(/\/+$/, "");
-}
+export const appUrl = siteUrl;

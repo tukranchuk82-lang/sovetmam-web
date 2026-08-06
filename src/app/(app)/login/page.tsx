@@ -5,7 +5,7 @@ import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { EmailAuthFlow } from "@/components/email-auth-flow";
 
-export const metadata = { title: "Вход" };
+export const metadata = { title: "Вход", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {

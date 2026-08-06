@@ -11,6 +11,12 @@ import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
+// Личная переписка — поисковику здесь делать нечего.
+export const metadata = {
+  title: "Обращение",
+  robots: { index: false, follow: false },
+};
+
 export default async function InquiryDetailPage({
   params,
 }: {

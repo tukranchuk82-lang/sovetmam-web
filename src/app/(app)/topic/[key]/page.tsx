@@ -7,6 +7,7 @@ import { getAllMeasures } from "@/lib/measures-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
 import type { SupportMeasure } from "@/lib/measures";
+import { TOPIC_KEYS, type TopicKey } from "@/lib/taxonomy";
 
 /**
  * Тематические плитки («лепестки» LIFE_CATEGORIES на главной): Деньги, Здоровье,
@@ -25,7 +26,7 @@ function topic(m: SupportMeasure, key: string): boolean {
   return (m.segments as unknown as string[]).includes(`topic-${key}`);
 }
 
-const TOPICS: Record<string, { title: string; short: string }> = {
+const TOPICS: Record<TopicKey, { title: string; short: string }> = {
   money: {
     title: "Деньги",
     short: "Выплаты, пособия, капиталы, компенсации и субсидии.",
@@ -102,7 +103,7 @@ const TOPICS: Record<string, { title: string; short: string }> = {
 };
 
 export function generateStaticParams() {
-  return Object.keys(TOPICS).map((key) => ({ key }));
+  return TOPIC_KEYS.map((key) => ({ key }));
 }
 
 export async function generateMetadata({
@@ -111,8 +112,13 @@ export async function generateMetadata({
   params: Promise<{ key: string }>;
 }) {
   const { key } = await params;
-  const cfg = TOPICS[key];
-  return { title: cfg ? cfg.title : "Меры поддержки" };
+  const cfg = TOPICS[key as TopicKey];
+  if (!cfg) return { title: "Меры поддержки" };
+  return {
+    title: cfg.title,
+    description: cfg.short,
+    alternates: { canonical: `/topic/${key}` },
+  };
 }
 
 export default async function TopicPage({
@@ -121,7 +127,7 @@ export default async function TopicPage({
   params: Promise<{ key: string }>;
 }) {
   const { key } = await params;
-  const cfg = TOPICS[key];
+  const cfg = TOPICS[key as TopicKey];
   if (!cfg) notFound();
 
   const all = await getAllMeasures();

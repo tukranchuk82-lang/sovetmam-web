@@ -8,7 +8,10 @@ import { createInquiryAction } from "@/app/(app)/profile/inquiries/actions";
 import { NewInquiryForm } from "@/components/new-inquiry-form";
 import type { InquiryType } from "@/lib/inquiries";
 
-export const metadata = { title: "Новое обращение" };
+export const metadata = {
+  title: "Новое обращение",
+  robots: { index: false, follow: false },
+};
 export const dynamic = "force-dynamic";
 
 export default async function NewInquiryPage({

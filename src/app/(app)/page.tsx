@@ -6,6 +6,8 @@ import { CatalogMeasures } from "@/components/home/catalog-measures";
 import { Classification } from "@/components/home/classification";
 import { Directions } from "@/components/home/directions";
 import { PyramidSection } from "@/components/home/pyramid-section";
+import { JsonLd } from "@/components/json-ld";
+import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 
 // Акцентный цвет декоративных черт — бренд-бордовый.
 const ACCENT = "#8E1D2C";
@@ -17,12 +19,40 @@ const FEATURES = [
   { img: "/head-cut.png?v=2", lines: ["Забота, уважение", "и реальная помощь"] },
 ];
 
+// Паспорт сайта и организации для поисковика. Отсюда берутся название
+// организации в выдаче и строка поиска по каталогу прямо в результатах Google.
+const SITE_SCHEMA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl()}/#organization`,
+      name: "Совет матерей",
+      alternateName: "Общероссийская общественная организация «Совет матерей»",
+      url: siteUrl(),
+      logo: `${siteUrl()}/icon-512.png`,
+      description:
+        "Общероссийская общественная организация, помогает семьям с детьми и будущим родителям разобраться в мерах государственной поддержки.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl()}/#website`,
+      name: SITE_NAME,
+      url: siteUrl(),
+      description: SITE_DESCRIPTION,
+      inLanguage: "ru-RU",
+      publisher: { "@id": `${siteUrl()}/#organization` },
+    },
+  ],
+};
+
 export default function Home() {
   return (
     <div
       className="flex min-h-full flex-col bg-[#F8F7F6]"
       style={{ fontFamily: "var(--font-inter), sans-serif" }}
     >
+      <JsonLd data={SITE_SCHEMA} />
       {/* ГЕРОЙ: текст слева, портрет справа с наложением.
 
           Масштабирование. Каркас приложения ограничен 480px (см. app-shell),

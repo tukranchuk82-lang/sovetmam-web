@@ -12,6 +12,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 
 // Ранний перехват события установки. Chrome выбрасывает beforeinstallprompt
 // очень рано — иногда до того, как React-компоненты успеют повесить слушатель.
@@ -97,12 +98,62 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  // Базовый адрес: от него Next достраивает все относительные ссылки в
+  // мета-тегах — картинку карточки, канонические адреса страниц. Без него
+  // поисковик получал бы «/og.png» без домена и не смог бы её загрузить.
+  metadataBase: new URL(siteUrl()),
   title: {
     default: "Шпаргалка для родителей — меры поддержки семей с детьми",
     template: "%s — Шпаргалка для родителей",
   },
   description:
     "Шпаргалка для родителей от «Совета матерей»: все меры поддержки семей с детьми — федеральные, региональные, муниципальные, от работодателя и вузов. Пройдите анкету и узнайте, что положено именно вам.",
+  applicationName: "Шпаргалка для родителей",
+  authors: [{ name: "Совет матерей" }],
+  creator: "Совет матерей",
+  publisher: "Совет матерей",
+  // Канонический адрес страницы. Нужен, чтобы поисковик не считал разными
+  // страницами один и тот же адрес с рекламной меткой на хвосте: ссылки из
+  // рассылок и кнопки «Поделиться» приходят с ?utm=…, а страница-то одна.
+  alternates: { canonical: "/" },
+  // Разрешаем показывать в выдаче большие картинки и длинные описания —
+  // без этого Google обрезает и то, и другое до минимума.
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  // Карточка, которую видят в мессенджерах и соцсетях при пересылке ссылки.
+  openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    siteName: SITE_NAME,
+    url: "/",
+    title: "Шпаргалка для родителей — меры поддержки семей с детьми",
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Шпаргалка для родителей — меры поддержки семей с детьми",
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE.url],
+  },
+  // Подтверждение прав на сайт в Яндекс.Вебмастере и Google Search Console.
+  // Коды выдают панели вебмастера; пока переменных нет — тегов просто не будет.
+  verification: {
+    yandex: process.env.YANDEX_VERIFICATION,
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
+  // Телефоны и адреса в текстах мер Safari иначе сам превращает в ссылки —
+  // и ломает вёрстку карточек.
+  formatDetection: { telephone: false, address: false },
   // iOS игнорирует manifest.json и берёт apple-touch-icon, причём прозрачность
   // в нём не поддерживает — подставляет под неё чёрный фон. Поэтому
   // apple-touch-icon.png нарисован на непрозрачной белой подложке.

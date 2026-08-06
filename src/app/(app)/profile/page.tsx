@@ -38,7 +38,7 @@ import { PushToggle } from "@/components/push-toggle";
 import { Badge } from "@/components/ui/badge";
 import { MotionFadeIn } from "@/components/motion";
 
-export const metadata = { title: "Личный кабинет" };
+export const metadata = { title: "Личный кабинет", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
