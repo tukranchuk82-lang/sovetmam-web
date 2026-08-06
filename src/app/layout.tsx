@@ -12,7 +12,13 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
-import { OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
+import {
+  OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  YANDEX_VERIFICATION,
+  siteUrl,
+} from "@/lib/site";
 
 // Ранний перехват события установки. Chrome выбрасывает beforeinstallprompt
 // очень рано — иногда до того, как React-компоненты успеют повесить слушатель.
@@ -148,7 +154,7 @@ export const metadata: Metadata = {
   // Подтверждение прав на сайт в Яндекс.Вебмастере и Google Search Console.
   // Коды выдают панели вебмастера; пока переменных нет — тегов просто не будет.
   verification: {
-    yandex: process.env.YANDEX_VERIFICATION,
+    yandex: process.env.YANDEX_VERIFICATION ?? YANDEX_VERIFICATION,
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
   // Телефоны и адреса в текстах мер Safari иначе сам превращает в ссылки —
