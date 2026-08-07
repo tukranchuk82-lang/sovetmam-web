@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
 
 type Level = "" | "federal" | "regional";
 
+/** Категория коммерческих скидок — показываем их последними. */
+const SHOP_CATEGORY = "Скидки в магазинах";
+
 const LEVELS: { value: Level; label: string }[] = [
   { value: "", label: "Все" },
   { value: "federal", label: "Федеральные" },
@@ -49,11 +52,26 @@ export function SegmentMeasures({
   measures,
   initialRegion,
   footer,
+  primarySlugs,
+  primaryLabel,
+  restLabel,
 }: {
   measures: SupportMeasure[];
   initialRegion: string | null;
   /** Блок под списком (после кнопки «Показать ещё») — например, плашки обращений. */
   footer?: React.ReactNode;
+  /**
+   * Меры, которые нужно поднять наверх и отделить заголовком.
+   *
+   * Нужно там, где раздел смешивает «именно про вашу ситуацию» и «подходит
+   * всем»: в плитке «Семья с тремя детьми» из ста тридцати мер только двадцать
+   * про многодетность, и без разделения они тонут. Передаём список адресов мер,
+   * а не функцию-условие: страница считается на сервере, а функцию через эту
+   * границу не передать.
+   */
+  primarySlugs?: string[];
+  primaryLabel?: string;
+  restLabel?: string;
 }) {
   const [level, setLevel] = useState<Level>("");
   const [region, setRegion] = useState<string | null>(initialRegion);
@@ -63,7 +81,7 @@ export function SegmentMeasures({
   const hasRegional = measures.some((m) => m.level === "regional");
   const needsRegion = level !== "federal";
 
-  const visible = measures
+  const matching = measures
     .filter((m) => {
       if (m.level === "federal") return level !== "regional";
       // региональная мера
@@ -74,7 +92,31 @@ export function SegmentMeasures({
     // определялся sort_order из базы, где уровни могли идти вперемешку.
     // Array.prototype.sort стабилен (ES2019+), так что порядок мер внутри
     // каждого уровня (sort_order) не меняется.
-    .sort((a, b) => (a.level === "federal" ? 0 : 1) - (b.level === "federal" ? 0 : 1));
+    //
+    // Скидки магазинов — в самый конец своего уровня. Это приятный довесок, а
+    // не поддержка: человек, открывший раздел про многодетность, первым делом
+    // должен видеть досрочную пенсию и выплаты, а не кешбэк в супермаркете.
+    // Раньше они оказывались наверху случайно — sort_order у всех мер нулевой.
+    .sort(
+      (a, b) =>
+        (a.level === "federal" ? 0 : 1) - (b.level === "federal" ? 0 : 1) ||
+        (a.category === SHOP_CATEGORY ? 1 : 0) -
+          (b.category === SHOP_CATEGORY ? 1 : 0),
+    );
+
+  // Разделение на «именно про вашу ситуацию» и «подходит всем». Если списка
+  // не передали — раздел показывается одним списком, как раньше.
+  const primarySet = primarySlugs ? new Set(primarySlugs) : null;
+  const primary = primarySet
+    ? matching.filter((m) => primarySet.has(m.slug))
+    : [];
+  const rest = primarySet
+    ? matching.filter((m) => !primarySet.has(m.slug))
+    : matching;
+
+  // Порядок общий, поэтому «Показать ещё» работает как и прежде — просто
+  // сначала идут особенные меры, а заголовок рисуется на границе.
+  const visible = primarySet ? [...primary, ...rest] : matching;
 
   // Сменили фильтр — список другой, показываем его с начала.
   function chooseRegion(r: string) {
@@ -137,8 +179,25 @@ export function SegmentMeasures({
       </p>
 
       <div className="mt-3 space-y-3">
-        {visible.slice(0, shown).map((m) => (
-          <MeasureCard key={m.slug} measure={m} />
+        {visible.slice(0, shown).map((m, i) => (
+          <div key={m.slug} className="space-y-3">
+            {/* Заголовки групп рисуем на границах: перед первой мерой и перед
+                первой «универсальной». Пустую группу не подписываем. */}
+            {primarySet && i === 0 && primary.length > 0 && (
+              <GroupHeading
+                title={primaryLabel ?? "Именно для вашей ситуации"}
+                count={primary.length}
+              />
+            )}
+            {primarySet && i === primary.length && rest.length > 0 && (
+              <GroupHeading
+                title={restLabel ?? "Подходят и другим семьям"}
+                count={rest.length}
+                spaced
+              />
+            )}
+            <MeasureCard measure={m} />
+          </div>
         ))}
       </div>
 
@@ -190,6 +249,28 @@ export function SegmentMeasures({
           onClose={() => setPickerOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+/** Подпись группы внутри списка мер. */
+function GroupHeading({
+  title,
+  count,
+  spaced,
+}: {
+  title: string;
+  count: number;
+  spaced?: boolean;
+}) {
+  return (
+    <div className={cn("flex items-baseline gap-2", spaced && "pt-4")}>
+      <h2 className="text-sm font-bold uppercase tracking-wide text-brand">
+        {title}
+      </h2>
+      <span className="text-xs font-semibold text-muted-foreground">
+        {count}
+      </span>
     </div>
   );
 }

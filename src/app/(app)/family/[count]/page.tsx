@@ -84,6 +84,18 @@ export default async function FamilyPage({
       ? await getMeasuresForManyChildren()
       : await getMeasuresForFamilySize(cfg.count);
 
+  // Меры, где число детей — само условие («на третьего ребёнка», «многодетным»).
+  // Их немного, и раньше они тонули среди универсальных: в разделе «Семья с
+  // тремя детьми» из ста тридцати мер про многодетность всего два десятка, а
+  // ровно за ними человек сюда и приходит. Поднимаем их наверх отдельной
+  // группой. У «Многодетной семьи» делить нечего — там весь список такой.
+  const primarySlugs =
+    cfg.count === "many"
+      ? undefined
+      : list
+          .filter((m) => (m.criteria?.minChildren ?? 1) >= 2)
+          .map((m) => m.slug);
+
   // Регион: cookie (явный выбор на этом экране) → анкета подбора. См. segment/[id].
   const cookieStore = await cookies();
   const user = await getCurrentAppUser();
@@ -123,7 +135,13 @@ export default async function FamilyPage({
         <ChevronRight className="size-5 shrink-0 text-white/60" />
       </Link>
 
-      <SegmentMeasures measures={list} initialRegion={initialRegion} />
+      <SegmentMeasures
+        measures={list}
+        initialRegion={initialRegion}
+        primarySlugs={primarySlugs}
+        primaryLabel="Положены за количество детей"
+        restLabel="Подходят любой семье с детьми"
+      />
     </div>
   );
 }
