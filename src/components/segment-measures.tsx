@@ -118,6 +118,10 @@ export function SegmentMeasures({
   // сначала идут особенные меры, а заголовок рисуется на границе.
   const visible = primarySet ? [...primary, ...rest] : matching;
 
+  // Показывать нечего только потому, что не выбран регион: сами меры есть.
+  const hiddenUntilRegion =
+    visible.length === 0 && measures.length > 0 && needsRegion && !region && hasRegional;
+
   // Сменили фильтр — список другой, показываем его с начала.
   function chooseRegion(r: string) {
     setRegion(r);
@@ -172,10 +176,16 @@ export function SegmentMeasures({
         </button>
       )}
 
+      {/* Меры есть, но все они региональные, а регион не выбран — тогда
+          «не найдено» было бы неправдой: они найдены, просто спрятаны
+          фильтром. Человек с таким экраном решал, что подбор пуст, и уходил
+          (жалоба тестировщика 07.08.2026). */}
       <p className="mt-4 text-sm font-medium text-muted-foreground">
         {visible.length > 0
           ? pluralMeasures(visible.length) + " в разделе"
-          : "Подходящих мер не найдено"}
+          : hiddenUntilRegion
+            ? `Подобрали ${pluralMeasures(measures.length)} — укажите регион, чтобы их увидеть`
+            : "Подходящих мер не найдено"}
       </p>
 
       <div className="mt-3 space-y-3">
