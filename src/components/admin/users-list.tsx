@@ -10,6 +10,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import type { AdminUser } from "@/lib/users-admin";
+import { TAX_SYSTEM_LABEL, type TaxSystem } from "@/lib/measures";
 // Только типы: onboarding-db — серверный модуль (server-only), его константы
 // сюда тянуть нельзя, поэтому подписи ролей дублируем ниже.
 import type { AppRole, MessengerChannel } from "@/lib/onboarding-db";
@@ -50,6 +51,8 @@ const SURVEY_FLAGS: { key: string; label: string }[] = [
   { key: "teacher", label: "педагог" },
   { key: "selfEmployed", label: "самозанятый" },
   { key: "entrepreneur", label: "предприниматель" },
+  { key: "employed", label: "работает по найму" },
+  { key: "hasEmployees", label: "есть сотрудники" },
 ];
 
 function formatDate(iso: string | null): string {
@@ -278,6 +281,11 @@ function UserDetails({ user }: { user: AdminUser }) {
               ? `${s.childrenCount}${ages ? ` (возраст: ${ages})` : ""}`
               : "нет"}
           </Field>
+          {typeof s.taxSystem === "string" && (
+            <Field label="Налогообложение ИП">
+              {TAX_SYSTEM_LABEL[s.taxSystem as TaxSystem] ?? s.taxSystem}
+            </Field>
+          )}
           {flags.length > 0 && (
             <Field label="Отметил">{flags.join(", ")}</Field>
           )}

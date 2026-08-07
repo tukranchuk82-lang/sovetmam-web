@@ -207,6 +207,17 @@ export const REGIONS = [
  */
 export type IncomePm = 1 | 1.5 | 2;
 
+/** Система налогообложения предпринимателя. */
+export type TaxSystem = "osno" | "usn" | "patent" | "eshn" | "unknown";
+
+export const TAX_SYSTEM_LABEL: Record<TaxSystem, string> = {
+  osno: "Общая (ОСНО)",
+  usn: "Упрощённая (УСН)",
+  patent: "Патент",
+  eshn: "Сельхозналог (ЕСХН)",
+  unknown: "Не знаю",
+};
+
 /**
  * Условия, при которых мера подходит пользователю (движок правил).
  *
@@ -314,6 +325,15 @@ export interface EligibilityCriteria {
   requiresSelfEmployed?: boolean;
   requiresEntrepreneur?: boolean;
   /**
+   * Мера — возврат уже уплаченного НДФЛ (налоговые вычеты, семейная налоговая
+   * выплата). Положена только тем, кто этот налог платил.
+   *
+   * Кто платит — считает paysNdfl. Коротко: наёмная работа с официальной
+   * зарплатой или предпринимательство на общей системе. Самозанятость (НПД),
+   * УСН и патент своего НДФЛ не дают: вернуть нечего.
+   */
+  requiresNdfl?: boolean;
+  /**
    * Родитель работает учителем.
    *
    * Появилось под Указ Президента от 20.07.2026 № 498: у учителей есть свой
@@ -415,6 +435,29 @@ export interface UserProfile {
   parentUnder35: boolean;
   selfEmployed: boolean;
   entrepreneur: boolean;
+  /**
+   * Кто-то из родителей работает по найму с официальной зарплатой.
+   *
+   * `null` — не спрашивали (анкету заполнили до появления вопроса).
+   */
+  employed: boolean | null;
+  /**
+   * Система налогообложения предпринимателя. Спрашиваем, только если человек
+   * ответил, что он ИП.
+   *
+   * Нужна ровно для одного: свой НДФЛ по ставке 13% предприниматель платит
+   * только на общей системе. На УСН, патенте и ЕСХН — не платит, а значит и
+   * возвращать ему нечего.
+   */
+  taxSystem: TaxSystem | null;
+  /**
+   * У предпринимателя есть наёмные сотрудники.
+   *
+   * На право самого ИП вернуть налог не влияет: НДФЛ за работников он
+   * перечисляет как налоговый агент, это налог работников, а не его.
+   * Спрашиваем ради мер для работодателей.
+   */
+  hasEmployees: boolean | null;
   disabledParent: boolean;
   fosterParent: boolean;
   /** Работает учителем — см. criteria.requiresTeacher. */
@@ -490,6 +533,43 @@ export function isYoungFamily(profile: UserProfile): boolean {
 
   const ages = [parentAge, spouseAge].filter((a): a is number => a != null);
   return ages.every((a) => a <= YOUNG_FAMILY_MAX_AGE);
+}
+
+/**
+ * Платит ли семья НДФЛ по основной ставке — то есть есть ли что возвращать.
+ *
+ * Возвращает `null`, если об этом ничего не спрашивали: анкеты, заполненные до
+ * появления вопросов о занятости, не должны терять меры, которые человек уже
+ * видел. Молча пропавшая мера хуже лишней.
+ *
+ * Правила простые:
+ *  - наёмная работа с официальной зарплатой — налог платит работодатель, право
+ *    на вычет есть;
+ *  - ИП на общей системе — платит свой НДФЛ, право есть;
+ *  - ИП на УСН, патенте, ЕСХН и самозанятость (НПД) своего НДФЛ не дают.
+ *
+ * Важно: самозанятый или ИП, который вдобавок работает по найму, право
+ * сохраняет — поэтому наёмная работа проверяется первой и перевешивает.
+ *
+ * НДФЛ, который предприниматель перечисляет за сотрудников, здесь не при чём:
+ * это налог работников, ИП лишь налоговый агент. Права на собственный вычет
+ * он не даёт, поэтому hasEmployees в расчёте не участвует.
+ */
+export function paysNdfl(profile: UserProfile): boolean | null {
+  if (profile.employed === true) return true;
+
+  if (profile.entrepreneur) {
+    if (profile.taxSystem === "osno") return true;
+    // «Не знаю» — не повод скрывать меру: пусть человек проверит сам.
+    if (profile.taxSystem == null || profile.taxSystem === "unknown") return null;
+    return false;
+  }
+
+  // Работы по найму нет и предпринимательства нет: остаётся самозанятость либо
+  // отсутствие дохода — в обоих случаях своего НДФЛ нет.
+  if (profile.employed === false) return false;
+
+  return null;
 }
 
 /**
@@ -589,6 +669,9 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   }
   if (c.requiresSelfEmployed && !profile.selfEmployed) return false;
   if (c.requiresEntrepreneur && !profile.entrepreneur) return false;
+  // Возврат НДФЛ — только тем, кто его платит. Если ответов о занятости нет
+  // (анкета заполнена до появления вопросов), условие пропускаем: см. paysNdfl.
+  if (c.requiresNdfl && paysNdfl(profile) === false) return false;
   if (c.requiresDisabledParent && !profile.disabledParent) return false;
   if (c.requiresFosterParent && !profile.fosterParent) return false;
   if (c.requiresTeacher && !profile.teacher) return false;

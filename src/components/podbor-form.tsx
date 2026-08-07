@@ -16,11 +16,18 @@ import { saveSurveyAction } from "@/app/(app)/login/onboarding-actions";
 import {
   matchMeasures,
   REGIONS,
+  TAX_SYSTEM_LABEL,
   YOUNG_FAMILY_MAX_AGE,
   type IncomePm,
   type SupportMeasure,
+  type TaxSystem,
   type UserProfile,
 } from "@/lib/measures";
+
+/** Ответ о системе налогообложения из сохранённой анкеты — с проверкой. */
+function isTaxSystem(v: unknown): v is TaxSystem {
+  return typeof v === "string" && v in TAX_SYSTEM_LABEL;
+}
 
 /** Кнопка-выбор (используется для «Да/Нет» и вариантов). */
 function Choice({
@@ -271,6 +278,11 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     parentUnder35: !!v.parentUnder35,
     selfEmployed: !!v.selfEmployed,
     entrepreneur: !!v.entrepreneur,
+    // Занятость: null означает «не спрашивали». Отличать это от «нет» важно —
+    // на нём держится правило paysNdfl, см. lib/measures.ts.
+    employed: typeof v.employed === "boolean" ? v.employed : null,
+    taxSystem: isTaxSystem(v.taxSystem) ? v.taxSystem : null,
+    hasEmployees: typeof v.hasEmployees === "boolean" ? v.hasEmployees : null,
     disabledParent: !!v.disabledParent,
     fosterParent: !!v.fosterParent,
     teacher: !!v.teacher,
@@ -351,6 +363,13 @@ export function PodborForm({
   );
   const [selfEmployed, setSelfEmployed] = useState<boolean | null>(saved?.selfEmployed ?? null);
   const [entrepreneur, setEntrepreneur] = useState<boolean | null>(saved?.entrepreneur ?? null);
+  const [employed, setEmployed] = useState<boolean | null>(saved?.employed ?? null);
+  const [taxSystem, setTaxSystem] = useState<TaxSystem | null>(
+    saved?.taxSystem ?? null,
+  );
+  const [hasEmployees, setHasEmployees] = useState<boolean | null>(
+    saved?.hasEmployees ?? null,
+  );
   const [disabledParent, setDisabledParent] = useState<boolean | null>(saved?.disabledParent ?? null);
   const [fosterParent, setFosterParent] = useState<boolean | null>(saved?.fosterParent ?? null);
   const [teacher, setTeacher] = useState<boolean | null>(saved?.teacher ?? null);
@@ -440,6 +459,11 @@ export function PodborForm({
       parentUnder35: youngFamily,
       selfEmployed: selfEmployed ?? false,
       entrepreneur: entrepreneur ?? false,
+      // Здесь, в отличие от остальных ответов, null сохраняем как есть:
+      // «не ответили» и «нет» для налоговых мер значат разное (см. paysNdfl).
+      employed,
+      taxSystem: entrepreneur ? taxSystem : null,
+      hasEmployees: entrepreneur ? hasEmployees : null,
       disabledParent: disabledParent ?? false,
       fosterParent: fosterParent ?? false,
       teacher: teacher ?? false,
@@ -863,6 +887,23 @@ export function PodborForm({
           <YesNo value={fosterParent} onChange={setFosterParent} />
         </Question>
 
+        {/* Занятость. От неё зависят налоговые вычеты: вернуть можно только
+            уже уплаченный НДФЛ. Спрашиваем «кто-то из родителей», потому что
+            вычет за лечение или обучение ребёнка вправе получить любой из
+            супругов — семье достаточно одного работающего. */}
+        <div className="rounded-2xl border bg-card p-3.5">
+          <p className="text-sm font-medium">
+            Кто-то из родителей работает по найму с официальной зарплатой?
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            От этого зависят налоговые вычеты: вернуть можно только тот налог,
+            который уже удержали с зарплаты.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <YesNo value={employed} onChange={setEmployed} />
+          </div>
+        </div>
+
         <Question label="Вы самозанятый?">
           <YesNo value={selfEmployed} onChange={setSelfEmployed} />
         </Question>
@@ -870,6 +911,37 @@ export function PodborForm({
         <Question label="Вы индивидуальный предприниматель?">
           <YesNo value={entrepreneur} onChange={setEntrepreneur} />
         </Question>
+
+        {/* Уточнения для ИП появляются только после ответа «да» — остальным
+            эти вопросы ни о чём. */}
+        {entrepreneur === true && (
+          <>
+            <div className="rounded-2xl border bg-card p-3.5">
+              <p className="text-sm font-medium">Ваша система налогообложения</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Свой НДФЛ предприниматель платит только на общей системе — на
+                УСН и патенте налог другой, и возвращать нечего.
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {(
+                  ["osno", "usn", "patent", "eshn", "unknown"] as TaxSystem[]
+                ).map((t) => (
+                  <Choice
+                    key={t}
+                    active={taxSystem === t}
+                    onClick={() => setTaxSystem(t)}
+                  >
+                    {TAX_SYSTEM_LABEL[t]}
+                  </Choice>
+                ))}
+              </div>
+            </div>
+
+            <Question label="У вас есть наёмные сотрудники?">
+              <YesNo value={hasEmployees} onChange={setHasEmployees} />
+            </Question>
+          </>
+        )}
 
         <Question label="Вы работаете учителем?">
           <YesNo value={teacher} onChange={setTeacher} />
