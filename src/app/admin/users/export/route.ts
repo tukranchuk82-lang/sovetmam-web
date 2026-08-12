@@ -35,7 +35,20 @@ const HEADERS = [
   "Сохранено мер",
   "utm_source",
   "utm_campaign",
+  "Согласие на обработку данных",
+  "Согласие на рассылку",
 ];
+
+/** «редакция 1.0 от 09.08.2026» либо пусто, если согласие не записывали. */
+function consentCell(
+  consents: { kind: string; docVersion: string; acceptedAt: string; revokedAt: string | null }[],
+  kind: string,
+): string {
+  const c = consents.find((x) => x.kind === kind && !x.revokedAt);
+  if (!c) return "";
+  const date = new Date(c.acceptedAt).toLocaleDateString("ru-RU");
+  return `редакция ${c.docVersion} от ${date}`;
+}
 
 export async function GET() {
   const admin = await getCurrentAdmin();
@@ -60,6 +73,10 @@ export async function GET() {
       u.savedCount,
       u.utmSource,
       u.utmCampaign,
+      // Дата согласия и редакция документа — то, чем согласие подтверждается.
+      // Пусто у зарегистрированных до введения галочек.
+      consentCell(u.consents, "personal_data"),
+      consentCell(u.consents, "mailing"),
     ]
       .map(cell)
       .join(";"),

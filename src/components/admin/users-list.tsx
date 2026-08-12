@@ -55,6 +55,12 @@ const SURVEY_FLAGS: { key: string; label: string }[] = [
   { key: "hasEmployees", label: "есть сотрудники" },
 ];
 
+/** Человеческие названия согласий. */
+const CONSENT_LABEL: Record<string, string> = {
+  personal_data: "обработка персональных данных",
+  mailing: "новости и анонсы",
+};
+
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("ru-RU", {
@@ -269,6 +275,26 @@ function UserDetails({ user }: { user: AdminUser }) {
         </Field>
       )}
       <Field label="Сохранено мер">{user.savedCount}</Field>
+
+      {/* Согласия. У тех, кто зарегистрировался до появления галочек, записей
+          нет — так и пишем, чтобы пустое место не читалось как «отказался». */}
+      <Field label="Согласия">
+        {user.consents.length === 0 ? (
+          <span className="text-muted-foreground">
+            записей нет — регистрация до введения галочек
+          </span>
+        ) : (
+          <span className="space-y-0.5">
+            {user.consents.map((c, i) => (
+              <span key={i} className="block">
+                {CONSENT_LABEL[c.kind] ?? c.kind} — ред. {c.docVersion},{" "}
+                {formatDate(c.acceptedAt)}
+                {c.revokedAt ? ` · отозвано ${formatDate(c.revokedAt)}` : ""}
+              </span>
+            ))}
+          </span>
+        )}
+      </Field>
 
       {s ? (
         <>

@@ -30,6 +30,13 @@ export interface AdminUser {
   utmSource: string | null;
   utmCampaign: string | null;
   savedCount: number;
+  /**
+   * Отметки о согласиях: на обработку данных и на рассылку.
+   *
+   * Пусто у тех, кто зарегистрировался до появления галочек: их согласие
+   * считается данным при регистрации, отдельной записи о нём нет.
+   */
+  consents: { kind: string; docVersion: string; acceptedAt: string; revokedAt: string | null }[];
 }
 
 /** Поля анкеты /podbor, которые показываем в админке (остальные не трогаем). */
@@ -78,9 +85,10 @@ const SELECT =
 export async function listAppUsersForAdmin(): Promise<AdminUser[]> {
   const sb = createSupabaseAdminClient();
 
-  const [users, saved] = await Promise.all([
+  const [users, saved, consents] = await Promise.all([
     sb.from("app_users").select(SELECT).order("created_at", { ascending: false }),
     sb.from("saved_measures").select("user_id"),
+    sb.from("user_consents").select("user_id,kind,doc_version,accepted_at,revoked_at"),
   ]);
   if (users.error) throw users.error;
 
@@ -89,6 +97,25 @@ export async function listAppUsersForAdmin(): Promise<AdminUser[]> {
   const savedByUser = new Map<string, number>();
   for (const r of (saved.data ?? []) as { user_id: string }[]) {
     savedByUser.set(r.user_id, (savedByUser.get(r.user_id) ?? 0) + 1);
+  }
+
+  // Согласия — тем же приёмом: одна выборка на всех, раскладываем по людям.
+  const consentsByUser = new Map<string, AdminUser["consents"]>();
+  for (const c of (consents.data ?? []) as {
+    user_id: string;
+    kind: string;
+    doc_version: string;
+    accepted_at: string;
+    revoked_at: string | null;
+  }[]) {
+    const list = consentsByUser.get(c.user_id) ?? [];
+    list.push({
+      kind: c.kind,
+      docVersion: c.doc_version,
+      acceptedAt: c.accepted_at,
+      revokedAt: c.revoked_at,
+    });
+    consentsByUser.set(c.user_id, list);
   }
 
   return (users.data as Row[]).map((r) => ({
@@ -114,6 +141,7 @@ export async function listAppUsersForAdmin(): Promise<AdminUser[]> {
     utmSource: r.utm_source,
     utmCampaign: r.utm_campaign,
     savedCount: savedByUser.get(r.id) ?? 0,
+    consents: consentsByUser.get(r.id) ?? [],
   }));
 }
 
