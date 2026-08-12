@@ -12,6 +12,42 @@ import {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Где лежат правовые документы — общий сайт для всех наших сервисов. */
+const DOCS_URL = "https://doc.sovetmam.ru";
+
+/**
+ * Строка с галочкой согласия.
+ *
+ * Галочка не отмечена заранее и никогда не отмечается за человека:
+ * предустановленная отметка согласием не считается.
+ */
+function Consent({
+  checked,
+  onChange,
+  required,
+  children,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex cursor-pointer items-start gap-2.5">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 size-4 shrink-0 accent-[#8E1D2C]"
+      />
+      <span className="text-xs leading-snug text-[#4D4D4D]">
+        {children}
+        {required && <span className="text-[#8E1D2C]"> *</span>}
+      </span>
+    </label>
+  );
+}
+
 // Топ популярных почтовых доменов — для подсказки об опечатке.
 const POPULAR_DOMAINS = [
   "mail.ru",
@@ -94,6 +130,10 @@ export function EmailAuthFlow() {
   const [error, setError] = useState<string | null>(null);
   const [devCode, setDevCode] = useState<string | null>(null);
   const [noAccount, setNoAccount] = useState(false); // «У меня уже есть аккаунт»
+  // Согласия при регистрации. Обязательное — на обработку данных, без него
+  // аккаунт не создаём; рассылка добровольна и ни на что не влияет.
+  const [consentData, setConsentData] = useState(false);
+  const [consentMailing, setConsentMailing] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const suggestion = suggestEmail(email);
@@ -134,8 +174,17 @@ export function EmailAuthFlow() {
     setError(null);
     if (!firstName.trim()) return setError("Укажите имя.");
     if (!lastName.trim()) return setError("Укажите фамилию.");
+    if (!consentData)
+      return setError(
+        "Без согласия на обработку персональных данных мы не сможем создать аккаунт.",
+      );
     startTransition(async () => {
-      const res = await requestCode({ firstName, lastName, email });
+      const res = await requestCode({
+        firstName,
+        lastName,
+        email,
+        consentMailing,
+      });
       if (!res.ok) return setError(res.error);
       setMode("register");
       setDevCode(res.devCode ?? null);
@@ -266,6 +315,51 @@ export function EmailAuthFlow() {
               required
             />
           </div>
+          {/* Согласия. Показываем только при регистрации: у тех, кто уже
+              зарегистрирован, согласие считается данным — переспрашивать их
+              заказчик не стал. Обе галочки человек ставит сам, заранее
+              отмеченных нет: предустановленная галочка согласием не считается. */}
+          <div className="space-y-2.5 rounded-xl border border-black/[0.08] bg-[#f9fafb] p-3">
+            <Consent
+              checked={consentData}
+              onChange={setConsentData}
+              required
+            >
+              Я согласен на{" "}
+              <a
+                href={`${DOCS_URL}/consent`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#8E1D2C] underline"
+              >
+                обработку персональных данных
+              </a>{" "}
+              и ознакомился с{" "}
+              <a
+                href={`${DOCS_URL}/privacy`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#8E1D2C] underline"
+              >
+                политикой конфиденциальности
+              </a>
+            </Consent>
+
+            <Consent checked={consentMailing} onChange={setConsentMailing}>
+              Хочу получать{" "}
+              <a
+                href={`${DOCS_URL}/mailing`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#8E1D2C] underline"
+              >
+                новости и анонсы
+              </a>{" "}
+              — необязательно. Ответы на обращения и служебные письма приходят в
+              любом случае
+            </Consent>
+          </div>
+
           {error && <p className="text-sm text-[#8E1D2C]">{error}</p>}
           <button type="submit" disabled={pending} className={btnCls}>
             {pending ? (

@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { DOC_VERSION, recordConsent } from "@/lib/consents";
 import {
   upsertUserForRequest,
   issueOtp,
@@ -71,6 +72,8 @@ export async function requestCode(input: {
   firstName: string;
   lastName: string;
   email: string;
+  /** Отметил ли человек добровольное согласие на рассылку. */
+  consentMailing?: boolean;
 }): Promise<RequestCodeResult> {
   const firstName = input.firstName.trim();
   const lastName = input.lastName.trim();
@@ -80,8 +83,29 @@ export async function requestCode(input: {
   if (lastName.length < 2) return { ok: false, error: "Укажите фамилию." };
   if (!EMAIL_RE.test(email)) return { ok: false, error: "Проверьте адрес email." };
 
+  // Регистрируется ли человек впервые — узнаём ДО создания записи: согласия
+  // спрашиваем только у новых, зарегистрированных раньше не трогаем.
+  const existing = await getAppUserByEmail(email);
+
   const utm = await readUtm();
-  await upsertUserForRequest(email, firstName, lastName, utm);
+  const user = await upsertUserForRequest(email, firstName, lastName, utm);
+
+  if (!existing) {
+    // Обязательное согласие проверено на форме, но записываем его здесь:
+    // проверка в браузере — удобство, а запись в базе — доказательство.
+    await recordConsent({
+      userId: user.id,
+      kind: "personal_data",
+      docVersion: DOC_VERSION.personalData,
+    });
+    if (input.consentMailing) {
+      await recordConsent({
+        userId: user.id,
+        kind: "mailing",
+        docVersion: DOC_VERSION.mailing,
+      });
+    }
+  }
   const code = await issueOtp(email);
   await sendOtpEmail(email, code);
 
