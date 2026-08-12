@@ -47,6 +47,10 @@ export const CLASS_KEYS = [
 export type ClassKey = (typeof CLASS_KEYS)[number];
 
 export const SITUATION_KEYS = [
+  // Для тех, у кого детей ещё нет и беременности пока нет: лечение бесплодия,
+  // ЭКО, жильё молодой семье. Раньше такие люди не видели в подборе почти
+  // ничего — вся база адресована семьям с детьми.
+  "planning",
   "young-family",
   "low-income",
   "single-parent",

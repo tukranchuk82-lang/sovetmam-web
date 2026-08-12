@@ -179,6 +179,9 @@ export const CATALOG_SITUATIONS: CatalogSituation[] = [
   // Ведёт на уже рабочий /segment/[id] (фильтрует по measures.segments,
   // умеет федеральные-раньше-региональных и регион пользователя) — раньше
   // вело на /catalog?situation=..., а /catalog этот параметр не читает вовсе.
+  // Первой плиткой — до «ждём ребёнка»: это самое начало пути, и людям без
+  // детей раньше в приложении не было ничего адресованного.
+  { id: "planning", title: "Планируем ребёнка", href: "/situation/planning" },
   { id: "expecting-1", title: "Ждём 1-го ребёнка", href: "/segment/expecting-first" },
   { id: "expecting-2", title: "Ждём 2-го ребёнка", href: "/segment/expecting-second" },
   { id: "expecting-3", title: "Ждём 3-го ребёнка", href: "/segment/expecting-third" },

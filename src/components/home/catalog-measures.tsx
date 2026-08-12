@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Baby,
+  HeartHandshake,
   Users,
   UsersRound,
   Heart,
@@ -46,6 +47,7 @@ const CARD_BG =
 // Тематические иконки по id ситуации. lucide не содержит точных пиктограмм
 // макета (беременность, коляска), поэтому подобраны ближайшие линейные иконки.
 const ICONS: Record<string, LucideIcon> = {
+  planning: HeartHandshake,
   "expecting-1": Baby,
   "expecting-2": Baby,
   "expecting-3": Baby,
