@@ -136,16 +136,27 @@ function Question({
 function YesNo({
   value,
   onChange,
+  /**
+   * Разрешает снять ответ повторным нажатием.
+   *
+   * Нужно вопросам о здоровье: мы обещаем в документах, что отвечать на них
+   * необязательно, а без возможности передумать это обещание пустое — нажав
+   * один раз, человек уже не мог вернуться к «не отвечал».
+   */
+  clearable = false,
 }: {
   value: boolean | null;
-  onChange: (v: boolean) => void;
+  onChange: (v: boolean | null) => void;
+  clearable?: boolean;
 }) {
+  const pick = (v: boolean) => onChange(clearable && value === v ? null : v);
+
   return (
     <>
-      <Choice active={value === true} onClick={() => onChange(true)}>
+      <Choice active={value === true} onClick={() => pick(true)}>
         Да
       </Choice>
-      <Choice active={value === false} onClick={() => onChange(false)}>
+      <Choice active={value === false} onClick={() => pick(false)}>
         Нет
       </Choice>
     </>
@@ -885,26 +896,72 @@ export function PodborForm({
           <YesNo value={student} onChange={setStudent} />
         </Question>
 
-        <Question label="В семье есть ребёнок-инвалид?">
-          <YesNo value={disabledChild} onChange={setDisabledChild} />
-        </Question>
+        {/* Вопросы о здоровье собраны в один блок и помечены как
+            необязательные.
 
-        <div>
-          <p className="text-sm font-medium">
-            В семье есть ребёнок с ОВЗ (ограниченными возможностями здоровья)?
+            Сведения об инвалидности — особая категория персональных данных,
+            к ней закон предъявляет повышенные требования, и мы обещаем в
+            политике конфиденциальности, что отвечать на эти вопросы не
+            обязательно. Обещание должно быть выполнимым: ответ снимается
+            повторным нажатием, а пропуск ничего не ломает — просто не покажем
+            меры, положенные по этому основанию. */}
+        <div className="rounded-2xl border border-[#D9D2C6] bg-[#F7F4EE] p-3.5">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-[#3A4D63]">Здоровье семьи</p>
+            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+              можно пропустить
+            </span>
+          </div>
+          <p className="mt-1 text-xs leading-snug text-muted-foreground">
+            Спрашиваем только для подбора: по этим основаниям положены отдельные
+            меры. Если отвечать не хотите — пропустите, подбор всё равно
+            сработает. Нажмите на выбранный ответ ещё раз, чтобы снять его.
           </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Статус ОВЗ даёт психолого-медико-педагогическая комиссия. Инвалидности
-            при этом может не быть.
-          </p>
-          <div className="mt-2 flex gap-2">
-            <YesNo value={specialNeedsChild} onChange={setSpecialNeedsChild} />
+
+          <div className="mt-3 space-y-3">
+            <div>
+              <p className="text-sm font-medium">В семье есть ребёнок-инвалид?</p>
+              <div className="mt-2 flex gap-2">
+                <YesNo
+                  value={disabledChild}
+                  onChange={setDisabledChild}
+                  clearable
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">
+                В семье есть ребёнок с ОВЗ (ограниченными возможностями
+                здоровья)?
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Статус ОВЗ даёт психолого-медико-педагогическая комиссия.
+                Инвалидности при этом может не быть.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <YesNo
+                  value={specialNeedsChild}
+                  onChange={setSpecialNeedsChild}
+                  clearable
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">
+                Кто-то из родителей имеет инвалидность?
+              </p>
+              <div className="mt-2 flex gap-2">
+                <YesNo
+                  value={disabledParent}
+                  onChange={setDisabledParent}
+                  clearable
+                />
+              </div>
+            </div>
           </div>
         </div>
-
-        <Question label="Кто-то из родителей имеет инвалидность?">
-          <YesNo value={disabledParent} onChange={setDisabledParent} />
-        </Question>
 
         <Question label="Вы приёмный родитель, опекун или усыновитель?">
           <YesNo value={fosterParent} onChange={setFosterParent} />
