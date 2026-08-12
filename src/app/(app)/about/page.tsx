@@ -6,6 +6,7 @@ export const metadata = {
 };
 
 import { OrgName } from "@/components/org-name";
+import { LegalLinks } from "@/components/legal-links";
 
 export default function AboutPage() {
   return (
@@ -28,6 +29,8 @@ export default function AboutPage() {
           Госуслуг и в официальных источниках, указанных в каждой мере.
         </p>
       </div>
+
+      <LegalLinks className="mt-5 rounded-2xl border bg-card p-4" />
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} <OrgName />

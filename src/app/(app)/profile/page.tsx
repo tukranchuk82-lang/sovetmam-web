@@ -27,6 +27,7 @@ import { getViewMode } from "@/lib/view-mode";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
 import { logoutDemoUser } from "@/app/(app)/login/actions";
 import { logout } from "@/app/(app)/login/onboarding-actions";
+import { LegalLinks } from "@/components/legal-links";
 import { isAppAdmin, ROLE_LABELS as APP_ROLE_LABELS, type AppUser } from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
@@ -444,6 +445,8 @@ async function AppUserProfile({ user }: { user: AppUser }) {
           </div>
         </section>
       )}
+
+      <LegalLinks className="mt-8 rounded-2xl border bg-card p-4" />
 
       <form action={logout} className="mt-8">
         <button
