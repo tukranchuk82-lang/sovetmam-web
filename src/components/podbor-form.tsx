@@ -475,7 +475,9 @@ export function PodborForm({
       // «не ответили» и «нет» для налоговых мер значат разное (см. paysNdfl).
       employed,
       taxSystem: entrepreneur ? taxSystem : null,
-      hasEmployees: entrepreneur ? hasEmployees : null,
+      // На НПД наёмных работников держать нельзя — вопрос мы не задаём, и
+      // отвечаем за человека сами, чтобы ответ не остался пустым.
+      hasEmployees: entrepreneur ? (taxSystem === "npd" ? false : hasEmployees) : null,
       disabledParent: disabledParent ?? false,
       fosterParent: fosterParent ?? false,
       teacher: teacher ?? false,
@@ -1015,12 +1017,12 @@ export function PodborForm({
             <div className="rounded-2xl border bg-card p-3.5">
               <p className="text-sm font-medium">Ваша система налогообложения</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Свой НДФЛ предприниматель платит только на общей системе — на
-                УСН и патенте налог другой, и возвращать нечего.
+                Свой НДФЛ предприниматель платит только на общей системе. На
+                УСН, НПД, патенте и ЕСХН налог другой, и возвращать нечего.
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {(
-                  ["osno", "usn", "patent", "eshn", "unknown"] as TaxSystem[]
+                  ["osno", "usn", "npd", "patent", "eshn", "unknown"] as TaxSystem[]
                 ).map((t) => (
                   <Choice
                     key={t}
@@ -1033,9 +1035,17 @@ export function PodborForm({
               </div>
             </div>
 
-            <Question label="У вас есть наёмные сотрудники?">
-              <YesNo value={hasEmployees} onChange={setHasEmployees} />
-            </Question>
+            {/* НПД запрещает наёмных работников — спрашивать не о чем. */}
+            {taxSystem === "npd" ? (
+              <p className="rounded-2xl border border-dashed bg-card px-3.5 py-3 text-xs text-muted-foreground">
+                На НПД наёмных сотрудников быть не может — про них не
+                спрашиваем.
+              </p>
+            ) : (
+              <Question label="У вас есть наёмные сотрудники?">
+                <YesNo value={hasEmployees} onChange={setHasEmployees} />
+              </Question>
+            )}
           </>
         )}
 
