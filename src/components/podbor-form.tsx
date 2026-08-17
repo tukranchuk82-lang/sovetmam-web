@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   MessageCircle,
   FileEdit,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -549,12 +550,27 @@ export function PodborForm({
             >
               Вам может подойти
             </h1>
+            {/* Скачивание — до списка: в соцзащите и МФЦ просят «принесите
+                список», и человек ищет эту кнопку сразу, а не после сотни
+                карточек. Обычная ссылка, а не действие: файл собирает сервер по
+                сохранённой анкете, поэтому работает и на телефоне, и с другого
+                устройства. */}
+            <a
+              href="/podbor/pdf"
+              className={cn(
+                buttonVariants(),
+                "mt-4 h-11 w-full gap-2 bg-[#1B3A6B] text-white hover:bg-[#16305a]",
+              )}
+            >
+              <Download className="size-4" /> Скачать подборку в PDF
+            </a>
+
             {/* Кнопка «Посмотреть все меры» — до списка, чтобы не листать вниз. */}
             <Link
               href="/catalog"
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "mt-4 h-11 w-full gap-2 border-[#1B3A6B]/25 text-[#1B3A6B]",
+                "mt-2.5 h-11 w-full gap-2 border-[#1B3A6B]/25 text-[#1B3A6B]",
               )}
             >
               <LayoutGrid className="size-4" /> Посмотреть все меры
