@@ -1,0 +1,20 @@
+{
+  "slug": "reg-altayskiy-kray-012",
+  "criteria": {
+    "regions": [
+      "Алтайский край"
+    ],
+    "minChildren": 3,
+    "requiresChildren": true
+  },
+  "segments": [
+    "expecting-fifth-plus",
+    "many-children",
+    "topic-money",
+    "topic-housing",
+    "class-free",
+    "class-discount",
+    "class-money",
+    "class-once-life"
+  ]
+}
