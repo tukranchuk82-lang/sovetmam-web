@@ -12,6 +12,17 @@ const SOURCE_LABEL: Record<string, string> = {
   "без метки": "Без метки",
 };
 
+/** Понятное имя способа отправки. */
+const CHANNEL_LABEL: Record<string, string> = {
+  telegram: "Telegram",
+  max: "MAX",
+  whatsapp: "WhatsApp",
+  vk: "ВКонтакте",
+  copy: "Скопировали ссылку",
+  through: "Другие приложения (окно телефона)",
+  неизвестно: "Не записано (до появления выбора)",
+};
+
 export default async function SharePage() {
   const stats = await getShareStats();
 
@@ -65,6 +76,39 @@ export default async function SharePage() {
                 </Link>
                 <span className="shrink-0 text-sm font-semibold tabular-nums">
                   {p.count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="mt-2 rounded-2xl border bg-card p-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Куда отправляют
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Что нажали в окне «Поделиться». Отправил человек ссылку в чужом
+          приложении или передумал — нам уже не видно, поэтому это счёт
+          намерений, а не доставленных сообщений.
+        </p>
+
+        {stats.byChannel.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Пока никто не делился.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-1.5">
+            {stats.byChannel.map((c) => (
+              <li
+                key={c.channel}
+                className="flex items-baseline justify-between gap-3 border-b pb-1.5 last:border-0"
+              >
+                <span className="truncate text-sm">
+                  {CHANNEL_LABEL[c.channel] ?? c.channel}
+                </span>
+                <span className="shrink-0 text-sm font-semibold tabular-nums">
+                  {c.count}
                 </span>
               </li>
             ))}

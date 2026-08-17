@@ -9,6 +9,7 @@ import {
   type SupportMeasure,
 } from "@/lib/measures";
 import { REGION_COOKIE, REGION_COOKIE_MAX_AGE } from "@/lib/region";
+import { useListPosition } from "@/lib/list-position";
 import { cn } from "@/lib/utils";
 
 type Level = "" | "federal" | "regional";
@@ -77,6 +78,15 @@ export function SegmentMeasures({
   const [region, setRegion] = useState<string | null>(initialRegion);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [shown, setShown] = useState(PAGE_SIZE);
+
+  // Уходя в меру, запоминаем, сколько мер было раскрыто, какой стоял фильтр и
+  // где человек остановился, — чтобы «назад» вернуло на то же место.
+  const remember = useListPosition<{ shown: number; level: Level }>((saved) => {
+    if (typeof saved.shown === "number") setShown(saved.shown);
+    if (saved.level === "" || saved.level === "federal" || saved.level === "regional") {
+      setLevel(saved.level);
+    }
+  });
 
   const hasRegional = measures.some((m) => m.level === "regional");
   const needsRegion = level !== "federal";
@@ -188,7 +198,11 @@ export function SegmentMeasures({
             : "Подходящих мер не найдено"}
       </p>
 
-      <div className="mt-3 space-y-3">
+      {/* Ловим клик до перехода в меру: в этот миг ещё известны и раскрытая
+          часть списка, и место прокрутки. Слушатель на всём списке, а не на
+          каждой карточке, — иначе пришлось бы протаскивать обработчик внутрь
+          карточки, где он не нужен. */}
+      <div className="mt-3 space-y-3" onClickCapture={() => remember({ shown, level })}>
         {visible.slice(0, shown).map((m, i) => (
           <div key={m.slug} className="space-y-3">
             {/* Заголовки групп рисуем на границах: перед первой мерой и перед

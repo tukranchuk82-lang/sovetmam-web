@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { MeasureCard } from "@/components/measure-card";
 import { pluralMeasures } from "@/lib/measures";
+import { useListPosition } from "@/lib/list-position";
 import { cn } from "@/lib/utils";
 
 // Облегчённая мера — только то, что нужно фильтру и карточке.
@@ -109,10 +110,21 @@ export function CatalogBrowser({
     return () => ro.disconnect();
   }, []);
 
-  // Любая смена фильтра — снова показываем с начала.
-  useEffect(() => {
-    setVisible(PAGE);
-  }, [query, level, region, category]);
+  // Уходя в меру, запоминаем фильтры, раскрытую часть списка и место
+  // прокрутки — чтобы «назад» вернуло туда же, а не в начало каталога.
+  const remember = useListPosition<{
+    query: string;
+    level: string;
+    region: string;
+    category: string;
+    visible: number;
+  }>((saved) => {
+    if (typeof saved.query === "string") setQuery(saved.query);
+    if (typeof saved.level === "string") setLevel(saved.level);
+    if (typeof saved.region === "string") setRegion(saved.region);
+    if (typeof saved.category === "string") setCategory(saved.category);
+    if (typeof saved.visible === "number") setVisible(saved.visible);
+  });
 
   const filtered = useMemo(() => {
     // Ищем ПО СЛОВАМ, а не по фразе целиком: запрос «Питание для многодетных
@@ -142,13 +154,33 @@ export function CatalogBrowser({
 
   const shown = filtered.slice(0, visible);
 
+  // Любая смена фильтра — снова показываем список с начала. Раньше это делал
+  // useEffect по изменению фильтров, но он же сбрасывал список и при
+  // восстановлении: мы возвращали «раскрыто 60 мер», а следом приходил сброс
+  // на первую порцию. Поэтому сбрасываем там, где человек правда меняет фильтр.
+  function changeQuery(v: string) {
+    setQuery(v);
+    setVisible(PAGE);
+  }
   function selectLevel(v: string) {
     setLevel(v);
     if (v === "federal") setRegion(""); // у федеральных региона нет
+    setVisible(PAGE);
   }
   function selectRegion(v: string) {
     setRegion(v);
     if (v && level === "federal") setLevel("regional"); // регион => региональная
+    setVisible(PAGE);
+  }
+  function selectCategory(v: string) {
+    setCategory(v);
+    setVisible(PAGE);
+  }
+  function resetFilters() {
+    setLevel("");
+    setRegion("");
+    setCategory("");
+    setVisible(PAGE);
   }
 
   return (
@@ -247,7 +279,7 @@ export function CatalogBrowser({
           />
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => changeQuery(e.target.value)}
             placeholder="Поиск по названию меры поддержки…"
             className="w-full rounded-2xl border-[1.5px] border-[#1B3A6B]/25 bg-white py-4 pl-12 pr-11 text-[15px] font-medium shadow-[0_16px_36px_-14px_rgba(27,58,107,0.55)] transition-all placeholder:font-normal placeholder:text-[#9aa0a8] focus:border-[#1B3A6B]/60 focus:shadow-[0_18px_40px_-14px_rgba(27,58,107,0.6)] focus:ring-4 focus:ring-[#1B3A6B]/10 focus:outline-none"
           />
@@ -255,7 +287,7 @@ export function CatalogBrowser({
             <button
               type="button"
               aria-label="Очистить"
-              onClick={() => setQuery("")}
+              onClick={() => changeQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-[#9aa0a8] transition-colors hover:bg-black/5 hover:text-[#5b616b]"
             >
               <X className="size-4" />
@@ -271,11 +303,7 @@ export function CatalogBrowser({
           {(level || region || category) && (
             <button
               type="button"
-              onClick={() => {
-                setLevel("");
-                setRegion("");
-                setCategory("");
-              }}
+              onClick={resetFilters}
               className="text-xs font-semibold text-[#8E1D2C] hover:underline"
             >
               Сбросить
@@ -306,7 +334,7 @@ export function CatalogBrowser({
           />
           <FilterSelect
             value={category}
-            onChange={setCategory}
+            onChange={selectCategory}
             options={categories}
             placeholder="Все категории"
           />
@@ -318,8 +346,13 @@ export function CatalogBrowser({
         Найдено: {pluralMeasures(filtered.length)}
       </p>
 
-      {/* Список */}
-      <div className="mt-3 space-y-3">
+      {/* Список. Клик по карточке перехватываем до перехода — см. remember. */}
+      <div
+        className="mt-3 space-y-3"
+        onClickCapture={() =>
+          remember({ query, level, region, category, visible })
+        }
+      >
         {shown.map((m) => (
           <MeasureCard key={m.slug} measure={m} />
         ))}

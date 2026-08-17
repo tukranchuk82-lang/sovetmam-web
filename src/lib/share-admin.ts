@@ -20,6 +20,8 @@ export interface ShareStats {
   signups: number;
   /** Чем делятся чаще всего. */
   topPaths: { path: string; count: number; title: string | null }[];
+  /** Куда отправляют ссылку: Telegram, MAX, копирование. */
+  byChannel: { channel: string; count: number }[];
   /** Приходы по меткам: кнопка «Поделиться», рассылки, посты. */
   bySource: { source: string; visits: number }[];
 }
@@ -28,6 +30,7 @@ interface EventRow {
   kind: "share" | "visit";
   path: string;
   ref: string | null;
+  channel: string | null;
   visitor: string | null;
   created_at: string;
 }
@@ -45,7 +48,7 @@ export async function getShareStats(): Promise<ShareStats> {
   // подвисла, если приложением вдруг начнут делиться тысячами.
   const { data } = await sb
     .from("share_events")
-    .select("kind, path, ref, visitor, created_at")
+    .select("kind, path, ref, channel, visitor, created_at")
     .order("created_at", { ascending: false })
     .limit(20_000);
 
@@ -91,6 +94,17 @@ export async function getShareStats(): Promise<ShareStats> {
     for (const p of topPaths) if (p.path === "/") p.title = "Главная страница";
   }
 
+  // Куда носят ссылки. У событий до августа 2026 канал не записан — тогда в
+  // окне «Поделиться» ещё не было выбора мессенджера.
+  const byChannelMap = new Map<string, number>();
+  for (const r of shares) {
+    const key = r.channel ?? "неизвестно";
+    byChannelMap.set(key, (byChannelMap.get(key) ?? 0) + 1);
+  }
+  const byChannel = [...byChannelMap.entries()]
+    .map(([channel, cnt]) => ({ channel, count: cnt }))
+    .sort((a, b) => b.count - a.count);
+
   const bySourceMap = new Map<string, number>();
   for (const r of visits) {
     const key = r.ref ?? "без метки";
@@ -121,6 +135,7 @@ export async function getShareStats(): Promise<ShareStats> {
     people,
     signups: signups ?? 0,
     topPaths,
+    byChannel,
     bySource,
   };
 }

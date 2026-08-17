@@ -11,9 +11,23 @@ import { recordShareEvent } from "@/lib/share";
  * задерживать человека, ни показывать ему ошибку.
  */
 
+/**
+ * Куда человек отправил ссылку.
+ *
+ * through — родное окно выбора приложений, copy — скопировал ссылку,
+ * остальное — прямой переход в мессенджер из нашего окна.
+ */
+export type ShareChannel =
+  | "through"
+  | "copy"
+  | "telegram"
+  | "max"
+  | "whatsapp"
+  | "vk";
+
 export async function recordShareAction(input: {
   path: string;
-  channel: "through" | "copy";
+  channel: ShareChannel;
 }): Promise<void> {
   const user = await getCurrentAppUser();
   const ua = (await headers()).get("user-agent");
