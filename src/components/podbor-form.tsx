@@ -22,6 +22,10 @@ import {
   type IncomePm,
   type SupportMeasure,
   type TaxSystem,
+  type EmploymentStatus,
+  type EmploymentKind,
+  type PreviousEmployment,
+  type WorkField,
   type UserProfile,
 } from "@/lib/measures";
 
@@ -35,10 +39,12 @@ function Choice({
   active,
   onClick,
   children,
+  className,
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <button
@@ -49,6 +55,7 @@ function Choice({
         active
           ? "border-transparent bg-[#1B3A6B] text-white shadow-[0_4px_12px_-4px_rgba(27,58,107,0.45)]"
           : "border-black/[0.08] bg-white text-[#4a4f57] hover:bg-[#f4f5f7]",
+        className,
       )}
     >
       {children}
@@ -301,6 +308,44 @@ const MULTIPLE_BIRTH_OPTIONS: { value: number; label: string }[] = [
 ];
 
 // Возраст ребёнка: 0…18, где 18 — «18 и старше».
+const EMPLOYMENT_OPTIONS: { value: EmploymentStatus; label: string }[] = [
+  { value: "working", label: "Работаю" },
+  { value: "not-working", label: "Не работаю" },
+  { value: "parental-leave", label: "В декрете" },
+];
+
+const KIND_OPTIONS: { value: EmploymentKind; label: string }[] = [
+  { value: "hired", label: "По найму" },
+  { value: "self-employed", label: "Самозанятость" },
+  { value: "entrepreneur", label: "ИП" },
+];
+
+/**
+ * Кем человек был до декрета.
+ *
+ * Без этого ответа декрет стирал бы источник: ушла в декрет из вуза — положены
+ * академический отпуск, семейное общежитие и выплаты вуза; с работы — 40%
+ * заработка и меры работодателя; была самозанятой — декретных нет вовсе.
+ */
+const PREV_EMPLOYMENT_OPTIONS: { value: PreviousEmployment; label: string }[] = [
+  { value: "hired", label: "Работала по найму" },
+  { value: "self-employed", label: "Самозанятость" },
+  { value: "entrepreneur", label: "ИП" },
+  { value: "student", label: "Училась очно" },
+  { value: "none", label: "Не работала" },
+];
+
+const WORK_FIELD_OPTIONS: { value: WorkField; label: string }[] = [
+  { value: "education", label: "Образование" },
+  { value: "medicine", label: "Медицина" },
+  { value: "sport", label: "Спорт" },
+  { value: "culture", label: "Культура" },
+  { value: "it", label: "ИТ" },
+  { value: "public", label: "Госслужба, бюджет" },
+  { value: "defense", label: "Оборонная промышленность" },
+  { value: "military", label: "Военная служба" },
+];
+
 const MONTHS = [
   "январь",
   "февраль",
@@ -416,6 +461,12 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     hasChildren: !!v.hasChildren,
     childrenCount: Number(v.childrenCount) || 0,
     children: Array.isArray(v.children) ? v.children : undefined,
+    employmentStatus: v.employmentStatus ?? null,
+    employmentKinds: Array.isArray(v.employmentKinds) ? v.employmentKinds : [],
+    previousEmployment: v.previousEmployment ?? null,
+    voluntaryInsurance: v.voluntaryInsurance ?? null,
+    unemployedStatus: v.unemployedStatus ?? null,
+    workFields: Array.isArray(v.workFields) ? v.workFields : null,
     childrenAges: ages,
     youngestChildAgeYears: youngest,
     multipleBirthCount: Number(v.multipleBirthCount) || 1,
@@ -540,9 +591,41 @@ export function PodborForm({
   const [hasSpouse, setHasSpouse] = useState<boolean | null>(
     savedSurvey?.singleParent === true ? false : null,
   );
-  const [selfEmployed, setSelfEmployed] = useState<boolean | null>(saved?.selfEmployed ?? null);
-  const [entrepreneur, setEntrepreneur] = useState<boolean | null>(saved?.entrepreneur ?? null);
-  const [employed, setEmployed] = useState<boolean | null>(saved?.employed ?? null);
+  // Занятость: сначала общий вопрос, потом уточнения — см. EMPLOYMENT_OPTIONS.
+  // Анкеты, заполненные по старой форме, восстанавливаем из прежних ответов
+  // про наём, самозанятость и ИП.
+  const [employmentStatus, setEmploymentStatus] = useState<EmploymentStatus | null>(
+    () => {
+      if (saved?.employmentStatus) return saved.employmentStatus;
+      if (saved?.employed || saved?.selfEmployed || saved?.entrepreneur) {
+        return "working";
+      }
+      return null;
+    },
+  );
+  const [employmentKinds, setEmploymentKinds] = useState<EmploymentKind[]>(() => {
+    if (Array.isArray(saved?.employmentKinds)) return saved.employmentKinds;
+    const out: EmploymentKind[] = [];
+    if (saved?.employed) out.push("hired");
+    if (saved?.selfEmployed) out.push("self-employed");
+    if (saved?.entrepreneur) out.push("entrepreneur");
+    return out;
+  });
+  const [previousEmployment, setPreviousEmployment] =
+    useState<PreviousEmployment | null>(saved?.previousEmployment ?? null);
+  const [voluntaryInsurance, setVoluntaryInsurance] = useState<boolean | null>(
+    saved?.voluntaryInsurance ?? null,
+  );
+  const [unemployedStatus, setUnemployedStatus] = useState<boolean | null>(
+    saved?.unemployedStatus ?? null,
+  );
+  // Сферы работы: null — вопрос пропущен, пустой массив — осознанный ответ
+  // «не работаем в указанных сферах». Разница важна для подбора.
+  const [workFields, setWorkFields] = useState<WorkField[] | null>(() => {
+    if (Array.isArray(saved?.workFields)) return saved.workFields;
+    if (saved?.teacher) return ["education"];
+    return null;
+  });
   const [taxSystem, setTaxSystem] = useState<TaxSystem | null>(
     saved?.taxSystem ?? null,
   );
@@ -551,7 +634,7 @@ export function PodborForm({
   );
   const [disabledParent, setDisabledParent] = useState<boolean | null>(saved?.disabledParent ?? null);
   const [fosterParent, setFosterParent] = useState<boolean | null>(saved?.fosterParent ?? null);
-  const [teacher, setTeacher] = useState<boolean | null>(saved?.teacher ?? null);
+
 
   // Сколько окошек возраста показывать. При «10 и более» число берётся из
   // отдельного поля; пока оно пустое или больше 20 — окошек нет.
@@ -596,6 +679,59 @@ export function PodborForm({
   );
   const youngFamily =
     parentAges.length > 0 && parentAges.every((a) => a <= YOUNG_FAMILY_MAX_AGE);
+
+  // Прежние поля профиля выводим из новых ответов: на них размечены меры
+  // (вычеты по НДФЛ, меры самозанятым, ИП и учителям), и перемечать больше
+  // двух тысяч мер ради переименования полей было бы расточительно.
+  //
+  // Декрет считаем занятостью того вида, из которого человек в него ушёл:
+  // место работы за ним сохраняется, а вычеты за отработанные годы доступны.
+  const isHired =
+    employmentKinds.includes("hired") || previousEmployment === "hired";
+  const isSelfEmployed =
+    employmentKinds.includes("self-employed") ||
+    previousEmployment === "self-employed";
+  const isEntrepreneur =
+    employmentKinds.includes("entrepreneur") ||
+    previousEmployment === "entrepreneur";
+  // Уточнения для предпринимателей и самозанятых нужны в любой ветке — и у
+  // работающих, и у тех, кто в декрете.
+  const needsTaxSystem = isEntrepreneur;
+  const needsInsurance = isEntrepreneur || isSelfEmployed;
+
+  /**
+   * Смена статуса занятости стирает ответы других ветвей.
+   *
+   * Иначе они остаются в анкете невидимо: отметил «ИП», передумал и выбрал
+   * «в декрете» — а вопросы про налоговый режим и взносы по-прежнему на
+   * экране, и в профиль уезжает предпринимательство, которого нет.
+   */
+  function chooseEmployment(next: EmploymentStatus) {
+    setEmploymentStatus(next);
+    if (next !== "working") setEmploymentKinds([]);
+    if (next !== "parental-leave") setPreviousEmployment(null);
+    if (next !== "not-working") setUnemployedStatus(null);
+    if (next === "not-working") {
+      setTaxSystem(null);
+      setHasEmployees(null);
+      setVoluntaryInsurance(null);
+    }
+  }
+
+  function toggleKind(kind: EmploymentKind) {
+    setEmploymentKinds((prev) =>
+      prev.includes(kind) ? prev.filter((k) => k !== kind) : [...prev, kind],
+    );
+  }
+
+  function toggleWorkField(field: WorkField) {
+    setWorkFields((prev) => {
+      const list = prev ?? [];
+      return list.includes(field)
+        ? list.filter((f) => f !== field)
+        : [...list, field];
+    });
+  }
 
   function setBirthAt(i: number, value: ChildBirth) {
     setBirthByChild((prev) => ({ ...prev, [i]: value }));
@@ -643,14 +779,16 @@ export function PodborForm({
     parentAge,
     spouseAge,
     hasSpouse,
-    selfEmployed,
-    entrepreneur,
-    employed,
+    employmentStatus,
+    employmentKinds,
+    previousEmployment,
+    voluntaryInsurance,
+    unemployedStatus,
+    workFields,
     taxSystem,
     hasEmployees,
     disabledParent,
     fosterParent,
-    teacher,
   };
 
   // Человек уже что-то ответил? Считаем сравнением с пустой анкетой, а не
@@ -720,13 +858,25 @@ export function PodborForm({
     setParentAge(num(d.parentAge));
     setSpouseAge(num(d.spouseAge));
     setHasSpouse(bool(d.hasSpouse));
-    setSelfEmployed(bool(d.selfEmployed));
-    setEntrepreneur(bool(d.entrepreneur));
-    setEmployed(bool(d.employed));
+    if (
+      d.employmentStatus === "working" ||
+      d.employmentStatus === "not-working" ||
+      d.employmentStatus === "parental-leave"
+    ) {
+      setEmploymentStatus(d.employmentStatus);
+    }
+    if (Array.isArray(d.employmentKinds)) {
+      setEmploymentKinds(d.employmentKinds as EmploymentKind[]);
+    }
+    if (typeof d.previousEmployment === "string") {
+      setPreviousEmployment(d.previousEmployment as PreviousEmployment);
+    }
+    if (Array.isArray(d.workFields)) setWorkFields(d.workFields as WorkField[]);
+    setVoluntaryInsurance(bool(d.voluntaryInsurance));
+    setUnemployedStatus(bool(d.unemployedStatus));
     setHasEmployees(bool(d.hasEmployees));
     setDisabledParent(bool(d.disabledParent));
     setFosterParent(bool(d.fosterParent));
-    setTeacher(bool(d.teacher));
     if (d.incomeAnswered === true) {
       setIncomeAnswered(true);
       const pm = d.incomePm;
@@ -787,18 +937,26 @@ export function PodborForm({
       // возраст не указали вовсе, меры для молодых семей не показываем:
       // лучше не предложить подходящее, чем обнадёжить зря.
       parentUnder35: youngFamily,
-      selfEmployed: selfEmployed ?? false,
-      entrepreneur: entrepreneur ?? false,
-      // Здесь, в отличие от остальных ответов, null сохраняем как есть:
-      // «не ответили» и «нет» для налоговых мер значат разное (см. paysNdfl).
-      employed,
-      taxSystem: entrepreneur ? taxSystem : null,
-      // На НПД наёмных работников держать нельзя — вопрос мы не задаём, и
-      // отвечаем за человека сами, чтобы ответ не остался пустым.
-      hasEmployees: entrepreneur ? (taxSystem === "npd" ? false : hasEmployees) : null,
+      selfEmployed: isSelfEmployed,
+      entrepreneur: isEntrepreneur,
+      // Наёмная работа: null означает «не спрашивали». Если человек ответил на
+      // вопрос о занятости, ответ уже определённый — false, а не пустота.
+      employed: employmentStatus == null ? null : isHired,
+      employmentStatus,
+      employmentKinds,
+      previousEmployment: employmentStatus === "parental-leave" ? previousEmployment : null,
+      voluntaryInsurance: needsInsurance ? voluntaryInsurance : null,
+      unemployedStatus: employmentStatus === "not-working" ? unemployedStatus : null,
+      workFields,
+      taxSystem: needsTaxSystem ? taxSystem : null,
+      hasEmployees: needsTaxSystem
+        ? taxSystem === "npd"
+          ? false
+          : hasEmployees
+        : null,
       disabledParent: disabledParent ?? false,
       fosterParent: fosterParent ?? false,
-      teacher: teacher ?? false,
+      teacher: (workFields ?? []).includes("education"),
     };
     submitted.current = true;
     // Анкета уехала в профиль — черновик свою работу сделал.
@@ -1318,73 +1476,189 @@ export function PodborForm({
         {/* Экран 4: Работа и доход */}
         {step === 3 && (
           <div className="space-y-6">
-        {/* Занятость. От неё зависят налоговые вычеты: вернуть можно только
-            уже уплаченный НДФЛ. Спрашиваем «кто-то из родителей», потому что
-            вычет за лечение или обучение ребёнка вправе получить любой из
-            супругов — семье достаточно одного работающего. */}
+        {/* Занятость одним деревом: сначала общий вопрос, потом уточнения —
+            и только тем, кого они касаются.
+
+            Раньше рядом стояли три отдельных вопроса: наём, самозанятость и
+            ИП. Человек в декрете не попадал ни в один, хотя от того, откуда он
+            в декрет ушёл, зависит почти всё: из вуза — академический отпуск и
+            выплаты вуза, с работы — 40% заработка и меры работодателя, из
+            самозанятости — декретных нет вовсе. */}
         <div className="rounded-2xl border bg-card p-3.5">
-          <p className="text-sm font-medium">
-            Кто-то из родителей работает по найму с официальной зарплатой?
-          </p>
+          <p className="text-sm font-medium">Работаете ли вы сейчас?</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            От этого зависят налоговые вычеты: вернуть можно только тот налог,
-            который уже удержали с зарплаты.
+            От занятости зависят выплаты и налоговые вычеты: вернуть можно
+            только тот налог, который уже удержали.
           </p>
-          <div className="mt-2 flex gap-2">
-            <YesNo value={employed} onChange={setEmployed} />
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {EMPLOYMENT_OPTIONS.map((o) => (
+              <Choice
+                key={o.value}
+                active={employmentStatus === o.value}
+                onClick={() => chooseEmployment(o.value)}
+              >
+                {o.label}
+              </Choice>
+            ))}
           </div>
-        </div>
 
-        <Question label="Вы самозанятый?">
-          <YesNo value={selfEmployed} onChange={setSelfEmployed} />
-        </Question>
-
-        <Question label="Вы индивидуальный предприниматель?">
-          <YesNo value={entrepreneur} onChange={setEntrepreneur} />
-        </Question>
-
-        {/* Уточнения для ИП появляются только после ответа «да» — остальным
-            эти вопросы ни о чём. */}
-        {entrepreneur === true && (
-          <>
-            <div className="rounded-2xl border bg-card p-3.5">
-              <p className="text-sm font-medium">Ваша система налогообложения</p>
+          {employmentStatus === "working" && (
+            <div className="mt-3.5">
+              <p className="text-sm font-medium">Как оформлены?</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Свой НДФЛ предприниматель платит только на общей системе. На
-                УСН, НПД, патенте и ЕСХН налог другой, и возвращать нечего.
+                Можно отметить несколько — многие совмещают наём с
+                самозанятостью.
               </p>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                {(
-                  ["osno", "usn", "npd", "patent", "eshn", "unknown"] as TaxSystem[]
-                ).map((t) => (
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {KIND_OPTIONS.map((o) => (
                   <Choice
-                    key={t}
-                    active={taxSystem === t}
-                    onClick={() => setTaxSystem(t)}
+                    key={o.value}
+                    active={employmentKinds.includes(o.value)}
+                    onClick={() => toggleKind(o.value)}
                   >
-                    {TAX_SYSTEM_LABEL[t]}
+                    {o.label}
                   </Choice>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* НПД запрещает наёмных работников — спрашивать не о чем. */}
-            {taxSystem === "npd" ? (
-              <p className="rounded-2xl border border-dashed bg-card px-3.5 py-3 text-xs text-muted-foreground">
-                На НПД наёмных сотрудников быть не может — про них не
-                спрашиваем.
+          {employmentStatus === "parental-leave" && (
+            <div className="mt-3.5">
+              <p className="text-sm font-medium">А до декрета?</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                От этого зависит, что вам положено: у вчерашней студентки —
+                академический отпуск, семейное общежитие и выплаты вуза, у
+                работавшей по найму — 40% заработка и меры работодателя.
               </p>
-            ) : (
-              <Question label="У вас есть наёмные сотрудники?">
-                <YesNo value={hasEmployees} onChange={setHasEmployees} />
-              </Question>
-            )}
-          </>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {PREV_EMPLOYMENT_OPTIONS.map((o) => (
+                  <Choice
+                    key={o.value}
+                    active={previousEmployment === o.value}
+                    onClick={() => setPreviousEmployment(o.value)}
+                  >
+                    {o.label}
+                  </Choice>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {employmentStatus === "not-working" && (
+            <div className="mt-3.5">
+              <p className="text-sm font-medium">
+                Есть официальный статус безработного?
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Статус присваивает Служба занятости. Если его нет, меры для
+                безработных всё равно покажем — с пометкой, что статус нужно
+                оформить.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <YesNo value={unemployedStatus} onChange={setUnemployedStatus} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Уточнения для предпринимателей — в любой ветке, включая декрет. */}
+        {needsTaxSystem && (
+          <div className="rounded-2xl border bg-card p-3.5">
+            <p className="text-sm font-medium">Ваша система налогообложения</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Свой НДФЛ предприниматель платит только на общей системе. На УСН,
+              АУСН, НПД, патенте и ЕСХН налог другой, и возвращать нечего.
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {(
+                [
+                  "osno",
+                  "usn",
+                  "ausn",
+                  "npd",
+                  "patent",
+                  "eshn",
+                  "unknown",
+                ] as TaxSystem[]
+              ).map((t) => (
+                <Choice
+                  key={t}
+                  active={taxSystem === t}
+                  onClick={() => setTaxSystem(t)}
+                >
+                  {TAX_SYSTEM_LABEL[t]}
+                </Choice>
+              ))}
+            </div>
+          </div>
         )}
 
-        <Question label="Вы работаете учителем?">
-          <YesNo value={teacher} onChange={setTeacher} />
-        </Question>
+        {/* НПД запрещает наёмных работников — спрашивать не о чем. */}
+        {needsTaxSystem &&
+          (taxSystem === "npd" ? (
+            <p className="rounded-2xl border border-dashed bg-card px-3.5 py-3 text-xs text-muted-foreground">
+              На НПД наёмных сотрудников быть не может — про них не спрашиваем.
+            </p>
+          ) : (
+            <Question label="У вас есть наёмные сотрудники?">
+              <YesNo value={hasEmployees} onChange={setHasEmployees} />
+            </Question>
+          ))}
+
+        {/* Добровольные взносы: без них у предпринимателя нет права на
+            декретные, а у самозанятого — на больничный. Роды добровольное
+            страхование самозанятых не покрывает вовсе. */}
+        {needsInsurance && (
+          <div className="rounded-2xl border bg-card p-3.5">
+            <p className="text-sm font-medium">
+              Платили добровольные взносы на социальное страхование?
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              У предпринимателя декретные положены только при взносе,
+              уплаченном до 31 декабря прошлого года. У самозанятых добровольное
+              страхование покрывает больничные, но не беременность и роды.
+            </p>
+            <div className="mt-2 flex gap-2">
+              <YesNo
+                value={voluntaryInsurance}
+                onChange={setVoluntaryInsurance}
+                clearable
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Сфера работы вместо прежнего вопроса «вы работаете учителем?»:
+            подъёмные по земским программам, IT-ипотека и жилищные кооперативы
+            привязаны к профессии, а не к одной только педагогике. */}
+        <div>
+          <p className="text-sm font-medium">
+            Кто-то из родителей работает в этих сферах?
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Можно отметить несколько. От сферы зависят подъёмные земских
+            программ, льготная ипотека для ИТ и жилищные кооперативы.
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {WORK_FIELD_OPTIONS.map((o) => (
+              <Choice
+                key={o.value}
+                active={(workFields ?? []).includes(o.value)}
+                onClick={() => toggleWorkField(o.value)}
+              >
+                {o.label}
+              </Choice>
+            ))}
+            <Choice
+              active={workFields != null && workFields.length === 0}
+              onClick={() => setWorkFields([])}
+              className="col-span-2"
+            >
+              Не работаем в указанных сферах
+            </Choice>
+          </div>
+        </div>
 
         {/* Доход — шкала, а не да/нет: меры задают потолок «до 1 / 1,5 / 2 ПМ»,
             и мера с потолком 2 ПМ должна показываться и тем, у кого доход
