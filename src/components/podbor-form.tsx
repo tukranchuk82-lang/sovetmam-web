@@ -653,6 +653,44 @@ export function PodborForm({
       </p>
 
       <div className="mt-6 space-y-6">
+        {/* Регион — первым и обязательно. Без него подбор теряет три четверти
+            базы: региональных мер 2264 против 109 федеральных. Раньше вариант
+            «Не указывать» стоял по умолчанию, и каждая пятая анкета уходила без
+            региона — человек получал почти пустой экран и решал, что ему
+            ничего не положено. */}
+        <div>
+          <p className="text-sm font-medium">
+            Ваш регион <span className="text-[#8E1D2C]">*</span>
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Самые крупные выплаты — региональные, и в каждой области они свои.
+            Без региона мы покажем только федеральные меры.
+          </p>
+          <div className="relative mt-2">
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className={cn(
+                "w-full appearance-none rounded-xl border bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
+                region
+                  ? "border-black/[0.08] font-medium text-[#2b2f36]"
+                  : "border-[#8E1D2C]/30 text-[#7a808a]",
+              )}
+            >
+              <option value="">Выберите регион</option>
+              {REGIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden
+              className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
+            />
+          </div>
+        </div>
+
         <Question label="Вы в ожидании ребёнка?">
           <YesNo
             value={pregnant}
@@ -788,42 +826,12 @@ export function PodborForm({
           </div>
         )}
 
+        {/* Гражданство спрашиваем отдельно от региона: человек без
+            гражданства РФ всё равно живёт в конкретной области, и часть мер
+            ему доступна. Раньше ответ «нет» стирал уже выбранный регион. */}
         <Question label="Вы гражданин РФ?">
-          <YesNo
-            value={isCitizen}
-            onChange={(v) => {
-              setIsCitizen(v);
-              if (!v) setRegion("");
-            }}
-          />
+          <YesNo value={isCitizen} onChange={setIsCitizen} />
         </Question>
-
-        {isCitizen === true && (
-          <div>
-            <p className="text-sm font-medium">Ваш регион</p>
-            <div className="relative mt-2">
-              <select
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                className={cn(
-                  "w-full appearance-none rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
-                  region ? "font-medium text-[#2b2f36]" : "text-[#7a808a]",
-                )}
-              >
-                <option value="">Не указывать</option>
-                {REGIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                aria-hidden
-                className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
-              />
-            </div>
-          </div>
-        )}
 
         {isCitizen === false && (
           <p className="rounded-xl border border-dashed bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
@@ -1084,16 +1092,22 @@ export function PodborForm({
         </Question>
       </div>
 
-      {/* Пока в «точном числе детей» стоит больше 20, окошки возраста не
-          показываются — отправлять такую анкету нечему. */}
+      {/* Кнопка заблокирована в двух случаях: в «точном числе детей» стоит
+          больше 20 (окошки возраста тогда не показываются, отправлять нечего)
+          и не выбран регион. */}
+      {!region && (
+        <p className="mt-6 rounded-xl border border-dashed border-[#8E1D2C]/30 bg-[#8E1D2C]/[0.04] px-4 py-3 text-xs leading-relaxed text-[#8E1D2C]">
+          Чтобы показать подходящие меры, выберите регион в начале анкеты.
+        </p>
+      )}
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={tooManyChildren}
+        disabled={tooManyChildren || !region}
         className={cn(
           buttonVariants(),
-          "mt-8 h-12 w-full text-base",
-          tooManyChildren && "pointer-events-none opacity-50",
+          "mt-4 h-12 w-full text-base",
+          (tooManyChildren || !region) && "pointer-events-none opacity-50",
         )}
       >
         Показать подходящие меры
