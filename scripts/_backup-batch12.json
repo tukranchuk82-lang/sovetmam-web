@@ -1,0 +1,95 @@
+[
+ {
+  "slug": "tomsk-020",
+  "title": "Прокат вещей для детей до 2 лет (Томская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Томская область"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 2
+  }
+ },
+ {
+  "slug": "kchr-011",
+  "title": "Пункты проката вещей для новорождённых (Карачаево-Черкесская Республика)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Карачаево-Черкесская Республика"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 1
+  }
+ },
+ {
+  "slug": "chao-022",
+  "title": "Компенсация аренды жилья семьям с детьми (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "chuv-007",
+  "title": "Социальная выплата молодой семье на жильё (Чувашская Республика)",
+  "criteria": {
+   "regions": [
+    "Чувашская Республика"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "chech-010",
+  "title": "Социальная выплата молодым семьям на покупку или строительство жилья (Чеченская Республика)",
+  "criteria": {
+   "regions": [
+    "Чеченская Республика"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "kostroma-027",
+  "title": "Бесплатный земельный участок многодетным под строительство дома (Костромская область)",
+  "criteria": {
+   "regions": [
+    "Костромская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "kostroma-032",
+  "title": "Выплата на жильё награждённым медалью «Материнская слава» или «За верность отцовскому долгу» (Костромская область)",
+  "criteria": {
+   "regions": [
+    "Костромская область"
+   ],
+   "minChildren": 4,
+   "requiresChildren": true
+  }
+ }
+]

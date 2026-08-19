@@ -890,11 +890,12 @@ export function PodborForm({
 
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
   //
-  // ignoreRegion включаем ТОЛЬКО когда регион в анкете указан: тогда фильтром
-  // занимается сам список, где регион можно переключить. Если региона нет,
-  // отсекаем региональные меры сразу — иначе человек получал меры всех
-  // регионов страны разом (у одной живой анкеты выходило 1147 мер), а в PDF
-  // они уезжали целиком.
+  // Регион отсекаем всегда: в подборку идут федеральные меры и меры своего
+  // региона. Раньше при заполненном регионе стоял ignoreRegion, потому что
+  // фильтром занимался прежний список разделов с собственным переключателем
+  // региона. У нового экрана результатов такого переключателя нет, и с
+  // ignoreRegion человек получал меры всех регионов страны разом — на живых
+  // анкетах выходило до 1726 карточек.
   const [step, setStep] = useState(0);
   // Профиль, по которому собрана подборка: нужен экрану результатов, чтобы
   // разложить меры по группам и посчитать сроки под конкретную семью.
@@ -902,11 +903,7 @@ export function PodborForm({
     hasSaved ? toProfile(saved!) : null,
   );
   const [results, setResults] = useState<SupportMeasure[] | null>(() =>
-    hasSaved
-      ? matchMeasures(toProfile(saved!), measures, {
-          ignoreRegion: Boolean(toProfile(saved!).region),
-        })
-      : null,
+    hasSaved ? matchMeasures(toProfile(saved!), measures) : null,
   );
   const submitted = useRef(false);
   const topRef = useRef<HTMLDivElement>(null);
@@ -1197,7 +1194,7 @@ export function PodborForm({
       // сохранённый подбор.
     }
     setResults(
-      matchMeasures(profile, measures, { ignoreRegion: Boolean(profile.region) }),
+      matchMeasures(profile, measures),
     );
     // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли пользователь;
     // при перезаполнении данные перезапишутся).
