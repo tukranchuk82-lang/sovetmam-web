@@ -82,7 +82,10 @@ export function isOpenToEveryone(m: SupportMeasure): boolean {
 
 /** Карман меры: деньги, скидка или бесплатная услуга. */
 export function pocketOf(m: SupportMeasure): PocketKey {
-  const segments = m.segments ?? [];
+  // В measures.segments лежат метки трёх видов: жизненные ситуации, темы
+  // (topic-) и классы (class-). Тип SegmentId описывает только ситуации,
+  // поэтому классы читаем как строки — так же, как страницы /class/[key].
+  const segments = m.segments as unknown as string[];
   if (segments.includes("class-money")) return "money";
   if (segments.includes("class-discount")) return "discount";
   if (segments.includes("class-free")) return "free";

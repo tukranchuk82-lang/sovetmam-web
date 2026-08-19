@@ -2,6 +2,7 @@ import "server-only";
 import { createSupabaseAnonClient } from "@/lib/supabase/anon";
 import type {
   EligibilityCriteria,
+  MeasureDeadline,
   SegmentId,
   SupportLevel,
   SupportMeasure,
