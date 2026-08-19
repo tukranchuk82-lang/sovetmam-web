@@ -1,0 +1,46 @@
+[
+ {
+  "slug": "zab-004",
+  "title": "Ежемесячная выплата на третьего ребёнка (Забайкальский край)",
+  "criteria": {
+   "regions": [
+    "Забайкальский край"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "bur-010",
+  "title": "Компенсация обучения детей из многодетных семей по СПО (Республика Бурятия)",
+  "criteria": {
+   "regions": [
+    "Республика Бурятия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "psk-019",
+  "title": "Бесплатный проезд детям Героев России (Псковская область)",
+  "criteria": {
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "msk-kompensaciya-detsad",
+  "title": "Компенсация родительской платы за детский сад (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ }
+]
