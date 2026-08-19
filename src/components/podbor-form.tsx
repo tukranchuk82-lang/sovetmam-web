@@ -87,34 +87,66 @@ function InquiryLinks() {
 }
 
 /** Выпадающий список возраста ребёнка: 0…18, где 18 — «18 и старше». */
-function AgeSelect({
+function BirthSelect({
   value,
   onChange,
 }: {
-  value: number | null;
-  onChange: (v: number | null) => void;
+  value: ChildBirth;
+  onChange: (v: ChildBirth) => void;
 }) {
+  const selectClass = (filled: boolean) =>
+    cn(
+      "w-full appearance-none rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
+      filled ? "font-medium text-[#2b2f36]" : "text-[#7a808a]",
+    );
   return (
-    <div className="relative mt-1">
-      <select
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
-        className={cn(
-          "w-full appearance-none rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
-          value != null ? "font-medium text-[#2b2f36]" : "text-[#7a808a]",
-        )}
-      >
-        <option value="">Возраст</option>
-        {AGE_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        aria-hidden
-        className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
-      />
+    <div className="mt-1 grid grid-cols-2 gap-2">
+      <div className="relative">
+        <select
+          value={value.month ?? ""}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              month: e.target.value === "" ? null : Number(e.target.value),
+            })
+          }
+          className={selectClass(value.month != null)}
+        >
+          <option value="">Месяц</option>
+          {MONTHS.map((m, i) => (
+            <option key={m} value={i + 1}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          aria-hidden
+          className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
+        />
+      </div>
+      <div className="relative">
+        <select
+          value={value.year ?? ""}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              year: e.target.value === "" ? null : Number(e.target.value),
+            })
+          }
+          className={selectClass(value.year != null)}
+        >
+          <option value="">Год</option>
+          {BIRTH_YEARS.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          aria-hidden
+          className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
+        />
+      </div>
     </div>
   );
 }
@@ -269,10 +301,63 @@ const MULTIPLE_BIRTH_OPTIONS: { value: number; label: string }[] = [
 ];
 
 // Возраст ребёнка: 0…18, где 18 — «18 и старше».
-const AGE_OPTIONS: { value: number; label: string }[] = Array.from(
-  { length: 19 },
-  (_, i) => ({ value: i, label: i === 18 ? "18 и старше" : String(i) }),
+const MONTHS = [
+  "январь",
+  "февраль",
+  "март",
+  "апрель",
+  "май",
+  "июнь",
+  "июль",
+  "август",
+  "сентябрь",
+  "октябрь",
+  "ноябрь",
+  "декабрь",
+];
+
+/**
+ * Годы рождения — за последние 25 лет. Дальше смысла нет: даже самые «долгие»
+ * меры (статус многодетной семьи, пенсия по потере кормильца) держатся
+ * максимум до 23 лет ребёнка.
+ */
+const BIRTH_YEARS = Array.from(
+  { length: 26 },
+  (_, i) => new Date().getFullYear() - i,
 );
+
+/** Ответ про одного ребёнка: месяц и год рождения, плюс учёба для взрослых. */
+type ChildBirth = {
+  month: number | null;
+  year: number | null;
+  studies: boolean | null;
+};
+
+const EMPTY_BIRTH: ChildBirth = { month: null, year: null, studies: null };
+
+/**
+ * Возраст в полных годах на сегодня.
+ *
+ * Месяц необязателен: если человек его не указал, берём середину года — тогда
+ * ошибка не больше полугода, и не приходится блокировать анкету из-за
+ * вопроса, ответ на который можно не помнить.
+ */
+function ageYearsOf(b: ChildBirth): number | null {
+  if (b.year == null) return null;
+  const now = new Date();
+  const months =
+    (now.getFullYear() - b.year) * 12 + (now.getMonth() + 1 - (b.month ?? 6));
+  return Math.max(0, Math.floor(months / 12));
+}
+
+/** Правильное склонение: «1 год», «2 года», «5 лет». */
+function pluralYears(n: number): string {
+  const d10 = n % 10;
+  const d100 = n % 100;
+  if (d10 === 1 && d100 !== 11) return `${n} год`;
+  if (d10 >= 2 && d10 <= 4 && (d100 < 10 || d100 >= 20)) return `${n} года`;
+  return `${n} лет`;
+}
 
 // Возраст родителей: от 16 до 60, дальше «60 и старше» — точное число там уже
 // ни на одну меру не влияет, а список не стоит делать бесконечным.
@@ -330,6 +415,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
       v.pregnant && expecting >= 1 && expecting <= 10 ? expecting : null,
     hasChildren: !!v.hasChildren,
     childrenCount: Number(v.childrenCount) || 0,
+    children: Array.isArray(v.children) ? v.children : undefined,
     childrenAges: ages,
     youngestChildAgeYears: youngest,
     multipleBirthCount: Number(v.multipleBirthCount) || 1,
@@ -389,12 +475,35 @@ export function PodborForm({
   // нужной длины выводится из числа детей при отрисовке. Раньше длину
   // подгонял эффект, и React справедливо ругался на состояние, которое
   // правится следом за другим состоянием.
-  const [agesByChild, setAgesByChild] = useState<Record<number, number | null>>(() =>
-    Object.fromEntries(
-      (Array.isArray(saved?.childrenAges) ? saved.childrenAges.map(Number) : []).map(
-        (age, i) => [i, age],
-      ),
-    ),
+  const [birthByChild, setBirthByChild] = useState<Record<number, ChildBirth>>(
+    () => {
+      const out: Record<number, ChildBirth> = {};
+      // Анкета заполнена по новой форме — берём даты как есть.
+      const kids = Array.isArray(saved?.children) ? saved.children : null;
+      if (kids) {
+        kids.forEach((c, i) => {
+          out[i] = {
+            month: typeof c?.birthMonth === "number" ? c.birthMonth : null,
+            year: typeof c?.birthYear === "number" ? c.birthYear : null,
+            studies:
+              typeof c?.studiesFullTime === "boolean" ? c.studiesFullTime : null,
+          };
+        });
+        return out;
+      }
+      // Старая анкета: был только возраст в годах. Год рождения выводим из
+      // него, месяц оставляем пустым — человек уточнит, если захочет.
+      (Array.isArray(saved?.childrenAges) ? saved.childrenAges.map(Number) : []).forEach(
+        (age, i) => {
+          out[i] = {
+            month: null,
+            year: new Date().getFullYear() - age,
+            studies: null,
+          };
+        },
+      );
+      return out;
+    },
   );
   // Многоплодные роды: 1 — обычные, 2 — двойня, 3 — тройня, 4 — четверни и более.
   const [multipleBirthCount, setMultipleBirthCount] = useState<number | null>(
@@ -459,10 +568,22 @@ export function PodborForm({
 
   // Список окошек идёт за числом детей: добавили ребёнка — появилось пустое,
   // убавили — лишние скрылись, а ответы оставшихся сохранились.
-  const childrenAges = Array.from(
+  const childBirths = Array.from(
     { length: childCount },
-    (_, i) => agesByChild[i] ?? null,
+    (_, i) => birthByChild[i] ?? EMPTY_BIRTH,
   );
+
+  // Для движка: даты рождения (по ним считается возраст в месяцах) и возрасты
+  // в годах. Возрасты нужны мерам, размеченным по старым правилам — школьное
+  // питание, дошкольные льготы и прочие, где считаются целые годы.
+  const childrenInfo = childBirths
+    .filter((b) => b.year != null)
+    .map((b) => ({
+      birthMonth: b.month ?? 6,
+      birthYear: b.year as number,
+      studiesFullTime: b.studies ?? undefined,
+    }));
+  const childrenAges = childBirths.map((b) => ageYearsOf(b));
 
   // Движок подбора смотрит на возраст младшего — выводим его из ответов.
   const filledAges = childrenAges.filter((a): a is number => a != null);
@@ -476,8 +597,8 @@ export function PodborForm({
   const youngFamily =
     parentAges.length > 0 && parentAges.every((a) => a <= YOUNG_FAMILY_MAX_AGE);
 
-  function setAgeAt(i: number, value: number | null) {
-    setAgesByChild((prev) => ({ ...prev, [i]: value }));
+  function setBirthAt(i: number, value: ChildBirth) {
+    setBirthByChild((prev) => ({ ...prev, [i]: value }));
   }
 
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
@@ -507,7 +628,7 @@ export function PodborForm({
     hasChildren,
     childrenCount,
     exactCount,
-    agesByChild,
+    birthByChild,
     multipleBirthCount,
     isCitizen,
     incomePm,
@@ -541,7 +662,7 @@ export function PodborForm({
         key !== "step" &&
         value !== null &&
         value !== "" &&
-        !(key === "agesByChild" && Object.keys(value ?? {}).length === 0) &&
+        !(key === "birthByChild" && Object.keys(value ?? {}).length === 0) &&
         !(key === "incomeAnswered" && value === false),
     );
 
@@ -579,8 +700,8 @@ export function PodborForm({
     }
     if (typeof d.region === "string") setRegion(d.region);
     if (typeof d.exactCount === "string") setExactCount(d.exactCount);
-    if (d.agesByChild && typeof d.agesByChild === "object") {
-      setAgesByChild(d.agesByChild as Record<number, number | null>);
+    if (d.birthByChild && typeof d.birthByChild === "object") {
+      setBirthByChild(d.birthByChild as Record<number, ChildBirth>);
     }
     if (isTaxSystem(d.taxSystem)) setTaxSystem(d.taxSystem);
     setPregnant(bool(d.pregnant));
@@ -644,6 +765,7 @@ export function PodborForm({
       expectingChildNumber: pregnant ? expectingNumber : null,
       hasChildren: hasChildren ?? false,
       childrenCount: hasChildren ? (childCount || 1) : 0,
+      children: hasChildren ? childrenInfo : [],
       childrenAges: hasChildren ? filledAges : [],
       youngestChildAgeYears: hasChildren ? youngestAge : null,
       multipleBirthCount: pregnant || hasChildren ? (multipleBirthCount ?? 1) : 1,
@@ -1046,30 +1168,68 @@ export function PodborForm({
               </div>
             )}
 
-            {childCount === 1 && (
+            {childCount >= 1 && (
               <div>
-                <p className="text-sm font-medium">Укажите возраст ребёнка</p>
-                <div className="mt-2">
-                  <AgeSelect
-                    value={childrenAges[0] ?? null}
-                    onChange={(v) => setAgeAt(0, v)}
-                  />
-                </div>
-              </div>
-            )}
+                <p className="text-sm font-medium">
+                  {childCount === 1
+                    ? "Когда родился ребёнок?"
+                    : "Когда родились дети?"}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Спрашиваем дату, а не возраст: возраст в анкете устаревает, и
+                  через год подбор считал бы ребёнка младше, чем он есть. Месяц
+                  можно не указывать — он важен только для малышей, у которых
+                  меры меняются в полтора года.
+                </p>
+                <div className="mt-2 space-y-3">
+                  {childBirths.map((b, i) => {
+                    const years = ageYearsOf(b);
+                    return (
+                      <div key={i}>
+                        <span className="text-xs text-muted-foreground">
+                          {childCount === 1 ? "Ребёнок" : `${i + 1}-й ребёнок`}
+                          {years != null ? ` — сейчас ${pluralYears(years)}` : ""}
+                        </span>
+                        <BirthSelect
+                          value={b}
+                          onChange={(v) => setBirthAt(i, v)}
+                        />
 
-            {childCount > 1 && (
-              <div>
-                <p className="text-sm font-medium">Укажите возраст каждого ребёнка</p>
-                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2.5">
-                  {childrenAges.map((age, i) => (
-                    <label key={i} className="block">
-                      <span className="text-xs text-muted-foreground">
-                        {i + 1}-й ребёнок
-                      </span>
-                      <AgeSelect value={age} onChange={(v) => setAgeAt(i, v)} />
-                    </label>
-                  ))}
+                        {/* Взрослый ребёнок остаётся в составе семьи, пока
+                            учится очно: до 23 лет держится статус многодетной
+                            семьи и часть мер на самого ребёнка. */}
+                        {years != null && years >= 18 && (
+                          <div className="mt-2 rounded-xl border border-[#D9D2C6] bg-[#F7F4EE] px-3 py-2.5">
+                            <p className="text-xs font-semibold text-[#3A4D63]">
+                              Учится очно?
+                            </p>
+                            <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                              До 23 лет очная учёба сохраняет статус многодетной
+                              семьи и меры на этого ребёнка.
+                            </p>
+                            <div className="mt-2 grid grid-cols-2 gap-2">
+                              <Choice
+                                active={b.studies === true}
+                                onClick={() =>
+                                  setBirthAt(i, { ...b, studies: true })
+                                }
+                              >
+                                Да
+                              </Choice>
+                              <Choice
+                                active={b.studies === false}
+                                onClick={() =>
+                                  setBirthAt(i, { ...b, studies: false })
+                                }
+                              >
+                                Нет
+                              </Choice>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
