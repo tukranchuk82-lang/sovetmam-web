@@ -1,0 +1,56 @@
+[
+ {
+  "slug": "oren-013",
+  "title": "Социальная выплата на первоначальный взнос по ипотеке (Оренбургская область)",
+  "criteria": {
+   "regions": [
+    "Оренбургская область"
+   ],
+   "requiresChildren": true,
+   "requiresMortgageIntent": true
+  }
+ },
+ {
+  "slug": "hmao-018",
+  "title": "Бесплатное предоставление земельного участка для ИЖС многодетным семьям (ХМАО — Югра)",
+  "criteria": {
+   "regions": [
+    "Ханты-Мансийский автономный округ — Югра"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "tat-009",
+  "title": "Доплата детям-инвалидам, нуждающимся в постоянном уходе (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "chel-016",
+  "title": "Господдержка молодым семьям на приобретение жилья (Челябинская область)",
+  "criteria": {
+   "regions": [
+    "Челябинская область"
+   ],
+   "requiresStudent": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "rtadd-003",
+  "title": "Социальная ипотека «Молодая семья» под 7% годовых (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ }
+]
