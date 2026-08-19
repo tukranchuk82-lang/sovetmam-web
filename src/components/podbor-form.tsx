@@ -308,6 +308,15 @@ const MULTIPLE_BIRTH_OPTIONS: { value: number; label: string }[] = [
 ];
 
 // Возраст ребёнка: 0…18, где 18 — «18 и старше».
+/**
+ * Ориентир учётной нормы площади, кв. м на человека.
+ *
+ * Точную норму устанавливает каждый муниципалитет свою, единого справочника
+ * не существует. Берём типовое значение: оно нужно не для решения, а для
+ * подсказки «похоже, у вас есть основание встать на учёт».
+ */
+const HOUSING_NORM_HINT = 12;
+
 const EMPLOYMENT_OPTIONS: { value: EmploymentStatus; label: string }[] = [
   { value: "working", label: "Работаю" },
   { value: "not-working", label: "Не работаю" },
@@ -461,6 +470,12 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     hasChildren: !!v.hasChildren,
     childrenCount: Number(v.childrenCount) || 0,
     children: Array.isArray(v.children) ? v.children : undefined,
+    ownsHome: v.ownsHome ?? null,
+    homeArea: v.homeArea ?? null,
+    residentsCount: v.residentsCount ?? null,
+    homeUnfit: v.homeUnfit ?? null,
+    housingNeedStatus: v.housingNeedStatus ?? null,
+    hasMortgage: v.hasMortgage ?? null,
     employmentStatus: v.employmentStatus ?? null,
     employmentKinds: Array.isArray(v.employmentKinds) ? v.employmentKinds : [],
     previousEmployment: v.previousEmployment ?? null,
@@ -569,6 +584,22 @@ export function PodborForm({
     saved ? saved.incomePm !== undefined || !!saved.lowIncome : false,
   );
   const [mortgageIntent, setMortgageIntent] = useState<boolean | null>(saved?.mortgageIntent ?? null);
+  // Жильё. Блок обязательный: без него 74 меры показываются всем подряд,
+  // хотя без статуса нуждающихся они недоступны.
+  const [ownsHome, setOwnsHome] = useState<boolean | null>(saved?.ownsHome ?? null);
+  const [homeArea, setHomeArea] = useState<string>(
+    saved?.homeArea != null ? String(saved.homeArea) : "",
+  );
+  const [residents, setResidents] = useState<string>(
+    saved?.residentsCount != null ? String(saved.residentsCount) : "",
+  );
+  const [homeUnfit, setHomeUnfit] = useState<boolean | null>(saved?.homeUnfit ?? null);
+  const [housingNeed, setHousingNeed] = useState<
+    "registered" | "no" | "unknown" | null
+  >(saved?.housingNeedStatus ?? null);
+  const [hasMortgage, setHasMortgage] = useState<boolean | null>(
+    saved?.hasMortgage ?? null,
+  );
   const [singleParent, setSingleParent] = useState<boolean | null>(saved?.singleParent ?? null);
   const [svoFamily, setSvoFamily] = useState<boolean | null>(saved?.svoFamily ?? null);
   const [student, setStudent] = useState<boolean | null>(saved?.student ?? null);
@@ -718,6 +749,25 @@ export function PodborForm({
     }
   }
 
+  // Метры на человека: показываем расчёт человеку и передаём в подбор.
+  const areaNum = homeArea.trim() === "" ? null : Number(homeArea);
+  const residentsNum = residents.trim() === "" ? null : Number(residents);
+  const areaValid = areaNum != null && Number.isFinite(areaNum) && areaNum > 0;
+  const residentsValid =
+    residentsNum != null && Number.isInteger(residentsNum) && residentsNum > 0;
+  const areaPerPerson =
+    areaValid && residentsValid ? (areaNum as number) / (residentsNum as number) : null;
+
+  // Блок жилья обязателен — пропустить его нельзя. Метраж при этом можно не
+  // указывать: человек может не помнить точную площадь, и блокировать анкету
+  // из-за этого неправильно.
+  const housingAnswered =
+    ownsHome != null &&
+    homeUnfit != null &&
+    housingNeed != null &&
+    mortgageIntent != null &&
+    hasMortgage != null;
+
   function toggleKind(kind: EmploymentKind) {
     setEmploymentKinds((prev) =>
       prev.includes(kind) ? prev.filter((k) => k !== kind) : [...prev, kind],
@@ -770,6 +820,12 @@ export function PodborForm({
     incomePm,
     incomeAnswered,
     mortgageIntent,
+    ownsHome,
+    homeArea,
+    residents,
+    homeUnfit,
+    housingNeed,
+    hasMortgage,
     singleParent,
     svoFamily,
     student,
@@ -849,6 +905,18 @@ export function PodborForm({
     setMultipleBirthCount(num(d.multipleBirthCount));
     setIsCitizen(bool(d.isCitizen));
     setMortgageIntent(bool(d.mortgageIntent));
+    setOwnsHome(bool(d.ownsHome));
+    setHomeUnfit(bool(d.homeUnfit));
+    setHasMortgage(bool(d.hasMortgage));
+    if (typeof d.homeArea === "string") setHomeArea(d.homeArea);
+    if (typeof d.residents === "string") setResidents(d.residents);
+    if (
+      d.housingNeed === "registered" ||
+      d.housingNeed === "no" ||
+      d.housingNeed === "unknown"
+    ) {
+      setHousingNeed(d.housingNeed);
+    }
     setSingleParent(bool(d.singleParent));
     setSvoFamily(bool(d.svoFamily));
     setStudent(bool(d.student));
@@ -928,6 +996,12 @@ export function PodborForm({
       specialNeedsChild: specialNeedsChild ?? false,
       lossOfBreadwinner: lossOfBreadwinner ?? false,
       mortgageIntent: mortgageIntent ?? false,
+      ownsHome,
+      homeArea: areaValid ? areaNum : null,
+      residentsCount: residentsValid ? residentsNum : null,
+      homeUnfit,
+      housingNeedStatus: housingNeed,
+      hasMortgage,
       svoFamily: svoFamily ?? false,
       singleParent: singleParent ?? false,
       student: student ?? false,
@@ -1712,9 +1786,136 @@ export function PodborForm({
         {/* Экран 5: Жильё */}
         {step === 4 && (
           <div className="space-y-6">
+        {/* Жильё — обязательный блок.
+
+            74 меры требуют статуса нуждающихся в улучшении жилищных условий, а
+            статус присваивает администрация по заявлению. Раньше эти меры
+            показывались всем подряд. Спрашивать «состоите на учёте?» одним
+            вопросом мало: половина людей не знает ответа. Поэтому сами считаем
+            основание по статье 51 Жилищного кодекса — своего жилья нет, метраж
+            меньше учётной нормы или жильё аварийное — и показываем меру с
+            плашкой «нужно встать на учёт» вместо того, чтобы прятать её. */}
+        <div className="rounded-2xl border bg-card p-3.5">
+          <p className="text-sm font-medium">Есть ли у вас своё жильё?</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            В собственности или по договору социального найма — у вас или у
+            членов семьи.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <YesNo value={ownsHome} onChange={setOwnsHome} />
+          </div>
+
+          {ownsHome === true && (
+            <div className="mt-3.5">
+              <p className="text-sm font-medium">
+                Площадь жилья и сколько человек в нём зарегистрировано
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Точную площадь можно не помнить — тогда оставьте поле пустым.
+                Метраж нужен, чтобы понять, есть ли основание встать на учёт:
+                норму устанавливает муниципалитет, обычно это 10–12 м² на
+                человека.
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-xs text-muted-foreground">
+                    Площадь, м²
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={1}
+                    value={homeArea}
+                    onChange={(e) => setHomeArea(e.target.value)}
+                    placeholder="например, 54"
+                    className="mt-1 w-full rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-3 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs text-muted-foreground">
+                    Человек прописано
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    value={residents}
+                    onChange={(e) => setResidents(e.target.value)}
+                    placeholder="например, 4"
+                    className="mt-1 w-full rounded-xl border border-black/[0.08] bg-white py-2.5 pl-3 pr-3 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none"
+                  />
+                </label>
+              </div>
+
+              {areaPerPerson != null && (
+                <p
+                  className={cn(
+                    "mt-2.5 rounded-xl px-3 py-2.5 text-xs leading-snug",
+                    areaPerPerson < HOUSING_NORM_HINT
+                      ? "bg-[#8E1D2C]/[0.06] text-[#8E1D2C]"
+                      : "bg-black/[0.03] text-muted-foreground",
+                  )}
+                >
+                  Получается {Math.round(areaPerPerson * 10) / 10} м² на
+                  человека.{" "}
+                  {areaPerPerson < HOUSING_NORM_HINT
+                    ? "Похоже, у вас есть основание встать на учёт как нуждающимся — точную норму уточните в администрации по месту жительства."
+                    : "По метражу оснований для постановки на учёт, скорее всего, нет."}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Question label="Жильё признано аварийным или непригодным?">
+          <YesNo value={homeUnfit} onChange={setHomeUnfit} />
+        </Question>
+
+        <div className="rounded-2xl border bg-card p-3.5">
+          <p className="text-sm font-medium">
+            Состоите на учёте как нуждающиеся в жилье?
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Это официальный статус: его присваивает администрация по заявлению.
+            От него зависят «Молодая семья», социальный найм и жилищные
+            выплаты. Если не знаете — так и ответьте, мы подскажем по метражу.
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <Choice
+              active={housingNeed === "registered"}
+              onClick={() => setHousingNeed("registered")}
+            >
+              Да
+            </Choice>
+            <Choice
+              active={housingNeed === "no"}
+              onClick={() => setHousingNeed("no")}
+            >
+              Нет
+            </Choice>
+            <Choice
+              active={housingNeed === "unknown"}
+              onClick={() => setHousingNeed("unknown")}
+            >
+              Не знаю
+            </Choice>
+          </div>
+        </div>
+
         <Question label="Планируете покупку жилья или ипотеку?">
           <YesNo value={mortgageIntent} onChange={setMortgageIntent} />
         </Question>
+
+        <div className="rounded-2xl border bg-card p-3.5">
+          <p className="text-sm font-medium">Есть действующая ипотека?</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            При рождении третьего ребёнка государство погашает 450 000 ₽ по
+            ипотеке, а в ряде регионов добавляет свою выплату сверху.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <YesNo value={hasMortgage} onChange={setHasMortgage} />
+          </div>
+        </div>
           </div>
         )}
 
@@ -1818,6 +2019,14 @@ export function PodborForm({
           Выберите регион, чтобы продолжить.
         </p>
       )}
+      {/* Жильё пропускать нельзя: без ответов 74 меры показываются наугад. */}
+      {step === 4 && !housingAnswered && (
+        <p className="mt-6 rounded-xl border border-dashed border-[#1B3A6B]/30 bg-[#1B3A6B]/[0.04] px-4 py-3 text-xs leading-relaxed text-[#1B3A6B]">
+          Ответьте на вопросы о жилье — от них зависят самые крупные меры:
+          земельный участок, «Молодая семья», социальный найм и выплаты на
+          погашение ипотеки.
+        </p>
+      )}
       {/* «Точное число детей» больше 20 — окошки возраста не показываются,
           отправлять такую анкету нечему. */}
       {tooManyChildren && step === 1 && (
@@ -1843,11 +2052,17 @@ export function PodborForm({
           <button
             type="button"
             onClick={() => goToStep(step + 1)}
-            disabled={(step === 0 && !region) || (step === 1 && tooManyChildren)}
+            disabled={
+              (step === 0 && !region) ||
+              (step === 1 && tooManyChildren) ||
+              (step === 4 && !housingAnswered)
+            }
             className={cn(
               buttonVariants(),
               "h-12 flex-[2] text-base",
-              ((step === 0 && !region) || (step === 1 && tooManyChildren)) &&
+              ((step === 0 && !region) ||
+                (step === 1 && tooManyChildren) ||
+                (step === 4 && !housingAnswered)) &&
                 "pointer-events-none opacity-50",
             )}
           >
