@@ -1,0 +1,57 @@
+[
+ {
+  "slug": "ryaz-021",
+  "title": "Выплата студентам из многодетных на проезд (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "maxIncomePm": 1,
+   "minChildren": 3,
+   "requiresStudent": true,
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "komi-032",
+  "title": "Меры поддержки семей участников СВО (Республика Коми)",
+  "criteria": {
+   "regions": [
+    "Республика Коми"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-004",
+  "title": "Компенсация части стоимости платного обучения детей из многодетных семей (Калининградская область)",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "pensiya-po-potere-kormilca",
+  "title": "Пенсия по случаю потери кормильца",
+  "criteria": {
+   "requiresFamily": true,
+   "requiresLossOfBreadwinner": true
+  }
+ },
+ {
+  "slug": "bsh-004",
+  "title": "Единовременная выплата многодетным семьям с 8 и более детьми (Республика Башкортостан)",
+  "criteria": {
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ }
+]

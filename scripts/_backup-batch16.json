@@ -1,0 +1,52 @@
+[
+ {
+  "slug": "sah-030",
+  "title": "Поддержка студентов до 23 лет (Сахалинская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "saha-017",
+  "title": "Выплата на транспорт семьям с 10 и более детьми (Республика Саха (Якутия))",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresFosterParent": true
+    }
+   ],
+   "regions": [
+    "Республика Саха (Якутия)"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "sah-035",
+  "title": "Оплата обучения детям погибших военнослужащих (Сахалинская область)",
+  "criteria": {
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ }
+]
