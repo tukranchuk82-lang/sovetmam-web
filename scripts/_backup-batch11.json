@@ -1,0 +1,101 @@
+[
+ {
+  "slug": "zapor-009",
+  "title": "Жильё или выплата семьям с детьми-инвалидами (Запорожская область)",
+  "criteria": {
+   "regions": [
+    "Запорожская область"
+   ],
+   "requiresChildren": true,
+   "requiresDisabledChild": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "lpc-015",
+  "title": "Санаторно-курортная путёвка беременным (Липецкая область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresPregnancy": true
+    }
+   ],
+   "regions": [
+    "Липецкая область"
+   ]
+  },
+  "deadline": null
+ },
+ {
+  "slug": "socnaym-maloimushchim",
+  "title": "Социальный наём жилья для малоимущих",
+  "criteria": {
+   "requiresLowIncome": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "rtadd-002",
+  "title": "Бесплатный земельный участок многодетным семьям (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "minChildren": 3
+  },
+  "deadline": null
+ },
+ {
+  "slug": "ivn-034",
+  "title": "Присмотр за детьми и соцуслуги семьям участников СВО (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "mgd-017",
+  "title": "Выплата на жильё многодетным с 4+ детьми (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "kostroma-019",
+  "title": "200 000 ₽ на жильё при рождении третьего ребёнка (Костромская область)",
+  "criteria": {
+   "regions": [
+    "Костромская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true,
+   "requiresMortgageIntent": true,
+   "maxYoungestChildAgeYears": 1
+  },
+  "deadline": null
+ },
+ {
+  "slug": "tomsk-021",
+  "title": "Путёвки и компенсация отдыха детей (Томская область)",
+  "criteria": {
+   "regions": [
+    "Томская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  },
+  "deadline": null
+ }
+]

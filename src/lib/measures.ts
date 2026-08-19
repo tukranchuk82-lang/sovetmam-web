@@ -1229,6 +1229,21 @@ function pluralDays(n: number): string {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
+ * Порог срочности: меру поднимаем в блок «Успеть подать», только когда до
+ * конца срока меньше трёх месяцев. Иначе туда попадали бы меры, до которых
+ * ещё больше года, и блок перестал бы что-либо значить.
+ */
+const URGENT_DAYS = 90;
+
+/** «1 ноября» или «1 ноября 2027 года», если срок выходит за текущий год. */
+function dateText(d: Date, now: Date): string {
+  const base = `${d.getDate()} ${MONTHS_GENITIVE[d.getMonth()]}`;
+  return d.getFullYear() === now.getFullYear()
+    ? base
+    : `${base} ${d.getFullYear()} года`;
+}
+
+/**
  * Что сказать человеку про срок этой меры — с учётом его анкеты.
  *
  * Возвращает null, когда говорить нечего: срока нет, он уже прошёл или к этой
@@ -1262,8 +1277,13 @@ export function deadlineStatus(
     until.setMonth(until.getMonth() + d.months);
     const left = Math.ceil((until.getTime() - now.getTime()) / DAY_MS);
     if (left <= 0) return null;
+    // Пока времени много, счётчик дней только пугает: «осталось 439 дней»
+    // человек читает как срочность, хотя спешить некуда.
+    if (left > URGENT_DAYS) {
+      return { text: `Подать до ${dateText(until, now)}`, urgent: false };
+    }
     return {
-      text: `Успеть до ${until.getDate()} ${MONTHS_GENITIVE[until.getMonth()]}: осталось ${pluralDays(left)}`,
+      text: `Успеть до ${dateText(until, now)}: осталось ${pluralDays(left)}`,
       urgent: true,
     };
   }
@@ -1285,8 +1305,8 @@ export function deadlineStatus(
     const year = now.getFullYear();
     const from = new Date(year, d.fromMonth - 1, d.fromDay);
     const to = new Date(year, d.toMonth - 1, d.toDay);
-    const fromText = `${d.fromDay} ${MONTHS_GENITIVE[d.fromMonth - 1]}`;
-    const toText = `${d.toDay} ${MONTHS_GENITIVE[d.toMonth - 1]}`;
+    const fromText = dateText(from, now);
+    const toText = dateText(to, now);
     if (now < from) {
       return { text: `Заявления принимают с ${fromText} по ${toText}`, urgent: false };
     }
