@@ -1,0 +1,85 @@
+[
+ {
+  "slug": "mari-014",
+  "title": "Выплата родителю по уходу за детьми-инвалидами (Республика Марий Эл)",
+  "criteria": {
+   "regions": [
+    "Республика Марий Эл"
+   ],
+   "requiresChildren": true,
+   "requiresDisabledChild": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "hmao-001",
+  "title": "Югорский семейный капитал (ХМАО — Югра)",
+  "criteria": {
+   "regions": [
+    "Ханты-Мансийский автономный округ — Югра"
+   ],
+   "requiresStudent": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "chao-003",
+  "title": "500 000 ₽ на каждого ребёнка при рождении двойни и более (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  },
+  "deadline": null
+ },
+ {
+  "slug": "bsh-003",
+  "title": "Пособие малоимущим при рождении двойни и более (Республика Башкортостан)",
+  "criteria": {
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "requiresFamily": true,
+   "requiresLowIncome": true,
+   "minSimultaneousBirth": 2
+  },
+  "deadline": null
+ },
+ {
+  "slug": "irkutsk-005",
+  "title": "Единовременная выплата при одновременном рождении двух и более детей (Иркутская область)",
+  "criteria": {
+   "regions": [
+    "Иркутская область"
+   ],
+   "minSimultaneousBirth": 2
+  },
+  "deadline": null
+ },
+ {
+  "slug": "krsk-014",
+  "title": "Пособие при усыновлении второго и последующих детей (Курская область)",
+  "criteria": {
+   "regions": [
+    "Курская область"
+   ],
+   "requiresChildren": true,
+   "requiresFosterParent": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "chao-002",
+  "title": "Выплата при рождении второго и последующего ребёнка (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "minChildren": 1,
+   "requiresFamily": true
+  },
+  "deadline": null
+ }
+]
