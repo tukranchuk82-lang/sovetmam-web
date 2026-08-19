@@ -192,6 +192,22 @@ const EXPECTING_OPTIONS: { value: number; label: string }[] = [
 
 // Больше 20 детей вводить незачем: ни одна мера не различает 20 и 25 детей,
 // а поле «сколько именно» должно оставаться защищённым от случайного ввода.
+/**
+ * Экраны анкеты. Раньше все девятнадцать вопросов шли одной простынёй, и до
+ * конца доходили не все: часть людей бросала анкету на середине, часть
+ * отвечала наугад. Порядок экранов согласован: регион первым (без него подбор
+ * теряет три четверти базы), дальше семья, потом всё остальное.
+ */
+const STEPS = [
+  "Где вы живёте",
+  "Дети",
+  "Родители",
+  "Работа и доход",
+  "Жильё",
+  "Особые статусы",
+  "Здоровье",
+];
+
 const MAX_CHILDREN = 20;
 
 // «Сколько у вас детей»: 1…9 и «10 и более» (10 — маркер, точное число потом
@@ -422,6 +438,13 @@ export function PodborForm({
     setAgesByChild((prev) => ({ ...prev, [i]: value }));
   }
 
+  // Переход между экранами: прокручиваем к началу анкеты, иначе человек
+  // оказывается в середине следующего экрана и не видит его первый вопрос.
+  function goToStep(next: number) {
+    setStep(next);
+    topRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
   //
   // ignoreRegion включаем ТОЛЬКО когда регион в анкете указан: тогда фильтром
@@ -429,6 +452,7 @@ export function PodborForm({
   // отсекаем региональные меры сразу — иначе человек получал меры всех
   // регионов страны разом (у одной живой анкеты выходило 1147 мер), а в PDF
   // они уезжали целиком.
+  const [step, setStep] = useState(0);
   const [results, setResults] = useState<SupportMeasure[] | null>(() =>
     hasSaved
       ? matchMeasures(toProfile(saved!), measures, {
@@ -652,7 +676,33 @@ export function PodborForm({
         вернуться к нему в любой момент.
       </p>
 
+      {/* Где человек находится и сколько осталось. */}
+      <div className="mt-5">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#1B3A6B]">
+            {STEPS[step]}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            шаг {step + 1} из {STEPS.length}
+          </p>
+        </div>
+        <div className="mt-2 flex gap-1">
+          {STEPS.map((title, i) => (
+            <span
+              key={title}
+              className={cn(
+                "h-1.5 flex-1 rounded-full transition-colors",
+                i <= step ? "bg-[#1B3A6B]" : "bg-black/[0.08]",
+              )}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="mt-6 space-y-6">
+        {/* Экран 1: Где вы живёте */}
+        {step === 0 && (
+          <div className="space-y-6">
         {/* Регион — первым и обязательно. Без него подбор теряет три четверти
             базы: региональных мер 2264 против 109 федеральных. Раньше вариант
             «Не указывать» стоял по умолчанию, и каждая пятая анкета уходила без
@@ -691,6 +741,26 @@ export function PodborForm({
           </div>
         </div>
 
+        {/* Гражданство спрашиваем отдельно от региона: человек без
+            гражданства РФ всё равно живёт в конкретной области, и часть мер
+            ему доступна. Раньше ответ «нет» стирал уже выбранный регион. */}
+        <Question label="Вы гражданин РФ?">
+          <YesNo value={isCitizen} onChange={setIsCitizen} />
+        </Question>
+
+        {isCitizen === false && (
+          <p className="rounded-xl border border-dashed bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
+            Большинство федеральных и региональных мер господдержки в РФ
+            предоставляются гражданам России. Подбор покажет только меры,
+            для которых гражданство РФ не требуется.
+          </p>
+        )}
+          </div>
+        )}
+
+        {/* Экран 2: Дети */}
+        {step === 1 && (
+          <div className="space-y-6">
         <Question label="Вы в ожидании ребёнка?">
           <YesNo
             value={pregnant}
@@ -825,69 +895,12 @@ export function PodborForm({
             </div>
           </div>
         )}
-
-        {/* Гражданство спрашиваем отдельно от региона: человек без
-            гражданства РФ всё равно живёт в конкретной области, и часть мер
-            ему доступна. Раньше ответ «нет» стирал уже выбранный регион. */}
-        <Question label="Вы гражданин РФ?">
-          <YesNo value={isCitizen} onChange={setIsCitizen} />
-        </Question>
-
-        {isCitizen === false && (
-          <p className="rounded-xl border border-dashed bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
-            Большинство федеральных и региональных мер господдержки в РФ
-            предоставляются гражданам России. Подбор покажет только меры,
-            для которых гражданство РФ не требуется.
-          </p>
+          </div>
         )}
 
-        {/* Доход — шкала, а не да/нет: меры задают потолок «до 1 / 1,5 / 2 ПМ»,
-            и мера с потолком 2 ПМ должна показываться и тем, у кого доход
-            ниже 1 ПМ. Выбранное значение — верхняя граница группы. */}
-        <div>
-          <p className="text-sm font-medium">
-            Доход на человека в семье (в прожиточных минимумах)
-          </p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            <Choice
-              active={incomeAnswered && incomePm === 1}
-              onClick={() => {
-                setIncomePm(1);
-                setIncomeAnswered(true);
-              }}
-            >
-              до 1 ПМ
-            </Choice>
-            <Choice
-              active={incomeAnswered && incomePm === 1.5}
-              onClick={() => {
-                setIncomePm(1.5);
-                setIncomeAnswered(true);
-              }}
-            >
-              от 1 до 1,5 ПМ
-            </Choice>
-            <Choice
-              active={incomeAnswered && incomePm === 2}
-              onClick={() => {
-                setIncomePm(2);
-                setIncomeAnswered(true);
-              }}
-            >
-              от 1,5 до 2 ПМ
-            </Choice>
-            <Choice
-              active={incomeAnswered && incomePm === null}
-              onClick={() => {
-                setIncomePm(null);
-                setIncomeAnswered(true);
-              }}
-            >
-              выше 2 ПМ
-            </Choice>
-          </div>
-        </div>
-
+        {/* Экран 3: Родители */}
+        {step === 2 && (
+          <div className="space-y-6">
         {/* Возраст спрашиваем у каждого супруга отдельно: программы для
             молодых семей требуют ценз от обоих, и на общий вопрос «до 35?»
             семья, где одному 33, а другому 37, отвечала «да». */}
@@ -929,100 +942,19 @@ export function PodborForm({
           </div>
         </div>
 
-        <Question label="Планируете покупку жилья или ипотеку?">
-          <YesNo value={mortgageIntent} onChange={setMortgageIntent} />
-        </Question>
-
         <Question label="Вы единственный родитель (неполная семья)?">
           <YesNo value={singleParent} onChange={setSingleParent} />
-        </Question>
-
-        {/* Отдельный вопрос: «единственный родитель» и «потеря кормильца» —
-            разные вещи. Из-за того, что мы не спрашивали про второе, пенсия по
-            случаю потери кормильца предлагалась полным семьям. */}
-        <Question label="Кто-то из детей потерял одного или обоих родителей?">
-          <YesNo value={lossOfBreadwinner} onChange={setLossOfBreadwinner} />
-        </Question>
-
-        <Question label="Кто-то из членов семьи является участником СВО?">
-          <YesNo value={svoFamily} onChange={setSvoFamily} />
         </Question>
 
         <Question label="Родители учатся очно (студенческая семья)?">
           <YesNo value={student} onChange={setStudent} />
         </Question>
-
-        {/* Вопросы о здоровье собраны в один блок и помечены как
-            необязательные.
-
-            Сведения об инвалидности — особая категория персональных данных,
-            к ней закон предъявляет повышенные требования, и мы обещаем в
-            политике конфиденциальности, что отвечать на эти вопросы не
-            обязательно. Обещание должно быть выполнимым: ответ снимается
-            повторным нажатием, а пропуск ничего не ломает — просто не покажем
-            меры, положенные по этому основанию. */}
-        <div className="rounded-2xl border border-[#D9D2C6] bg-[#F7F4EE] p-3.5">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-[#3A4D63]">Здоровье семьи</p>
-            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-              можно пропустить
-            </span>
           </div>
-          <p className="mt-1 text-xs leading-snug text-muted-foreground">
-            Спрашиваем только для подбора: по этим основаниям положены отдельные
-            меры. Если отвечать не хотите — пропустите, подбор всё равно
-            сработает. Нажмите на выбранный ответ ещё раз, чтобы снять его.
-          </p>
+        )}
 
-          <div className="mt-3 space-y-3">
-            <div>
-              <p className="text-sm font-medium">В семье есть ребёнок-инвалид?</p>
-              <div className="mt-2 flex gap-2">
-                <YesNo
-                  value={disabledChild}
-                  onChange={setDisabledChild}
-                  clearable
-                />
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium">
-                В семье есть ребёнок с ОВЗ (ограниченными возможностями
-                здоровья)?
-              </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Статус ОВЗ даёт психолого-медико-педагогическая комиссия.
-                Инвалидности при этом может не быть.
-              </p>
-              <div className="mt-2 flex gap-2">
-                <YesNo
-                  value={specialNeedsChild}
-                  onChange={setSpecialNeedsChild}
-                  clearable
-                />
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium">
-                Кто-то из родителей имеет инвалидность?
-              </p>
-              <div className="mt-2 flex gap-2">
-                <YesNo
-                  value={disabledParent}
-                  onChange={setDisabledParent}
-                  clearable
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Question label="Вы приёмный родитель, опекун или усыновитель?">
-          <YesNo value={fosterParent} onChange={setFosterParent} />
-        </Question>
-
+        {/* Экран 4: Работа и доход */}
+        {step === 3 && (
+          <div className="space-y-6">
         {/* Занятость. От неё зависят налоговые вычеты: вернуть можно только
             уже уплаченный НДФЛ. Спрашиваем «кто-то из родителей», потому что
             вычет за лечение или обучение ребёнка вправе получить любой из
@@ -1090,28 +1022,222 @@ export function PodborForm({
         <Question label="Вы работаете учителем?">
           <YesNo value={teacher} onChange={setTeacher} />
         </Question>
+
+        {/* Доход — шкала, а не да/нет: меры задают потолок «до 1 / 1,5 / 2 ПМ»,
+            и мера с потолком 2 ПМ должна показываться и тем, у кого доход
+            ниже 1 ПМ. Выбранное значение — верхняя граница группы. */}
+        <div>
+          <p className="text-sm font-medium">
+            Доход на человека в семье (в прожиточных минимумах)
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Choice
+              active={incomeAnswered && incomePm === 1}
+              onClick={() => {
+                setIncomePm(1);
+                setIncomeAnswered(true);
+              }}
+            >
+              до 1 ПМ
+            </Choice>
+            <Choice
+              active={incomeAnswered && incomePm === 1.5}
+              onClick={() => {
+                setIncomePm(1.5);
+                setIncomeAnswered(true);
+              }}
+            >
+              от 1 до 1,5 ПМ
+            </Choice>
+            <Choice
+              active={incomeAnswered && incomePm === 2}
+              onClick={() => {
+                setIncomePm(2);
+                setIncomeAnswered(true);
+              }}
+            >
+              от 1,5 до 2 ПМ
+            </Choice>
+            <Choice
+              active={incomeAnswered && incomePm === null}
+              onClick={() => {
+                setIncomePm(null);
+                setIncomeAnswered(true);
+              }}
+            >
+              выше 2 ПМ
+            </Choice>
+          </div>
+        </div>
+          </div>
+        )}
+
+        {/* Экран 5: Жильё */}
+        {step === 4 && (
+          <div className="space-y-6">
+        <Question label="Планируете покупку жилья или ипотеку?">
+          <YesNo value={mortgageIntent} onChange={setMortgageIntent} />
+        </Question>
+          </div>
+        )}
+
+        {/* Экран 6: Особые статусы */}
+        {step === 5 && (
+          <div className="space-y-6">
+        <Question label="Кто-то из членов семьи является участником СВО?">
+          <YesNo value={svoFamily} onChange={setSvoFamily} />
+        </Question>
+
+        {/* Отдельный вопрос: «единственный родитель» и «потеря кормильца» —
+            разные вещи. Из-за того, что мы не спрашивали про второе, пенсия по
+            случаю потери кормильца предлагалась полным семьям. */}
+        <Question label="Кто-то из детей потерял одного или обоих родителей?">
+          <YesNo value={lossOfBreadwinner} onChange={setLossOfBreadwinner} />
+        </Question>
+
+        <Question label="Вы приёмный родитель, опекун или усыновитель?">
+          <YesNo value={fosterParent} onChange={setFosterParent} />
+        </Question>
+          </div>
+        )}
+
+        {/* Экран 7: Здоровье */}
+        {step === 6 && (
+          <div className="space-y-6">
+        {/* Вопросы о здоровье собраны в один блок и помечены как
+            необязательные.
+
+            Сведения об инвалидности — особая категория персональных данных,
+            к ней закон предъявляет повышенные требования, и мы обещаем в
+            политике конфиденциальности, что отвечать на эти вопросы не
+            обязательно. Обещание должно быть выполнимым: ответ снимается
+            повторным нажатием, а пропуск ничего не ломает — просто не покажем
+            меры, положенные по этому основанию. */}
+        <div className="rounded-2xl border border-[#D9D2C6] bg-[#F7F4EE] p-3.5">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-[#3A4D63]">Здоровье семьи</p>
+            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+              можно пропустить
+            </span>
+          </div>
+          <p className="mt-1 text-xs leading-snug text-muted-foreground">
+            Спрашиваем только для подбора: по этим основаниям положены отдельные
+            меры. Если отвечать не хотите — пропустите, подбор всё равно
+            сработает. Нажмите на выбранный ответ ещё раз, чтобы снять его.
+          </p>
+
+          <div className="mt-3 space-y-3">
+            <div>
+              <p className="text-sm font-medium">В семье есть ребёнок-инвалид?</p>
+              <div className="mt-2 flex gap-2">
+                <YesNo
+                  value={disabledChild}
+                  onChange={setDisabledChild}
+                  clearable
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">
+                В семье есть ребёнок с ОВЗ (ограниченными возможностями
+                здоровья)?
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Статус ОВЗ даёт психолого-медико-педагогическая комиссия.
+                Инвалидности при этом может не быть.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <YesNo
+                  value={specialNeedsChild}
+                  onChange={setSpecialNeedsChild}
+                  clearable
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">
+                Кто-то из родителей имеет инвалидность?
+              </p>
+              <div className="mt-2 flex gap-2">
+                <YesNo
+                  value={disabledParent}
+                  onChange={setDisabledParent}
+                  clearable
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        )}
       </div>
 
-      {/* Кнопка заблокирована в двух случаях: в «точном числе детей» стоит
-          больше 20 (окошки возраста тогда не показываются, отправлять нечего)
-          и не выбран регион. */}
-      {!region && (
+      {/* Регион — единственный обязательный ответ: без него дальше идти
+          некуда, три четверти базы просто не покажутся. */}
+      {step === 0 && !region && (
         <p className="mt-6 rounded-xl border border-dashed border-[#8E1D2C]/30 bg-[#8E1D2C]/[0.04] px-4 py-3 text-xs leading-relaxed text-[#8E1D2C]">
-          Чтобы показать подходящие меры, выберите регион в начале анкеты.
+          Выберите регион, чтобы продолжить.
         </p>
       )}
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={tooManyChildren || !region}
-        className={cn(
-          buttonVariants(),
-          "mt-4 h-12 w-full text-base",
-          (tooManyChildren || !region) && "pointer-events-none opacity-50",
+      {/* «Точное число детей» больше 20 — окошки возраста не показываются,
+          отправлять такую анкету нечему. */}
+      {tooManyChildren && step === 1 && (
+        <p className="mt-6 rounded-xl border border-dashed border-red-500/40 bg-red-50 px-4 py-3 text-xs leading-relaxed text-red-700">
+          Впишите не больше 20 детей — подбор мер от этого не изменится.
+        </p>
+      )}
+
+      <div className="mt-6 flex items-center gap-3">
+        {step > 0 && (
+          <button
+            type="button"
+            onClick={() => goToStep(step - 1)}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "h-12 flex-1 border-[#1B3A6B]/25 text-base text-[#1B3A6B]",
+            )}
+          >
+            Назад
+          </button>
         )}
-      >
-        Показать подходящие меры
-      </button>
+        {step < STEPS.length - 1 ? (
+          <button
+            type="button"
+            onClick={() => goToStep(step + 1)}
+            disabled={(step === 0 && !region) || (step === 1 && tooManyChildren)}
+            className={cn(
+              buttonVariants(),
+              "h-12 flex-[2] text-base",
+              ((step === 0 && !region) || (step === 1 && tooManyChildren)) &&
+                "pointer-events-none opacity-50",
+            )}
+          >
+            Далее
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={tooManyChildren || !region}
+            className={cn(
+              buttonVariants(),
+              "h-12 flex-[2] text-base",
+              (tooManyChildren || !region) && "pointer-events-none opacity-50",
+            )}
+          >
+            Показать меры
+          </button>
+        )}
+      </div>
+
+      {/* Последний экран необязательный — даём пропустить его целиком. */}
+      {step === STEPS.length - 1 && (
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          Вопросы о здоровье можно не заполнять — подбор всё равно сработает.
+        </p>
+      )}
     </div>
   );
 }
