@@ -1,0 +1,106 @@
+[
+ {
+  "slug": "kostroma-035",
+  "title": "Льготный проезд школьников и студентов по банковской карте в Костроме (Костромская область)",
+  "criteria": {
+   "regions": [
+    "Костромская область"
+   ],
+   "requiresChildren": true,
+   "minSchoolChildren": 1
+  }
+ },
+ {
+  "slug": "chao-031",
+  "title": "Выплаты детям участников СВО во время учёбы (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 15,
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "krg-015",
+  "title": "Кратковременный присмотр за детьми (Курганская область)",
+  "criteria": {
+   "regions": [
+    "Курганская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mari-001",
+  "title": "Прокат вещей для детей до 2 лет (Республика Марий Эл)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Республика Марий Эл"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 2
+  }
+ },
+ {
+  "slug": "rtadd-016",
+  "title": "Бесплатное горячее питание детям участников СВО в школах (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "yarosl-006",
+  "title": "Пункты проката детских вещей до 2 лет (Ярославская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Ярославская область"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 2
+  }
+ },
+ {
+  "slug": "ryaz-049",
+  "title": "Скидка 50 % на пригородные электрички школьникам и студентам (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "requiresChildren": true,
+   "minSchoolChildren": 1
+  }
+ },
+ {
+  "slug": "rst-016",
+  "title": "Прокат предметов для ухода за детьми до двух лет (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresFamily": true
+  }
+ }
+]
