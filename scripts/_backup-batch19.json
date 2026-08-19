@@ -1,0 +1,35 @@
+[
+ {
+  "slug": "krg-009",
+  "title": "Выплата пострадавшим от пожара (Курганская область)",
+  "criteria": {
+   "regions": [
+    "Курганская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "prim-022",
+  "title": "Выплата на жильё приёмным семьям после пожара (Приморский край)",
+  "criteria": {
+   "regions": [
+    "Приморский край"
+   ],
+   "requiresChildren": true,
+   "requiresFosterParent": true
+  }
+ },
+ {
+  "slug": "kostroma-008",
+  "title": "Выплата многодетной семье при пожаре (Костромская область)",
+  "criteria": {
+   "regions": [
+    "Костромская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]

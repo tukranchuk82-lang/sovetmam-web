@@ -1,0 +1,100 @@
+[
+ {
+  "slug": "posobie-po-uhodu-do-1-5-let",
+  "title": "Ежемесячное пособие по уходу за ребёнком до 1,5 лет",
+  "criteria": {
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 1
+  }
+ },
+ {
+  "slug": "besplatnoe-obuchenie-mam",
+  "title": "Бесплатное профобучение для мам в декрете и женщин с детьми",
+  "criteria": {
+   "hasChildAgedTo": 7,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "ivn-021",
+  "title": "Помощь на открытие своего дела многодетным родителям (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "smol-022",
+  "title": "Временное трудоустройство подростков 14–18 лет (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "amur-022",
+  "title": "Бесплатное профобучение женщин в отпуске по уходу за ребёнком (Амурская область)",
+  "criteria": {
+   "regions": [
+    "Амурская область"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "posobie-po-bezrabotice",
+  "title": "Пособие по безработице",
+  "criteria": {
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "brn-001",
+  "title": "Временное трудоустройство подростков 14–18 лет (Брянская область)",
+  "criteria": {
+   "regions": [
+    "Брянская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ivn-023",
+  "title": "Временное трудоустройство подростков 14–18 лет (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chao-032",
+  "title": "Оплачиваемая работа для подростков 14–18 лет (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 14,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "psk-008",
+  "title": "Профобучение родителей в декрете и ищущих работу (Псковская область)",
+  "criteria": {
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ }
+]

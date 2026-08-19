@@ -1,0 +1,114 @@
+[
+ {
+  "slug": "msk-uhod-rebenok-invalid",
+  "title": "Ежемесячная выплата по уходу за ребёнком-инвалидом (Москва)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresDisabledChild": true
+    },
+    {
+     "requiresFosterParent": true
+    }
+   ],
+   "regions": [
+    "Москва"
+   ]
+  }
+ },
+ {
+  "slug": "komi-013",
+  "title": "Компенсация обучения студентов из многодетных семей (Республика Коми)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Республика Коми"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krasn-001",
+  "title": "Краевой материнский (семейный) капитал (Красноярский край)",
+  "criteria": {
+   "regions": [
+    "Красноярский край"
+   ],
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "perm-003",
+  "title": "Единовременная материальная помощь детям участников СВО (Пермский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresSvoFamily": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Пермский край"
+   ]
+  }
+ },
+ {
+  "slug": "kbr-005",
+  "title": "Компенсация части платы за детский сад (Кабардино-Балкарская Республика)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Кабардино-Балкарская Республика"
+   ],
+   "hasChildAgedTo": 7,
+   "hasChildAgedFrom": 1,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "kostroma-022",
+  "title": "Компенсация на питание студенткам с детьми до 3 лет (Костромская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 3,
+     "hasChildAgedFrom": 0
+    }
+   ],
+   "regions": [
+    "Костромская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "tyumen-004",
+  "title": "Адресное социальное пособие семьям с детьми (Тюменская область)",
+  "criteria": {
+   "regions": [
+    "Тюменская область"
+   ],
+   "requiresLowIncome": true
+  }
+ }
+]

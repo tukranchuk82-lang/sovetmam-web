@@ -1,0 +1,73 @@
+[
+ {
+  "slug": "posobie-beremennoy-zhene-prizyvnika",
+  "title": "Единовременное пособие беременной жене военнослужащего по призыву",
+  "criteria": {
+   "requiresPregnancy": true
+  }
+ },
+ {
+  "slug": "posobie-na-rebenka-voennosluzhashego-po-prizyvu",
+  "title": "Ежемесячное пособие на ребёнка военнослужащего по призыву",
+  "criteria": {
+   "requiresChildren": true,
+   "requiresSvoFamily": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "tat-005",
+  "title": "Выплата сельским женщинам при рождении ребёнка (Республика Татарстан)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 0
+    }
+   ],
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "excludeFromMatching": true
+  }
+ },
+ {
+  "slug": "pnz-004",
+  "title": "Профобучение родителей в декрете и ищущих работу (Пензенская область)",
+  "criteria": {
+   "regions": [
+    "Пензенская область"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "lenobl-002",
+  "title": "Единовременное пособие беременной жене участника СВО (Ленинградская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "requiresSvoFamily": true
+    }
+   ],
+   "regions": [
+    "Ленинградская область"
+   ]
+  }
+ },
+ {
+  "slug": "dekretnye-dlya-ip-samozanyatyh",
+  "title": "Декретные выплаты для ИП и самозанятых",
+  "criteria": {
+   "requiresFamily": true,
+   "requiresPregnancy": true
+  }
+ }
+]
