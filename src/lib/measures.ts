@@ -230,6 +230,59 @@ export const TAX_SYSTEM_LABEL: Record<TaxSystem, string> = {
   unknown: "Не знаю",
 };
 
+/** Тип населённого пункта — от него зависят сельские и малогородские программы. */
+export type SettlementType = "city" | "small-town" | "village";
+
+/** Чем человек занят сейчас. Декрет — отдельное состояние, а не «не работаю». */
+export type EmploymentStatus = "working" | "not-working" | "parental-leave";
+
+/** Как оформлена занятость. Можно совмещать: наём + самозанятость. */
+export type EmploymentKind = "hired" | "self-employed" | "entrepreneur";
+
+/** Кем человек был до декрета — от этого зависят и выплаты, и меры вуза. */
+export type PreviousEmployment = EmploymentKind | "student" | "none";
+
+/** Сфера работы: под земские программы, IT-ипотеку, ЖСК. */
+export type WorkField =
+  | "education"
+  | "medicine"
+  | "sport"
+  | "culture"
+  | "it"
+  | "public"
+  | "defense"
+  | "military";
+
+/** Кто именно в семье связан с СВО: круг получателей у мер разный. */
+export type SvoRole = "active" | "veteran" | "lost" | "disabled";
+
+/** Уровень и форма обучения родителей-студентов. */
+export type StudyLevel = "vuz" | "college";
+export type StudyFunding = "budget" | "paid";
+
+/** Срок беременности — влияет на единое пособие и выплаты жене призывника. */
+export type PregnancyStage = "under12" | "12-27" | "28-35" | "36plus";
+
+/**
+ * Ребёнок: месяц и год рождения вместо возраста.
+ *
+ * Возраст в анкете устаревает — заполненная год назад анкета считает семилетку
+ * шестилеткой, и школьные меры человеку не показываются. Дата рождения не
+ * устаревает никогда, даёт точность в месяцах (нужна для мер «до 1,5 лет») и
+ * позволяет считать сроки подачи: например, шесть месяцев на единовременное
+ * пособие отсчитываются именно от неё.
+ */
+export interface ChildInfo {
+  /** 1–12. */
+  birthMonth: number;
+  birthYear: number;
+  /**
+   * Для детей 18 лет и старше: учится ли очно. От этого зависит статус
+   * многодетной семьи (он держится до 23 лет) и меры для студентов.
+   */
+  studiesFullTime?: boolean;
+}
+
 /**
  * Условия, при которых мера подходит пользователю (движок правил).
  *
@@ -357,6 +410,78 @@ export interface EligibilityCriteria {
   requiresDisabledParent?: boolean;
   /** Приёмные родители, опекуны, попечители, усыновители. */
   requiresFosterParent?: boolean;
+  /**
+   * Возрастное окно ребёнка В МЕСЯЦАХ: мера подходит, если ХОТЯ БЫ ОДИН ребёнок
+   * попадает в диапазон. Заменяет hasChildAgedFrom/hasChildAgedTo — те считали
+   * в целых годах, и рубеж «до полутора лет» выразить было нельзя.
+   *
+   * Возраст считается на сегодня из даты рождения, поэтому подбор не устаревает.
+   */
+  childAgeFromMonths?: number;
+  childAgeToMonths?: number;
+  /**
+   * Мера касается и тех, кто ребёнка только ждёт.
+   *
+   * Нужна вместе с возрастным окном: маткапитал и единовременное пособие при
+   * рождении привязаны к возрасту 0, но знать о них нужно заранее. Без этого
+   * флага беременная без детей их не увидит — в окно никто не попадает.
+   */
+  appliesToExpecting?: boolean;
+  /** Есть ребёнок 18–23 лет на очном обучении. */
+  requiresChildStudying?: boolean;
+  /** У ребёнка редкое (орфанное) заболевание — «Круг добра», лечебное питание. */
+  requiresRareDisease?: boolean;
+  /** Встала на учёт по беременности до 12 недель — условие единого пособия. */
+  requiresEarlyRegistration?: boolean;
+  /** Срок беременности не меньше указанного: жене призывника — от 180 дней. */
+  minPregnancyWeeks?: number;
+  /** Село или город до 50 тысяч: сельская ипотека, земские программы. */
+  requiresSettlement?: SettlementType[];
+  /** Нужно гражданство РФ у всей семьи. */
+  requiresCitizenship?: boolean;
+  /** Человек сейчас в отпуске по беременности и родам или по уходу за ребёнком. */
+  requiresParentalLeave?: boolean;
+  /** Откуда человек ушёл в декрет: меры вуза — только вчерашним студентам. */
+  requiresPreviousEmployment?: PreviousEmployment[];
+  /**
+   * Уплачены добровольные взносы на социальное страхование.
+   *
+   * Оформляемая метка: у ИП право на декретные есть только при взносе до
+   * 31 декабря прошлого года, задним числом не купишь — но на следующий год
+   * успеть можно, поэтому меру показываем с плашкой, а не прячем.
+   */
+  requiresVoluntaryInsurance?: boolean;
+  /** Официальный статус безработного. Оформляемая метка — см. PendingReason. */
+  requiresUnemployedStatus?: boolean;
+  /** Сфера работы родителя. Обобщает частный случай requiresTeacher. */
+  requiresWorkField?: WorkField[];
+  requiresStudyLevel?: StudyLevel[];
+  /** Мера для платного обучения: перевод на бюджет, отсрочка оплаты. */
+  requiresPaidStudy?: boolean;
+  requiresTargetedContract?: boolean;
+  /**
+   * Статус нуждающихся в улучшении жилищных условий.
+   *
+   * Оформляемая метка: статус присваивает администрация, и если у семьи есть
+   * основание (своего жилья нет, метраж меньше нормы, жильё аварийное), меру
+   * показываем с плашкой, а не прячем.
+   */
+  requiresHousingNeed?: boolean;
+  /** Нет своего жилья ни в собственности, ни по соцнайму. */
+  requiresNoHome?: boolean;
+  /** Жильё аварийное или непригодное для проживания. */
+  requiresUnfitHousing?: boolean;
+  /** Есть действующая ипотека: 450 000 ₽ на погашение, каникулы, вычет. */
+  requiresMortgage?: boolean;
+  /** Уточнение внутри СВО: круг получателей у каждой меры свой. */
+  requiresSvoRole?: SvoRole[];
+  /** Муж проходит срочную службу по призыву — это не СВО, меры другие. */
+  requiresConscriptSpouse?: boolean;
+  requiresVeteranCombat?: boolean;
+  /** Пострадавшие от радиационных аварий (ЧАЭС, «Маяк»). */
+  requiresRadiation?: boolean;
+  /** Трудная жизненная ситуация: пожар, ЧС, потеря жилья. */
+  requiresHardship?: boolean;
   /** Только для региональных мер: список регионов, где мера действует. */
   regions?: string[];
 }
@@ -474,6 +599,66 @@ export interface UserProfile {
   fosterParent: boolean;
   /** Работает учителем — см. criteria.requiresTeacher. */
   teacher: boolean;
+
+  // ── Анкета версии 2 ───────────────────────────────────────────────────
+  // Все поля необязательные: 40+ анкет заполнены по старой форме, и они
+  // должны продолжать работать. Где нового ответа нет, движок берёт старое
+  // поле или пропускает условие — молча пропавшая мера хуже лишней.
+
+  /** Город, малый город или село — сельские и малогородские программы. */
+  settlementType?: SettlementType | null;
+  /** Гражданство РФ у всей семьи. false — у кого-то из семьи его нет. */
+  citizenshipAll?: boolean | null;
+  /** Срок беременности. */
+  pregnancyStage?: PregnancyStage | null;
+  /** Встала на учёт по беременности до 12 недель. */
+  registeredEarly?: boolean | null;
+  /**
+   * Дети с датами рождения. Заменяет childrenAges: возраст в анкете
+   * устаревает, дата рождения — нет. Старое поле остаётся для анкет,
+   * заполненных раньше.
+   */
+  children?: ChildInfo[];
+  /** У ребёнка редкое (орфанное) заболевание. */
+  rareDisease?: boolean;
+  /** Работает, не работает или в декрете. */
+  employmentStatus?: EmploymentStatus | null;
+  /** Как оформлена занятость: можно совмещать наём с самозанятостью. */
+  employmentKinds?: EmploymentKind[];
+  /** Кем человек был до декрета — от этого зависят меры вуза и работодателя. */
+  previousEmployment?: PreviousEmployment | null;
+  /** Уплачены добровольные взносы на социальное страхование (ИП, самозанятые). */
+  voluntaryInsurance?: boolean | null;
+  /** Официальный статус безработного. */
+  unemployedStatus?: boolean | null;
+  /**
+   * Сферы работы родителей. Пустой массив — осознанный ответ «не работаем
+   * в указанных сферах», null — вопрос пропущен. Разница важна: пропуск меру
+   * не скрывает, явное «нет» — скрывает.
+   */
+  workFields?: WorkField[] | null;
+  studyLevel?: StudyLevel | null;
+  studyFunding?: StudyFunding | null;
+  targetedContract?: boolean | null;
+  /** Есть своё жильё — в собственности или по социальному найму. */
+  ownsHome?: boolean | null;
+  /** Общая площадь жилья и число зарегистрированных — для расчёта нормы. */
+  homeArea?: number | null;
+  residentsCount?: number | null;
+  /** Жильё аварийное или непригодное. */
+  homeUnfit?: boolean | null;
+  /** Состоит на учёте как нуждающийся в улучшении жилищных условий. */
+  housingNeedStatus?: "registered" | "no" | "unknown" | null;
+  /** Есть действующая ипотека. */
+  hasMortgage?: boolean | null;
+  /** Кто в семье связан с СВО: у каждой меры свой круг получателей. */
+  svoRoles?: SvoRole[];
+  /** Муж проходит срочную службу по призыву — это не СВО. */
+  conscriptSpouse?: boolean;
+  veteranCombat?: boolean;
+  radiationAffected?: boolean;
+  /** Трудная жизненная ситуация: пожар, ЧС, потеря жилья. */
+  hardship?: boolean;
 }
 
 /** Правильное склонение: «1 мера», «2 меры», «5 мер». */
@@ -496,36 +681,66 @@ export function getSegment(id: string): Segment | undefined {
  * можно указать, если в анкете не указывали), поэтому фильтрацию по региону
  * берёт на себя список мер, а не движок.
  */
-export function isEligible(
+/**
+ * Подходит ли мера — с тремя исходами вместо двух.
+ *
+ * fits: false — не подходит, показывать нельзя.
+ * fits: true, pending пуст — подходит полностью.
+ * fits: true, pending не пуст — подойдёт, когда человек оформит статус;
+ * такую меру показываем с плашкой из PENDING_TEXT, а не прячем.
+ *
+ * Плашка появляется, только если ВСЕ остальные условия совпали: провалено
+ * хотя бы одно жёсткое — меры нет вовсе, чтобы не обнадёживать зря.
+ */
+export function evaluateEligibility(
   profile: UserProfile,
   m: SupportMeasure,
-  { ignoreRegion = false }: { ignoreRegion?: boolean } = {},
-): boolean {
+  {
+    ignoreRegion = false,
+    strict = false,
+  }: { ignoreRegion?: boolean; strict?: boolean } = {},
+): { fits: boolean; pending: PendingReason[] } {
   const c = m.criteria;
 
   // Региональные меры показываем ТОЛЬКО при совпадении региона. Источник региона —
   // criteria.regions (если задан) или колонка region. Без выбранного региона
   // региональные меры не показываем вовсе — иначе в выдачу попадают чужие регионы.
   if (m.level === "regional" && !ignoreRegion) {
-    if (!profile.region) return false;
+    if (!profile.region) return { fits: false, pending: [] };
     const allowed =
       c.regions && c.regions.length > 0
         ? c.regions
         : m.region
           ? [m.region]
           : [];
-    if (allowed.length > 0 && !allowed.includes(profile.region)) return false;
+    if (allowed.length > 0 && !allowed.includes(profile.region)) {
+      return { fits: false, pending: [] };
+    }
   }
 
-  if (!matchesCriteria(profile, c)) return false;
+  const pending = new Set<PendingReason>();
+  if (!matchesCriteria(profile, c, strict ? undefined : pending)) {
+    return { fits: false, pending: [] };
+  }
 
   // Вторая (страховочная) проверка региона: мера могла указать regions, будучи
   // помечена федеральной. Тоже уважает ignoreRegion — иначе региональные меры
   // отсеиваются здесь, даже если выше их пропустили.
   if (!ignoreRegion && c.regions && c.regions.length > 0) {
-    if (!profile.region || !c.regions.includes(profile.region)) return false;
+    if (!profile.region || !c.regions.includes(profile.region)) {
+      return { fits: false, pending: [] };
+    }
   }
-  return true;
+  return { fits: true, pending: [...pending] };
+}
+
+/** Подходит ли мера. Меры «подойдёт, если оформить статус» тоже считаются. */
+export function isEligible(
+  profile: UserProfile,
+  m: SupportMeasure,
+  opts: { ignoreRegion?: boolean; strict?: boolean } = {},
+): boolean {
+  return evaluateEligibility(profile, m, opts).fits;
 }
 
 /** Предельный возраст супругов в программах для молодых семей. */
@@ -590,7 +805,139 @@ export function paysNdfl(profile: UserProfile): boolean | null {
  * Все поля — через И; `anyOf` — «хотя бы один из вложенных наборов».
  * Вынесено отдельной функцией, чтобы anyOf проверялся теми же правилами.
  */
-function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean {
+/**
+ * Чего человеку не хватает, чтобы мера стала доступной.
+ *
+ * Это третий исход помимо «подходит» и «не подходит»: статус, который человек
+ * может оформить. Такие меры не прячем — показываем с плашкой, где назван и
+ * сам статус, и ведомство, которое его присваивает.
+ */
+export type PendingReason = "unemployed" | "housing" | "insurance";
+
+export const PENDING_TEXT: Record<PendingReason, string> = {
+  unemployed:
+    "Положено при официальном статусе безработного, полученном в Службе занятости",
+  housing:
+    "Положено при статусе нуждающихся в улучшении жилищных условий — оформляется в администрации по месту жительства",
+  insurance:
+    "Положено, если добровольные взносы на социальное страхование уплачены до 31 декабря предыдущего года — на следующий год ещё можно успеть",
+};
+
+/**
+ * Ориентир учётной нормы площади, кв. м на человека.
+ *
+ * Точную норму устанавливает каждый муниципалитет отдельно, единого
+ * справочника не существует. Берём типовое значение: оно нужно не для
+ * решения, а для подсказки «похоже, у вас есть основание встать на учёт».
+ */
+const HOUSING_NORM_M2 = 12;
+
+/** Возраст ребёнка в месяцах на сегодня. */
+function childAgeMonths(child: ChildInfo, now = new Date()): number {
+  return (
+    (now.getFullYear() - child.birthYear) * 12 +
+    (now.getMonth() + 1 - child.birthMonth)
+  );
+}
+
+/**
+ * Возрасты детей в месяцах — диапазоном, а не точкой.
+ *
+ * У анкет версии 2 дата рождения известна, и диапазон вырождается в точку.
+ * У старых анкет есть только возраст в целых годах: ребёнку «5 лет» может
+ * быть от 60 до 71 месяца, поэтому проверяем пересечение с окном меры, а не
+ * попадание точки — иначе меры «до 1,5 лет» потерялись бы у всех, кто
+ * заполнял анкету раньше.
+ */
+function childrenAgeRangesMonths(
+  profile: UserProfile,
+): { from: number; to: number }[] {
+  if (profile.children && profile.children.length > 0) {
+    return profile.children.map((ch) => {
+      const m = childAgeMonths(ch);
+      return { from: m, to: m };
+    });
+  }
+  const ages = profile.childrenAges ?? [];
+  return ages.map((a) =>
+    // 18 в старой анкете значило «18 и старше» — верхнюю границу берём 24 года.
+    a >= 18 ? { from: 18 * 12, to: 24 * 12 } : { from: a * 12, to: a * 12 + 11 },
+  );
+}
+
+/**
+ * Сколько детей считается по правилу Указа Президента от 23.01.2024 № 63:
+ * дети младше 18 лет плюс дети до 23 лет, которые учатся очно.
+ *
+ * Раньше движок брал число, которое человек вписал сам, и возраст не смотрел
+ * вовсе. Из-за этого семья теряла статус многодетной, когда старший поступал
+ * в вуз, — на что и жаловался заказчик.
+ */
+export function countChildrenForStatus(profile: UserProfile): number {
+  const kids = profile.children;
+  if (!kids || kids.length === 0) return profile.childrenCount;
+  return kids.filter((ch) => {
+    const years = Math.floor(childAgeMonths(ch) / 12);
+    if (years < 18) return true;
+    return years <= 23 && ch.studiesFullTime === true;
+  }).length;
+}
+
+/** Есть ли ребёнок 18–23 лет на очном обучении. */
+function hasStudyingAdultChild(profile: UserProfile): boolean {
+  return (profile.children ?? []).some((ch) => {
+    const years = Math.floor(childAgeMonths(ch) / 12);
+    return years >= 18 && years <= 23 && ch.studiesFullTime === true;
+  });
+}
+
+/** Нижняя граница срока беременности в неделях — по выбранной группе. */
+function pregnancyWeeksFrom(profile: UserProfile): number | null {
+  switch (profile.pregnancyStage) {
+    case "under12":
+      return 0;
+    case "12-27":
+      return 12;
+    case "28-35":
+      return 28;
+    case "36plus":
+      return 36;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Положение семьи с жильём: статус есть, статуса нет но основание есть, либо
+ * оснований не видно.
+ *
+ * Основания — по статье 51 Жилищного кодекса: своего жилья нет, площадь на
+ * человека меньше учётной нормы, жильё аварийное. Когда данных нет вовсе,
+ * возвращаем «основание есть»: лучше показать меру с плашкой, чем спрятать
+ * положенное.
+ */
+export function housingNeedState(
+  profile: UserProfile,
+): "registered" | "eligible" | "no" {
+  if (profile.housingNeedStatus === "registered") return "registered";
+  if (profile.ownsHome === false) return "eligible";
+  if (profile.homeUnfit === true) return "eligible";
+  const { homeArea: area, residentsCount: people } = profile;
+  if (area != null && people != null && people > 0) {
+    return area / people < HOUSING_NORM_M2 ? "eligible" : "no";
+  }
+  // Про жильё ничего не спрашивали (старая анкета) — меру не прячем.
+  if (profile.ownsHome == null && profile.housingNeedStatus == null) {
+    return "eligible";
+  }
+  return "no";
+}
+
+function matchesCriteria(
+  profile: UserProfile,
+  c: EligibilityCriteria,
+  pending?: Set<PendingReason>,
+): boolean {
   // Мера показывается только в каталоге — в подборе её быть не должно.
   if (c.excludeFromMatching) return false;
 
@@ -601,9 +948,10 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   // ожидающая третьего, должна видеть меры «на третьего ребёнка» — оформлять их
   // всё равно после родов, но знать о них нужно заранее. Отсюда и вопрос анкеты
   // «какого по счёту ребёнка ожидаете».
+  const countedChildren = countChildrenForStatus(profile);
   const effectiveChildren = profile.pregnant
-    ? Math.max(profile.childrenCount + 1, profile.expectingChildNumber ?? 0)
-    : profile.childrenCount;
+    ? Math.max(countedChildren + 1, profile.expectingChildNumber ?? 0)
+    : countedChildren;
   if (c.minChildren && effectiveChildren < c.minChildren) return false;
   // Многоплодные роды: нужно, чтобы за одни роды родилось не меньше N детей.
   // Незаполненный ответ считаем обычными родами (1) — мера про двойню/тройню не
@@ -689,12 +1037,130 @@ function matchesCriteria(profile: UserProfile, c: EligibilityCriteria): boolean 
   if (c.requiresFosterParent && !profile.fosterParent) return false;
   if (c.requiresTeacher && !profile.teacher) return false;
 
+  // ── Анкета версии 2 ───────────────────────────────────────────────────
+
+  // Возрастное окно в месяцах: достаточно, чтобы подошёл ХОТЯ БЫ ОДИН ребёнок.
+  // Семья с детьми 2 и 9 лет видит и малышовые меры, и школьные.
+  if (c.childAgeFromMonths != null || c.childAgeToMonths != null) {
+    const from = c.childAgeFromMonths ?? 0;
+    const to = c.childAgeToMonths ?? 24 * 12;
+    const ranges = childrenAgeRangesMonths(profile);
+    if (ranges.length === 0) {
+      // Детей ещё нет. Меры про рождение (маткапитал, пособие при рождении)
+      // помечены appliesToExpecting — их показываем и тем, кто ждёт ребёнка.
+      if (!(c.appliesToExpecting && profile.pregnant)) return false;
+    } else if (!ranges.some((r) => r.to >= from && r.from <= to)) {
+      return false;
+    }
+  }
+  if (c.requiresChildStudying && !hasStudyingAdultChild(profile)) return false;
+  if (c.requiresRareDisease && !profile.rareDisease) return false;
+  if (c.requiresEarlyRegistration && profile.registeredEarly !== true) {
+    return false;
+  }
+  if (c.minPregnancyWeeks != null) {
+    const weeks = pregnancyWeeksFrom(profile);
+    // Срок не указан — условие пропускаем, чтобы не терять меру у тех, кто
+    // заполнял анкету до появления вопроса.
+    if (weeks != null && weeks < c.minPregnancyWeeks) return false;
+  }
+  if (c.requiresSettlement && c.requiresSettlement.length > 0) {
+    const kind = profile.settlementType;
+    if (kind && !c.requiresSettlement.includes(kind)) return false;
+  }
+  if (c.requiresCitizenship && profile.citizenshipAll === false) return false;
+  if (c.requiresParentalLeave && profile.employmentStatus !== "parental-leave") {
+    return false;
+  }
+  if (c.requiresPreviousEmployment && c.requiresPreviousEmployment.length > 0) {
+    const prev = profile.previousEmployment;
+    if (prev && !c.requiresPreviousEmployment.includes(prev)) return false;
+  }
+  if (c.requiresWorkField && c.requiresWorkField.length > 0) {
+    const wanted = c.requiresWorkField;
+    const fields = profile.workFields;
+    // null — вопрос пропущен, меру не скрываем. Пустой массив — осознанный
+    // ответ «не работаем в указанных сферах», меру убираем.
+    if (fields && !fields.some((f) => wanted.includes(f))) return false;
+  }
+  if (c.requiresStudyLevel && c.requiresStudyLevel.length > 0) {
+    const level = profile.studyLevel;
+    if (level && !c.requiresStudyLevel.includes(level)) return false;
+  }
+  if (c.requiresPaidStudy && profile.studyFunding === "budget") return false;
+  if (c.requiresTargetedContract && profile.targetedContract === false) {
+    return false;
+  }
+  if (c.requiresNoHome && profile.ownsHome === true) return false;
+  if (c.requiresUnfitHousing && profile.homeUnfit === false) return false;
+  if (c.requiresMortgage && profile.hasMortgage === false) return false;
+  if (c.requiresSvoRole && c.requiresSvoRole.length > 0) {
+    const wantedRoles = c.requiresSvoRole;
+    const roles = profile.svoRoles ?? [];
+    if (roles.length > 0 && !roles.some((r) => wantedRoles.includes(r))) {
+      return false;
+    }
+  }
+  if (c.requiresConscriptSpouse && !profile.conscriptSpouse) return false;
+  if (c.requiresVeteranCombat && !profile.veteranCombat) return false;
+  if (c.requiresRadiation && !profile.radiationAffected) return false;
+  if (c.requiresHardship && !profile.hardship) return false;
+
+  // ── Оформляемые условия ───────────────────────────────────────────────
+  // Статус, которого пока нет, но который человек может получить. В обычном
+  // режиме такие меры показываем с плашкой (см. PENDING_TEXT), в строгом —
+  // когда аккумулятор не передан — скрываем.
+  if (c.requiresUnemployedStatus && profile.unemployedStatus !== true) {
+    if (!pending) return false;
+    pending.add("unemployed");
+  }
+  if (c.requiresVoluntaryInsurance && profile.voluntaryInsurance !== true) {
+    if (!pending) return false;
+    pending.add("insurance");
+  }
+  if (c.requiresHousingNeed) {
+    const state = housingNeedState(profile);
+    if (state === "no") return false;
+    if (state === "eligible") {
+      if (!pending) return false;
+      pending.add("housing");
+    }
+  }
+
   // «Хотя бы одна из групп» — для мер, адресованных нескольким категориям сразу
   // («многодетным, малоимущим и семьям с детьми-инвалидами»).
   if (c.anyOf && c.anyOf.length > 0) {
-    if (!c.anyOf.some((sub) => matchesCriteria(profile, sub))) return false;
+    // Сначала ищем ветку, которая проходит целиком: если человек подходит
+    // как многодетный, незачем предлагать ему оформлять статус безработного.
+    if (c.anyOf.some((sub) => matchesCriteria(profile, sub))) return true;
+    if (!pending) return false;
+    for (const sub of c.anyOf) {
+      const branch = new Set<PendingReason>();
+      if (matchesCriteria(profile, sub, branch)) {
+        branch.forEach((r) => pending.add(r));
+        return true;
+      }
+    }
+    return false;
   }
   return true;
+}
+
+/**
+ * Подбор с пометками: рядом с мерой едет список статусов, которых человеку
+ * не хватает. Нужен экрану результатов, чтобы нарисовать плашку.
+ */
+export function matchMeasuresDetailed(
+  profile: UserProfile,
+  measures: SupportMeasure[],
+  opts: { ignoreRegion?: boolean } = {},
+): { measure: SupportMeasure; pending: PendingReason[] }[] {
+  const out: { measure: SupportMeasure; pending: PendingReason[] }[] = [];
+  for (const measure of measures) {
+    const verdict = evaluateEligibility(profile, measure, opts);
+    if (verdict.fits) out.push({ measure, pending: verdict.pending });
+  }
+  return out;
 }
 
 /** Возвращает все подходящие меры из переданного списка. */
