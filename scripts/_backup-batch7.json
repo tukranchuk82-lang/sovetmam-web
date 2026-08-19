@@ -1,0 +1,47 @@
+[
+ {
+  "slug": "kirov-026",
+  "title": "Социальные выплаты молодым семьям на приобретение жилья (Кировская область)",
+  "criteria": {
+   "regions": [
+    "Кировская область"
+   ],
+   "requiresStudent": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "bsh-020",
+  "title": "Социальная выплата на жильё отдельным категориям многодетных семей (Республика Башкортостан)",
+  "criteria": {
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "voronezh-021",
+  "title": "Ежемесячная выплата на третьего ребёнка до 3 лет (Воронежская область)",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "minChildren": 3,
+   "requiresLowIncome": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "krym-008",
+  "title": "Компенсация найма жилья малоимущим семьям (Республика Крым)",
+  "criteria": {
+   "regions": [
+    "Республика Крым"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ }
+]

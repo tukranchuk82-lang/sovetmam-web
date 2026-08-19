@@ -17,7 +17,11 @@ const has = (m) => {
   return c.requiresHousingNeed !== undefined ||
     (Array.isArray(c.anyOf) && c.anyOf.some((s) => s && s.requiresHousingNeed !== undefined));
 };
-const list = rows.filter((m) => re.test([m.title, m.short_description, ...(m.tips ?? []), ...(m.how_to_apply ?? [])].join(" ")) && !has(m));
+// Меры, уже проверенные вручную и признанные ложными срабатываниями,
+// в выгрузку не берём — иначе каждый подход начинался бы с их разбора.
+let checked = [];
+try { checked = JSON.parse(readFileSync("scripts/_housing-checked.json", "utf8")); } catch {}
+const list = rows.filter((m) => !checked.includes(m.slug) && re.test([m.title, m.short_description, ...(m.tips ?? []), ...(m.how_to_apply ?? [])].join(" ")) && !has(m));
 const from = Number(process.argv[2] ?? 0), to = Number(process.argv[3] ?? 12);
 const slice = list.slice(from, to);
 const out = slice.map((m) => [
