@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import {
   RotateCcw,
@@ -207,6 +207,48 @@ const STEPS = [
   "Особые статусы",
   "Здоровье",
 ];
+
+/**
+ * Черновик ответов — в памяти вкладки.
+ *
+ * Анкета стала многоэкранной, а ответы живут в состоянии страницы: одно
+ * случайное нажатие «Назад» в шапке приложения — и человек теряет всё, что
+ * успел заполнить. Черновик это спасает.
+ *
+ * Именно sessionStorage, а не localStorage: среди ответов есть сведения об
+ * инвалидности — особая категория персональных данных, и в политике мы
+ * обещаем минимум. Черновик доживает до закрытия вкладки и не оставляет
+ * следов в браузере после того, как человек ушёл.
+ */
+const DRAFT_KEY = "podbor-draft-v1";
+
+/**
+ * Есть ли отложенный черновик — читаем через useSyncExternalStore.
+ *
+ * Сервер о sessionStorage ничего не знает, поэтому серверный снимок всегда
+ * «нет». Иначе разметка на сервере и в браузере разошлась бы, и React
+ * пожаловался бы на несоответствие при гидратации.
+ */
+function subscribeToDraft() {
+  return () => {};
+}
+
+function readDraftFlag(): boolean {
+  try {
+    return sessionStorage.getItem(DRAFT_KEY) != null;
+  } catch {
+    return false;
+  }
+}
+
+function readDraft(): Record<string, unknown> | null {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
 
 const MAX_CHILDREN = 20;
 
@@ -438,13 +480,6 @@ export function PodborForm({
     setAgesByChild((prev) => ({ ...prev, [i]: value }));
   }
 
-  // Переход между экранами: прокручиваем к началу анкеты, иначе человек
-  // оказывается в середине следующего экрана и не видит его первый вопрос.
-  function goToStep(next: number) {
-    setStep(next);
-    topRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-  }
-
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
   //
   // ignoreRegion включаем ТОЛЬКО когда регион в анкете указан: тогда фильтром
@@ -462,6 +497,138 @@ export function PodborForm({
   );
   const submitted = useRef(false);
   const topRef = useRef<HTMLDivElement>(null);
+
+  // Все ответы одним объектом — его и держим в черновике.
+  const answers = {
+    step,
+    region,
+    pregnant,
+    expectingNumber,
+    hasChildren,
+    childrenCount,
+    exactCount,
+    agesByChild,
+    multipleBirthCount,
+    isCitizen,
+    incomePm,
+    incomeAnswered,
+    mortgageIntent,
+    singleParent,
+    svoFamily,
+    student,
+    disabledChild,
+    specialNeedsChild,
+    lossOfBreadwinner,
+    parentAge,
+    spouseAge,
+    hasSpouse,
+    selfEmployed,
+    entrepreneur,
+    employed,
+    taxSystem,
+    hasEmployees,
+    disabledParent,
+    fosterParent,
+    teacher,
+  };
+
+  // Человек уже что-то ответил? Считаем сравнением с пустой анкетой, а не
+  // отдельным флагом: иначе пришлось бы оборачивать три десятка обработчиков.
+  const touched =
+    step > 0 ||
+    Object.entries(answers).some(
+      ([key, value]) =>
+        key !== "step" &&
+        value !== null &&
+        value !== "" &&
+        !(key === "agesByChild" && Object.keys(value ?? {}).length === 0) &&
+        !(key === "incomeAnswered" && value === false),
+    );
+
+  // Пишем черновик после каждого изменения — но только когда человек начал
+  // заполнять. Иначе пустая форма при открытии затёрла бы прошлый черновик
+  // раньше, чем человек успел им воспользоваться.
+  useEffect(() => {
+    if (!touched) return;
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(answers));
+    } catch {
+      // Приватный режим может запрещать запись — тогда просто работаем без
+      // черновика, ломать из-за этого анкету нельзя.
+    }
+  });
+
+  // Черновик не подставляем молча: человек мог уйти со страницы намеренно
+  // и вернуться, чтобы начать заново. Предлагаем выбрать.
+  const hasDraft = useSyncExternalStore(
+    subscribeToDraft,
+    readDraftFlag,
+    () => false,
+  );
+  const [draftDismissed, setDraftDismissed] = useState(false);
+  const draftOffered = hasDraft && !hasSaved && !touched && !draftDismissed;
+
+  function applyDraft() {
+    const d = readDraft();
+    setDraftDismissed(true);
+    if (!d) return;
+    const num = (v: unknown) => (typeof v === "number" ? v : null);
+    const bool = (v: unknown) => (typeof v === "boolean" ? v : null);
+    if (typeof d.step === "number" && d.step >= 0 && d.step < STEPS.length) {
+      setStep(d.step);
+    }
+    if (typeof d.region === "string") setRegion(d.region);
+    if (typeof d.exactCount === "string") setExactCount(d.exactCount);
+    if (d.agesByChild && typeof d.agesByChild === "object") {
+      setAgesByChild(d.agesByChild as Record<number, number | null>);
+    }
+    if (isTaxSystem(d.taxSystem)) setTaxSystem(d.taxSystem);
+    setPregnant(bool(d.pregnant));
+    setExpectingNumber(num(d.expectingNumber));
+    setHasChildren(bool(d.hasChildren));
+    setChildrenCount(num(d.childrenCount));
+    setMultipleBirthCount(num(d.multipleBirthCount));
+    setIsCitizen(bool(d.isCitizen));
+    setMortgageIntent(bool(d.mortgageIntent));
+    setSingleParent(bool(d.singleParent));
+    setSvoFamily(bool(d.svoFamily));
+    setStudent(bool(d.student));
+    setDisabledChild(bool(d.disabledChild));
+    setSpecialNeedsChild(bool(d.specialNeedsChild));
+    setLossOfBreadwinner(bool(d.lossOfBreadwinner));
+    setParentAge(num(d.parentAge));
+    setSpouseAge(num(d.spouseAge));
+    setHasSpouse(bool(d.hasSpouse));
+    setSelfEmployed(bool(d.selfEmployed));
+    setEntrepreneur(bool(d.entrepreneur));
+    setEmployed(bool(d.employed));
+    setHasEmployees(bool(d.hasEmployees));
+    setDisabledParent(bool(d.disabledParent));
+    setFosterParent(bool(d.fosterParent));
+    setTeacher(bool(d.teacher));
+    if (d.incomeAnswered === true) {
+      setIncomeAnswered(true);
+      const pm = d.incomePm;
+      setIncomePm(pm === 1 || pm === 1.5 || pm === 2 ? pm : null);
+    }
+  }
+
+  function forgetDraft() {
+    setDraftDismissed(true);
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Не смогли стереть — черновик всё равно перекроется следующими ответами.
+    }
+  }
+
+  // Переход между экранами: прокручиваем к началу анкеты, иначе человек
+  // оказывается в середине следующего экрана и не видит его первый вопрос.
+  function goToStep(next: number) {
+    setStep(next);
+    topRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
 
   useEffect(() => {
     // Прокручиваем наверх только после отправки анкеты пользователем,
@@ -512,6 +679,13 @@ export function PodborForm({
       teacher: teacher ?? false,
     };
     submitted.current = true;
+    // Анкета уехала в профиль — черновик свою работу сделал.
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
+      // Не смогли стереть — не беда, при следующем открытии его перекроет
+      // сохранённый подбор.
+    }
     setResults(
       matchMeasures(profile, measures, { ignoreRegion: Boolean(profile.region) }),
     );
@@ -675,6 +849,35 @@ export function PodborForm({
         Ответьте на несколько вопросов о семье. Мы сохраним ваш подбор — сможете
         вернуться к нему в любой момент.
       </p>
+
+      {/* Незаконченная анкета — предлагаем продолжить с того же места. */}
+      {draftOffered && (
+        <div className="mt-4 rounded-2xl border border-[#1B3A6B]/20 bg-[#1B3A6B]/[0.05] p-3.5">
+          <p className="text-sm font-semibold text-[#1B3A6B]">
+            У вас есть незаконченная анкета
+          </p>
+          <p className="mt-1 text-xs leading-snug text-muted-foreground">
+            Ответы сохранились, когда вы уходили со страницы. Можно продолжить
+            с того же места или начать заново.
+          </p>
+          <div className="mt-2.5 flex gap-2">
+            <button
+              type="button"
+              onClick={applyDraft}
+              className="inline-flex items-center rounded-lg bg-[#1B3A6B] px-3.5 py-2 text-xs font-semibold text-white transition-all hover:bg-[#16305a] active:scale-[0.98]"
+            >
+              Продолжить
+            </button>
+            <button
+              type="button"
+              onClick={forgetDraft}
+              className="inline-flex items-center rounded-lg border border-[#1B3A6B]/25 px-3.5 py-2 text-xs font-semibold text-[#1B3A6B] transition-colors hover:bg-white"
+            >
+              Начать заново
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Где человек находится и сколько осталось. */}
       <div className="mt-5">
