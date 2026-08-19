@@ -494,6 +494,35 @@ export interface EligibilityCriteria {
   regions?: string[];
 }
 
+/**
+ * Срок подачи заявления.
+ *
+ * Книга Буцкой держится на сроках: двенадцать недель беременности открывают
+ * единое пособие, шесть месяцев на пособие при рождении — иначе деньги
+ * сгорают, семейную налоговую выплату принимают только с 1 июня по 1 октября.
+ * Храним разбором, а не текстом, чтобы посчитать остаток для конкретной семьи:
+ * «осталось 40 дней» человек воспринимает совсем иначе, чем «в течение шести
+ * месяцев».
+ */
+export type MeasureDeadline =
+  /** N месяцев со дня рождения ребёнка. */
+  | { kind: "after-birth"; months: number; note?: string }
+  /** Успеть до N недель беременности (постановка на учёт). */
+  | { kind: "pregnancy-weeks"; weeks: number; note?: string }
+  /** Окно приёма заявлений внутри года: с 1 июня по 1 октября и подобные. */
+  | {
+      kind: "year-window";
+      fromMonth: number;
+      fromDay: number;
+      toMonth: number;
+      toDay: number;
+      note?: string;
+    }
+  /** До конца года: добровольные взносы ИП и самозанятых. */
+  | { kind: "year-end"; note?: string }
+  /** Срок есть, но посчитать его по анкете нельзя — показываем текстом. */
+  | { kind: "note"; note: string };
+
 export interface SupportMeasure {
   slug: string;
   title: string;
@@ -504,6 +533,8 @@ export interface SupportMeasure {
   amount?: string;
   segments: SegmentId[];
   criteria: EligibilityCriteria;
+  /** Срок подачи заявления, если он есть. */
+  deadline?: MeasureDeadline | null;
   howToApply: string[];
   documents: string[];
   /** «Полезно знать» — заметки/факты рядом с мерой (не отдельная выплата). */
@@ -1169,6 +1200,116 @@ export function matchMeasuresDetailed(
     if (verdict.fits) out.push({ measure, pending: verdict.pending });
   }
   return out;
+}
+
+const MONTHS_GENITIVE = [
+  "января",
+  "февраля",
+  "марта",
+  "апреля",
+  "мая",
+  "июня",
+  "июля",
+  "августа",
+  "сентября",
+  "октября",
+  "ноября",
+  "декабря",
+];
+
+/** Правильное склонение: «1 день», «2 дня», «5 дней». */
+function pluralDays(n: number): string {
+  const d10 = n % 10;
+  const d100 = n % 100;
+  if (d10 === 1 && d100 !== 11) return `${n} день`;
+  if (d10 >= 2 && d10 <= 4 && (d100 < 10 || d100 >= 20)) return `${n} дня`;
+  return `${n} дней`;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Что сказать человеку про срок этой меры — с учётом его анкеты.
+ *
+ * Возвращает null, когда говорить нечего: срока нет, он уже прошёл или к этой
+ * семье не относится. Признак urgent поднимает меру в блок «Успеть подать».
+ */
+export function deadlineStatus(
+  profile: UserProfile,
+  measure: SupportMeasure,
+  now: Date = new Date(),
+): { text: string; urgent: boolean } | null {
+  const d = measure.deadline;
+  if (!d) return null;
+
+  if (d.kind === "note") return { text: d.note, urgent: false };
+
+  if (d.kind === "after-birth") {
+    // Отсчёт идёт от самого младшего ребёнка: у старших срок давно прошёл.
+    const kids = profile.children ?? [];
+    if (kids.length === 0) {
+      if (!profile.pregnant) return null;
+      return {
+        text: `Подать заявление нужно в течение ${d.months} месяцев после рождения ребёнка — потом право сгорает`,
+        urgent: false,
+      };
+    }
+    const youngest = kids.reduce((a, b) =>
+      childAgeMonths(a) <= childAgeMonths(b) ? a : b,
+    );
+    const born = new Date(youngest.birthYear, youngest.birthMonth - 1, 1);
+    const until = new Date(born);
+    until.setMonth(until.getMonth() + d.months);
+    const left = Math.ceil((until.getTime() - now.getTime()) / DAY_MS);
+    if (left <= 0) return null;
+    return {
+      text: `Успеть до ${until.getDate()} ${MONTHS_GENITIVE[until.getMonth()]}: осталось ${pluralDays(left)}`,
+      urgent: true,
+    };
+  }
+
+  if (d.kind === "pregnancy-weeks") {
+    if (!profile.pregnant) return null;
+    // Уже встала на учёт — напоминать не о чем.
+    if (profile.registeredEarly === true) return null;
+    if (profile.pregnancyStage === "under12") {
+      return {
+        text: `Встать на учёт нужно до ${d.weeks} недель — позже право не появится`,
+        urgent: true,
+      };
+    }
+    return null;
+  }
+
+  if (d.kind === "year-window") {
+    const year = now.getFullYear();
+    const from = new Date(year, d.fromMonth - 1, d.fromDay);
+    const to = new Date(year, d.toMonth - 1, d.toDay);
+    const fromText = `${d.fromDay} ${MONTHS_GENITIVE[d.fromMonth - 1]}`;
+    const toText = `${d.toDay} ${MONTHS_GENITIVE[d.toMonth - 1]}`;
+    if (now < from) {
+      return { text: `Заявления принимают с ${fromText} по ${toText}`, urgent: false };
+    }
+    if (now > to) {
+      return {
+        text: `Приём закрыт до ${fromText} следующего года`,
+        urgent: false,
+      };
+    }
+    const left = Math.ceil((to.getTime() - now.getTime()) / DAY_MS);
+    return {
+      text: `Подать до ${toText}: осталось ${pluralDays(left)}`,
+      urgent: left <= 45,
+    };
+  }
+
+  // До конца года.
+  const yearEnd = new Date(now.getFullYear(), 11, 31);
+  const left = Math.ceil((yearEnd.getTime() - now.getTime()) / DAY_MS);
+  return {
+    text: `Успеть до 31 декабря: осталось ${pluralDays(left)}`,
+    urgent: left <= 60,
+  };
 }
 
 /** Возвращает все подходящие меры из переданного списка. */
