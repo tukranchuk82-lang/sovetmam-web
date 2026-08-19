@@ -12,8 +12,10 @@ import { buildPodborPdf } from "@/lib/podbor-pdf";
  * единственный надёжный источник.
  *
  * Регион уважаем: в файл идут федеральные меры и региональные того региона,
- * который человек указал. Если регион не указан, региональные не отсекаем —
- * иначе файл получился бы почти пустым, а человек не понял бы почему.
+ * который человек указал. Если регион не указан, региональных мер в файле нет
+ * вовсе — раньше в этом случае уезжали меры всех регионов страны разом, и
+ * человек получал сотни чужих карточек. Вместо них в файл идёт строка о том,
+ * что регион стоит указать.
  */
 export const dynamic = "force-dynamic";
 
@@ -26,7 +28,7 @@ export async function GET(): Promise<Response> {
   if (!survey || typeof survey.hasChildren !== "boolean") redirect("/podbor");
 
   const all = await getAllMeasures();
-  const matched = matchMeasures(survey, all, { ignoreRegion: !survey.region });
+  const matched = matchMeasures(survey, all);
 
   const pdf = await buildPodborPdf({
     measures: matched,

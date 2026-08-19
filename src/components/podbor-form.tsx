@@ -423,12 +423,17 @@ export function PodborForm({
   }
 
   // Если анкета уже была заполнена — сразу показываем сохранённый подбор.
+  //
+  // ignoreRegion включаем ТОЛЬКО когда регион в анкете указан: тогда фильтром
+  // занимается сам список, где регион можно переключить. Если региона нет,
+  // отсекаем региональные меры сразу — иначе человек получал меры всех
+  // регионов страны разом (у одной живой анкеты выходило 1147 мер), а в PDF
+  // они уезжали целиком.
   const [results, setResults] = useState<SupportMeasure[] | null>(() =>
-    // ignoreRegion: региональные меры не отсекаем по региону из анкеты — этим
-    // занимается сам список (там регион переключается, и его можно указать,
-    // если в анкете не указывали).
     hasSaved
-      ? matchMeasures(toProfile(saved!), measures, { ignoreRegion: true })
+      ? matchMeasures(toProfile(saved!), measures, {
+          ignoreRegion: Boolean(toProfile(saved!).region),
+        })
       : null,
   );
   const submitted = useRef(false);
@@ -483,7 +488,9 @@ export function PodborForm({
       teacher: teacher ?? false,
     };
     submitted.current = true;
-    setResults(matchMeasures(profile, measures, { ignoreRegion: true }));
+    setResults(
+      matchMeasures(profile, measures, { ignoreRegion: Boolean(profile.region) }),
+    );
     // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли пользователь;
     // при перезаполнении данные перезапишутся).
     void saveSurveyAction(profile as unknown as Record<string, unknown>);
@@ -520,6 +527,29 @@ export function PodborForm({
             </button>
           </div>
         </div>
+
+        {/* Регион не указан — региональных мер в подборке нет вовсе.
+            Молчать об этом нельзя: человек решит, что в его области ничего
+            не положено, хотя именно там самые крупные выплаты. */}
+        {!region && (
+          <div className="mt-3 rounded-2xl border border-[#8E1D2C]/20 bg-[#8E1D2C]/[0.04] p-3.5">
+            <p className="text-sm font-semibold text-[#8E1D2C]">
+              Регион не указан — показываем только федеральные меры
+            </p>
+            <p className="mt-1 text-sm leading-snug text-muted-foreground">
+              Они действуют по всей стране. Укажите регион, и к ним добавятся
+              меры вашей области: губернаторские выплаты, региональный
+              материнский капитал, льготы на ЖКУ, проезд и детский сад.
+            </p>
+            <button
+              type="button"
+              onClick={reset}
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-[#8E1D2C] px-3.5 py-2 text-xs font-semibold text-white transition-all hover:bg-[#7a1826] active:scale-[0.98]"
+            >
+              Указать регион
+            </button>
+          </div>
+        )}
 
         {/* Детей нет и беременности нет — таким людям адресована лишь часть
             базы, и об этом честнее сказать прямо, чем оставить человека гадать,
