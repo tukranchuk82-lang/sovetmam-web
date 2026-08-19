@@ -1,0 +1,95 @@
+[
+ {
+  "slug": "bsh-019",
+  "title": "Социальная выплата молодым семьям на жильё (Республика Башкортостан)",
+  "criteria": {
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "krasn-002",
+  "title": "Земельный сертификат взамен земельного участка (Красноярский край)",
+  "criteria": {
+   "regions": [
+    "Красноярский край"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "bel-zhilyo-bezvozmezdnoe",
+  "title": "Жильё многодетным по договору безвозмездного пользования (Белгородская область)",
+  "criteria": {
+   "regions": [
+    "Белгородская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "dnr-011",
+  "title": "Содействие многодетным в улучшении жилищных условий (Донецкая Народная Республика)",
+  "criteria": {
+   "regions": [
+    "Донецкая Народная Республика"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-022",
+  "title": "«Социальная няня» — присмотр за детьми до 3 лет (Калининградская область)",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
+   "hasChildAgedTo": 3,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "tula-023",
+  "title": "Выплата малоимущим многодетным с 5+ детьми на жильё (Тульская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Тульская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "reg-novosibirskaya-oblast-020",
+  "title": "Выплата семьям с тремя и более детьми-инвалидами (Новосибирская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresDisabledChild": true
+    }
+   ],
+   "regions": [
+    "Новосибирская область"
+   ]
+  }
+ }
+]
