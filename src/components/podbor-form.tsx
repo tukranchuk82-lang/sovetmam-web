@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { SegmentMeasures } from "@/components/segment-measures";
+import { PodborResults } from "@/components/podbor-results";
 import { saveSurveyAction } from "@/app/(app)/login/onboarding-actions";
 import {
   matchMeasures,
@@ -896,6 +896,11 @@ export function PodborForm({
   // регионов страны разом (у одной живой анкеты выходило 1147 мер), а в PDF
   // они уезжали целиком.
   const [step, setStep] = useState(0);
+  // Профиль, по которому собрана подборка: нужен экрану результатов, чтобы
+  // разложить меры по группам и посчитать сроки под конкретную семью.
+  const [resultProfile, setResultProfile] = useState<UserProfile | null>(() =>
+    hasSaved ? toProfile(saved!) : null,
+  );
   const [results, setResults] = useState<SupportMeasure[] | null>(() =>
     hasSaved
       ? matchMeasures(toProfile(saved!), measures, {
@@ -1182,6 +1187,7 @@ export function PodborForm({
       fosterParent: fosterParent ?? false,
       teacher: (workFields ?? []).includes("education"),
     };
+    setResultProfile(profile);
     submitted.current = true;
     // Анкета уехала в профиль — черновик свою работу сделал.
     try {
@@ -1310,14 +1316,17 @@ export function PodborForm({
               <LayoutGrid className="size-4" /> Посмотреть все меры
             </Link>
 
-            {/* Тот же список, что и в разделах каталога: фильтр «Все /
-                Федеральные / Региональные», выбор региона (если в анкете его не
-                указали — можно указать прямо здесь) и выдача по 10 штук. */}
-            <SegmentMeasures
-              measures={results}
-              initialRegion={region || null}
-              footer={<InquiryLinks />}
-            />
+            {/* Подборка разложена по группам: сначала сроки, затем
+                «положено всем» и «положено вам», внутри — деньги, скидки,
+                бесплатное. Раньше здесь была плоская лента, общая с разделами
+                каталога, и порядок в ней был случайным. */}
+            {resultProfile && (
+              <PodborResults
+                profile={resultProfile}
+                measures={results}
+                footer={<InquiryLinks />}
+              />
+            )}
           </>
         ) : (
           <div className="py-10 text-center">
