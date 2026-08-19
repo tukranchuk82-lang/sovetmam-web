@@ -26,6 +26,11 @@ import {
   type EmploymentKind,
   type PreviousEmployment,
   type WorkField,
+  type SettlementType,
+  type PregnancyStage,
+  type SvoRole,
+  type StudyLevel,
+  type StudyFunding,
   type UserProfile,
 } from "@/lib/measures";
 
@@ -317,6 +322,43 @@ const MULTIPLE_BIRTH_OPTIONS: { value: number; label: string }[] = [
  */
 const HOUSING_NORM_HINT = 12;
 
+const SETTLEMENT_OPTIONS: { value: SettlementType; label: string }[] = [
+  { value: "city", label: "Город" },
+  { value: "small-town", label: "Город до 50 тысяч" },
+  { value: "village", label: "Село, посёлок" },
+];
+
+const PREGNANCY_OPTIONS: { value: PregnancyStage; label: string }[] = [
+  { value: "under12", label: "До 12 недель" },
+  { value: "12-27", label: "12–27 недель" },
+  { value: "28-35", label: "28–35 недель" },
+  { value: "36plus", label: "36 недель и больше" },
+];
+
+/**
+ * Кто в семье связан со специальной военной операцией.
+ *
+ * Уточнение обязательно: круг получателей у каждой меры свой, и «участник» и
+ * «погибший» открывают совершенно разные наборы. Можно отметить несколько —
+ * в семье бывает и ветеран, и погибший родственник.
+ */
+const SVO_ROLE_OPTIONS: { value: SvoRole; label: string }[] = [
+  { value: "active", label: "Участвует сейчас" },
+  { value: "veteran", label: "Ветеран боевых действий" },
+  { value: "lost", label: "Погиб или пропал без вести" },
+  { value: "disabled", label: "Получил инвалидность" },
+];
+
+const STUDY_LEVEL_OPTIONS: { value: StudyLevel; label: string }[] = [
+  { value: "vuz", label: "Вуз" },
+  { value: "college", label: "Колледж, техникум" },
+];
+
+const STUDY_FUNDING_OPTIONS: { value: StudyFunding; label: string }[] = [
+  { value: "budget", label: "Бюджет" },
+  { value: "paid", label: "Платно" },
+];
+
 const EMPLOYMENT_OPTIONS: { value: EmploymentStatus; label: string }[] = [
   { value: "working", label: "Работаю" },
   { value: "not-working", label: "Не работаю" },
@@ -470,6 +512,18 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     hasChildren: !!v.hasChildren,
     childrenCount: Number(v.childrenCount) || 0,
     children: Array.isArray(v.children) ? v.children : undefined,
+    settlementType: v.settlementType ?? null,
+    pregnancyStage: v.pregnancyStage ?? null,
+    registeredEarly: v.registeredEarly ?? null,
+    rareDisease: !!v.rareDisease,
+    studyLevel: v.studyLevel ?? null,
+    studyFunding: v.studyFunding ?? null,
+    targetedContract: v.targetedContract ?? null,
+    svoRoles: Array.isArray(v.svoRoles) ? v.svoRoles : [],
+    conscriptSpouse: !!v.conscriptSpouse,
+    veteranCombat: !!v.veteranCombat,
+    radiationAffected: !!v.radiationAffected,
+    hardship: !!v.hardship,
     ownsHome: v.ownsHome ?? null,
     homeArea: v.homeArea ?? null,
     residentsCount: v.residentsCount ?? null,
@@ -576,6 +630,47 @@ export function PodborForm({
     saved?.multipleBirthCount ?? null,
   );
   const [isCitizen, setIsCitizen] = useState<boolean | null>(saved ? (saved.region ? true : null) : null);
+  // Тип населённого пункта: сельская ипотека под 3%, земские программы и
+  // «Гектар» привязаны не к региону, а к тому, город это или село.
+  const [settlementType, setSettlementType] = useState<SettlementType | null>(
+    saved?.settlementType ?? null,
+  );
+  // Срок беременности и ранняя постановка на учёт: единое пособие беременным
+  // положено только тем, кто встал на учёт до 12 недель.
+  const [pregnancyStage, setPregnancyStage] = useState<PregnancyStage | null>(
+    saved?.pregnancyStage ?? null,
+  );
+  const [registeredEarly, setRegisteredEarly] = useState<boolean | null>(
+    saved?.registeredEarly ?? null,
+  );
+  const [rareDisease, setRareDisease] = useState<boolean | null>(
+    saved?.rareDisease ?? null,
+  );
+  // Учёба родителей: от уровня и формы зависят перевод на бюджет, отсрочка
+  // оплаты и приостановка отработки по целевому договору.
+  const [studyLevel, setStudyLevel] = useState<StudyLevel | null>(
+    saved?.studyLevel ?? null,
+  );
+  const [studyFunding, setStudyFunding] = useState<StudyFunding | null>(
+    saved?.studyFunding ?? null,
+  );
+  const [targetedContract, setTargetedContract] = useState<boolean | null>(
+    saved?.targetedContract ?? null,
+  );
+  // Особые статусы.
+  const [svoRoles, setSvoRoles] = useState<SvoRole[]>(() =>
+    Array.isArray(saved?.svoRoles) ? saved.svoRoles : [],
+  );
+  const [conscriptSpouse, setConscriptSpouse] = useState<boolean | null>(
+    saved?.conscriptSpouse ?? null,
+  );
+  const [veteranCombat, setVeteranCombat] = useState<boolean | null>(
+    saved?.veteranCombat ?? null,
+  );
+  const [radiationAffected, setRadiationAffected] = useState<boolean | null>(
+    saved?.radiationAffected ?? null,
+  );
+  const [hardship, setHardship] = useState<boolean | null>(saved?.hardship ?? null);
   const [region, setRegion] = useState(saved?.region ?? "");
   // «Выше 2 ПМ» — это не отсутствие ответа, поэтому шкала хранит отдельный
   // флаг «ответил» (incomeAnswered) рядом со значением (null = выше 2 ПМ).
@@ -774,6 +869,12 @@ export function PodborForm({
     );
   }
 
+  function toggleSvoRole(role: SvoRole) {
+    setSvoRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
+    );
+  }
+
   function toggleWorkField(field: WorkField) {
     setWorkFields((prev) => {
       const list = prev ?? [];
@@ -820,6 +921,18 @@ export function PodborForm({
     incomePm,
     incomeAnswered,
     mortgageIntent,
+    settlementType,
+    pregnancyStage,
+    registeredEarly,
+    rareDisease,
+    studyLevel,
+    studyFunding,
+    targetedContract,
+    svoRoles,
+    conscriptSpouse,
+    veteranCombat,
+    radiationAffected,
+    hardship,
     ownsHome,
     homeArea,
     residents,
@@ -906,6 +1019,31 @@ export function PodborForm({
     setIsCitizen(bool(d.isCitizen));
     setMortgageIntent(bool(d.mortgageIntent));
     setOwnsHome(bool(d.ownsHome));
+    setRegisteredEarly(bool(d.registeredEarly));
+    setRareDisease(bool(d.rareDisease));
+    setTargetedContract(bool(d.targetedContract));
+    setConscriptSpouse(bool(d.conscriptSpouse));
+    setVeteranCombat(bool(d.veteranCombat));
+    setRadiationAffected(bool(d.radiationAffected));
+    setHardship(bool(d.hardship));
+    if (Array.isArray(d.svoRoles)) setSvoRoles(d.svoRoles as SvoRole[]);
+    if (d.settlementType === "city" || d.settlementType === "small-town" || d.settlementType === "village") {
+      setSettlementType(d.settlementType);
+    }
+    if (
+      d.pregnancyStage === "under12" ||
+      d.pregnancyStage === "12-27" ||
+      d.pregnancyStage === "28-35" ||
+      d.pregnancyStage === "36plus"
+    ) {
+      setPregnancyStage(d.pregnancyStage);
+    }
+    if (d.studyLevel === "vuz" || d.studyLevel === "college") {
+      setStudyLevel(d.studyLevel);
+    }
+    if (d.studyFunding === "budget" || d.studyFunding === "paid") {
+      setStudyFunding(d.studyFunding);
+    }
     setHomeUnfit(bool(d.homeUnfit));
     setHasMortgage(bool(d.hasMortgage));
     if (typeof d.homeArea === "string") setHomeArea(d.homeArea);
@@ -996,6 +1134,18 @@ export function PodborForm({
       specialNeedsChild: specialNeedsChild ?? false,
       lossOfBreadwinner: lossOfBreadwinner ?? false,
       mortgageIntent: mortgageIntent ?? false,
+      settlementType,
+      pregnancyStage: pregnant ? pregnancyStage : null,
+      registeredEarly: pregnant ? registeredEarly : null,
+      rareDisease: rareDisease ?? false,
+      studyLevel: student ? studyLevel : null,
+      studyFunding: student ? studyFunding : null,
+      targetedContract: student ? targetedContract : null,
+      svoRoles: svoFamily ? svoRoles : [],
+      conscriptSpouse: conscriptSpouse ?? false,
+      veteranCombat: veteranCombat ?? false,
+      radiationAffected: radiationAffected ?? false,
+      hardship: hardship ?? false,
       ownsHome,
       homeArea: areaValid ? areaNum : null,
       residentsCount: residentsValid ? residentsNum : null,
@@ -1298,6 +1448,29 @@ export function PodborForm({
           </div>
         </div>
 
+        {/* Город или село — отдельный вопрос, потому что часть программ
+            привязана не к региону, а к размеру населённого пункта: сельская
+            ипотека под 3% (и 0,1% в приграничье), подъёмные земских программ
+            для врачей, учителей и тренеров, «Гектар». */}
+        <div>
+          <p className="text-sm font-medium">Где вы живёте?</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            От размера населённого пункта зависят сельская ипотека и подъёмные
+            земских программ — в городах они не действуют.
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {SETTLEMENT_OPTIONS.map((o) => (
+              <Choice
+                key={o.value}
+                active={settlementType === o.value}
+                onClick={() => setSettlementType(o.value)}
+              >
+                {o.label}
+              </Choice>
+            ))}
+          </div>
+        </div>
+
         {/* Гражданство спрашиваем отдельно от региона: человек без
             гражданства РФ всё равно живёт в конкретной области, и часть мер
             ему доступна. Раньше ответ «нет» стирал уже выбранный регион. */}
@@ -1343,6 +1516,48 @@ export function PodborForm({
                   {o.label}
                 </Choice>
               ))}
+            </div>
+          </div>
+        )}
+
+        {pregnant && (
+          <div className="rounded-2xl border bg-card p-3.5">
+            <p className="text-sm font-medium">Какой у вас срок?</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              От срока зависят выплаты: пособие беременной жене призывника
+              назначают с 180 дней, а некоторые региональные меры — только на
+              ранних сроках.
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {PREGNANCY_OPTIONS.map((o) => (
+                <Choice
+                  key={o.value}
+                  active={pregnancyStage === o.value}
+                  onClick={() => setPregnancyStage(o.value)}
+                >
+                  {o.label}
+                </Choice>
+              ))}
+            </div>
+
+            {/* Двенадцать недель — рубеж, который стоит денег: единое пособие
+                беременным положено только тем, кто встал на учёт до этого
+                срока, и позже право уже не появится. */}
+            <div className="mt-3.5">
+              <p className="text-sm font-medium">
+                Встали на учёт в женской консультации до 12 недель?
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Это условие единого пособия для беременных. Если срок ещё не
+                вышел — успейте встать на учёт, потом право не появится.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <YesNo
+                  value={registeredEarly}
+                  onChange={setRegisteredEarly}
+                  clearable
+                />
+              </div>
             </div>
           </div>
         )}
@@ -1544,6 +1759,54 @@ export function PodborForm({
         <Question label="Родители учатся очно (студенческая семья)?">
           <YesNo value={student} onChange={setStudent} />
         </Question>
+
+        {/* Уточнения только для студенческих семей: от уровня и формы обучения
+            зависят перевод с платного на бюджет после рождения ребёнка,
+            отсрочка оплаты и приостановка отработки по целевому договору. */}
+        {student === true && (
+          <div className="rounded-2xl border bg-card p-3.5">
+            <p className="text-sm font-medium">Где учитесь?</p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {STUDY_LEVEL_OPTIONS.map((o) => (
+                <Choice
+                  key={o.value}
+                  active={studyLevel === o.value}
+                  onClick={() => setStudyLevel(o.value)}
+                >
+                  {o.label}
+                </Choice>
+              ))}
+            </div>
+
+            <p className="mt-3.5 text-sm font-medium">Форма обучения</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              У платного обучения свои меры: перевод на бюджет после рождения
+              ребёнка и отсрочка оплаты минимум на полгода.
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {STUDY_FUNDING_OPTIONS.map((o) => (
+                <Choice
+                  key={o.value}
+                  active={studyFunding === o.value}
+                  onClick={() => setStudyFunding(o.value)}
+                >
+                  {o.label}
+                </Choice>
+              ))}
+            </div>
+
+            <p className="mt-3.5 text-sm font-medium">
+              Учитесь по целевому договору?
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Беременность и уход за ребёнком до трёх лет приостанавливают
+              обязательства по договору — отработку не потеряете.
+            </p>
+            <div className="mt-2 flex gap-2">
+              <YesNo value={targetedContract} onChange={setTargetedContract} />
+            </div>
+          </div>
+        )}
           </div>
         )}
 
@@ -1926,6 +2189,71 @@ export function PodborForm({
           <YesNo value={svoFamily} onChange={setSvoFamily} />
         </Question>
 
+        {/* Уточнение обязательно: в базе 254 меры для семей участников СВО, и
+            круг получателей у каждой свой. «Участвует сейчас» и «погиб»
+            открывают совершенно разные наборы — от льгот на детский сад до
+            выплаты пяти миллионов и второй пенсии. */}
+        {svoFamily === true && (
+          <div className="rounded-2xl border bg-card p-3.5">
+            <p className="text-sm font-medium">Кто именно?</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Можно отметить несколько. От этого зависит, какие меры вам
+              положены: у каждой выплаты свой круг получателей.
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {SVO_ROLE_OPTIONS.map((o) => (
+                <Choice
+                  key={o.value}
+                  active={svoRoles.includes(o.value)}
+                  onClick={() => toggleSvoRole(o.value)}
+                >
+                  {o.label}
+                </Choice>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Срочная служба — это не СВО, и меры совсем другие: беременной жене
+            призывника положено единовременное пособие, а на ребёнка — выплата
+            до трёх лет, а не до полутора, как обычно. */}
+        <div className="rounded-2xl border bg-card p-3.5">
+          <p className="text-sm font-medium">
+            Муж проходит срочную службу по призыву?
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            У жён призывников свои выплаты: пособие по беременности и выплата на
+            ребёнка до трёх лет. Это отдельные меры, не связанные с СВО.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <YesNo value={conscriptSpouse} onChange={setConscriptSpouse} />
+          </div>
+        </div>
+
+        <Question label="В семье есть ветеран боевых действий?">
+          <YesNo value={veteranCombat} onChange={setVeteranCombat} />
+        </Question>
+
+        <Question label="Семья пострадала от радиационных аварий (ЧАЭС, «Маяк»)?">
+          <YesNo value={radiationAffected} onChange={setRadiationAffected} />
+        </Question>
+
+        {/* Трудная жизненная ситуация — основание для срочной помощи: путёвки
+            в лагерь, вещевая помощь, кризисные центры, социальный контракт. */}
+        <div className="rounded-2xl border bg-card p-3.5">
+          <p className="text-sm font-medium">
+            Семья в трудной жизненной ситуации?
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Пожар, чрезвычайная ситуация, потеря жилья или дохода. По этому
+            основанию положены срочная помощь, путёвки в лагерь и социальный
+            контракт.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <YesNo value={hardship} onChange={setHardship} />
+          </div>
+        </div>
+
         {/* Отдельный вопрос: «единственный родитель» и «потеря кормильца» —
             разные вещи. Из-за того, что мы не спрашивали про второе, пенсия по
             случаю потери кормильца предлагалась полным семьям. */}
@@ -1991,6 +2319,24 @@ export function PodborForm({
                   onChange={setSpecialNeedsChild}
                   clearable
                 />
+              </div>
+            </div>
+
+            {/* Редкое заболевание оказалось здесь, а не в блоке про детей,
+                хотя в проекте анкеты стояло там: это медицинские сведения, и
+                им место в необязательном блоке, про который мы обещали, что
+                отвечать не обязательно. */}
+            <div>
+              <p className="text-sm font-medium">
+                У ребёнка редкое (орфанное) заболевание?
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Фонд «Круг добра» закупает дорогие лекарства и медизделия,
+                которых нет в обычных региональных списках. Заявку подаёт
+                лечащий врач через регион.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <YesNo value={rareDisease} onChange={setRareDisease} clearable />
               </div>
             </div>
 
