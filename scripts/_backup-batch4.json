@@ -1,0 +1,122 @@
+[
+ {
+  "slug": "voronezh-015",
+  "title": "Бесплатное двухразовое питание детей участников СВО в школах (Воронежская область)",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "spb-011",
+  "title": "«Социальная няня» — присмотр за детьми до 3 лет (Санкт-Петербург)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "hasChildAgedTo": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mari-002",
+  "title": "«Социальная няня» — присмотр за детьми до 3 лет (Республика Марий Эл)",
+  "criteria": {
+   "regions": [
+    "Республика Марий Эл"
+   ],
+   "minChildren": 3,
+   "hasChildAgedTo": 3,
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "krsk-004",
+  "title": "Льготный проезд многодетным по Карте жителя (Курская область)",
+  "criteria": {
+   "regions": [
+    "Курская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "rtadd-007",
+  "title": "Бесплатный прокат предметов первой необходимости для новорождённых (Республика Татарстан)",
+  "criteria": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "requiresPregnancy": true
+      },
+      {
+       "hasChildAgedTo": 0
+      }
+     ],
+     "minChildren": 3
+    },
+    {
+     "anyOf": [
+      {
+       "requiresPregnancy": true
+      },
+      {
+       "hasChildAgedTo": 0
+      }
+     ],
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Республика Татарстан"
+   ]
+  }
+ },
+ {
+  "slug": "tomsk-019",
+  "title": "«Социальная няня» — присмотр за детьми до 3 лет (Томская область)",
+  "criteria": {
+   "regions": [
+    "Томская область"
+   ],
+   "minChildren": 3,
+   "hasChildAgedTo": 3,
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "voronezh-025",
+  "title": "Скидка 50 % на проезд школьников и студентов в электричках (Воронежская область)",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "hasChildAgedTo": 23,
+   "hasChildAgedFrom": 7
+  }
+ },
+ {
+  "slug": "kemerovo-013",
+  "title": "Бесплатное горячее питание и проезд детям участников СВО (Кемеровская область — Кузбасс)",
+  "criteria": {
+   "regions": [
+    "Кемеровская область — Кузбасс"
+   ],
+   "requiresSvoFamily": true
+  }
+ }
+]
