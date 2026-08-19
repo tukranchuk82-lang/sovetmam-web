@@ -1,0 +1,98 @@
+[
+ {
+  "slug": "rtadd-015",
+  "title": "Социальная выплата молодым семьям на приобретение или строительство жилья (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "chel-009",
+  "title": "Бесплатный земельный участок многодетным семьям под ИЖС или ЛПХ (Челябинская область)",
+  "criteria": {
+   "regions": [
+    "Челябинская область"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "ryaz-031",
+  "title": "Выплата на жильё семьям с 10+ детьми (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "minChildren": 10,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-021",
+  "title": "Прокат предметов первой необходимости для новорождённых (Калининградская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 0
+    }
+   ],
+   "regions": [
+    "Калининградская область"
+   ],
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "prokat-detskih-tovarov",
+  "title": "Бесплатный прокат детских товаров",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 3
+    }
+   ],
+   "requiresFamily": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "molodaya-semya",
+  "title": "Программа «Молодая семья»",
+  "criteria": {
+   "requiresParentUnder35": true,
+   "requiresMortgageIntent": true
+  }
+ },
+ {
+  "slug": "chao-019",
+  "title": "Первый взнос по ипотеке многодетным и возмещение процентов (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true,
+   "requiresMortgageIntent": true
+  }
+ },
+ {
+  "slug": "rstadd-014",
+  "title": "Субсидирование процентной ставки по жилищному кредиту для участников СВО (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresSvoFamily": true
+  }
+ }
+]
