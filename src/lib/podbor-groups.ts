@@ -140,14 +140,23 @@ export function groupPodbor(
     }
   }
 
-  // Внутри кармана — сначала меры с суммой: человек пришёл за деньгами, а не
-  // за списком услуг. Порядок в базе (sort_order) у всех мер нулевой, поэтому
-  // без этой сортировки маткапитал оказывался в хвосте.
-  const withAmountFirst = (a: PodborItem, b: PodborItem) =>
-    Number(Boolean(b.measure.amount)) - Number(Boolean(a.measure.amount));
+  // Порядок внутри кармана: сначала федеральные меры, потом меры своего
+  // региона, и в каждой половине сначала те, у которых названа сумма.
+  //
+  // Федеральные идут первыми, потому что они крупнее и действуют одинаково
+  // по всей стране: материнский капитал и единое пособие человек должен
+  // увидеть раньше областной надбавки. Сумма поднимает меру внутри половины —
+  // за деньгами приходят чаще, чем за услугой. Порядок из базы (sort_order)
+  // здесь не работает: он у всех мер нулевой, из-за чего маткапитал когда-то
+  // оказывался в хвосте списка.
+  const byLevelThenAmount = (a: PodborItem, b: PodborItem) => {
+    const level = (m: PodborItem) => (m.measure.level === "federal" ? 0 : 1);
+    if (level(a) !== level(b)) return level(a) - level(b);
+    return Number(Boolean(b.measure.amount)) - Number(Boolean(a.measure.amount));
+  };
   for (const bucket of [groups.forAll, groups.forYou]) {
     for (const key of Object.keys(bucket) as PocketKey[]) {
-      bucket[key].sort(withAmountFirst);
+      bucket[key].sort(byLevelThenAmount);
     }
   }
   return groups;
