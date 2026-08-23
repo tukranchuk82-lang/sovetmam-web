@@ -6,7 +6,9 @@ import { MeasureCard } from "@/components/measure-card";
 import { PENDING_TEXT, pluralMeasures, type SupportMeasure, type UserProfile } from "@/lib/measures";
 import {
   groupPodbor,
+  POCKET_ORDER,
   POCKET_TITLE,
+  type PodborBlock,
   type PodborItem,
   type PocketKey,
 } from "@/lib/podbor-groups";
@@ -14,12 +16,11 @@ import {
 /**
  * Экран результатов подбора.
  *
- * Раньше подборка была одной плоской лентой на 30–70 карточек, где маткапитал
- * мог оказаться двадцать седьмым, а первым — телефон доверия. Теперь порядок
- * задаёт книга: сверху то, что горит по срокам, затем «положено всем» (с этого
- * книга начинает разговор, потому что главный миф — «мне ничего не положено»),
- * следом «положено вам» — то, что открылось из-за состава семьи, дохода или
- * статуса. Внутри каждой группы — деньги, скидки, бесплатное.
+ * Сверху — одна общая цифра: сколько мер подошло семье. Дальше два блока:
+ * федеральные меры и меры своего региона. Внутри каждого одинаковый порядок —
+ * выплаты, бесплатное, скидки, права и поддержка, — а меры со сгорающим сроком
+ * подняты в самое начало блока и выделены цветом: деньги теряют не от
+ * незнания, а от опоздания.
  */
 
 const PAGE = 5;
@@ -47,7 +48,7 @@ function Deadline({ item }: { item: PodborItem }) {
     <p
       className={
         item.deadline.urgent
-          ? "mt-1.5 flex gap-1.5 rounded-xl bg-[#8E1D2C]/[0.08] px-3 py-2 text-[11.5px] font-semibold leading-snug text-[#8E1D2C]"
+          ? "mt-1.5 flex gap-1.5 rounded-xl bg-white/70 px-3 py-2 text-[11.5px] font-semibold leading-snug text-[#8E1D2C]"
           : "mt-1.5 flex gap-1.5 rounded-xl bg-black/[0.03] px-3 py-2 text-[11.5px] leading-snug text-muted-foreground"
       }
     >
@@ -67,7 +68,23 @@ function Item({ item }: { item: PodborItem }) {
   );
 }
 
-/** Один «карман» внутри группы: деньги, скидки или бесплатное. */
+/**
+ * Мера, у которой закрывается срок: подкрашенная подложка и прямая надпись.
+ * Такую карточку нельзя пролистать не заметив — в этом весь смысл.
+ */
+function UrgentItem({ item }: { item: PodborItem }) {
+  return (
+    <div className="rounded-2xl border border-[#8E1D2C]/30 bg-[#8E1D2C]/[0.05] p-2.5">
+      <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-[#8E1D2C] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.04em] text-white">
+        <Clock className="size-3" aria-hidden />
+        Скоро истечёт срок действия
+      </p>
+      <Item item={item} />
+    </div>
+  );
+}
+
+/** Карман внутри блока: выплаты, бесплатное, скидки, права и поддержка. */
 function Pocket({ pocket, items }: { pocket: PocketKey; items: PodborItem[] }) {
   const [shown, setShown] = useState(PAGE);
   if (items.length === 0) return null;
@@ -95,26 +112,33 @@ function Pocket({ pocket, items }: { pocket: PocketKey; items: PodborItem[] }) {
   );
 }
 
-function Group({
+function Block({
   title,
   note,
-  count,
-  pockets,
+  block,
 }: {
   title: string;
   note: string;
-  count: number;
-  pockets: Record<PocketKey, PodborItem[]>;
+  block: PodborBlock;
 }) {
-  if (count === 0) return null;
+  if (block.count === 0) return null;
   return (
     <section className="mt-7">
       <h2 className="text-[19px] font-semibold leading-tight text-[#1A1A1A]">
-        {title} · {count}
+        {title} · {block.count}
       </h2>
       <p className="mt-1 text-xs leading-snug text-muted-foreground">{note}</p>
-      {(["money", "discount", "free"] as PocketKey[]).map((key) => (
-        <Pocket key={key} pocket={key} items={pockets[key]} />
+
+      {block.urgent.length > 0 && (
+        <div className="mt-3 space-y-3">
+          {block.urgent.map((item) => (
+            <UrgentItem key={item.measure.slug} item={item} />
+          ))}
+        </div>
+      )}
+
+      {POCKET_ORDER.map((key) => (
+        <Pocket key={key} pocket={key} items={block.pockets[key]} />
       ))}
     </section>
   );
@@ -135,43 +159,32 @@ export function PodborResults({
 
   return (
     <div>
-      {/* Сроки — наверху и отдельно: книга Буцкой прямо говорит, что деньги
-          теряют не от незнания, а от опоздания. Эти же меры остаются и в своих
-          группах ниже, чтобы список не выглядел рваным. */}
-      {groups.urgent.length > 0 && (
-        <section className="mt-5 rounded-2xl border border-[#8E1D2C]/25 bg-[#8E1D2C]/[0.04] p-4">
-          <h2 className="text-[17px] font-semibold leading-tight text-[#8E1D2C]">
-            Успеть подать · {groups.urgent.length}
-          </h2>
-          <p className="mt-1 text-xs leading-snug text-[#8E1D2C]/80">
-            У этих мер закрывается срок. Пропустите — право сгорит, и
-            восстановить его будет нельзя.
-          </p>
-          <div className="mt-3 space-y-3">
-            {groups.urgent.map((item) => (
-              <Item key={item.measure.slug} item={item} />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Общий счёт — первое, что человек видит: сколько мер ему подошло. */}
+      <section className="mt-5 rounded-2xl border border-[#1B3A6B]/20 bg-[#1B3A6B]/[0.04] px-4 py-3.5">
+        <p className="text-[22px] font-semibold leading-tight text-[#1B3A6B]">
+          Вам подходит {pluralMeasures(groups.total)}
+        </p>
+        <p className="mt-1 text-xs leading-snug text-muted-foreground">
+          {groups.urgentCount > 0
+            ? "Меры со сгорающим сроком отмечены и подняты наверх — с них и начните."
+            : "Сначала федеральные меры, затем меры вашего региона."}
+        </p>
+      </section>
 
-      <Group
-        title="Положено всем"
-        note="Эти меры не требуют ни особого статуса, ни проверки дохода — достаточно того, что у вас есть ребёнок или вы его ждёте."
-        count={groups.forAllCount}
-        pockets={groups.forAll}
+      <Block
+        title="Федеральные меры"
+        note="Действуют по всей стране — не зависят от того, где вы живёте."
+        block={groups.federal}
       />
 
-      <Group
-        title="Положено вам"
-        note="Открылись благодаря составу семьи, доходу или статусу. Если что-то изменится, список тоже изменится — обновите ответы."
-        count={groups.forYouCount}
-        pockets={groups.forYou}
+      <Block
+        title="Меры вашего региона"
+        note="Их назначают местные власти, и в соседней области условия могут быть другими."
+        block={groups.regional}
       />
 
       <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
-        Всего подобрано {pluralMeasures(groups.total)}. Условия и суммы
-        меняются — проверяйте их при подаче заявления.
+        Условия и суммы меняются — проверяйте их при подаче заявления.
       </p>
 
       {footer}

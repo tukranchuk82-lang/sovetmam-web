@@ -7,25 +7,30 @@ import {
 } from "./measures";
 
 /**
- * Раскладка подборки по группам — так, как устроена книга Буцкой.
+ * Раскладка подборки.
  *
- * Раньше подбор отдавал одну плоскую ленту: маткапитал соседствовал с
- * телефоном доверия, а порядок определялся служебным именем меры. Человек
- * видел три десятка карточек вперемешку и не понимал, с чего начать.
+ * Сначала подбор отдавал одну плоскую ленту на 30–70 карточек: маткапитал мог
+ * оказаться двадцать седьмым, а первым — телефон доверия. Потом мы разложили
+ * меры на «положено всем» и «положено вам», но деление оказалось неудачным:
+ * человеку важно не то, по какому основанию мера открылась, а кто её даёт и
+ * что именно он получит.
  *
- * Книга даёт готовую структуру. Сначала то, что горит по срокам. Потом
- * «положено всем» — без проверки дохода и статуса; с этого начинается вторая
- * глава, потому что главный миф звучит как «мне ничего не положено». Потом
- * «положено вам» — то, что открылось благодаря составу семьи, доходу или
- * статусу. Внутри каждой группы — три «кармана»: деньги, скидки, бесплатное.
+ * Поэтому теперь два больших блока — федеральные меры и меры своего региона, —
+ * и внутри каждого один и тот же порядок: выплаты, бесплатное, скидки, права и
+ * поддержка. Меры со сгорающим сроком поднимаются в самое начало своего блока:
+ * деньги теряют не от незнания, а от опоздания.
  */
 
-export type PocketKey = "money" | "discount" | "free";
+export type PocketKey = "money" | "free" | "discount" | "support";
+
+/** Порядок карманов внутри блока — от денег к нематериальному. */
+export const POCKET_ORDER: PocketKey[] = ["money", "free", "discount", "support"];
 
 export const POCKET_TITLE: Record<PocketKey, string> = {
-  money: "Деньги",
-  discount: "Скидки",
+  money: "Выплаты",
   free: "Бесплатно",
+  discount: "Скидки",
+  support: "Права и поддержка",
 };
 
 export type PodborItem = {
@@ -35,87 +40,75 @@ export type PodborItem = {
   deadline: { text: string; urgent: boolean } | null;
 };
 
-export type PodborGroups = {
+/** Один блок выдачи: срочное сверху, затем карманы. */
+export type PodborBlock = {
   urgent: PodborItem[];
-  forAll: Record<PocketKey, PodborItem[]>;
-  forYou: Record<PocketKey, PodborItem[]>;
-  forAllCount: number;
-  forYouCount: number;
+  pockets: Record<PocketKey, PodborItem[]>;
+  count: number;
+};
+
+export type PodborGroups = {
+  federal: PodborBlock;
+  regional: PodborBlock;
   total: number;
+  urgentCount: number;
 };
 
 /**
- * Условия, которые не делают меру адресной.
+ * Карман меры: выплаты, бесплатное, скидки, права и поддержка.
  *
- * Беременность, наличие детей и возраст ребёнка — это не «особый статус», а
- * обычный ход жизни: бесплатное питание в школе положено всем ученикам, а не
- * какой-то льготной категории. Регион тоже не критерий отбора: чужие меры
- * человек и так не увидит, а ежемесячное пособие своей области положено всем
- * её жителям с детьми.
+ * Первые три читаются из меток class-*, которые проставлены почти у всей базы.
+ * Четвёртого класса в базе нет, и придумывать метку ради него мы пока не стали:
+ * «права и поддержка» — это не отдельный вид помощи, а те же бесплатные услуги,
+ * только нематериальные. Отличаем их по разделу каталога: сопровождение семьи
+ * (кризисные центры, социальная няня, юрист, психолог) и трудовые гарантии.
  */
-const OPEN_CRITERIA = new Set([
-  "requiresFamily",
-  "requiresPregnancy",
-  "requiresChildren",
-  "childAgeFromMonths",
-  "childAgeToMonths",
-  "appliesToExpecting",
-  "hasChildAgedFrom",
-  "hasChildAgedTo",
-  "maxYoungestChildAgeYears",
-  "regions",
-  "requiresCitizenship",
-  "excludeFromMatching",
-]);
+const SUPPORT_CATEGORIES = new Set(["Помощь и сопровождение", "Работа и занятость"]);
 
-/** Мера положена всем — без проверки дохода, статуса и числа детей. */
-export function isOpenToEveryone(m: SupportMeasure): boolean {
-  const c = m.criteria ?? {};
-  return Object.entries(c).every(([key, value]) => {
-    if (OPEN_CRITERIA.has(key)) return true;
-    // «Хотя бы один ребёнок» ограничением не считается — это те же дети.
-    if (key === "minChildren") return (value as number) <= 1;
-    if (key === "anyOf") return false;
-    return value === undefined;
-  });
-}
-
-/** Карман меры: деньги, скидка или бесплатная услуга. */
 export function pocketOf(m: SupportMeasure): PocketKey {
   // В measures.segments лежат метки трёх видов: жизненные ситуации, темы
   // (topic-) и классы (class-). Тип SegmentId описывает только ситуации,
   // поэтому классы читаем как строки — так же, как страницы /class/[key].
   const segments = m.segments as unknown as string[];
+
   if (segments.includes("class-money")) return "money";
   if (segments.includes("class-discount")) return "discount";
-  if (segments.includes("class-free")) return "free";
-  // Карман не проставлен: если у меры есть сумма — это деньги, иначе услуга.
-  return m.amount ? "money" : "free";
+  if (segments.includes("class-free")) {
+    return SUPPORT_CATEGORIES.has(m.category) ? "support" : "free";
+  }
+  // Метки нет (таких в базе единицы): если названа сумма — это выплата,
+  // иначе относим к правам и поддержке.
+  return m.amount ? "money" : "support";
 }
 
-function emptyPockets(): Record<PocketKey, PodborItem[]> {
-  return { money: [], discount: [], free: [] };
+function emptyBlock(): PodborBlock {
+  return {
+    urgent: [],
+    pockets: { money: [], free: [], discount: [], support: [] },
+    count: 0,
+  };
 }
 
 /**
- * Собирает подборку в группы.
+ * Порядок внутри кармана: сначала меры с названной суммой.
  *
- * Меры со срочным сроком попадают И в блок «Успеть подать», И в свою обычную
- * группу: наверху человек видит, что горит, а ниже — полную картину, чтобы
- * список не выглядел рваным.
+ * Порядок из базы (sort_order) здесь не работает — он у всех мер нулевой,
+ * из-за чего маткапитал когда-то оказывался в хвосте списка.
  */
+function withAmountFirst(a: PodborItem, b: PodborItem) {
+  return Number(Boolean(b.measure.amount)) - Number(Boolean(a.measure.amount));
+}
+
 export function groupPodbor(
   profile: UserProfile,
   measures: SupportMeasure[],
   now: Date = new Date(),
 ): PodborGroups {
   const groups: PodborGroups = {
-    urgent: [],
-    forAll: emptyPockets(),
-    forYou: emptyPockets(),
-    forAllCount: 0,
-    forYouCount: 0,
+    federal: emptyBlock(),
+    regional: emptyBlock(),
     total: 0,
+    urgentCount: 0,
   };
 
   for (const measure of measures) {
@@ -127,37 +120,23 @@ export function groupPodbor(
       pending: verdict.pending,
       deadline: deadlineStatus(profile, measure, now),
     };
+    const block = measure.level === "federal" ? groups.federal : groups.regional;
+    block.count += 1;
     groups.total += 1;
-    if (item.deadline?.urgent) groups.urgent.push(item);
 
-    const pocket = pocketOf(measure);
-    if (isOpenToEveryone(measure)) {
-      groups.forAll[pocket].push(item);
-      groups.forAllCount += 1;
-    } else {
-      groups.forYou[pocket].push(item);
-      groups.forYouCount += 1;
+    // Мера со сгорающим сроком живёт только наверху своего блока: показывать
+    // её второй раз в кармане — значит сбивать счёт и путать человека.
+    if (item.deadline?.urgent) {
+      block.urgent.push(item);
+      groups.urgentCount += 1;
+      continue;
     }
+    block.pockets[pocketOf(measure)].push(item);
   }
 
-  // Порядок внутри кармана: сначала федеральные меры, потом меры своего
-  // региона, и в каждой половине сначала те, у которых названа сумма.
-  //
-  // Федеральные идут первыми, потому что они крупнее и действуют одинаково
-  // по всей стране: материнский капитал и единое пособие человек должен
-  // увидеть раньше областной надбавки. Сумма поднимает меру внутри половины —
-  // за деньгами приходят чаще, чем за услугой. Порядок из базы (sort_order)
-  // здесь не работает: он у всех мер нулевой, из-за чего маткапитал когда-то
-  // оказывался в хвосте списка.
-  const byLevelThenAmount = (a: PodborItem, b: PodborItem) => {
-    const level = (m: PodborItem) => (m.measure.level === "federal" ? 0 : 1);
-    if (level(a) !== level(b)) return level(a) - level(b);
-    return Number(Boolean(b.measure.amount)) - Number(Boolean(a.measure.amount));
-  };
-  for (const bucket of [groups.forAll, groups.forYou]) {
-    for (const key of Object.keys(bucket) as PocketKey[]) {
-      bucket[key].sort(byLevelThenAmount);
-    }
+  for (const block of [groups.federal, groups.regional]) {
+    block.urgent.sort(withAmountFirst);
+    for (const key of POCKET_ORDER) block.pockets[key].sort(withAmountFirst);
   }
   return groups;
 }
