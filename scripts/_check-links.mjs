@@ -15,8 +15,9 @@ for (let f = 0; ; f += 1000) {
   rows.push(...data); if (data.length < 1000) break;
 }
 
-// Та же регулярка, что в компоненте RichText.
-const LINK = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|((?:https?:\/\/|www\.)[^\s<>()]+[^\s<>().,;:]|(?:[a-z0-9-]+\.)+(?:ru|рф|com|org|net)(?:\/[^\s<>()]*[^\s<>().,;:])?)/gi;
+// Правило берём прямо из компонента — так проверка не разъедется с кодом.
+const component = readFileSync("src/components/rich-text.tsx", "utf8");
+const LINK = eval(component.match(/const LINK = (\/[\s\S]+?\/[a-z]*);/)[1]);
 
 const found = new Map();
 for (const r of rows) {
