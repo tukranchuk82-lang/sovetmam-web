@@ -128,6 +128,24 @@ export default async function MeasurePage({
         ) : null}
         <p className="mt-3 text-muted-foreground">{m.shortDescription}</p>
 
+        {m.eligibility && (
+          <>
+            <Separator className="my-6" />
+            {/* «Кому положено» идёт до порядка оформления: сначала человек
+                должен понять, его ли это мера, и только потом читать шаги. */}
+            <section>
+              <h2 className="text-lg font-bold">Кому положено</h2>
+              <div className="mt-3 space-y-2.5">
+                {m.eligibility.split(/\n+/).filter(Boolean).map((line, i) => (
+                  <p key={i} className="text-sm leading-relaxed text-muted-foreground">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
         {m.howToApply.length > 0 && (
           <>
             <Separator className="my-6" />

@@ -231,6 +231,18 @@ export function MeasureForm({
         </Field>
       </fieldset>
 
+      <Field
+        label="Кому положено"
+        hint="условия человеческим текстом: кому, при каких доходах, до какого возраста детей"
+      >
+        <textarea
+          name="eligibility"
+          defaultValue={initial?.eligibility ?? ""}
+          rows={4}
+          className={inputCls}
+        />
+      </Field>
+
       <Field label="Как оформить" hint="каждый шаг — отдельной строкой">
         <textarea
           name="howToApply"

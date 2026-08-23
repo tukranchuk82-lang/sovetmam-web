@@ -79,6 +79,7 @@ function buildInput(fd: FormData): MeasureInput {
     amount: getOptionalString(fd, "amount"),
     segments: getSegments(fd),
     criteria: getCriteria(fd),
+    eligibility: getOptionalString(fd, "eligibility"),
     howToApply: getList(fd, "howToApply"),
     documents: getList(fd, "documents"),
     tips: getList(fd, "tips"),

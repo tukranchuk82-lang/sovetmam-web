@@ -535,6 +535,8 @@ export interface SupportMeasure {
   criteria: EligibilityCriteria;
   /** Срок подачи заявления, если он есть. */
   deadline?: MeasureDeadline | null;
+  /** «Кому положено» — условия человеческим текстом, до порядка оформления. */
+  eligibility?: string | null;
   howToApply: string[];
   documents: string[];
   /** «Полезно знать» — заметки/факты рядом с мерой (не отдельная выплата). */

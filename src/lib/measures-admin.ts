@@ -9,7 +9,7 @@ export interface MeasureAdminRow extends SupportMeasure {
 }
 
 const SELECT_FIELDS =
-  "slug, title, short_description, level, region, category, amount, segments, criteria, how_to_apply, documents, tips, source_url, source_name, updated_at_label, is_published, sort_order";
+  "slug, title, short_description, level, region, category, amount, segments, criteria, eligibility, how_to_apply, documents, tips, source_url, source_name, updated_at_label, is_published, sort_order";
 
 function rowToAdmin(r: Record<string, unknown>): MeasureAdminRow {
   return {
@@ -22,6 +22,7 @@ function rowToAdmin(r: Record<string, unknown>): MeasureAdminRow {
     amount: (r.amount as string | null) ?? undefined,
     segments: (r.segments as string[]) as SupportMeasure["segments"],
     criteria: (r.criteria as SupportMeasure["criteria"]) ?? {},
+    eligibility: (r.eligibility as string | null) ?? null,
     howToApply: (r.how_to_apply as string[]) ?? [],
     documents: (r.documents as string[]) ?? [],
     tips: (r.tips as string[] | null) ?? [],
@@ -168,6 +169,7 @@ export interface MeasureInput {
   amount: string | null;
   segments: string[];
   criteria: SupportMeasure["criteria"];
+  eligibility: string | null;
   howToApply: string[];
   documents: string[];
   tips: string[];
@@ -189,6 +191,7 @@ function inputToRow(m: MeasureInput) {
     amount: m.amount,
     segments: m.segments,
     criteria: m.criteria,
+    eligibility: m.eligibility,
     how_to_apply: m.howToApply,
     documents: m.documents,
     tips: m.tips,
