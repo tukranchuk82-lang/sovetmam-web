@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { RichText } from "@/components/rich-text";
 import { SaveHeart } from "@/components/save-heart";
 import { ShareButton } from "@/components/share-button";
 import { getAllMeasureSlugs, getMeasureBySlug } from "@/lib/measures-db";
@@ -138,7 +139,7 @@ export default async function MeasurePage({
               <div className="mt-3 space-y-2.5">
                 {m.eligibility.split(/\n+/).filter(Boolean).map((line, i) => (
                   <p key={i} className="text-sm leading-relaxed text-muted-foreground">
-                    {line}
+                    <RichText text={line} />
                   </p>
                 ))}
               </div>
@@ -157,7 +158,9 @@ export default async function MeasurePage({
                     <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                       {i + 1}
                     </span>
-                    <span className="text-sm text-muted-foreground">{step}</span>
+                    <span className="text-sm text-muted-foreground">
+                      <RichText text={step} />
+                    </span>
                   </li>
                 ))}
               </ol>
@@ -168,9 +171,16 @@ export default async function MeasurePage({
         {m.documents.length > 0 && (
           <section className="mt-6">
             <h2 className="text-lg font-bold">Какие документы нужны</h2>
-            <ul className="mt-3 list-inside list-disc space-y-1.5 text-sm text-muted-foreground">
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
               {m.documents.map((d, i) => (
-                <li key={i}>{d}</li>
+                <li key={i} className="flex gap-2">
+                  <span aria-hidden className="mt-0.5 text-primary/60">
+                    •
+                  </span>
+                  <span>
+                    <RichText text={d} />
+                  </span>
+                </li>
               ))}
             </ul>
           </section>
@@ -188,7 +198,9 @@ export default async function MeasurePage({
                   <span aria-hidden className="mt-0.5 text-amber-500">
                     •
                   </span>
-                  <span>{t}</span>
+                  <span>
+                    <RichText text={t} />
+                  </span>
                 </li>
               ))}
             </ul>
