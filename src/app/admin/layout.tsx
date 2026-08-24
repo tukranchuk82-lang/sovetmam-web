@@ -77,7 +77,7 @@ export default async function AdminLayout({
             Сверка
           </AdminNavLink>
           <AdminNavLink href="/admin/share" icon={<Share2 className="size-4" />}>
-            Поделились
+            Откуда приходят
           </AdminNavLink>
           <AdminNavLink href="/admin/knowledge" icon={<FolderInput className="size-4" />}>
             База знаний

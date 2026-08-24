@@ -1,6 +1,5 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { SHARE_SOURCE } from "@/lib/share-source";
 
 /**
  * Отчёты по кнопке «Поделиться» для админки.
@@ -22,8 +21,10 @@ export interface ShareStats {
   topPaths: { path: string; count: number; title: string | null }[];
   /** Куда отправляют ссылку: Telegram, MAX, копирование. */
   byChannel: { channel: string; count: number }[];
-  /** Приходы по меткам: кнопка «Поделиться», рассылки, посты. */
-  bySource: { source: string; visits: number }[];
+  /** Приходы по меткам: кнопка «Поделиться», квиз, рассылки, посты. */
+  bySource: { source: string; visits: number; people: number; signups: number }[];
+  /** Метка, по которой отфильтрованы остальные цифры (null — все сразу). */
+  source: string | null;
 }
 
 interface EventRow {
@@ -39,7 +40,7 @@ function daysAgo(days: number): string {
   return new Date(Date.now() - days * 86_400_000).toISOString();
 }
 
-export async function getShareStats(): Promise<ShareStats> {
+export async function getShareStats(source?: string | null): Promise<ShareStats> {
   const sb = createSupabaseAdminClient();
 
   // Событий немного (нажатие кнопки — редкое действие), поэтому читаем их
@@ -52,7 +53,10 @@ export async function getShareStats(): Promise<ShareStats> {
     .order("created_at", { ascending: false })
     .limit(20_000);
 
-  const rows = (data ?? []) as EventRow[];
+  const allRows = (data ?? []) as EventRow[];
+  // Сводку по меткам считаем всегда по всем событиям — иначе, выбрав одну
+  // метку, мы бы потеряли из виду остальные и не смогли переключиться.
+  const rows = source ? allRows.filter((r) => (r.ref ?? "без метки") === source) : allRows;
   const d7 = daysAgo(7);
   const d30 = daysAgo(30);
 
@@ -105,21 +109,42 @@ export async function getShareStats(): Promise<ShareStats> {
     .map(([channel, cnt]) => ({ channel, count: cnt }))
     .sort((a, b) => b.count - a.count);
 
-  const bySourceMap = new Map<string, number>();
-  for (const r of visits) {
+  // Сколько людей и регистраций дала каждая метка. Людей считаем по разным
+  // устройствам, регистрации — по профилям: метка попадает в профиль при
+  // регистрации, и это самый честный счёт.
+  const bySourceMap = new Map<string, { visits: number; visitors: Set<string> }>();
+  for (const r of allRows) {
+    if (r.kind !== "visit") continue;
     const key = r.ref ?? "без метки";
-    bySourceMap.set(key, (bySourceMap.get(key) ?? 0) + 1);
+    const cell = bySourceMap.get(key) ?? { visits: 0, visitors: new Set<string>() };
+    cell.visits += 1;
+    if (r.visitor) cell.visitors.add(r.visitor);
+    bySourceMap.set(key, cell);
   }
+
+  const { data: signupRows } = await sb
+    .from("app_users")
+    .select("utm_source")
+    .not("utm_source", "is", null);
+  const signupsBySource = new Map<string, number>();
+  for (const u of (signupRows ?? []) as { utm_source: string }[]) {
+    signupsBySource.set(u.utm_source, (signupsBySource.get(u.utm_source) ?? 0) + 1);
+  }
+
   const bySource = [...bySourceMap.entries()]
-    .map(([source, v]) => ({ source, visits: v }))
+    .map(([key, cell]) => ({
+      source: key,
+      visits: cell.visits,
+      people: cell.visitors.size,
+      signups: signupsBySource.get(key) ?? 0,
+    }))
     .sort((a, b) => b.visits - a.visits);
 
   const people = new Set(visits.map((r) => r.visitor).filter(Boolean)).size;
 
-  const { count: signups } = await sb
-    .from("app_users")
-    .select("id", { count: "exact", head: true })
-    .eq("utm_source", SHARE_SOURCE);
+  const signups = source
+    ? (signupsBySource.get(source) ?? 0)
+    : [...signupsBySource.values()].reduce((a, b) => a + b, 0);
 
   return {
     shares: {
@@ -133,9 +158,10 @@ export async function getShareStats(): Promise<ShareStats> {
       last30: count(visits, d30),
     },
     people,
-    signups: signups ?? 0,
+    signups,
     topPaths,
     byChannel,
     bySource,
+    source: source ?? null,
   };
 }

@@ -3,12 +3,16 @@ import { Share2, ExternalLink } from "lucide-react";
 import { getShareStats } from "@/lib/share-admin";
 import { AdminPageHeader } from "@/components/admin/page-header";
 
-export const metadata = { title: "Поделились" };
+export const metadata = { title: "Откуда приходят" };
 export const dynamic = "force-dynamic";
 
 /** Понятное имя метки вместо служебного слова в ссылке. */
 const SOURCE_LABEL: Record<string, string> = {
   share: "Кнопка «Поделиться»",
+  quiz: "Квиз «Сколько вам положено»",
+  kurs: "Курс «Шпаргалка»",
+  bot: "Чат-боты",
+  baza: "База знаний",
   "без метки": "Без метки",
 };
 
@@ -23,33 +27,61 @@ const CHANNEL_LABEL: Record<string, string> = {
   неизвестно: "Не записано (до появления выбора)",
 };
 
-export default async function SharePage() {
-  const stats = await getShareStats();
+export default async function SharePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ source?: string }>;
+}) {
+  const { source } = await searchParams;
+  const stats = await getShareStats(source || null);
+  const label = (key: string) => SOURCE_LABEL[key] ?? key;
 
   return (
     <div className="px-4 py-5 md:px-6">
       <AdminPageHeader
         icon={<Share2 />}
-        title="Поделились"
-        description="Сколько раз отправили ссылку на приложение, сколько людей по ней пришло и сколько осталось."
+        title="Откуда приходят"
+        description="Сколько людей пришло по размеченным ссылкам — из квиза, ботов, рассылок и кнопки «Поделиться» — и сколько из них зарегистрировалось."
       />
 
-      {/* Цепочка целиком: поделились → пришли → зарегистрировались. Три числа
-          рядом показывают, где теряются люди. */}
-      <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label="Поделились всего" value={stats.shares.total} accent />
-        <Stat label="Поделились за 7 дней" value={stats.shares.last7} />
-        <Stat label="Пришло людей" value={stats.people} accent />
-        <Stat label="Из них зарегистрировались" value={stats.signups} />
+      {/* Выбор источника: все цифры ниже считаются по выбранной метке. */}
+      <div className="mt-4 flex flex-wrap gap-1.5">
+        <SourceTab
+          href="/admin/share"
+          active={!stats.source}
+          title="Все источники"
+        />
+        {stats.bySource.map((s) => (
+          <SourceTab
+            key={s.source}
+            href={"/admin/share?source=" + encodeURIComponent(s.source)}
+            active={stats.source === s.source}
+            title={label(s.source) + " · " + s.visits}
+          />
+        ))}
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {/* Цепочка целиком: пришли → остались. Когда выбран один источник,
+          счётчики нажатий кнопки «Поделиться» не показываем: они про способ
+          отправки ссылки, а не про то, откуда пришёл человек. */}
+      <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <Stat label="Пришло людей" value={stats.people} accent />
+        <Stat label="Из них зарегистрировались" value={stats.signups} accent />
         <Stat label="Переходов всего" value={stats.visits.total} />
         <Stat label="Переходов за 7 дней" value={stats.visits.last7} />
-        <Stat label="Переходов за 30 дней" value={stats.visits.last30} />
-        <Stat label="Поделились за 30 дней" value={stats.shares.last30} />
       </div>
 
+      {!stats.source && (
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Stat label="Поделились всего" value={stats.shares.total} />
+          <Stat label="Поделились за 7 дней" value={stats.shares.last7} />
+          <Stat label="Поделились за 30 дней" value={stats.shares.last30} />
+          <Stat label="Переходов за 30 дней" value={stats.visits.last30} />
+        </div>
+      )}
+
+      {!stats.source && (
+        <>
       <div className="mt-2 rounded-2xl border bg-card p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Чем делятся чаще всего
@@ -115,6 +147,8 @@ export default async function SharePage() {
           </ul>
         )}
       </div>
+        </>
+      )}
 
       <div className="mt-2 rounded-2xl border bg-card p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -136,11 +170,19 @@ export default async function SharePage() {
                 key={s.source}
                 className="flex items-baseline justify-between gap-3 border-b pb-1.5 last:border-0"
               >
-                <span className="truncate text-sm">
-                  {SOURCE_LABEL[s.source] ?? s.source}
-                </span>
-                <span className="shrink-0 text-sm font-semibold tabular-nums">
-                  {s.visits}
+                <Link
+                  href={"/admin/share?source=" + encodeURIComponent(s.source)}
+                  className="truncate text-sm hover:underline"
+                >
+                  {label(s.source)}
+                </Link>
+                {/* Цепочка по каждому источнику: переходы → люди → регистрации.
+                    Так видно не только объём, но и то, что из него выросло. */}
+                <span className="shrink-0 text-sm tabular-nums">
+                  <span className="font-semibold">{s.visits}</span>
+                  <span className="text-muted-foreground">
+                    {" "}· {s.people} чел. · {s.signups} рег.
+                  </span>
                 </span>
               </li>
             ))}
@@ -154,6 +196,30 @@ export default async function SharePage() {
         поэтому обновление страницы счётчик не накручивает.
       </p>
     </div>
+  );
+}
+
+/** Вкладка выбора источника: нажатие меняет метку в адресе страницы. */
+function SourceTab({
+  href,
+  active,
+  title,
+}: {
+  href: string;
+  active: boolean;
+  title: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={
+        active
+          ? "rounded-full bg-[#1B3A6B] px-3 py-1.5 text-xs font-semibold text-white"
+          : "rounded-full border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent"
+      }
+    >
+      {title}
+    </Link>
   );
 }
 
