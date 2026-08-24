@@ -15,6 +15,9 @@ export interface ShareStats {
   visits: { total: number; last7: number; last30: number };
   /** Сколько разных устройств приходило по размеченным ссылкам. */
   people: number;
+  /** Люди за 7 и 30 дней — для сводки. */
+  peopleLast7: number;
+  peopleLast30: number;
   /** Зарегистрировались, придя по кнопке «Поделиться». */
   signups: number;
   /** Чем делятся чаще всего. */
@@ -140,7 +143,14 @@ export async function getShareStats(source?: string | null): Promise<ShareStats>
     }))
     .sort((a, b) => b.visits - a.visits);
 
-  const people = new Set(visits.map((r) => r.visitor).filter(Boolean)).size;
+  const peopleIn = (since?: string) =>
+    new Set(
+      visits
+        .filter((r) => (since ? r.created_at >= since : true))
+        .map((r) => r.visitor)
+        .filter(Boolean),
+    ).size;
+  const people = peopleIn();
 
   const signups = source
     ? (signupsBySource.get(source) ?? 0)
@@ -158,6 +168,8 @@ export async function getShareStats(source?: string | null): Promise<ShareStats>
       last30: count(visits, d30),
     },
     people,
+    peopleLast7: peopleIn(d7),
+    peopleLast30: peopleIn(d30),
     signups,
     topPaths,
     byChannel,

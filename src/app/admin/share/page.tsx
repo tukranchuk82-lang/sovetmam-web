@@ -56,7 +56,7 @@ export default async function SharePage({
             key={s.source}
             href={"/admin/share?source=" + encodeURIComponent(s.source)}
             active={stats.source === s.source}
-            title={label(s.source) + " · " + s.visits}
+            title={label(s.source) + " · " + s.people}
           />
         ))}
       </div>
@@ -67,8 +67,8 @@ export default async function SharePage({
       <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="Пришло людей" value={stats.people} accent />
         <Stat label="Из них зарегистрировались" value={stats.signups} accent />
-        <Stat label="Переходов всего" value={stats.visits.total} />
-        <Stat label="Переходов за 7 дней" value={stats.visits.last7} />
+        <Stat label="Людей за 7 дней" value={stats.peopleLast7} />
+        <Stat label="Людей за 30 дней" value={stats.peopleLast30} />
       </div>
 
       {!stats.source && (
@@ -76,7 +76,7 @@ export default async function SharePage({
           <Stat label="Поделились всего" value={stats.shares.total} />
           <Stat label="Поделились за 7 дней" value={stats.shares.last7} />
           <Stat label="Поделились за 30 дней" value={stats.shares.last30} />
-          <Stat label="Переходов за 30 дней" value={stats.visits.last30} />
+          <Stat label="Переходов всего" value={stats.visits.total} />
         </div>
       )}
 
@@ -163,7 +163,7 @@ export default async function SharePage({
             загадка — «512 · 423 · 90». */}
         <div className="mt-3 flex items-baseline justify-between gap-3 border-b pb-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
           <span>Источник</span>
-          <span className="shrink-0">Переходы · люди · регистрации</span>
+          <span className="shrink-0">Люди · регистрации · переходы</span>
         </div>
 
         {stats.bySource.length === 0 ? (
@@ -183,12 +183,12 @@ export default async function SharePage({
                 >
                   {label(s.source)}
                 </Link>
-                {/* Цепочка по каждому источнику: переходы → люди → регистрации.
-                    Так видно не только объём, но и то, что из него выросло. */}
+                {/* Главное число — люди: именно их считаем результатом.
+                    Переходы оставляем справочно, серым. */}
                 <span className="shrink-0 text-sm tabular-nums">
-                  <span className="font-semibold">{s.visits}</span>
+                  <span className="font-semibold">{s.people} чел.</span>
                   <span className="text-muted-foreground">
-                    {" "}· {s.people} чел. · {s.signups} рег.
+                    {" "}· {s.signups} рег. · {s.visits} переходов
                   </span>
                 </span>
               </li>
@@ -198,15 +198,15 @@ export default async function SharePage({
       </div>
 
       <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-        <b>Переходы</b> — сколько раз открывали приложение по размеченной
-        ссылке. Один визит считается один раз, поэтому обновление страницы
-        счётчик не накручивает, но человек, зашедший сегодня и завтра, добавит
-        два перехода.{" "}
-        <b>Люди</b> — сколько разных устройств приходило: десять заходов с
-        одного телефона это один человек. Если один и тот же человек зашёл с
-        телефона и с компьютера, он посчитается дважды.{" "}
+        <b>Люди</b> — главное число: сколько разных устройств приходило.
+        Десять заходов с одного телефона — это один человек. Если один и тот же
+        человек открыл ссылку и с телефона, и с компьютера, он посчитается
+        дважды.{" "}
         <b>Регистрации</b> — сколько из пришедших завели учётную запись: метка
-        ссылки сохраняется в профиле, поэтому счёт точный.
+        ссылки сохраняется в профиле, поэтому счёт точный.{" "}
+        <b>Переходы</b> — справочно: сколько всего было заходов по ссылке. Один
+        визит считается один раз, обновление страницы счётчик не накручивает, но
+        человек, зашедший сегодня и завтра, добавит два перехода.
       </p>
     </div>
   );
