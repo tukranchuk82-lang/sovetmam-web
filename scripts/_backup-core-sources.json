@@ -1,0 +1,38 @@
+[
+ {
+  "slug": "proezd-detey",
+  "title": "Льготный проезд для детей",
+  "criteria": {
+   "requiresFamily": true
+  },
+  "source_url": "https://www.rzd.ru/",
+  "source_name": "Правила перевозок пассажиров РЖД; статья 106 Воздушного кодекса РФ"
+ },
+ {
+  "slug": "eko-po-oms",
+  "title": "ЭКО по полису ОМС",
+  "criteria": {
+   "requiresChildren": false
+  },
+  "source_url": "https://www.rosminzdrav.ru/",
+  "source_name": "Программа государственных гарантий бесплатного оказания медицинской помощи; порядок использования вспомогательных репродуктивных технологий"
+ },
+ {
+  "slug": "krizisnye-centry",
+  "title": "Кризисные центры для семей с детьми",
+  "criteria": {
+   "requiresFamily": true
+  },
+  "source_url": "https://mintrud.gov.ru/",
+  "source_name": "Региональные министерства социальной защиты; всероссийский телефон доверия для женщин"
+ },
+ {
+  "slug": "sertifikat-dopolnitelnogo-obrazovaniya",
+  "title": "Сертификат дополнительного образования (кружки и секции)",
+  "criteria": {
+   "requiresFamily": true
+  },
+  "source_url": "https://www.gosuslugi.ru/",
+  "source_name": "Целевая модель развития дополнительного образования детей; региональные навигаторы"
+ }
+]
