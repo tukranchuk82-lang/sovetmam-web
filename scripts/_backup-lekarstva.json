@@ -1,0 +1,14 @@
+{
+ "slug": "besplatnye-lekarstva-detyam",
+ "criteria": {
+  "anyOf": [
+   {
+    "maxYoungestChildAgeYears": 3
+   },
+   {
+    "minChildren": 3
+   }
+  ],
+  "requiresChildren": true
+ }
+}
