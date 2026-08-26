@@ -1,0 +1,18 @@
+[
+ {
+  "slug": "pushkinskaya-karta",
+  "title": "Пушкинская карта — 5 000 ₽ в год",
+  "criteria": {
+   "requiresFamily": true,
+   "hasChildAgedFrom": 14
+  }
+ },
+ {
+  "slug": "obrazovatelnyy-kredit",
+  "title": "Образовательный кредит под 3% годовых",
+  "criteria": {
+   "requiresFamily": true,
+   "hasChildAgedFrom": 16
+  }
+ }
+]
