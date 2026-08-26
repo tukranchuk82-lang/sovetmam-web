@@ -1,0 +1,17 @@
+[
+ {
+  "slug": "semeynaya-ipoteka",
+  "title": "Семейная ипотека под 6%",
+  "criteria": {
+   "requiresChildren": true,
+   "requiresMortgageIntent": true
+  }
+ },
+ {
+  "slug": "dalnevostochnaya-arkticheskaya-ipoteka",
+  "title": "Дальневосточная и арктическая ипотека (до 2%)",
+  "criteria": {
+   "requiresMortgageIntent": true
+  }
+ }
+]
