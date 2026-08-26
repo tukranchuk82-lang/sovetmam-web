@@ -1,0 +1,13 @@
+{
+ "slug": "edinoe-posobie",
+ "criteria": {
+  "anyOf": [
+   {
+    "requiresLowIncome": true
+   },
+   {
+    "requiresPregnancy": true
+   }
+  ]
+ }
+}
