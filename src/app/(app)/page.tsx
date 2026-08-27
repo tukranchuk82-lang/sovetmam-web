@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Sparkles, ChevronRight } from "lucide-react";
 import { Portrait } from "@/components/home/portrait";
 import { AuthorSignature } from "@/components/home/author-signature";
+import { CourseBanner } from "@/components/home/course-banner";
 import { CatalogMeasures } from "@/components/home/catalog-measures";
 import { Classification } from "@/components/home/classification";
 import { Directions } from "@/components/home/directions";
@@ -9,16 +10,6 @@ import { PyramidSection } from "@/components/home/pyramid-section";
 import { ShareSection } from "@/components/home/share-section";
 import { JsonLd } from "@/components/json-ld";
 import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
-
-// Акцентный цвет декоративных черт — бренд-бордовый.
-const ACCENT = "#8E1D2C";
-
-
-const FEATURES = [
-  { img: "/bird2-cut.png?v=2", lines: ["Проверенные и актуальные", "меры поддержки"] },
-  { img: "/kid-cut.png?v=2", lines: ["Подбор мер под вашу", "жизненную ситуацию"] },
-  { img: "/head-cut.png?v=2", lines: ["Забота, уважение", "и реальная помощь"] },
-];
 
 // Паспорт сайта и организации для поисковика. Отсюда берутся название
 // организации в выдаче и строка поиска по каталогу прямо в результатах Google.
@@ -70,10 +61,10 @@ export default function Home() {
           число, потому что min(1, <длина>) — невалидный CSS: смешивать число и
           длину нельзя. Поэтому размеры пишем как calc(42 * var(--s)).
 
-          --col — ширина правой колонки (портрет + подпись под ним). Одна
-          колонка на оба элемента гарантирует, что их ширины совпадают. */}
+          --col — ширина правой колонки с портретом. От неё же считается
+          правый отступ текстового блока слева, чтобы он не лез на фото. */}
       <section
-        className="relative min-h-[436px] flex-1 overflow-hidden px-6 pt-5"
+        className="relative min-h-[352px] flex-1 overflow-hidden px-6 pt-5"
         style={
           {
             containerType: "inline-size",
@@ -91,32 +82,27 @@ export default function Home() {
                 style={{ mixBlendMode: "multiply" }} />
            и видимый <h1> с подзаголовком (см. ниже). */}
 
-        {/* Силуэт города снизу слева (как было изначально): правый край левее
-           подписи, зазор 1ch — текст справа на него не наползает.
-           city-trim.png — с обрезанными пустыми полями (было 1899×828 при
-           контенте 1832×651), поэтому нижний край силуэта = нижний край
-           картинки и ровно совпадает с низом подписи «автор проекта»
-           (обе на bottom-4). Ширина в % — уменьшается вместе с экраном. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/city-trim.png?v=1"
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute bottom-4 right-[calc(46%_+_1ch_-_5px)] z-0 w-[85%] opacity-50"
-          style={{ mixBlendMode: "multiply" }}
-        />
+        {/* Силуэт города в герое снят по просьбе заказчика (2026-08): после
+           переезда подписи влево картинка оказалась прямо под текстом и
+           «поехала». Для отката вернуть:
+           <img src="/city-trim.png?v=1" alt="" aria-hidden
+                className="pointer-events-none absolute bottom-4 right-[calc(46%_+_1ch_-_5px)] z-0 w-[85%] opacity-50"
+                style={{ mixBlendMode: "multiply" }} />
+           Внизу страницы свой силуэт города — он остаётся. */}
 
-        {/* Правая колонка: портрет и подпись под ним. Ширина задана один раз
-           (--col), поэтому фото и текст всегда совпадают по левому и правому
-           краю. Колонка прижата к низу героя — низ подписи задаёт уровень,
-           по которому выравнивается силуэт города. */}
+        {/* Правая колонка: портрет. Ширина задана один раз (--col) — от неё
+           отбивается текст слева. Колонка прижата к низу героя. */}
         <div className="absolute bottom-4 right-2 z-10 w-[var(--col)]">
           <Portrait className="block w-full" />
-          <AuthorSignature className="relative z-20 mt-1" />
         </div>
 
-        {/* Текстовый блок (поверх, слева) */}
-        <div className="relative z-20">
+        {/* Текстовый блок слева: подпись автора. Прежде здесь были красная
+           черта и список из трёх преимуществ с иконками — сняты по просьбе
+           заказчика (2026-08), а подпись переехала сюда из-под портрета.
+           Правый край блока отбит на ширину колонки с фото, поэтому текст не
+           наползает на портрет; по вертикали блок центрован относительно
+           героя, чтобы совпадать с лицом на фото. */}
+        <div className="absolute inset-y-0 left-6 right-[calc(var(--col)_+_16px)] z-20 flex flex-col justify-center">
           {/* Заголовок остаётся в разметке для поисковиков и скринридеров,
               визуально скрыт (см. комментарий об откате выше). */}
           <h1 className="sr-only">
@@ -124,37 +110,7 @@ export default function Home() {
             навигатор мер поддержки для каждой семьи.
           </h1>
 
-          {/* Красная декоративная линия */}
-          <span
-            className="block h-[3px] w-10 rounded-full"
-            style={{ background: ACCENT }}
-          />
-
-          {/* Три преимущества. Иконки, отступы и кегль ужимаются вместе с
-              экраном (--s), поэтому список не наползает на силуэт города.
-              Шрифт не опускаем ниже 12px — читаемость важнее пропорции.
-              Правый отступ = ширина колонки с портретом + зазор. */}
-          <ul className="mt-[calc(24_*_var(--s))] flex flex-col gap-[calc(20_*_var(--s))] pr-[calc(var(--col)_-_4px)]">
-            {FEATURES.map(({ img, lines }) => (
-              <li
-                key={lines[0]}
-                className="flex items-center gap-[calc(14_*_var(--s))]"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={img}
-                  alt=""
-                  aria-hidden
-                  className="size-[calc(42_*_var(--s))] shrink-0 object-contain"
-                />
-                <span className="text-[max(12px,calc(14_*_var(--s)))] leading-snug text-[#1A1A1A]">
-                  {lines[0]}
-                  <br />
-                  {lines[1]}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <AuthorSignature />
         </div>
       </section>
 
@@ -199,6 +155,11 @@ export default function Home() {
           <ChevronRight className="size-5" />
         </span>
       </Link>
+
+      {/* Плашка авторского курса: уводит в отдельное приложение курса.
+          Стоит сразу за подбором — это второе, ради чего человек может сюда
+          прийти, и обе плашки видны на первом экране. */}
+      <CourseBanner />
 
       {/* Каталог мер поддержки — сетка жизненных ситуаций (по утв. макету) */}
       <CatalogMeasures />

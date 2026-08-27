@@ -26,12 +26,14 @@ export interface ShareStats {
   byChannel: { channel: string; count: number }[];
   /** Приходы по меткам: кнопка «Поделиться», квиз, рассылки, посты. */
   bySource: { source: string; visits: number; people: number; signups: number }[];
+  /** Уходы по нашим ссылкам наружу — сейчас это только плашка курса. */
+  exits: { target: string; people: number; clicks: number; last30: number }[];
   /** Метка, по которой отфильтрованы остальные цифры (null — все сразу). */
   source: string | null;
 }
 
 interface EventRow {
-  kind: "share" | "visit";
+  kind: "share" | "visit" | "exit";
   path: string;
   ref: string | null;
   channel: string | null;
@@ -143,6 +145,34 @@ export async function getShareStats(source?: string | null): Promise<ShareStats>
     }))
     .sort((a, b) => b.visits - a.visits);
 
+  // Переходы наружу считаем по всем событиям, а не по выбранной метке: метка
+  // отвечает на вопрос «откуда человек пришёл», а уход — совсем про другое.
+  const exitsMap = new Map<
+    string,
+    { clicks: number; visitors: Set<string>; last30: number }
+  >();
+  for (const r of allRows) {
+    if (r.kind !== "exit") continue;
+    const key = r.channel ?? "неизвестно";
+    const cell = exitsMap.get(key) ?? {
+      clicks: 0,
+      visitors: new Set<string>(),
+      last30: 0,
+    };
+    cell.clicks += 1;
+    if (r.visitor) cell.visitors.add(r.visitor);
+    if (r.created_at >= d30) cell.last30 += 1;
+    exitsMap.set(key, cell);
+  }
+  const exits = [...exitsMap.entries()]
+    .map(([target, cell]) => ({
+      target,
+      people: cell.visitors.size,
+      clicks: cell.clicks,
+      last30: cell.last30,
+    }))
+    .sort((a, b) => b.people - a.people);
+
   const peopleIn = (since?: string) =>
     new Set(
       visits
@@ -174,6 +204,7 @@ export async function getShareStats(source?: string | null): Promise<ShareStats>
     topPaths,
     byChannel,
     bySource,
+    exits,
     source: source ?? null,
   };
 }

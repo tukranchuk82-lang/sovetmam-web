@@ -23,7 +23,7 @@ export { SHARE_SOURCE };
 const VISITOR_COOKIE = "vid";
 const VISITOR_MAX_AGE = 60 * 60 * 24 * 365;
 
-export type ShareKind = "share" | "visit";
+export type ShareKind = "share" | "visit" | "exit";
 
 /**
  * Ссылка, которой делятся. Метка нужна, чтобы отличить переход по ней от

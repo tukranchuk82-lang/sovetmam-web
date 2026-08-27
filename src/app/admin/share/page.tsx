@@ -16,6 +16,11 @@ const SOURCE_LABEL: Record<string, string> = {
   "без метки": "Без метки",
 };
 
+/** Куда уводят наши собственные ссылки наружу. */
+const EXIT_LABEL: Record<string, string> = {
+  kurs: "Курс «Шпаргалка для родителей»",
+};
+
 /** Понятное имя способа отправки. */
 const CHANNEL_LABEL: Record<string, string> = {
   telegram: "Telegram",
@@ -196,6 +201,47 @@ export default async function SharePage({
           </ul>
         )}
       </div>
+
+      {/* Обратное направление: не «откуда пришли», а «куда ушли». Пока это
+          одна плашка курса на главной, но блок общий — сюда попадёт любая
+          наша ссылка наружу. Показываем только на общем виде: к выбранной
+          метке уходы отношения не имеют. */}
+      {!stats.source && stats.exits.length > 0 && (
+        <div className="mt-2 rounded-2xl border bg-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Уходят к нам же — в другие приложения
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Сколько человек нажало плашку курса на главной. Считаем нажатия на
+            нашей стороне: что человек сделал дальше, уже в приложении курса,
+            отсюда не видно.
+          </p>
+
+          <div className="mt-3 flex items-baseline justify-between gap-3 border-b pb-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+            <span>Куда</span>
+            <span className="shrink-0">Люди · нажатия · за 30 дней</span>
+          </div>
+
+          <ul className="mt-3 space-y-1.5">
+            {stats.exits.map((e) => (
+              <li
+                key={e.target}
+                className="flex items-baseline justify-between gap-3 border-b pb-1.5 last:border-0"
+              >
+                <span className="truncate text-sm">
+                  {EXIT_LABEL[e.target] ?? e.target}
+                </span>
+                <span className="shrink-0 text-sm tabular-nums">
+                  <span className="font-semibold">{e.people} чел.</span>
+                  <span className="text-muted-foreground">
+                    {" "}· {e.clicks} нажатий · {e.last30} за 30 дней
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
         <b>Люди</b> — главное число: сколько разных устройств приходило.
