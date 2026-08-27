@@ -324,6 +324,8 @@ export interface EligibilityCriteria {
    * requiresChildren: false читается движком как «ограничения нет».
    */
   requiresNoChildren?: boolean;
+  /** Беременности сейчас нет: мера нужна до неё, а не во время. */
+  requiresNotPregnant?: boolean;
   minChildren?: number;
   /**
    * Сколько нужно несовершеннолетних детей. Не то же, что minChildren:
@@ -1026,6 +1028,7 @@ function matchesCriteria(
   if (c.requiresNoChildren && (profile.hasChildren || profile.pregnant)) {
     return false;
   }
+  if (c.requiresNotPregnant && profile.pregnant) return false;
   if (c.minChildrenUnder18 != null) {
     const minors = (profile.childrenAges ?? []).filter((a) => a < 18).length;
     if (minors < c.minChildrenUnder18) return false;
