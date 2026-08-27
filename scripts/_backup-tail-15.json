@@ -1,0 +1,178 @@
+[
+ {
+  "slug": "sah-028",
+  "title": "Жильё при усыновлении ребёнка-инвалида (Сахалинская область)",
+  "criteria": {
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresChildren": true,
+   "requiresFosterParent": true
+  }
+ },
+ {
+  "slug": "saha-005",
+  "title": "Выплата при рождении первого ребёнка (Республика Саха (Якутия))",
+  "criteria": {
+   "regions": [
+    "Республика Саха (Якутия)"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "sah-004",
+  "title": "Бесплатное молоко младшим школьникам (Сахалинская область)",
+  "criteria": {
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chao-001",
+  "title": "Выплата при рождении первого ребёнка (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "sah-001",
+  "title": "Компенсация родительской платы за детский сад (Сахалинская область)",
+  "criteria": {
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chao-008",
+  "title": "«Подарок новорождённому» или 25 000 ₽ (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "saha-013",
+  "title": "Бесплатное питание школьников и студентов из многодетных семей (Республика Саха (Якутия))",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Республика Саха (Якутия)"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "saha-003",
+  "title": "Компенсация родительской платы за детский сад (Республика Саха (Якутия))",
+  "criteria": {
+   "regions": [
+    "Республика Саха (Якутия)"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "sah-003",
+  "title": "Бесплатное питание школьников (Сахалинская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "sah-013",
+  "title": "Выплата при рождении тройни и более (Сахалинская область)",
+  "criteria": {
+   "regions": [
+    "Сахалинская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 3
+  }
+ },
+ {
+  "slug": "sah-023",
+  "title": "Выплата при рождении первого ребёнка (Сахалинская область)",
+  "criteria": {
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "sah-022",
+  "title": "Выплата на школьную одежду малоимущим (Сахалинская область)",
+  "criteria": {
+   "regions": [
+    "Сахалинская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "saha-001",
+  "title": "Бесплатное питание школьников (Республика Саха (Якутия))",
+  "criteria": {
+   "regions": [
+    "Республика Саха (Якутия)"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chao-023",
+  "title": "Бесплатное горячее питание в школе (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "hasChildAgedTo": 17,
+   "hasChildAgedFrom": 7,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chao-002",
+  "title": "Выплата при рождении второго и последующего ребёнка (Чукотский автономный округ)",
+  "criteria": {
+   "regions": [
+    "Чукотский автономный округ"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true
+  }
+ }
+]

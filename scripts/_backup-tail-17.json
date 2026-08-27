@@ -1,0 +1,263 @@
+[
+ {
+  "slug": "kchr-009",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Карачаево-Черкесская Республика)",
+  "criteria": {
+   "regions": [
+    "Карачаево-Черкесская Республика"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "kchr-001",
+  "title": "Выплата при рождении второго ребёнка (Карачаево-Черкесская Республика)",
+  "criteria": {
+   "regions": [
+    "Карачаево-Черкесская Республика"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "mari-020",
+  "title": "Бесплатное питание школьников из многодетных семей (Республика Марий Эл)",
+  "criteria": {
+   "regions": [
+    "Республика Марий Эл"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "hak-007",
+  "title": "Бесплатный проезд школьников и родителя (Республика Хакасия)",
+  "criteria": {
+   "regions": [
+    "Республика Хакасия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "kchr-002",
+  "title": "Выплата при рождении третьего ребёнка (Карачаево-Черкесская Республика)",
+  "criteria": {
+   "regions": [
+    "Карачаево-Черкесская Республика"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "kchr-015",
+  "title": "Освобождение от платы за детский сад детям участников СВО (Карачаево-Черкесская Республика)",
+  "criteria": {
+   "regions": [
+    "Карачаево-Черкесская Республика"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "kchr-022",
+  "title": "Льготное питание детям участников СВО 5–11 классов (Карачаево-Черкесская Республика)",
+  "criteria": {
+   "regions": [
+    "Карачаево-Черкесская Республика"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "hak-009",
+  "title": "Первоочередной приём в детский сад (Республика Хакасия)",
+  "criteria": {
+   "regions": [
+    "Республика Хакасия"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krsk-005",
+  "title": "Бесплатный проезд школьников из многодетных семей и детей СВО (Курская область)",
+  "criteria": {
+   "regions": [
+    "Курская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krsk-007",
+  "title": "Выплата при рождении тройни и более (Курская область)",
+  "criteria": {
+   "regions": [
+    "Курская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 3
+  }
+ },
+ {
+  "slug": "krsk-018",
+  "title": "Выплата при рождении ребёнка в студенческой семье (Курская область)",
+  "criteria": {
+   "regions": [
+    "Курская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "krsk-017",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Курская область)",
+  "criteria": {
+   "regions": [
+    "Курская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "hak-014",
+  "title": "Бесплатное питание школьников и студентов (Республика Хакасия)",
+  "criteria": {
+   "regions": [
+    "Республика Хакасия"
+   ],
+   "minChildren": 3,
+   "requiresStudent": true,
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "hak-015",
+  "title": "Выплата на школьную одежду (Республика Хакасия)",
+  "criteria": {
+   "regions": [
+    "Республика Хакасия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "mari-011",
+  "title": "Компенсация родительской платы за детский сад (Республика Марий Эл)",
+  "criteria": {
+   "regions": [
+    "Республика Марий Эл"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mari-021",
+  "title": "Первоочередной приём в детский сад многодетным (Республика Марий Эл)",
+  "criteria": {
+   "regions": [
+    "Республика Марий Эл"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "hak-023",
+  "title": "Выплата по уходу родителю 7+ детей (Республика Хакасия)",
+  "criteria": {
+   "regions": [
+    "Республика Хакасия"
+   ],
+   "minChildren": 7,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krsk-008",
+  "title": "Выплата на школьную форму (Курская область)",
+  "criteria": {
+   "regions": [
+    "Курская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "hak-004",
+  "title": "Материальная помощь малообеспеченным семьям (Республика Хакасия)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresPregnancy": true
+    }
+   ],
+   "regions": [
+    "Республика Хакасия"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chech-013",
+  "title": "Бесплатное горячее питание в 5–11 классах для детей погибших участников СВО (Чеченская Республика)",
+  "criteria": {
+   "regions": [
+    "Чеченская Республика"
+   ],
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 11,
+   "requiresSvoFamily": true,
+   "requiresLossOfBreadwinner": true
+  }
+ },
+ {
+  "slug": "chech-006",
+  "title": "Бесплатное горячее питание в школе для льготных категорий (Чеченская Республика)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSpecialNeedsChild": true
+    },
+    {
+     "requiresFosterParent": true
+    },
+    {
+     "requiresSvoFamily": true
+    }
+   ],
+   "regions": [
+    "Чеченская Республика"
+   ],
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 7,
+   "requiresChildren": true
+  }
+ }
+]

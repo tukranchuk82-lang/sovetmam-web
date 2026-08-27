@@ -1,0 +1,186 @@
+[
+ {
+  "slug": "ivn-019",
+  "title": "Освобождение от платы за детский сад многодетным (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mgd-002",
+  "title": "Выплата при рождении двух и более детей (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "mgd-020",
+  "title": "Бесплатное питание школьников и студентов СПО (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mgd-003",
+  "title": "Выплата при рождении третьего ребёнка (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "ivn-036",
+  "title": "Бесплатное питание 5–11 классов детям участников СВО (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "mgd-001",
+  "title": "Выплата при рождении первого ребёнка (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "mgd-007",
+  "title": "Компенсация платы за детский сад (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mgd-051",
+  "title": "Выплата при рождении ребёнка в студенческой семье (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "ivn-009",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "mgd-053",
+  "title": "Помощь первоклассникам на школьные принадлежности (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "mgd-043",
+  "title": "Проездной билет сиротам-школьникам (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "requiresChildren": true,
+   "requiresFosterParent": true
+  }
+ },
+ {
+  "slug": "ivn-020",
+  "title": "Бесплатное горячее питание для 5–11 классов и СПО (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ivn-028",
+  "title": "Бесплатный проезд детям из многодетных семей и сиротам (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mgd-023",
+  "title": "Первоочередные путёвки в лагеря летом (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ivn-037",
+  "title": "Освобождение от платы за детский сад детям участников СВО (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "mgd-022",
+  "title": "Первоочередной приём в детский сад и допобразование (Магаданская область)",
+  "criteria": {
+   "regions": [
+    "Магаданская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ivn-018",
+  "title": "Первоочередной приём в детский сад многодетным (Ивановская область)",
+  "criteria": {
+   "regions": [
+    "Ивановская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]

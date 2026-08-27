@@ -1,76 +1,82 @@
 [
  {
-  "slug": "dagestan-001",
-  "region": "Республика Дагестан",
-  "title": "Единовременная выплата при рождении пятого и каждого последующего ребёнка (Республика Дагестан)",
+  "slug": "chech-004",
+  "region": "Чеченская Республика",
+  "title": "Справка о признании семьи малоимущей и льготы по ней (Чеченская Республика)",
   "criteria": {
    "regions": [
-    "Республика Дагестан"
+    "Чеченская Республика"
    ],
-   "minChildren": 5
-  },
-  "add": {
-   "childAgeToMonths": 12,
-   "appliesToExpecting": true
-  }
- },
- {
-  "slug": "dagestan-002",
-  "region": "Республика Дагестан",
-  "title": "Единовременная выплата при рождении десятого и каждого последующего ребёнка (Республика Дагестан)",
-  "criteria": {
-   "regions": [
-    "Республика Дагестан"
-   ],
-   "minChildren": 10
-  },
-  "add": {
-   "childAgeToMonths": 12,
-   "appliesToExpecting": true
-  }
- },
- {
-  "slug": "dagestan-006",
-  "region": "Республика Дагестан",
-  "title": "Ежемесячное пособие на ребёнка 17–18 лет, обучающегося в школе (Республика Дагестан)",
-  "criteria": {
-   "regions": [
-    "Республика Дагестан"
-   ],
-   "hasChildAgedTo": 18,
-   "hasChildAgedFrom": 17,
+   "requiresFamily": true,
    "requiresLowIncome": true
-  },
-  "add": {
-   "minChildren": 3
-  }
- },
- {
-  "slug": "dagestan-014",
-  "region": "Республика Дагестан",
-  "title": "Бесплатное горячее питание в школах детям мобилизованных и добровольцев СВО (Республика Дагестан)",
-  "criteria": {
-   "regions": [
-    "Республика Дагестан"
-   ],
-   "requiresSvoFamily": true
   },
   "add": {
    "minSchoolChildren": 1
   }
  },
  {
-  "slug": "dagestan-015",
-  "region": "Республика Дагестан",
-  "title": "Освобождение от платы за детский сад для детей участников СВО (Республика Дагестан)",
+  "slug": "chech-006",
+  "region": "Чеченская Республика",
+  "title": "Бесплатное горячее питание в школе для льготных категорий (Чеченская Республика)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSpecialNeedsChild": true
+    },
+    {
+     "requiresFosterParent": true
+    },
+    {
+     "requiresSvoFamily": true
+    }
+   ],
+   "regions": [
+    "Чеченская Республика"
+   ],
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 7,
+   "requiresChildren": true
+  },
+  "add": {
+   "minSchoolChildren": 1
+  }
+ },
+ {
+  "slug": "chech-012",
+  "region": "Чеченская Республика",
+  "title": "Первоочередной приём детей участников СВО в детский сад, школу и колледж (Чеченская Республика)",
   "criteria": {
    "regions": [
-    "Республика Дагестан"
+    "Чеченская Республика"
    ],
+   "requiresChildren": true,
    "requiresSvoFamily": true
   },
   "add": {
    "hasChildAgedTo": 7
+  }
+ },
+ {
+  "slug": "chech-013",
+  "region": "Чеченская Республика",
+  "title": "Бесплатное горячее питание в 5–11 классах для детей погибших участников СВО (Чеченская Республика)",
+  "criteria": {
+   "regions": [
+    "Чеченская Республика"
+   ],
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 11,
+   "requiresSvoFamily": true,
+   "requiresLossOfBreadwinner": true
+  },
+  "add": {
+   "minSchoolChildren": 1
   }
  }
 ]

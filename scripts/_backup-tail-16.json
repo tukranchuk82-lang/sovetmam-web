@@ -1,0 +1,157 @@
+[
+ {
+  "slug": "nao-004",
+  "title": "Пособие при рождении второго и последующих детей (Ненецкий автономный округ)",
+  "criteria": {
+   "regions": [
+    "Ненецкий автономный округ"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "orl-029",
+  "title": "Компенсация родительской платы за детский сад (Орловская область)",
+  "criteria": {
+   "regions": [
+    "Орловская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "kbr-002",
+  "title": "Пособие при рождении сразу трёх и более детей (Кабардино-Балкарская Республика)",
+  "criteria": {
+   "regions": [
+    "Кабардино-Балкарская Республика"
+   ],
+   "requiresChildren": true,
+   "minSimultaneousBirth": 3
+  }
+ },
+ {
+  "slug": "orl-012",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Орловская область)",
+  "criteria": {
+   "regions": [
+    "Орловская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "sev-003",
+  "title": "Освобождение от платы за детский сад (Севастополь)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresDisabledChild": true
+    },
+    {
+     "requiresFosterParent": true
+    }
+   ],
+   "regions": [
+    "Севастополь"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "nao-022",
+  "title": "Бесплатное питание школьников и студентов из многодетных семей (Ненецкий автономный округ)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Ненецкий автономный округ"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "orl-014",
+  "title": "Бесплатный проезд детям-сиротам (Орловская область)",
+  "criteria": {
+   "regions": [
+    "Орловская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "orl-027",
+  "title": "Бесплатное питание обучающихся (Орловская область)",
+  "criteria": {
+   "regions": [
+    "Орловская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "sev-016",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Севастополь)",
+  "criteria": {
+   "regions": [
+    "Севастополь"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "sev-001",
+  "title": "Компенсация родительской платы за детский сад (Севастополь)",
+  "criteria": {
+   "regions": [
+    "Севастополь"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "orl-005",
+  "title": "Выплата на школьную одежду многодетным (Орловская область)",
+  "criteria": {
+   "regions": [
+    "Орловская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "sev-002",
+  "title": "Снижение платы за детсад детям с ОВЗ (Севастополь)",
+  "criteria": {
+   "regions": [
+    "Севастополь"
+   ],
+   "requiresChildren": true,
+   "requiresSpecialNeedsChild": true
+  }
+ },
+ {
+  "slug": "sev-015",
+  "title": "Помощь на школьную форму многодетным (Севастополь)",
+  "criteria": {
+   "regions": [
+    "Севастополь"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]
