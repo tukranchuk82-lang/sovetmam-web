@@ -21,6 +21,7 @@ interface MeasureRow {
   criteria: EligibilityCriteria;
   deadline: MeasureDeadline | null;
   eligibility: string | null;
+  applies_by_child: boolean | null;
   how_to_apply: string[];
   documents: string[];
   tips: string[] | null;
@@ -44,6 +45,7 @@ function fromRow(r: MeasureRow): SupportMeasure {
     criteria: r.criteria ?? {},
     deadline: r.deadline ?? null,
     eligibility: r.eligibility ?? null,
+    appliesByChild: r.applies_by_child ?? false,
     howToApply: r.how_to_apply,
     documents: r.documents,
     tips: r.tips ?? [],
@@ -54,7 +56,7 @@ function fromRow(r: MeasureRow): SupportMeasure {
 }
 
 const SELECT_FIELDS =
-  "slug, title, short_description, level, region, category, amount, segments, criteria, deadline, eligibility, how_to_apply, documents, tips, source_url, source_name, updated_at_label, is_published, sort_order";
+  "slug, title, short_description, level, region, category, amount, segments, criteria, deadline, eligibility, applies_by_child, how_to_apply, documents, tips, source_url, source_name, updated_at_label, is_published, sort_order";
 
 export async function getAllMeasures(): Promise<SupportMeasure[]> {
   const supabase = createSupabaseAnonClient();

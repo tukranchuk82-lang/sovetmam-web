@@ -50,6 +50,8 @@ export type PodborBlock = {
 export type PodborGroups = {
   federal: PodborBlock;
   regional: PodborBlock;
+  /** Меры, которые ребёнок оформляет сам, — отдельным блоком в конце. */
+  child: PodborBlock;
   total: number;
   urgentCount: number;
 };
@@ -107,6 +109,7 @@ export function groupPodbor(
   const groups: PodborGroups = {
     federal: emptyBlock(),
     regional: emptyBlock(),
+    child: emptyBlock(),
     total: 0,
     urgentCount: 0,
   };
@@ -120,9 +123,17 @@ export function groupPodbor(
       pending: verdict.pending,
       deadline: deadlineStatus(profile, measure, now),
     };
-    const block = measure.level === "federal" ? groups.federal : groups.regional;
+    // Меры, которые оформляет сам ребёнок, идут в свой блок, а не к
+    // федеральным или региональным: родитель по ним не заявитель.
+    const block = measure.appliesByChild
+      ? groups.child
+      : measure.level === "federal"
+        ? groups.federal
+        : groups.regional;
     block.count += 1;
-    groups.total += 1;
+    // Общий счёт — только про самого человека: меры, которые оформляет
+    // ребёнок, в «вам подходит N мер» не входят, у них свой счётчик.
+    if (block !== groups.child) groups.total += 1;
 
     // Мера со сгорающим сроком живёт только наверху своего блока: показывать
     // её второй раз в кармане — значит сбивать счёт и путать человека.
@@ -134,7 +145,7 @@ export function groupPodbor(
     block.pockets[pocketOf(measure)].push(item);
   }
 
-  for (const block of [groups.federal, groups.regional]) {
+  for (const block of [groups.federal, groups.regional, groups.child]) {
     block.urgent.sort(withAmountFirst);
     for (const key of POCKET_ORDER) block.pockets[key].sort(withAmountFirst);
   }
