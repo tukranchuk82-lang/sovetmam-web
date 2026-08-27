@@ -319,7 +319,18 @@ export interface EligibilityCriteria {
   requiresFamily?: boolean;
   requiresPregnancy?: boolean;
   requiresChildren?: boolean;
+  /**
+   * Детей ещё нет — мера для планирующих. Отдельное поле, потому что
+   * requiresChildren: false читается движком как «ограничения нет».
+   */
+  requiresNoChildren?: boolean;
   minChildren?: number;
+  /**
+   * Сколько нужно несовершеннолетних детей. Не то же, что minChildren:
+   * тот считает всех, включая взрослых. Мера «двое детей до 18» семье
+   * с подростком и студентом не положена, хотя детей у неё двое.
+   */
+  minChildrenUnder18?: number;
   /**
    * Многоплодные роды: мера положена, только если за одни роды родилось не менее
    * N детей (двойня → 2, тройня → 3, четверни → 4). Это НЕ то же, что minChildren:
@@ -1012,6 +1023,13 @@ function matchesCriteria(
   if (c.requiresFamily && !profile.pregnant && !profile.hasChildren) return false;
   if (c.requiresPregnancy && !profile.pregnant) return false;
   if (c.requiresChildren && !profile.hasChildren) return false;
+  if (c.requiresNoChildren && (profile.hasChildren || profile.pregnant)) {
+    return false;
+  }
+  if (c.minChildrenUnder18 != null) {
+    const minors = (profile.childrenAges ?? []).filter((a) => a < 18).length;
+    if (minors < c.minChildrenUnder18) return false;
+  }
   // Число детей. Для тех, кто ждёт ребёнка, считаем будущее число: женщина,
   // ожидающая третьего, должна видеть меры «на третьего ребёнка» — оформлять их
   // всё равно после родов, но знать о них нужно заранее. Отсюда и вопрос анкеты

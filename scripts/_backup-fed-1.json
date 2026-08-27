@@ -1,0 +1,94 @@
+[
+ {
+  "slug": "transport-invalidam",
+  "title": "Транспортные льготы для людей с инвалидностью",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresDisabledChild": true
+    },
+    {
+     "requiresDisabledParent": true
+    }
+   ],
+   "requiresDisabledChild": false
+  }
+ },
+ {
+  "slug": "vyplaty-studencheskim-semyam-ot-vuza",
+  "title": "Выплаты студенческим семьям и студентам от вуза",
+  "criteria": {
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "eko-po-oms",
+  "title": "ЭКО по полису ОМС",
+  "criteria": {
+   "requiresChildren": false
+  }
+ },
+ {
+  "slug": "stipendii-gosudarstvennye",
+  "title": "Государственные стипендии студентам (ГАС, ГСС, ПГАС)",
+  "criteria": {
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "materinskiy-kapital",
+  "title": "Материнский (семейный) капитал",
+  "criteria": {
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "ostatok-materinskogo-kapitala",
+  "title": "Единовременная выплата остатка материнского капитала",
+  "criteria": {
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "nalogovyy-vychet-lechenie",
+  "title": "Налоговый вычет за лечение и ведение беременности",
+  "criteria": {
+   "requiresNdfl": true
+  }
+ },
+ {
+  "slug": "proezd-detey",
+  "title": "Льготный проезд для детей",
+  "criteria": {
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "stipendii-prezidentskie-imennye",
+  "title": "Президентские, правительственные и именные стипендии, гранты",
+  "criteria": {
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "akademicheskiy-otpusk",
+  "title": "Академический отпуск в вузе",
+  "criteria": {
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "kreditnye-kanikuly-spisanie-svo",
+  "title": "Кредитные каникулы и списание кредитов участникам СВО",
+  "criteria": {
+   "requiresDisabledParent": true
+  }
+ },
+ {
+  "slug": "lgotnyy-avtokredit",
+  "title": "Льготный автокредит «Семейный автомобиль»",
+  "criteria": {
+   "requiresFamily": true
+  }
+ }
+]
