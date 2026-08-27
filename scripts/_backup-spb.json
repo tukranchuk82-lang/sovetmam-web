@@ -1,0 +1,155 @@
+[
+ {
+  "slug": "spb-003",
+  "title": "Ежемесячное пособие на ребёнка от 7 до 16/18 лет (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "spb-018",
+  "title": "Ежегодная выплата многодетным на одежду для учёбы и спортивную форму (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "spb-008",
+  "title": "Выплата женщинам, родившим первого ребёнка в 19–24 года (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "maxParentAge": 24,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "spb-002",
+  "title": "Ежемесячное пособие на ребёнка от 1,5 до 7 лет (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "spb-007",
+  "title": "Единовременная выплата при рождении ребёнка (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "spb-004",
+  "title": "Ежемесячное пособие на ребёнка-инвалида и ВИЧ-инфицированного ребёнка (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "spb-023",
+  "title": "Объекты дачного фонда многодетным семьям с 5+ детьми (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "spb-026",
+  "title": "Бесплатный проезд детям из многодетных семей (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "spb-010",
+  "title": "Подарочный комплект новорождённому (Санкт-Петербург)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 0
+    }
+   ],
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "spb-005",
+  "title": "Пособие на ребёнка из семьи, где родители — инвалиды I/II групп (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresDisabledParent": true
+  }
+ },
+ {
+  "slug": "spb-017",
+  "title": "Ежемесячная выплата матерям пяти и более детей, получающим пенсию (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "spb-014",
+  "title": "Распоряжение средствами материнского капитала (Санкт-Петербург)",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresFamily": true,
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "spb-009",
+  "title": "Единовременная выплата беременной студентке (Санкт-Петербург)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Санкт-Петербург"
+   ]
+  }
+ }
+]

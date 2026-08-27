@@ -1,0 +1,92 @@
+[
+ {
+  "slug": "ryaz-004",
+  "title": "Компенсация платы за детский сад (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ryaz-011",
+  "title": "Компенсация аренды жилья молодым семьям (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "ryaz-006",
+  "title": "Выплата на жильё сельским семьям (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ryaz-010",
+  "title": "Отдых детей в лагерях (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ryaz-023",
+  "title": "Бесплатное питание школьников и студентов из многодетных семей (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "minChildren": 3,
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ryaz-038",
+  "title": "Питание детям с целиакией (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ryaz-040",
+  "title": "Изделия детям с диабетом 1 типа (Рязанская область)",
+  "criteria": {
+   "regions": [
+    "Рязанская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ryaz-001",
+  "title": "Выплата беременным студенткам (Рязанская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Рязанская область"
+   ]
+  }
+ }
+]

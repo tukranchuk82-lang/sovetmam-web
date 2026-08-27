@@ -1,0 +1,116 @@
+[
+ {
+  "slug": "mo-podarok-pervoklassniku",
+  "title": "Подарочный набор первокласснику из малоимущей семьи (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "moadd-003",
+  "title": "Выплата на ребёнка-инвалида с III степенью ограничения самообслуживания (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "moadd-013",
+  "title": "Ежегодная выплата на услуги такси для участников СВО и их детей-инвалидов (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresSvoFamily": true,
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "moadd-012",
+  "title": "Субсидия молодым семьям на улучшение жилищных условий (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresStudent": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "moadd-011",
+  "title": "Социальная (бюджетная) ипотека для учителей, врачей и молодых учёных (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "moadd-002",
+  "title": "Компенсация по уходу за ребёнком-инвалидом неработающему родителю (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "mo-kompensaciya-platy-detsad",
+  "title": "Компенсация родительской платы за детский сад (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mo-pitanie-shkolnikov",
+  "title": "Бесплатное питание школьников льготных категорий (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "moadd-006",
+  "title": "Бесплатные лекарства детям из многодетных семей до 6 лет (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "mo-otdyh-detey",
+  "title": "Отдых и оздоровление детей (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mo-pitanie-beremennyh-i-detey-do-3",
+  "title": "Выплата на полноценное питание беременным, кормящим и детям до 3 лет (Московская область)",
+  "criteria": {
+   "regions": [
+    "Московская область"
+   ],
+   "requiresPregnancy": true
+  }
+ }
+]
