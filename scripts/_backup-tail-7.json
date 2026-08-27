@@ -1,0 +1,195 @@
+[
+ {
+  "slug": "tamb-003",
+  "title": "Выплата при рождении ребёнка (Тамбовская область)",
+  "criteria": {
+   "regions": [
+    "Тамбовская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "tamb-015",
+  "title": "Выплаты выпускникам-сиротам (Тамбовская область)",
+  "criteria": {
+   "regions": [
+    "Тамбовская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tver-019",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Тверская область)",
+  "criteria": {
+   "regions": [
+    "Тверская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "zab-001",
+  "title": "Выплата при рождении первого ребёнка (Забайкальский край)",
+  "criteria": {
+   "regions": [
+    "Забайкальский край"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "zab-005",
+  "title": "Ежегодная выплата на школьную одежду многодетным (Забайкальский край)",
+  "criteria": {
+   "regions": [
+    "Забайкальский край"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "osetia-002",
+  "title": "Бесплатное питание школьников (Республика Северная Осетия — Алания)",
+  "criteria": {
+   "regions": [
+    "Республика Северная Осетия — Алания"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mrm-002",
+  "title": "Пособие при рождении двойни (Мурманская область)",
+  "criteria": {
+   "regions": [
+    "Мурманская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "tamb-006",
+  "title": "Компенсация родительской платы за детский сад (Тамбовская область)",
+  "criteria": {
+   "regions": [
+    "Тамбовская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tamb-012",
+  "title": "Выплаты сиротам-школьникам (Тамбовская область)",
+  "criteria": {
+   "regions": [
+    "Тамбовская область"
+   ],
+   "requiresChildren": true,
+   "requiresFosterParent": true
+  }
+ },
+ {
+  "slug": "osetia-001",
+  "title": "Первоочередное зачисление в детский сад (Республика Северная Осетия — Алания)",
+  "criteria": {
+   "regions": [
+    "Республика Северная Осетия — Алания"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "osetia-004",
+  "title": "Компенсация родительской платы за детский сад (Республика Северная Осетия — Алания)",
+  "criteria": {
+   "regions": [
+    "Республика Северная Осетия — Алания"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tver-004",
+  "title": "Оплата питания школьников из малоимущих семей (Тверская область)",
+  "criteria": {
+   "regions": [
+    "Тверская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "tamb-007",
+  "title": "Бесплатный детсад детям участников СВО (Тамбовская область)",
+  "criteria": {
+   "regions": [
+    "Тамбовская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "mrm-003",
+  "title": "Пособие при рождении тройни и более (Мурманская область)",
+  "criteria": {
+   "regions": [
+    "Мурманская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 3
+  }
+ },
+ {
+  "slug": "tamb-008",
+  "title": "Бесплатное питание школьников и студентов детям СВО (Тамбовская область)",
+  "criteria": {
+   "regions": [
+    "Тамбовская область"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "osetia-005",
+  "title": "Освобождение от платы за детский сад льготным категориям (Республика Северная Осетия — Алания)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresDisabledChild": true
+    },
+    {
+     "requiresFosterParent": true
+    },
+    {
+     "requiresSvoFamily": true
+    }
+   ],
+   "regions": [
+    "Республика Северная Осетия — Алания"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tver-006",
+  "title": "Обеспечение школьной формой многодетным (Тверская область)",
+  "criteria": {
+   "regions": [
+    "Тверская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]

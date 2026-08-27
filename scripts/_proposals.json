@@ -1,11 +1,11 @@
 [
  {
-  "slug": "prim-002",
-  "region": "Приморский край",
-  "title": "Единовременная выплата при рождении первого ребёнка (Приморский край)",
+  "slug": "lpc-001",
+  "region": "Липецкая область",
+  "title": "Выплата при рождении первого ребёнка маме 18–24 лет (Липецкая область)",
   "criteria": {
    "regions": [
-    "Приморский край"
+    "Липецкая область"
    ],
    "requiresFamily": true
   },
@@ -15,63 +15,74 @@
   }
  },
  {
-  "slug": "prim-005",
-  "region": "Приморский край",
-  "title": "Единовременная выплата на улучшение жилищных условий (Приморский край)",
+  "slug": "lpc-004",
+  "region": "Липецкая область",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Липецкая область)",
   "criteria": {
    "regions": [
-    "Приморский край"
+    "Липецкая область"
    ],
-   "minChildren": 2,
-   "requiresFamily": true
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
   },
   "add": {
-   "requiresHousingNeed": true
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true
   }
  },
  {
-  "slug": "prim-008",
-  "region": "Приморский край",
-  "title": "Ежегодные выплаты многодетным семьям на детей (Приморский край)",
+  "slug": "lpc-005",
+  "region": "Липецкая область",
+  "title": "Выплата при рождении тройни и более (Липецкая область)",
   "criteria": {
    "regions": [
-    "Приморский край"
+    "Липецкая область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 3
+  },
+  "add": {
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true
+  }
+ },
+ {
+  "slug": "lpc-010",
+  "region": "Липецкая область",
+  "title": "Компенсация родительской платы за детский сад (Липецкая область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Липецкая область"
+   ],
+   "requiresChildren": true
+  },
+  "add": {
+   "hasChildAgedTo": 7
+  }
+ },
+ {
+  "slug": "lpc-017",
+  "region": "Липецкая область",
+  "title": "Бесплатный проезд детям из многодетных семей (Липецкая область)",
+  "criteria": {
+   "regions": [
+    "Липецкая область"
    ],
    "minChildren": 3,
    "requiresChildren": true
   },
   "add": {
    "minSchoolChildren": 1
-  }
- },
- {
-  "slug": "prim-010",
-  "region": "Приморский край",
-  "title": "Компенсация проезда школьникам из многодетных семей (Приморский край)",
-  "criteria": {
-   "regions": [
-    "Приморский край"
-   ],
-   "minChildren": 3,
-   "requiresChildren": true
-  },
-  "add": {
-   "minSchoolChildren": 1
-  }
- },
- {
-  "slug": "prim-017",
-  "region": "Приморский край",
-  "title": "Ежемесячная выплата по уходу за ребёнком-инвалидом (региональная доплата, Приморский край)",
-  "criteria": {
-   "regions": [
-    "Приморский край"
-   ],
-   "requiresChildren": true,
-   "requiresDisabledChild": true
-  },
-  "add": {
-   "requiresNotEmployed": true
   }
  }
 ]

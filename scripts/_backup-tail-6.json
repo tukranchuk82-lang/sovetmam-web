@@ -1,0 +1,215 @@
+[
+ {
+  "slug": "stavropol-005",
+  "title": "Единовременная выплата студенческим семьям при рождении ребёнка (Ставропольский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresStudent": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Ставропольский край"
+   ]
+  }
+ },
+ {
+  "slug": "perm-004",
+  "title": "Освобождение семей участников СВО от платы за детский сад (Пермский край)",
+  "criteria": {
+   "regions": [
+    "Пермский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "perm-002",
+  "title": "Единовременная выплата при рождении ребёнка в семье участника СВО (Пермский край)",
+  "criteria": {
+   "regions": [
+    "Пермский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "perm-011",
+  "title": "Бесплатные лекарства детям из многодетных семей до 6 лет (Пермский край)",
+  "criteria": {
+   "regions": [
+    "Пермский край"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "perm-010",
+  "title": "Бесплатное питание школьников из многодетных семей (Пермский край)",
+  "criteria": {
+   "regions": [
+    "Пермский край"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "hmao-011",
+  "title": "Ежемесячная компенсация за воспитание ребёнка-инвалида на дому (ХМАО — Югра)",
+  "criteria": {
+   "regions": [
+    "Ханты-Мансийский автономный округ — Югра"
+   ],
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "komi-019",
+  "title": "Выплата одиноким родителям детей-инвалидов (Республика Коми)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresDisabledChild": true
+    },
+    {
+     "requiresFosterParent": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Республика Коми"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "perm-005",
+  "title": "Бесплатное горячее питание для детей участников СВО (Пермский край)",
+  "criteria": {
+   "regions": [
+    "Пермский край"
+   ],
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "stavropol-011",
+  "title": "Бесплатное горячее питание для детей участников СВО в школах (Ставропольский край)",
+  "criteria": {
+   "regions": [
+    "Ставропольский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "stavropol-010",
+  "title": "100% компенсация платы за детский сад для детей участников СВО (Ставропольский край)",
+  "criteria": {
+   "regions": [
+    "Ставропольский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "komi-005",
+  "title": "Бесплатное питание обучающихся (Республика Коми)",
+  "criteria": {
+   "regions": [
+    "Республика Коми"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "komi-036",
+  "title": "Компенсация родительской платы за детский сад (Республика Коми)",
+  "criteria": {
+   "regions": [
+    "Республика Коми"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "komi-014",
+  "title": "Бесплатное горячее питание для 5–11 классов (Республика Коми)",
+  "criteria": {
+   "regions": [
+    "Республика Коми"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "perm-013",
+  "title": "Единовременная выплата при рождении близнецов и более детей (Пермский край)",
+  "criteria": {
+   "regions": [
+    "Пермский край"
+   ],
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "perm-001",
+  "title": "Единовременная денежная выплата при рождении ребёнка (Пермский край)",
+  "criteria": {
+   "regions": [
+    "Пермский край"
+   ],
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "hmao-007",
+  "title": "Ежемесячная выплата многодетным семьям на проезд детей (ХМАО — Югра)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Ханты-Мансийский автономный округ — Югра"
+   ]
+  }
+ },
+ {
+  "slug": "stavropol-006",
+  "title": "Компенсация части родительской платы за детский сад (Ставропольский край)",
+  "criteria": {
+   "regions": [
+    "Ставропольский край"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "perm-009",
+  "title": "Материальная помощь на школьную форму многодетным малоимущим семьям (Пермский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Пермский край"
+   ]
+  }
+ }
+]
