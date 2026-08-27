@@ -1,15 +1,13 @@
 [
  {
-  "slug": "reg-kaliningradskaya-oblast-003",
-  "region": "Калининградская область",
-  "title": "Единовременная выплата молодой семье при рождении третьего ребёнка (Калининградская область)",
+  "slug": "dagestan-001",
+  "region": "Республика Дагестан",
+  "title": "Единовременная выплата при рождении пятого и каждого последующего ребёнка (Республика Дагестан)",
   "criteria": {
    "regions": [
-    "Калининградская область"
+    "Республика Дагестан"
    ],
-   "minChildren": 3,
-   "requiresFamily": true,
-   "requiresParentUnder35": true
+   "minChildren": 5
   },
   "add": {
    "childAgeToMonths": 12,
@@ -17,34 +15,62 @@
   }
  },
  {
-  "slug": "reg-kaliningradskaya-oblast-008",
-  "region": "Калининградская область",
-  "title": "Ежемесячное пособие студенческим семьям с детьми (Калининградская область)",
+  "slug": "dagestan-002",
+  "region": "Республика Дагестан",
+  "title": "Единовременная выплата при рождении десятого и каждого последующего ребёнка (Республика Дагестан)",
   "criteria": {
    "regions": [
-    "Калининградская область"
+    "Республика Дагестан"
    ],
-   "requiresStudent": true,
-   "requiresChildren": true
-  },
-  "add": {
-   "maxYoungestChildAgeYears": 3
-  }
- },
- {
-  "slug": "reg-kaliningradskaya-oblast-009",
-  "region": "Калининградская область",
-  "title": "Единоразовая выплата при рождении первого ребёнка студенткам и выпускницам (Калининградская область)",
-  "criteria": {
-   "regions": [
-    "Калининградская область"
-   ],
-   "requiresFamily": true,
-   "requiresStudent": true
+   "minChildren": 10
   },
   "add": {
    "childAgeToMonths": 12,
    "appliesToExpecting": true
+  }
+ },
+ {
+  "slug": "dagestan-006",
+  "region": "Республика Дагестан",
+  "title": "Ежемесячное пособие на ребёнка 17–18 лет, обучающегося в школе (Республика Дагестан)",
+  "criteria": {
+   "regions": [
+    "Республика Дагестан"
+   ],
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 17,
+   "requiresLowIncome": true
+  },
+  "add": {
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "dagestan-014",
+  "region": "Республика Дагестан",
+  "title": "Бесплатное горячее питание в школах детям мобилизованных и добровольцев СВО (Республика Дагестан)",
+  "criteria": {
+   "regions": [
+    "Республика Дагестан"
+   ],
+   "requiresSvoFamily": true
+  },
+  "add": {
+   "minSchoolChildren": 1
+  }
+ },
+ {
+  "slug": "dagestan-015",
+  "region": "Республика Дагестан",
+  "title": "Освобождение от платы за детский сад для детей участников СВО (Республика Дагестан)",
+  "criteria": {
+   "regions": [
+    "Республика Дагестан"
+   ],
+   "requiresSvoFamily": true
+  },
+  "add": {
+   "hasChildAgedTo": 7
   }
  }
 ]
