@@ -522,6 +522,12 @@ export interface EligibilityCriteria {
    * место сохраняется, права тоже.
    */
   requiresEmployed?: boolean;
+  /**
+   * Родитель не работает. Отпуск по уходу к «не работает» не относим:
+   * место сохраняется, зарплата идёт, а выплаты по уходу назначают тем,
+   * кто работу оставил.
+   */
+  requiresNotEmployed?: boolean;
 }
 
 /**
@@ -1202,6 +1208,9 @@ function matchesCriteria(
   if (c.requiresHardship && !profile.hardship) return false;
   // Права «на работе» не нужны тому, кто не работает.
   if (c.requiresEmployed && profile.employmentStatus === "not-working") {
+    return false;
+  }
+  if (c.requiresNotEmployed && profile.employmentStatus !== "not-working") {
     return false;
   }
 

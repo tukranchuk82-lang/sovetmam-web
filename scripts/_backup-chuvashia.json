@@ -1,0 +1,56 @@
+[
+ {
+  "slug": "chuv-002",
+  "title": "Возмещение 50 % проезда к месту санаторно-курортного лечения (Чувашская Республика)",
+  "criteria": {
+   "regions": [
+    "Чувашская Республика"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "chuv-010",
+  "title": "Первоочередной приём в детский сад (Чувашская Республика)",
+  "criteria": {
+   "regions": [
+    "Чувашская Республика"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chuv-015",
+  "title": "Временное трудоустройство подростков 14–18 лет (Чувашская Республика)",
+  "criteria": {
+   "regions": [
+    "Чувашская Республика"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "chuv-009",
+  "title": "Подарок новорождённому «Я родился в Чувашии» (Чувашская Республика)",
+  "criteria": {
+   "regions": [
+    "Чувашская Республика"
+   ],
+   "requiresFamily": true,
+   "maxYoungestChildAgeYears": 1
+  }
+ },
+ {
+  "slug": "chuv-038",
+  "title": "Сельская ипотека под 0,1 % для семей с тремя детьми (Чувашская Республика)",
+  "criteria": {
+   "regions": [
+    "Чувашская Республика"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true,
+   "requiresMortgageIntent": true
+  }
+ }
+]

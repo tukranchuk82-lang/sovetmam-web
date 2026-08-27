@@ -1,0 +1,101 @@
+[
+ {
+  "slug": "saratov-002",
+  "title": "Ежемесячная выплата при рождении третьего и последующих детей (Саратовская область)",
+  "criteria": {
+   "regions": [
+    "Саратовская область"
+   ],
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "saratov-007",
+  "title": "Льготный (бесплатный) проезд детям из многодетных семей и детям-инвалидам (Саратовская область)",
+  "criteria": {
+   "regions": [
+    "Саратовская область"
+   ],
+   "minChildren": 3,
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "saratov-006",
+  "title": "Денежная выплата многодетным на посещение театров (Саратовская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Саратовская область"
+   ]
+  }
+ },
+ {
+  "slug": "saratov-011",
+  "title": "Ежемесячная выплата на детей, страдающих целиакией (Саратовская область)",
+  "criteria": {
+   "regions": [
+    "Саратовская область"
+   ],
+   "requiresFosterParent": true
+  }
+ },
+ {
+  "slug": "saratov-004",
+  "title": "Денежная выплата многодетным на школьную одежду и обувь (Саратовская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Саратовская область"
+   ]
+  }
+ },
+ {
+  "slug": "saratov-010",
+  "title": "Единовременная выплата студенческим семьям при рождении ребёнка (Саратовская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Саратовская область"
+   ]
+  }
+ },
+ {
+  "slug": "saratov-005",
+  "title": "Денежная выплата многодетным на занятия физкультурой и спортом (Саратовская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Саратовская область"
+   ]
+  }
+ }
+]

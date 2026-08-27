@@ -54,7 +54,8 @@ const RULES = [
   [(s) => !s.disabledChild && !s.specialNeedsChild && !s.disabledParent,
    /инвалид/i, "в семье нет инвалидности",
    ["requiresDisabledChild", "requiresDisabledParent", "requiresSpecialNeedsChild"]],
-  [(s) => !s.svoFamily, /СВО|мобилизованн|специальной военной операции/i,
+  // Без флага i и с границами слова: иначе «освобождение» читается как «СВО».
+  [(s) => !s.svoFamily, /СВО|мобилизованн|специальной военной операции/,
    "семья не участника СВО", ["requiresSvoFamily", "requiresSvoRole", "requiresConscriptSpouse"]],
   [(s) => !s.fosterParent, /усыновл|опек|приёмн(ая|ой) семь/i, "семья не приёмная",
    ["requiresFosterParent"]],

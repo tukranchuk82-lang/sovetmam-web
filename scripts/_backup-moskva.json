@@ -1,0 +1,107 @@
+[
+ {
+  "slug": "msk-mnogodetnym-odezhda",
+  "title": "Ежегодная выплата многодетным на школьную одежду (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "msk-molochnaya-kuhnya",
+  "title": "Бесплатные продукты детского питания (молочная кухня, Москва)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 3
+    }
+   ],
+   "regions": [
+    "Москва"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "moskva-vyplata-molodoy-semye",
+  "title": "Дополнительное пособие молодым семьям при рождении ребёнка («лужковские», Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "msk-uhod-rebenok-invalid",
+  "title": "Ежемесячная выплата по уходу за ребёнком-инвалидом (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "childAgeToMonths": 276,
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "msk-besplatnoe-pitanie-shkolnikov",
+  "title": "Бесплатное питание школьников (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "msk-rost-zhizni-otdelnye",
+  "title": "Выплата на рост стоимости жизни отдельным категориям семей (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresChildren": true,
+   "requiresSingleParent": true
+  }
+ },
+ {
+  "slug": "msk-mnogodetnym-tovary",
+  "title": "Выплата многодетным на товары детского ассортимента (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "msk-besplatnye-lekarstva-detyam",
+  "title": "Бесплатные лекарства детям (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "msk-adresnaya-pomoshch",
+  "title": "Адресная социальная помощь семьям с детьми (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresChildren": true
+  }
+ }
+]
