@@ -1,0 +1,139 @@
+[
+ {
+  "slug": "rst-007",
+  "title": "Выплата на молочное детское питание малоимущим (Ростовская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 3
+    }
+   ],
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresFamily": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "rst-014",
+  "title": "Выплата 100 000 ₽ беременным студенткам (Ростовская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "rst-011",
+  "title": "Региональный материнский капитал (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresFamily": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "rst-019",
+  "title": "Меры поддержки семей участников СВО в образовании (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "rstadd-002",
+  "title": "Компенсация родительской платы за детский сад (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "rstadd-007",
+  "title": "Ежемесячная выплата на лечебное питание детей с фенилкетонурией (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresSpecialNeedsChild": true
+  }
+ },
+ {
+  "slug": "rstadd-003",
+  "title": "Почётный диплом Губернатора «За заслуги в воспитании детей» с поощрением (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "minChildren": 4
+  }
+ },
+ {
+  "slug": "rstadd-006",
+  "title": "Ежемесячная выплата на детей, инфицированных ВИЧ в детском возрасте (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresSpecialNeedsChild": true
+  }
+ },
+ {
+  "slug": "rstadd-008",
+  "title": "Бесплатные путёвки и компенсация отдыха и оздоровления детей (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "rst-008",
+  "title": "Выплата на полноценное питание беременным и детям до 3 лет (Ростовская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresPregnancy": true
+    }
+   ],
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "rst-020",
+  "title": "Бесплатное питание и выплаты студентам колледжей (Ростовская область)",
+  "criteria": {
+   "regions": [
+    "Ростовская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ }
+]

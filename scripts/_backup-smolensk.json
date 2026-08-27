@@ -1,0 +1,129 @@
+[
+ {
+  "slug": "smol-006",
+  "title": "Бесплатное питание школьников 5–11 классов (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "smol-007",
+  "title": "Выплата студенткам, родившим ребёнка (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "smol-029",
+  "title": "Именная стипендия студентам из многодетных семей (Смоленская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "smol-002",
+  "title": "Выплата на питание беременным и детям до 3 лет (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true,
+   "requiresPregnancy": true,
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "smol-008",
+  "title": "Компенсация родительской платы за детский сад (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "smol-013",
+  "title": "Выплата беременным студенткам (Смоленская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Смоленская область"
+   ]
+  }
+ },
+ {
+  "slug": "smol-030",
+  "title": "Бесплатное питание студентов СПО из многодетных семей (Смоленская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "smol-033",
+  "title": "Сертификат на частичную оплату путёвки (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "smol-005",
+  "title": "Пособие на ребёнка, не посещающего детсад (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "smol-024",
+  "title": "Первоочередной приём в детский сад (Смоленская область)",
+  "criteria": {
+   "regions": [
+    "Смоленская область"
+   ],
+   "requiresChildren": true
+  }
+ }
+]

@@ -1,0 +1,163 @@
+[
+ {
+  "slug": "krdadd-003",
+  "title": "Компенсация на полноценное питание детям до 3 лет, беременным и кормящим (Краснодарский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresPregnancy": true
+    }
+   ],
+   "regions": [
+    "Краснодарский край"
+   ]
+  }
+ },
+ {
+  "slug": "krdadd-013",
+  "title": "Ежегодная выплата детям инвалидов боевых действий и погибших военнослужащих (Краснодарский край)",
+  "criteria": {
+   "regions": [
+    "Краснодарский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "krd-019",
+  "title": "Гибкий график работы для многодетных родителей (Краснодарский край)",
+  "criteria": {
+   "regions": [
+    "Краснодарский край"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krd-011",
+  "title": "Медаль «Родительская доблесть» (Краснодарский край)",
+  "criteria": {
+   "regions": [
+    "Краснодарский край"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krd-021",
+  "title": "Бесплатный проезд детей-сирот, в том числе к месту лечения (Краснодарский край)",
+  "criteria": {
+   "regions": [
+    "Краснодарский край"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krd-013",
+  "title": "Бесплатный проезд для детей из многодетных семей (Краснодарский край)",
+  "criteria": {
+   "regions": [
+    "Краснодарский край"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krd-004",
+  "title": "Компенсация на полноценное питание беременным, кормящим и детям до 3 лет (Краснодарский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresPregnancy": true
+    }
+   ],
+   "regions": [
+    "Краснодарский край"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krd-016",
+  "title": "Бесплатное питание студентам из многодетных семей в колледжах (Краснодарский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Краснодарский край"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krd-007",
+  "title": "Компенсация стоимости детских путёвок (Краснодарский край)",
+  "criteria": {
+   "regions": [
+    "Краснодарский край"
+   ],
+   "requiresFamily": true,
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "krdadd-010",
+  "title": "Единовременная материальная помощь детям участников СВО (Краснодарский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresSvoFamily": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Краснодарский край"
+   ]
+  }
+ },
+ {
+  "slug": "krd-017",
+  "title": "Бесплатные лекарства детям из многодетных семей до 6 лет (Краснодарский край)",
+  "criteria": {
+   "regions": [
+    "Краснодарский край"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krdadd-002",
+  "title": "Ежемесячная выплата при рождении третьего и последующих детей до 3 лет (Краснодарский край)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Краснодарский край"
+   ]
+  }
+ }
+]
