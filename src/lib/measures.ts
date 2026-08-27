@@ -1359,7 +1359,11 @@ export function deadlineStatus(
     // Пока времени много, счётчик дней только пугает: «осталось 439 дней»
     // человек читает как срочность, хотя спешить некуда.
     if (left > URGENT_DAYS) {
-      return { text: `Подать до ${dateText(until, now)}`, urgent: false };
+      // Пока время есть, полезнее объяснить правило, чем показать дату.
+      return {
+        text: d.note ?? `Подать до ${dateText(until, now)}`,
+        urgent: false,
+      };
     }
     return {
       text: `Успеть до ${dateText(until, now)}: осталось ${pluralDays(left)}`,
@@ -1396,8 +1400,9 @@ export function deadlineStatus(
       };
     }
     const left = Math.ceil((to.getTime() - now.getTime()) / DAY_MS);
+    const base = d.note ?? `Подать до ${toText}`;
     return {
-      text: `Подать до ${toText}: осталось ${pluralDays(left)}`,
+      text: `${base}: осталось ${pluralDays(left)}`,
       urgent: left <= 45,
     };
   }
@@ -1406,7 +1411,7 @@ export function deadlineStatus(
   const yearEnd = new Date(now.getFullYear(), 11, 31);
   const left = Math.ceil((yearEnd.getTime() - now.getTime()) / DAY_MS);
   return {
-    text: `Успеть до 31 декабря: осталось ${pluralDays(left)}`,
+    text: `${d.note ?? "Успеть до 31 декабря"}: осталось ${pluralDays(left)}`,
     urgent: left <= 60,
   };
 }

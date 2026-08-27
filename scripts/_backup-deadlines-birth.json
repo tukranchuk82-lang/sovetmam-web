@@ -1,0 +1,609 @@
+[
+ {
+  "slug": "reg-altayskiy-kray-003",
+  "title": "Ежемесячное пособие на ребёнка (Алтайский край)",
+  "region": "Алтайский край",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSingleParent": true
+    }
+   ],
+   "regions": [
+    "Алтайский край"
+   ],
+   "requiresChildren": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "voronezh-002",
+  "title": "Единовременная денежная выплата 300 000 руб. молодой семье при рождении третьего ребёнка (Воронежская область)",
+  "region": "Воронежская область",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "voronezh-005",
+  "title": "Единовременная выплата женщинам-студенткам при постановке на учёт по беременности (Воронежская область)",
+  "region": "Воронежская область",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "requiresStudent": true,
+   "requiresPregnancy": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "tuva-001",
+  "title": "Выплата при рождении двойни и более (Республика Тыва)",
+  "region": "Республика Тыва",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "minSimultaneousBirth": 2
+  },
+  "deadline": null
+ },
+ {
+  "slug": "vol-007",
+  "title": "Пособие на рождение малоимущим женщинам без права на пособие по БиР (Вологодская область)",
+  "region": "Вологодская область",
+  "criteria": {
+   "regions": [
+    "Вологодская область"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "requiresLowIncome": true,
+   "appliesToExpecting": true,
+   "requiresNotEmployed": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "spb-001",
+  "title": "Ежемесячное пособие на ребёнка от рождения до 1,5 лет (Санкт-Петербург)",
+  "region": "Санкт-Петербург",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 1
+    }
+   ],
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "volgograd-019",
+  "title": "Выплата 300 000 ₽ молодой семье при рождении третьего ребёнка (Волгоградская область)",
+  "region": "Волгоградская область",
+  "criteria": {
+   "regions": [
+    "Волгоградская область"
+   ],
+   "minChildren": 3,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "lenobl-006",
+  "title": "Единовременное пособие при рождении ребёнка (Ленинградская область)",
+  "region": "Ленинградская область",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 0
+    }
+   ],
+   "regions": [
+    "Ленинградская область"
+   ],
+   "requiresFamily": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "dagestan-002",
+  "title": "Единовременная выплата при рождении десятого и каждого последующего ребёнка (Республика Дагестан)",
+  "region": "Республика Дагестан",
+  "criteria": {
+   "regions": [
+    "Республика Дагестан"
+   ],
+   "minChildren": 10,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "chel-002",
+  "title": "Областное единовременное пособие при рождении ребёнка (Челябинская область)",
+  "region": "Челябинская область",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 0
+    }
+   ],
+   "regions": [
+    "Челябинская область"
+   ]
+  },
+  "deadline": null
+ },
+ {
+  "slug": "volgograd-002",
+  "title": "Дополнительное единовременное пособие при рождении первого ребёнка (Волгоградская область)",
+  "region": "Волгоградская область",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 0
+    }
+   ],
+   "regions": [
+    "Волгоградская область"
+   ],
+   "maxParentAge": 24
+  },
+  "deadline": null
+ },
+ {
+  "slug": "mrm-018",
+  "title": "«Зарплата мамы 2.0» при рождении второго ребёнка (Мурманская область)",
+  "region": "Мурманская область",
+  "criteria": {
+   "regions": [
+    "Мурманская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "requiresLowIncome": true,
+   "maxYoungestChildAgeYears": 1
+  },
+  "deadline": null
+ },
+ {
+  "slug": "nnov-001",
+  "title": "Родительский основной доход «Основа» — региональный семейный капитал (Нижегородская область)",
+  "region": "Нижегородская область",
+  "criteria": {
+   "regions": [
+    "Нижегородская область"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 36,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "volgograd-003",
+  "title": "Дополнительное единовременное пособие при рождении второго ребёнка (Волгоградская область)",
+  "region": "Волгоградская область",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresPregnancy": true
+    },
+    {
+     "hasChildAgedTo": 0
+    }
+   ],
+   "regions": [
+    "Волгоградская область"
+   ],
+   "requiresLowIncome": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "dagestan-003",
+  "title": "Единовременная выплата при одновременном рождении двух детей (Республика Дагестан)",
+  "region": "Республика Дагестан",
+  "criteria": {
+   "regions": [
+    "Республика Дагестан"
+   ],
+   "minSimultaneousBirth": 2
+  },
+  "deadline": null
+ },
+ {
+  "slug": "bur-012",
+  "title": "Ежемесячная выплата на третьего ребёнка до 3 лет (Республика Бурятия)",
+  "region": "Республика Бурятия",
+  "criteria": {
+   "regions": [
+    "Республика Бурятия"
+   ],
+   "maxIncomePm": 2,
+   "minChildren": 3,
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 2
+  },
+  "deadline": null
+ },
+ {
+  "slug": "mrm-001",
+  "title": "«Зарплата мамы» при рождении первого ребёнка (Мурманская область)",
+  "region": "Мурманская область",
+  "criteria": {
+   "regions": [
+    "Мурманская область"
+   ],
+   "requiresFamily": true,
+   "maxYoungestChildAgeYears": 1
+  },
+  "deadline": null
+ },
+ {
+  "slug": "irkutsk-003",
+  "title": "Единовременная выплата при рождении первого ребёнка (Иркутская область)",
+  "region": "Иркутская область",
+  "criteria": {
+   "regions": [
+    "Иркутская область"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "requiresLowIncome": true,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "samara-001",
+  "title": "Единовременная выплата молодым мамам при рождении первенца (Самарская область)",
+  "region": "Самарская область",
+  "criteria": {
+   "regions": [
+    "Самарская область"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "tyumen-002",
+  "title": "Региональный материнский (семейный) капитал на третьего и последующих детей (Тюменская область)",
+  "region": "Тюменская область",
+  "criteria": {
+   "regions": [
+    "Тюменская область"
+   ],
+   "minChildren": 3,
+   "requiresDisabledChild": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "dagestan-004",
+  "title": "Единовременная выплата при одновременном рождении трёх и более детей (Республика Дагестан)",
+  "region": "Республика Дагестан",
+  "criteria": {
+   "regions": [
+    "Республика Дагестан"
+   ],
+   "minChildren": 3,
+   "minSimultaneousBirth": 3
+  },
+  "deadline": null
+ },
+ {
+  "slug": "psk-032",
+  "title": "«Зарплата мамы» до 25 лет при первом ребёнке (Псковская область)",
+  "region": "Псковская область",
+  "criteria": {
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true,
+   "maxYoungestChildAgeYears": 1
+  },
+  "deadline": null
+ },
+ {
+  "slug": "tat-005",
+  "title": "Выплата сельским женщинам при рождении ребёнка (Республика Татарстан)",
+  "region": "Республика Татарстан",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresSettlement": [
+    "village",
+    "small-town"
+   ]
+  },
+  "deadline": null
+ },
+ {
+  "slug": "reg-novosibirskaya-oblast-013",
+  "title": "Дополнительное пособие при рождении ребёнка в молодой семье (Новосибирская область)",
+  "region": "Новосибирская область",
+  "criteria": {
+   "regions": [
+    "Новосибирская область"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "voronezh-003",
+  "title": "Единовременная выплата при рождении второго ребёнка матери до 28 лет (Воронежская область)",
+  "region": "Воронежская область",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "minChildren": 2,
+   "maxParentAge": 28,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-002",
+  "title": "Областной материнский (семейный) капитал (Калининградская область)",
+  "region": "Калининградская область",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "sve-002",
+  "title": "Ежемесячная выплата на третьего ребёнка до 3 лет (Свердловская область)",
+  "region": "Свердловская область",
+  "criteria": {
+   "regions": [
+    "Свердловская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "maxYoungestChildAgeYears": 3
+  },
+  "deadline": null
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-003",
+  "title": "Единовременная выплата молодой семье при рождении третьего ребёнка (Калининградская область)",
+  "region": "Калининградская область",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-009",
+  "title": "Единоразовая выплата при рождении первого ребёнка студенткам и выпускницам (Калининградская область)",
+  "region": "Калининградская область",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "msk-edinovremennaya-pri-rozhdenii",
+  "title": "Единовременная компенсационная выплата при рождении ребёнка (Москва)",
+  "region": "Москва",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 6,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "reg-altayskiy-kray-004",
+  "title": "Единовременная выплата семьям студентов при рождении ребёнка",
+  "region": "Алтайский край",
+  "criteria": {
+   "regions": [
+    "Алтайский край"
+   ],
+   "maxParentAge": 27,
+   "requiresFamily": true,
+   "requiresStudent": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "reg-altayskiy-kray-005",
+  "title": "Единовременная выплата молодым семьям при рождении третьего ребёнка",
+  "region": "Алтайский край",
+  "criteria": {
+   "regions": [
+    "Алтайский край"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "vol-001",
+  "title": "Выплата при рождении первого ребёнка маме до 25 лет (Вологодская область)",
+  "region": "Вологодская область",
+  "criteria": {
+   "regions": [
+    "Вологодская область"
+   ],
+   "maxParentAge": 25,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "moskva-vyplata-molodoy-semye",
+  "title": "Дополнительное пособие молодым семьям при рождении ребёнка («лужковские», Москва)",
+  "region": "Москва",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "vol-002",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Вологодская область)",
+  "region": "Вологодская область",
+  "criteria": {
+   "regions": [
+    "Вологодская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true,
+   "requiresParentUnder35": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "chech-002",
+  "title": "Единовременная выплата при одновременном рождении трёх и более детей (Чеченская Республика)",
+  "region": "Чеченская Республика",
+  "criteria": {
+   "regions": [
+    "Чеченская Республика"
+   ],
+   "minChildren": 3,
+   "minSimultaneousBirth": 3
+  },
+  "deadline": null
+ },
+ {
+  "slug": "spb-007",
+  "title": "Единовременная выплата при рождении ребёнка (Санкт-Петербург)",
+  "region": "Санкт-Петербург",
+  "criteria": {
+   "regions": [
+    "Санкт-Петербург"
+   ],
+   "requiresFamily": true,
+   "childAgeToMonths": 18,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ },
+ {
+  "slug": "vol-030",
+  "title": "«С днём рождения, малыш!» — набор новорождённому (Вологодская область)",
+  "region": "Вологодская область",
+  "criteria": {
+   "regions": [
+    "Вологодская область"
+   ],
+   "requiresChildren": true,
+   "maxYoungestChildAgeYears": 1
+  },
+  "deadline": null
+ },
+ {
+  "slug": "dagestan-001",
+  "title": "Единовременная выплата при рождении пятого и каждого последующего ребёнка (Республика Дагестан)",
+  "region": "Республика Дагестан",
+  "criteria": {
+   "regions": [
+    "Республика Дагестан"
+   ],
+   "minChildren": 5,
+   "requiresFamily": true,
+   "childAgeToMonths": 12,
+   "appliesToExpecting": true
+  },
+  "deadline": null
+ }
+]
