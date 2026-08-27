@@ -1,0 +1,266 @@
+[
+ {
+  "slug": "yarosl-001",
+  "title": "Улучшение жилищных условий семей с 3+ детьми (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tat-002",
+  "title": "Ежемесячная субсидия на проезд детям из многодетных семей (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "rtadd-004",
+  "title": "Списание 200 000 ₽ долга по соципотеке при рождении ребёнка (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "krasn-017",
+  "title": "Бесплатное горячее питание в школах детям участников СВО (5–11 классы) (Красноярский край)",
+  "criteria": {
+   "regions": [
+    "Красноярский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "reg-novosibirskaya-oblast-013",
+  "title": "Дополнительное пособие при рождении ребёнка в молодой семье (Новосибирская область)",
+  "criteria": {
+   "regions": [
+    "Новосибирская область"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "rtadd-008",
+  "title": "Компенсация части родительской платы за детский сад (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "yarosl-002",
+  "title": "Улучшение жилищных условий семей с 8+ детьми (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "minChildren": 8,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "yarosl-021",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "yarosl-030",
+  "title": "Первоочередной перевод в школу и продлёнку детям СВО (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "rtadd-016",
+  "title": "Бесплатное горячее питание детям участников СВО в школах (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "childAgeToMonths": 240,
+   "requiresChildren": true,
+   "requiresSvoFamily": true,
+   "childAgeFromMonths": 84
+  }
+ },
+ {
+  "slug": "rtadd-003",
+  "title": "Социальная ипотека «Молодая семья» под 7% годовых (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "requiresHousingNeed": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "krasn-008",
+  "title": "Ежемесячная компенсация на единый социальный проездной / социальную карту (Красноярский край)",
+  "criteria": {
+   "regions": [
+    "Красноярский край"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "rtadd-005",
+  "title": "Социальная ипотека для участников СВО и членов их семей (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "rtadd-009",
+  "title": "Дополнительная компенсация платы за детский сад малообеспеченным семьям (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "rtadd-015",
+  "title": "Социальная выплата молодым семьям на приобретение или строительство жилья (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "requiresHousingNeed": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "reg-novosibirskaya-oblast-015",
+  "title": "Компенсация части родительской платы за детский сад (Новосибирская область)",
+  "criteria": {
+   "regions": [
+    "Новосибирская область"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "tat-003",
+  "title": "Бесплатные лекарства детям до 6 лет из многодетных семей (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "reg-novosibirskaya-oblast-014",
+  "title": "Выплата молодым семьям на присмотр и уход за детьми (Новосибирская область)",
+  "criteria": {
+   "regions": [
+    "Новосибирская область"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "tat-007",
+  "title": "Выплата на лекарства детям до 3 лет малоимущим (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "requiresFamily": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "yarosl-010",
+  "title": "Выплата к началу учебного года и на школьную форму (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "yarosl-028",
+  "title": "Бесплатный детский сад детям участников СВО (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "yarosl-009",
+  "title": "Выплата при рождении двойни или тройни (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "yarosl-003",
+  "title": "Бесплатные лекарства детям (Ярославская область)",
+  "criteria": {
+   "regions": [
+    "Ярославская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tat-011",
+  "title": "Компенсация 30% стоимости обучения детей из многодетных семей (Республика Татарстан)",
+  "criteria": {
+   "regions": [
+    "Республика Татарстан"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ }
+]

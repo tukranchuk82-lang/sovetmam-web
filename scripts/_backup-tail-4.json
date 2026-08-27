@@ -1,0 +1,176 @@
+[
+ {
+  "slug": "omsk-005",
+  "title": "Единовременная выплата при рождении ребёнка студенческим семьям (Омская область)",
+  "criteria": {
+   "regions": [
+    "Омская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "omsk-014",
+  "title": "Льгота по родительской плате за детский сад многодетным (г. Омск)",
+  "criteria": {
+   "regions": [
+    "Омская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "volgograd-022",
+  "title": "Компенсация части родительской платы за детский сад (Волгоградская область)",
+  "criteria": {
+   "regions": [
+    "Волгоградская область"
+   ],
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "omsk-009",
+  "title": "Социальные выплаты молодым семьям на жильё (Омская область)",
+  "criteria": {
+   "regions": [
+    "Омская область"
+   ],
+   "requiresChildren": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "pnz-015",
+  "title": "Выплата на проезд школьников многодетным (Пензенская область)",
+  "criteria": {
+   "regions": [
+    "Пензенская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "omsk-019",
+  "title": "Путёвки и проезд детям-сиротам на отдых и оздоровление (Омская область)",
+  "criteria": {
+   "regions": [
+    "Омская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "pnz-013",
+  "title": "Выплата при рождении ребёнка в студенческой семье (Пензенская область)",
+  "criteria": {
+   "regions": [
+    "Пензенская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "pnz-031",
+  "title": "Подарочные наборы студенческим семьям при рождении (Пензенская область)",
+  "criteria": {
+   "regions": [
+    "Пензенская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "oren-022",
+  "title": "Звание «Ветеран труда Оренбургской области» родителям детей-инвалидов и многодетным",
+  "criteria": {
+   "regions": [
+    "Оренбургская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "pnz-008",
+  "title": "Пособие при рождении двойни и более (Пензенская область)",
+  "criteria": {
+   "regions": [
+    "Пензенская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "pnz-014",
+  "title": "Ежегодная выплата на школьников многодетным (Пензенская область)",
+  "criteria": {
+   "regions": [
+    "Пензенская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "omsk-013",
+  "title": "Бесплатное горячее питание школьников 5–11 классов из многодетных семей (Омская область)",
+  "criteria": {
+   "regions": [
+    "Омская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "oren-004",
+  "title": "Единовременная материальная помощь при рождении двойни и более (Оренбургская область)",
+  "criteria": {
+   "regions": [
+    "Оренбургская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "oren-020",
+  "title": "Первоочередной приём детей в детские сады (Оренбургская область)",
+  "criteria": {
+   "regions": [
+    "Оренбургская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "oren-007",
+  "title": "Ежегодная выплата на школьную форму многодетным семьям (Оренбургская область)",
+  "criteria": {
+   "regions": [
+    "Оренбургская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "oren-018",
+  "title": "Компенсация проезда школьникам из многодетных семей (Оренбургская область)",
+  "criteria": {
+   "regions": [
+    "Оренбургская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]

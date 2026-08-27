@@ -1,0 +1,100 @@
+[
+ {
+  "slug": "ulyan-005",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Ульяновская область)",
+  "criteria": {
+   "regions": [
+    "Ульяновская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "sve-021",
+  "title": "Путёвки и проезд к месту лечения детям-сиротам (Свердловская область)",
+  "criteria": {
+   "regions": [
+    "Свердловская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "sve-019",
+  "title": "Льготные лекарства детям до 3 лет и до 6 лет из многодетных семей (Свердловская область)",
+  "criteria": {
+   "regions": [
+    "Свердловская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "sve-002",
+  "title": "Ежемесячная выплата на третьего ребёнка до 3 лет (Свердловская область)",
+  "criteria": {
+   "regions": [
+    "Свердловская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "sve-007",
+  "title": "Ежемесячное пособие родителю, воспитывающему ребёнка-инвалида (Свердловская область)",
+  "criteria": {
+   "regions": [
+    "Свердловская область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "kostroma-014",
+  "title": "Льгота на питание детям из семей участников СВО (Костромская область)",
+  "criteria": {
+   "regions": [
+    "Костромская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "ulyan-017",
+  "title": "Выплата на проезд школьникам многодетным (Ульяновская область)",
+  "criteria": {
+   "regions": [
+    "Ульяновская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ulyan-016",
+  "title": "Выплата на школьную одежду многодетным (Ульяновская область)",
+  "criteria": {
+   "regions": [
+    "Ульяновская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ulyan-024",
+  "title": "Бесплатное питание школьников и студентов (Ульяновская область)",
+  "criteria": {
+   "regions": [
+    "Ульяновская область"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ }
+]

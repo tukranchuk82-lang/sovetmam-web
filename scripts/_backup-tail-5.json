@@ -1,0 +1,257 @@
+[
+ {
+  "slug": "vld-013",
+  "title": "Выплата на питание и проезд школьникам из многодетных семей (Владимирская область)",
+  "criteria": {
+   "regions": [
+    "Владимирская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "bsh-012",
+  "title": "Спецпродукты питания беременным, кормящим и детям до 3 лет (Республика Башкортостан)",
+  "criteria": {
+   "anyOf": [
+    {
+     "anyOf": [
+      {
+       "requiresPregnancy": true
+      },
+      {
+       "hasChildAgedTo": 3
+      }
+     ],
+     "requiresLowIncome": true
+    },
+    {
+     "anyOf": [
+      {
+       "requiresPregnancy": true
+      },
+      {
+       "hasChildAgedTo": 3
+      }
+     ],
+     "requiresPregnancy": true
+    }
+   ],
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "psk-025",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Псковская область)",
+  "criteria": {
+   "regions": [
+    "Псковская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "vld-008",
+  "title": "Выплата при рождении ребёнка (Владимирская область)",
+  "criteria": {
+   "regions": [
+    "Владимирская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "vld-015",
+  "title": "Скидка на детский сад многодетным (Владимирская область)",
+  "criteria": {
+   "regions": [
+    "Владимирская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "prim-017",
+  "title": "Ежемесячная выплата по уходу за ребёнком-инвалидом (региональная доплата, Приморский край)",
+  "criteria": {
+   "regions": [
+    "Приморский край"
+   ],
+   "requiresChildren": true,
+   "requiresDisabledChild": true
+  }
+ },
+ {
+  "slug": "psk-012",
+  "title": "Бесплатное питание школьников и студентов из семей СВО (Псковская область)",
+  "criteria": {
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "psk-015",
+  "title": "Освобождение от платы за детсад детям СВО (Псковская область)",
+  "criteria": {
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "psk-031",
+  "title": "Выплата при рождении первого ребёнка маме до 25 лет (Псковская область)",
+  "criteria": {
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "vld-002",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Владимирская область)",
+  "criteria": {
+   "regions": [
+    "Владимирская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "prim-010",
+  "title": "Компенсация проезда школьникам из многодетных семей (Приморский край)",
+  "criteria": {
+   "regions": [
+    "Приморский край"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "bsh-005",
+  "title": "Ежемесячное пособие по уходу за ребёнком-инвалидом (Республика Башкортостан)",
+  "criteria": {
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "bsh-013",
+  "title": "Бесплатные лекарства детям до 6 лет из многодетных семей (Республика Башкортостан)",
+  "criteria": {
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "prim-002",
+  "title": "Единовременная выплата при рождении первого ребёнка (Приморский край)",
+  "criteria": {
+   "regions": [
+    "Приморский край"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "psk-020",
+  "title": "Бесплатный проезд школьникам из многодетных малоимущих семей (Псковская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "bsh-009",
+  "title": "Компенсация за школьную форму многодетным малоимущим (Республика Башкортостан)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "bsh-018",
+  "title": "Сертификат на частный детский сад при отсутствии места (Республика Башкортостан)",
+  "criteria": {
+   "regions": [
+    "Республика Башкортостан"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "psk-009",
+  "title": "Бесплатное питание школьников и студентов из многодетных малоимущих семей (Псковская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Псковская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "prim-008",
+  "title": "Ежегодные выплаты многодетным семьям на детей (Приморский край)",
+  "criteria": {
+   "regions": [
+    "Приморский край"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]

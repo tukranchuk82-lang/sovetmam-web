@@ -1,0 +1,130 @@
+[
+ {
+  "slug": "mord-004",
+  "title": "Компенсация родительской платы за детский сад (Республика Мордовия)",
+  "criteria": {
+   "regions": [
+    "Республика Мордовия"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "reg-altayskiy-kray-005",
+  "title": "Единовременная выплата молодым семьям при рождении третьего ребёнка",
+  "criteria": {
+   "regions": [
+    "Алтайский край"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "altadd-006",
+  "title": "Освобождение от платы за детский сад для детей участников СВО (Алтайский край)",
+  "criteria": {
+   "regions": [
+    "Алтайский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "altadd-013",
+  "title": "Внеочередное зачисление детей участников СВО в детский сад (Алтайский край)",
+  "criteria": {
+   "regions": [
+    "Алтайский край"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "reg-altayskiy-kray-004",
+  "title": "Единовременная выплата семьям студентов при рождении ребёнка",
+  "criteria": {
+   "regions": [
+    "Алтайский край"
+   ],
+   "maxParentAge": 27,
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "krym-002",
+  "title": "Обеспечение школьной формой многодетным (Республика Крым)",
+  "criteria": {
+   "regions": [
+    "Республика Крым"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krym-012",
+  "title": "Бесплатное питание школьников (Республика Крым)",
+  "criteria": {
+   "regions": [
+    "Республика Крым"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krym-016",
+  "title": "Компенсация родительской платы за детский сад (Республика Крым)",
+  "criteria": {
+   "regions": [
+    "Республика Крым"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mord-001",
+  "title": "Выплата при рождении первого ребёнка (Республика Мордовия)",
+  "criteria": {
+   "regions": [
+    "Республика Мордовия"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "mord-019",
+  "title": "Первоочередной приём в детский сад многодетным (Республика Мордовия)",
+  "criteria": {
+   "regions": [
+    "Республика Мордовия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "mord-020",
+  "title": "Первоочередной приём в детский сад детям военнослужащих СВО (Республика Мордовия)",
+  "criteria": {
+   "regions": [
+    "Республика Мордовия"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "mord-016",
+  "title": "Бесплатное питание школьников из многодетных семей (Республика Мордовия)",
+  "criteria": {
+   "regions": [
+    "Республика Мордовия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]
