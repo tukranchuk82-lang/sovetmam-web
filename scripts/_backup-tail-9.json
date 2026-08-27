@@ -1,0 +1,117 @@
+[
+ {
+  "slug": "lenobl-016",
+  "title": "Единовременная выплата 300 000 ₽ молодым семьям при рождении третьего и последующих детей",
+  "criteria": {
+   "regions": [
+    "Ленинградская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "lenobl-008",
+  "title": "Ежемесячная компенсация на полноценное питание беременным и детям до 3 лет (Ленинградская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresPregnancy": true
+    }
+   ],
+   "regions": [
+    "Ленинградская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "lenobl-015",
+  "title": "Единовременная социальная выплата студенческим семьям при рождении ребёнка (Ленинградская область)",
+  "criteria": {
+   "regions": [
+    "Ленинградская область"
+   ],
+   "maxParentAge": 25,
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "lenobl-035",
+  "title": "Компенсация части родительской платы за детский сад (Ленинградская область)",
+  "criteria": {
+   "regions": [
+    "Ленинградская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "yamal-026",
+  "title": "Отдых и проезд детей-сирот и приёмных семей (ЯНАО)",
+  "criteria": {
+   "regions": [
+    "Ямало-Ненецкий автономный округ"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "yamal-025",
+  "title": "Средства на обустройство и лечение детей в приёмной семье (ЯНАО)",
+  "criteria": {
+   "regions": [
+    "Ямало-Ненецкий автономный округ"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "lenobl-019",
+  "title": "Единовременная денежная выплата на улучшение жилищных условий (Ленинградская область)",
+  "criteria": {
+   "regions": [
+    "Ленинградская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 3,
+   "requiresMortgageIntent": false
+  }
+ },
+ {
+  "slug": "lenobl-034",
+  "title": "Первоочередной приём детей в детские сады (Ленинградская область)",
+  "criteria": {
+   "regions": [
+    "Ленинградская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "yamal-037",
+  "title": "Пособие к 1 сентября школьнику (ЯНАО)",
+  "criteria": {
+   "regions": [
+    "Ямало-Ненецкий автономный округ"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "yamal-007",
+  "title": "Льготные лекарства для детей (ЯНАО)",
+  "criteria": {
+   "regions": [
+    "Ямало-Ненецкий автономный округ"
+   ],
+   "requiresChildren": true
+  }
+ }
+]

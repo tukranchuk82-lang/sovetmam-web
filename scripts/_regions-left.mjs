@@ -1,9 +1,10 @@
 // Какие регионы ещё не вычитаны — по числу живых семей.
+import { DONE } from "./vychitka-done.mjs";
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "node:fs";
 const env = Object.fromEntries(readFileSync(".env.local", "utf8").split(/\r?\n/).filter((l) => l && !l.startsWith("#") && l.includes("=")).map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1)]; }));
 const sb = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
-const DONE = new Set(["Чувашская Республика", "Москва", "Саратовская область", "Рязанская область", "Московская область", "Санкт-Петербург", "Смоленская область", "Краснодарский край", "Челябинская область", "Ростовская область", "Нижегородская область", "Иркутская область"]);
+
 const { data: users } = await sb.from("app_users").select("survey").not("survey", "is", null);
 const byRegion = new Map();
 for (const u of users ?? []) {

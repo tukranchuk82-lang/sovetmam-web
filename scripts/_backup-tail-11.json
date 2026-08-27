@@ -1,0 +1,240 @@
+[
+ {
+  "slug": "voronezh-002",
+  "title": "Единовременная денежная выплата 300 000 руб. молодой семье при рождении третьего ребёнка (Воронежская область)",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "minChildren": 3,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "voronezh-006",
+  "title": "Ежемесячная денежная компенсация ЖКУ малообеспеченным многодетным семьям (Воронежская область)",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "minChildren": 3
+  }
+ },
+ {
+  "slug": "voronezh-019",
+  "title": "Внеочередное зачисление детей участников СВО в детский сад и бесплатный присмотр (Воронежская область)",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-003",
+  "title": "Единовременная выплата молодой семье при рождении третьего ребёнка (Калининградская область)",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "blg-011",
+  "title": "Выплата при рождении третьего и последующих детей в молодой семье (Белгородская область)",
+  "criteria": {
+   "regions": [
+    "Белгородская область"
+   ],
+   "minChildren": 3,
+   "requiresFamily": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "blg-001",
+  "title": "Выплата при рождении пятого и последующих детей (Белгородская область)",
+  "criteria": {
+   "regions": [
+    "Белгородская область"
+   ],
+   "minChildren": 5,
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "adg-007",
+  "title": "Выплата при рождении третьего ребёнка в молодой семье (Республика Адыгея)",
+  "criteria": {
+   "regions": [
+    "Республика Адыгея"
+   ],
+   "requiresFamily": true,
+   "requiresSingleParent": true,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "voronezh-003",
+  "title": "Единовременная выплата при рождении второго ребёнка матери до 28 лет (Воронежская область)",
+  "criteria": {
+   "regions": [
+    "Воронежская область"
+   ],
+   "minChildren": 2,
+   "maxParentAge": 28,
+   "requiresParentUnder35": true
+  }
+ },
+ {
+  "slug": "blg-018",
+  "title": "Компенсация проезда школьников из многодетных семей (Белгородская область)",
+  "criteria": {
+   "regions": [
+    "Белгородская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "adg-002",
+  "title": "Дополнительное пособие при рождении ребёнка (Республика Адыгея)",
+  "criteria": {
+   "regions": [
+    "Республика Адыгея"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "adg-023",
+  "title": "Горячее питание школьников (Республика Адыгея)",
+  "criteria": {
+   "regions": [
+    "Республика Адыгея"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krg-024",
+  "title": "Бесплатный проезд школьников из многодетных семей (Курганская область)",
+  "criteria": {
+   "regions": [
+    "Курганская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krg-002",
+  "title": "Компенсация ЖКУ федеральным льготникам (Курганская область)",
+  "criteria": {
+   "regions": [
+    "Курганская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "adg-006",
+  "title": "Выплата при рождении первого или второго ребёнка маме до 26 лет (Республика Адыгея)",
+  "criteria": {
+   "regions": [
+    "Республика Адыгея"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "blg-008",
+  "title": "Ежегодная выплата семьям участников СВО к учебному году (Белгородская область)",
+  "criteria": {
+   "regions": [
+    "Белгородская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "krg-012",
+  "title": "Пособие при рождении двойни и более (Курганская область)",
+  "criteria": {
+   "regions": [
+    "Курганская область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "krg-018",
+  "title": "Бесплатное посещение спортивных объектов (Курганская область)",
+  "criteria": {
+   "regions": [
+    "Курганская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "krg-023",
+  "title": "Бесплатное питание 5–11 классов льготным категориям (Курганская область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    },
+    {
+     "requiresSvoFamily": true
+    }
+   ],
+   "regions": [
+    "Курганская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "adg-026",
+  "title": "Освобождение от платы за детсад и кружки (Республика Адыгея)",
+  "criteria": {
+   "regions": [
+    "Республика Адыгея"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-009",
+  "title": "Единоразовая выплата при рождении первого ребёнка студенткам и выпускницам (Калининградская область)",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
+   "requiresFamily": true,
+   "requiresStudent": true
+  }
+ },
+ {
+  "slug": "adg-009",
+  "title": "Выплата на школьную одежду многодетным (Республика Адыгея)",
+  "criteria": {
+   "regions": [
+    "Республика Адыгея"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ }
+]

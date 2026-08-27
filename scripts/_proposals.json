@@ -1,26 +1,11 @@
 [
  {
-  "slug": "lpc-001",
-  "region": "Липецкая область",
-  "title": "Выплата при рождении первого ребёнка маме 18–24 лет (Липецкая область)",
+  "slug": "reg-kaliningradskaya-oblast-003",
+  "region": "Калининградская область",
+  "title": "Единовременная выплата молодой семье при рождении третьего ребёнка (Калининградская область)",
   "criteria": {
    "regions": [
-    "Липецкая область"
-   ],
-   "requiresFamily": true
-  },
-  "add": {
-   "childAgeToMonths": 12,
-   "appliesToExpecting": true
-  }
- },
- {
-  "slug": "lpc-004",
-  "region": "Липецкая область",
-  "title": "Выплата при рождении третьего ребёнка в молодой семье (Липецкая область)",
-  "criteria": {
-   "regions": [
-    "Липецкая область"
+    "Калининградская область"
    ],
    "minChildren": 3,
    "requiresFamily": true,
@@ -32,57 +17,34 @@
   }
  },
  {
-  "slug": "lpc-005",
-  "region": "Липецкая область",
-  "title": "Выплата при рождении тройни и более (Липецкая область)",
+  "slug": "reg-kaliningradskaya-oblast-008",
+  "region": "Калининградская область",
+  "title": "Ежемесячное пособие студенческим семьям с детьми (Калининградская область)",
   "criteria": {
    "regions": [
-    "Липецкая область"
+    "Калининградская область"
    ],
-   "minChildren": 3,
+   "requiresStudent": true,
+   "requiresChildren": true
+  },
+  "add": {
+   "maxYoungestChildAgeYears": 3
+  }
+ },
+ {
+  "slug": "reg-kaliningradskaya-oblast-009",
+  "region": "Калининградская область",
+  "title": "Единоразовая выплата при рождении первого ребёнка студенткам и выпускницам (Калининградская область)",
+  "criteria": {
+   "regions": [
+    "Калининградская область"
+   ],
    "requiresFamily": true,
-   "minSimultaneousBirth": 3
+   "requiresStudent": true
   },
   "add": {
    "childAgeToMonths": 12,
    "appliesToExpecting": true
-  }
- },
- {
-  "slug": "lpc-010",
-  "region": "Липецкая область",
-  "title": "Компенсация родительской платы за детский сад (Липецкая область)",
-  "criteria": {
-   "anyOf": [
-    {
-     "minChildren": 3
-    },
-    {
-     "requiresLowIncome": true
-    }
-   ],
-   "regions": [
-    "Липецкая область"
-   ],
-   "requiresChildren": true
-  },
-  "add": {
-   "hasChildAgedTo": 7
-  }
- },
- {
-  "slug": "lpc-017",
-  "region": "Липецкая область",
-  "title": "Бесплатный проезд детям из многодетных семей (Липецкая область)",
-  "criteria": {
-   "regions": [
-    "Липецкая область"
-   ],
-   "minChildren": 3,
-   "requiresChildren": true
-  },
-  "add": {
-   "minSchoolChildren": 1
   }
  }
 ]
