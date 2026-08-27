@@ -1,0 +1,468 @@
+[
+ {
+  "slug": "eao-014",
+  "title": "Бесплатный детский сад для детей-инвалидов, сирот и с туберкулёзной интоксикацией (Еврейская автономная область)",
+  "criteria": {
+   "anyOf": [
+    {
+     "requiresDisabledChild": true
+    },
+    {
+     "requiresFosterParent": true
+    }
+   ],
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "eao-009",
+  "title": "Ежегодная выплата на школьника многодетным семьям (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "eao-011",
+  "title": "Компенсация 100 % платы за детский сад многодетным (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "eao-015",
+  "title": "Бесплатный проезд школьников из многодетных семей (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "astra-006",
+  "title": "Ежегодное пособие на школьную одежду и принадлежности многодетным (Астраханская область)",
+  "criteria": {
+   "regions": [
+    "Астраханская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "astra-002",
+  "title": "Компенсация родительской платы за детский сад (Астраханская область)",
+  "criteria": {
+   "regions": [
+    "Астраханская область"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "klm-004",
+  "title": "Бесплатное питание школьников из многодетных семей (Республика Калмыкия)",
+  "criteria": {
+   "regions": [
+    "Республика Калмыкия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "klm-012",
+  "title": "Компенсация родительской платы за детский сад (Республика Калмыкия)",
+  "criteria": {
+   "regions": [
+    "Республика Калмыкия"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "kam-009",
+  "title": "Обеспечение школьников одеждой и спортформой многодетным (Камчатский край)",
+  "criteria": {
+   "regions": [
+    "Камчатский край"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tuva-005",
+  "title": "Бесплатный проезд детям из многодетных семей (Республика Тыва)",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tuva-006",
+  "title": "Компенсация питания детям участников СВО (Республика Тыва)",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "dnr-008",
+  "title": "Бесплатное питание школьников (Донецкая Народная Республика)",
+  "criteria": {
+   "regions": [
+    "Донецкая Народная Республика"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "eao-001",
+  "title": "Выплата при рождении первого ребёнка (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "dnr-013",
+  "title": "Бесплатный проезд школьников (Донецкая Народная Республика)",
+  "criteria": {
+   "regions": [
+    "Донецкая Народная Республика"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "eao-005",
+  "title": "Выплата при рождении двойни и более (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "eao-013",
+  "title": "Освобождение от платы за детский сад семьям участников СВО (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "eao-017",
+  "title": "Бесплатное горячее питание 5–11 классов семьям участников СВО (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "eao-016",
+  "title": "Бесплатное питание школьников из многодетных семей (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "bur-004",
+  "title": "Компенсация родительской платы за детский сад (Республика Бурятия)",
+  "criteria": {
+   "regions": [
+    "Республика Бурятия"
+   ],
+   "requiresChildren": true,
+   "requiresLowIncome": true
+  }
+ },
+ {
+  "slug": "klg-006",
+  "title": "Двухразовое питание школьникам из семей участников СВО (Калужская область)",
+  "criteria": {
+   "regions": [
+    "Калужская область"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "klg-007",
+  "title": "Одноразовое питание школьникам из многодетных семей (Калужская область)",
+  "criteria": {
+   "regions": [
+    "Калужская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "klg-012",
+  "title": "Выплата на школьную одежду многодетным (Калужская область)",
+  "criteria": {
+   "regions": [
+    "Калужская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "bur-009",
+  "title": "Бесплатный проезд детям из многодетных семей (Республика Бурятия)",
+  "criteria": {
+   "regions": [
+    "Республика Бурятия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "kam-016",
+  "title": "Дополнительное пособие при рождении двойни и тройни (Камчатский край)",
+  "criteria": {
+   "regions": [
+    "Камчатский край"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "ingushetia-001",
+  "title": "Единовременная выплата за рождение 8-го и последующих детей (Республика Ингушетия)",
+  "criteria": {
+   "regions": [
+    "Республика Ингушетия"
+   ],
+   "minChildren": 8,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "bur-006",
+  "title": "Выплата при рождении первого ребёнка (Республика Бурятия)",
+  "criteria": {
+   "regions": [
+    "Республика Бурятия"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "klm-001",
+  "title": "Выплата при рождении ребёнка (Республика Калмыкия)",
+  "criteria": {
+   "regions": [
+    "Республика Калмыкия"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "tuva-001",
+  "title": "Выплата при рождении двойни и более (Республика Тыва)",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "minChildren": 2,
+   "requiresFamily": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "ingushetia-002",
+  "title": "Выплата при рождении двойни или тройни (Республика Ингушетия)",
+  "criteria": {
+   "regions": [
+    "Республика Ингушетия"
+   ],
+   "minChildren": 2,
+   "requiresChildren": true,
+   "minSimultaneousBirth": 2
+  }
+ },
+ {
+  "slug": "kam-007",
+  "title": "Выплата при рождении первого ребёнка (Камчатский край)",
+  "criteria": {
+   "regions": [
+    "Камчатский край"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "dnr-007",
+  "title": "Первоочередной приём в детский сад (Донецкая Народная Республика)",
+  "criteria": {
+   "regions": [
+    "Донецкая Народная Республика"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tuva-add-nabor",
+  "title": "Подарочный набор новорождённому «Малышу Тывы» (Республика Тыва)",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "tuva-add-detsad-svo",
+  "title": "Бесплатный детский сад детям участников СВО (Республика Тыва)",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "requiresChildren": true,
+   "requiresSvoFamily": true
+  }
+ },
+ {
+  "slug": "tuva-003",
+  "title": "Компенсация питания школьников и студентов (Республика Тыва)",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "requiresStudent": true,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "astra-009",
+  "title": "Пособие на питание школьников из многодетных семей (Астраханская область)",
+  "criteria": {
+   "regions": [
+    "Астраханская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "tuva-004",
+  "title": "Пособие на школьную одежду многодетным (Республика Тыва)",
+  "criteria": {
+   "regions": [
+    "Республика Тыва"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "eao-012",
+  "title": "Первоочередной приём в детский сад детям из многодетных семей (Еврейская автономная область)",
+  "criteria": {
+   "regions": [
+    "Еврейская автономная область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ralt-003",
+  "title": "Бесплатное питание школьников и студентов из многодетных семей (Республика Алтай)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresStudent": true
+    }
+   ],
+   "regions": [
+    "Республика Алтай"
+   ],
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "astra-007",
+  "title": "Пособие на проезд школьников из многодетных семей (Астраханская область)",
+  "criteria": {
+   "regions": [
+    "Астраханская область"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "klm-007",
+  "title": "Выплата на проезд школьников многодетным (Республика Калмыкия)",
+  "criteria": {
+   "regions": [
+    "Республика Калмыкия"
+   ],
+   "minChildren": 3,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "ralt-004",
+  "title": "Компенсация на школьные нужды многодетным (Республика Алтай)",
+  "criteria": {
+   "anyOf": [
+    {
+     "minChildren": 3
+    },
+    {
+     "requiresLowIncome": true
+    }
+   ],
+   "regions": [
+    "Республика Алтай"
+   ],
+   "requiresChildren": true
+  }
+ }
+]
