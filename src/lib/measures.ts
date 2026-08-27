@@ -492,6 +492,23 @@ export interface EligibilityCriteria {
   requiresHardship?: boolean;
   /** Только для региональных мер: список регионов, где мера действует. */
   regions?: string[];
+  /**
+   * Регионы, где федеральная мера НЕ работает.
+   *
+   * Такое бывает: федеральное правило есть, а регион в нём не участвует
+   * или заменил его своим порядком. Пример — сертификат дополнительного
+   * образования: в Москве кружки записывают через mos.ru, сертификатов
+   * там не выдают. Показывать такую меру москвичке — обманывать её.
+   */
+  excludeRegions?: string[];
+  /**
+   * Человек работает: трудовой договор, самозанятость, своё дело.
+   *
+   * Нужен мерам, которые дают права ИМЕННО на работе — трудовые
+   * гарантии, вычеты с зарплаты. Отпуск по уходу считается работой:
+   * место сохраняется, права тоже.
+   */
+  requiresEmployed?: boolean;
 }
 
 /**
@@ -757,6 +774,16 @@ export function evaluateEligibility(
     if (allowed.length > 0 && !allowed.includes(profile.region)) {
       return { fits: false, pending: [] };
     }
+  }
+
+  // Регион, где меры нет. Работает и для федеральных мер — в этом смысл.
+  if (
+    !ignoreRegion &&
+    c.excludeRegions &&
+    profile.region &&
+    c.excludeRegions.includes(profile.region)
+  ) {
+    return { fits: false, pending: [] };
   }
 
   const pending = new Set<PendingReason>();
@@ -1146,12 +1173,26 @@ function matchesCriteria(
   if (c.requiresVeteranCombat && !profile.veteranCombat) return false;
   if (c.requiresRadiation && !profile.radiationAffected) return false;
   if (c.requiresHardship && !profile.hardship) return false;
+  // Права «на работе» не нужны тому, кто не работает.
+  if (c.requiresEmployed && profile.employmentStatus === "not-working") {
+    return false;
+  }
 
   // ── Оформляемые условия ───────────────────────────────────────────────
   // Статус, которого пока нет, но который человек может получить. В обычном
   // режиме такие меры показываем с плашкой (см. PENDING_TEXT), в строгом —
   // когда аккумулятор не передан — скрываем.
   if (c.requiresUnemployedStatus && profile.unemployedStatus !== true) {
+    // Кто работает или в отпуске по уходу, безработным стать не может:
+    // место за ним сохраняется. Раньше движок предлагал таким «оформить
+    // статус» — и работающая женщина видела в подборке пособие по
+    // безработице.
+    if (
+      profile.employmentStatus === "working" ||
+      profile.employmentStatus === "parental-leave"
+    ) {
+      return false;
+    }
     if (!pending) return false;
     pending.add("unemployed");
   }

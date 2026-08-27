@@ -1,0 +1,38 @@
+[
+ {
+  "slug": "trudovye-prava-roditeley",
+  "title": "Трудовые права беременных, родителей и студентов",
+  "criteria": {
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "sertifikat-dopolnitelnogo-obrazovaniya",
+  "title": "Сертификат дополнительного образования (кружки и секции)",
+  "criteria": {
+   "hasChildAgedTo": 18,
+   "hasChildAgedFrom": 5,
+   "requiresChildren": true
+  }
+ },
+ {
+  "slug": "msk-edinovremennaya-pri-rozhdenii",
+  "title": "Единовременная компенсационная выплата при рождении ребёнка (Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresFamily": true
+  }
+ },
+ {
+  "slug": "msk-rost-stoimosti-produktov",
+  "title": "Выплата на возмещение роста стоимости продуктов (дети до 3 лет, Москва)",
+  "criteria": {
+   "regions": [
+    "Москва"
+   ],
+   "requiresChildren": true
+  }
+ }
+]
