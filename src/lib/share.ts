@@ -23,7 +23,14 @@ export { SHARE_SOURCE };
 const VISITOR_COOKIE = "vid";
 const VISITOR_MAX_AGE = 60 * 60 * 24 * 365;
 
-export type ShareKind = "share" | "visit" | "exit";
+/**
+ * Виды событий устройства.
+ *
+ * share — нажали «Поделиться», visit — пришли по размеченной ссылке,
+ * exit — ушли по нашей ссылке наружу (в курс), open — открыли приложение
+ * (раз в сутки на устройство), install — установили приложение на телефон.
+ */
+export type ShareKind = "share" | "visit" | "exit" | "open" | "install";
 
 /**
  * Ссылка, которой делятся. Метка нужна, чтобы отличить переход по ней от

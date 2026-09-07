@@ -21,6 +21,7 @@ import {
   type MessengerChannel,
 } from "@/lib/onboarding-db";
 import { setUserSession, clearUserSession, getCurrentAppUser } from "@/lib/user-session";
+import { recordLogin } from "@/lib/login-events";
 import { applyPendingBotIdentity } from "@/lib/from-bot";
 import { sendOtpEmail } from "@/lib/notify/email";
 import { buildSalebotProxyLink } from "@/lib/salebot";
@@ -143,6 +144,9 @@ export async function verifyCode(input: {
   const user = await getAppUserByEmail(email);
   if (!user) return { ok: false, error: "Пользователь не найден." };
   await setUserSession(user.id);
+  // Отмечаем вход: по журналу людей считают по учётным записям, а не по
+  // браузерам, и видно, что человек заходит с телефона и с компьютера.
+  await recordLogin(user.id, "login");
   // Если человек пришёл из бота и только теперь вошёл — подключаем мессенджер
   // молча, без похода в бота и без сообщения оттуда.
   const fromBot = await applyPendingBotIdentity(user.id);

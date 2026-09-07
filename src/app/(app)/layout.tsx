@@ -7,6 +7,7 @@ import { AppShell } from "@/components/app-shell";
 import { SavedProvider } from "@/components/saved-provider";
 import { UtmCapture } from "@/components/utm-capture";
 import { ShareArrival } from "@/components/share-arrival";
+import { VisitPing } from "@/components/visit-ping";
 import { countUnreadForUser } from "@/lib/inquiry-thread";
 import { AppBadge } from "@/components/app-badge";
 
@@ -45,6 +46,9 @@ export default async function AppLayout({
       <UtmCapture />
       {/* Отметка о приходе по размеченной ссылке — считает пересылки и рассылки. */}
       <ShareArrival />
+      {/* Одна отметка о заходе в сутки: без неё видны только те, кто
+          пришёл по размеченной ссылке. */}
+      <VisitPing />
       {/* Кружок на иконке установленного приложения. */}
       <AppBadge count={unread} />
     </>
