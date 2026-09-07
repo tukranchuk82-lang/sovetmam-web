@@ -32,6 +32,13 @@ export default async function AppLayout({
   // Кружок на «Обращении»: сколько ответов человек ещё не открывал.
   const unread = appUser ? await countUnreadForUser(appUser.id) : 0;
 
+  // Кружок на аватарке: напомнить подключить мессенджер. Показывается только
+  // тем, кто ещё ни разу не открывал кабинет после регистрации без бота, —
+  // как только откроют, отметка гасится (см. profile/page.tsx).
+  const messengerHint = Boolean(
+    appUser && !appUser.messengerConnected && !appUser.messengerHintSeenAt,
+  );
+
   return (
     <>
       <SavedProvider authed={canSave}>
@@ -39,6 +46,7 @@ export default async function AppLayout({
           avatarSlot={avatarSlot}
           authed={Boolean(demoUser || appUser)}
           unread={unread}
+          messengerHint={messengerHint}
         >
           {children}
         </AppShell>

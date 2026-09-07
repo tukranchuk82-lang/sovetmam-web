@@ -136,7 +136,6 @@ export async function requestCode(input: {
   const email = input.email.trim().toLowerCase();
 
   if (firstName.length < 2) return { ok: false, error: "Укажите имя." };
-  if (lastName.length < 2) return { ok: false, error: "Укажите фамилию." };
   if (!EMAIL_RE.test(email)) return { ok: false, error: "Проверьте адрес email." };
 
   // Регистрируется ли человек впервые — узнаём ДО создания записи: согласия

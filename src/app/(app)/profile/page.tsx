@@ -28,7 +28,12 @@ import { ViewModeSwitch } from "@/components/view-mode-switch";
 import { logoutDemoUser } from "@/app/(app)/login/actions";
 import { logout } from "@/app/(app)/login/onboarding-actions";
 import { LegalLinks } from "@/components/legal-links";
-import { isAppAdmin, ROLE_LABELS as APP_ROLE_LABELS, type AppUser } from "@/lib/onboarding-db";
+import {
+  isAppAdmin,
+  markMessengerHintSeen,
+  ROLE_LABELS as APP_ROLE_LABELS,
+  type AppUser,
+} from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
 import { listSavedSlugs } from "@/lib/saved-measures-db";
@@ -230,7 +235,7 @@ export default async function ProfilePage() {
 
 // Личный кабинет обычного (email) пользователя.
 async function AppUserProfile({ user }: { user: AppUser }) {
-  const fullName = `${user.firstName} ${user.lastName}`;
+  const fullName = `${user.firstName} ${user.lastName}`.trim();
   const isAdmin = isAppAdmin(user);
   // Режим просмотра переключает сам админ. В режиме «пользователь» кабинет
   // выглядит ровно так же, как у обычной мамы, — чтобы можно было проверить
@@ -244,6 +249,13 @@ async function AppUserProfile({ user }: { user: AppUser }) {
   };
   const inquiries = await listInquiriesForUser(user.id);
   const savedCount = (await listSavedSlugs(user.id)).length;
+
+  // Открыл кабинет — напоминание про мессенджер своё дело сделало: человек
+  // увидел блок «Мессенджеры» ниже. Кружочек на аватарке больше не нужен.
+  if (!user.messengerConnected && !user.messengerHintSeenAt) {
+    await markMessengerHintSeen(user.id);
+  }
+
   return (
     <div className="px-4 py-5">
       <div className="flex items-center gap-3">

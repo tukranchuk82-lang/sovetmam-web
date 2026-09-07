@@ -16,7 +16,13 @@ export default async function LoginPage() {
   if (appUser || demoUser) redirect("/profile");
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center px-6 py-10">
+    // min-height считаем от высоты прокручиваемой области за вычетом шапки
+    // (--hdr-h ставит app-shell): без этого блок центрируется относительно
+    // высоты «под шапкой» целиком, включая саму шапку, и съезжает вниз.
+    <div
+      className="flex flex-col items-center justify-center px-6 py-10"
+      style={{ minHeight: "calc(100% - var(--hdr-h, 76px))" }}
+    >
       {/* Заголовок и подпись живут внутри формы — на шагах регистрации/кода
           они скрываются (см. EmailAuthFlow). */}
       <Suspense fallback={null}>

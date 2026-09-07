@@ -38,18 +38,30 @@ export function AppShell({
   avatarSlot,
   authed,
   unread = 0,
+  messengerHint = false,
   children,
 }: {
   avatarSlot: React.ReactNode;
   authed: boolean;
   /** Непрочитанные ответы на обращения — кружок в меню и на иконке. */
   unread?: number;
+  /** Напомнить подключить мессенджер — кружок на аватарке, с задержкой. */
+  messengerHint?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const section = sectionOf(pathname);
   const transparent = section === "catalog";
+
+  // Кружок на аватарке загорается не сразу при входе, а через паузу — когда
+  // человек уже начал листать приложение, а не в первую секунду после кода.
+  const [showMessengerHint, setShowMessengerHint] = useState(false);
+  useEffect(() => {
+    if (!messengerHint) return;
+    const t = setTimeout(() => setShowMessengerHint(true), 15_000);
+    return () => clearTimeout(t);
+  }, [messengerHint]);
 
   // Глобальная кнопка «Назад» — на всех экранах, кроме двух «корневых» с
   // собственным героем: главной и списка каталога (там возвращаться некуда, а
@@ -227,9 +239,15 @@ export function AppShell({
               <Link
                 href="/profile"
                 aria-label="Личный кабинет"
-                className="pointer-events-auto shrink-0"
+                className="pointer-events-auto relative shrink-0"
               >
                 {avatarSlot}
+                {showMessengerHint && (
+                  <span
+                    className="absolute -right-0.5 -top-0.5 size-3.5 rounded-full bg-[#E4374B] ring-2 ring-white"
+                    aria-label="Есть непрочитанное в личном кабинете"
+                  />
+                )}
               </Link>
             ) : (
               <Link

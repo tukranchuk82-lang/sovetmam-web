@@ -19,6 +19,8 @@ export interface AppUser {
   maxId: string | null;
   /** Идентификатор клиента в Salebot: по нему бот шлёт код подтверждения. */
   salebotClientId: string | null;
+  /** Открывал ли уже кабинет с напоминанием подключить мессенджер. */
+  messengerHintSeenAt: string | null;
   survey: Record<string, unknown> | null;
   avatarUrl: string | null;
   avatarEmoji: string | null;
@@ -66,6 +68,7 @@ type Row = {
   vk_id: number | null;
   max_id: string | null;
   salebot_client_id: string | null;
+  messenger_hint_seen_at: string | null;
   survey: Record<string, unknown> | null;
   avatar_url: string | null;
   avatar_emoji: string | null;
@@ -87,6 +90,7 @@ function fromRow(r: Row): AppUser {
     vkId: r.vk_id,
     maxId: r.max_id,
     salebotClientId: r.salebot_client_id,
+    messengerHintSeenAt: r.messenger_hint_seen_at,
     survey: r.survey,
     avatarUrl: r.avatar_url,
     avatarEmoji: r.avatar_emoji,
@@ -96,7 +100,18 @@ function fromRow(r: Row): AppUser {
 }
 
 const SELECT =
-  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+
+/** Отметить, что человек уже открывал кабинет с напоминанием подключить
+ * мессенджер, — кружочек на аватарке больше не должен показываться. */
+export async function markMessengerHintSeen(userId: string): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  await sb
+    .from("app_users")
+    .update({ messenger_hint_seen_at: new Date().toISOString() })
+    .eq("id", userId)
+    .is("messenger_hint_seen_at", null);
+}
 
 /** Подключён ли конкретный канал (по наличию id мессенджера). */
 export function channelConnected(u: AppUser, channel: MessengerChannel): boolean {

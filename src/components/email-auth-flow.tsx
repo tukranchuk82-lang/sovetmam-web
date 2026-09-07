@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, ArrowLeft, Loader2, ArrowRight } from "lucide-react";
+import { Mail, ArrowLeft, Loader2, ArrowRight, Send, MessageCircle } from "lucide-react";
 import {
   checkEmail,
   sendLoginCode,
@@ -131,12 +131,31 @@ const CHANNEL_HINT: Record<CodeChannel, string> = {
   vk: "сообщение от нашего бота — приходит сразу",
   telegram: "сообщение от нашего бота — приходит сразу",
 };
+
+// Свой цвет на каждый канал — чтобы список читался с одного взгляда, а не
+// одинаковыми белыми карточками. Email и MAX берут цвета из фирменного стиля
+// сайта; Telegram и «ВКонтакте» — их узнаваемые брендовые синие.
+const CHANNEL_STYLE: Record<CodeChannel, { bg: string; fg: string }> = {
+  email: { bg: "#8E1D2C", fg: "#ffffff" },
+  telegram: { bg: "#26A5E4", fg: "#ffffff" },
+  vk: { bg: "#0077FF", fg: "#ffffff" },
+  max: { bg: "#172A4B", fg: "#ffffff" },
+};
+
+function ChannelIcon({ channel }: { channel: CodeChannel }) {
+  if (channel === "email") return <Mail className="size-5" />;
+  if (channel === "telegram") return <Send className="size-5" />;
+  if (channel === "max") return <MessageCircle className="size-5" />;
+  // «ВКонтакте» — своей иконки в наборе нет, берём узнаваемые буквы.
+  return <span className="text-[13px] font-extrabold tracking-tight">VK</span>;
+}
+
 type Mode = "login" | "register";
 
 export function EmailAuthFlow() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/profile";
+  const next = params.get("next") || "/";
 
   const [step, setStep] = useState<Step>("email");
   const [mode, setMode] = useState<Mode>("login");
@@ -199,7 +218,6 @@ export function EmailAuthFlow() {
     e.preventDefault();
     setError(null);
     if (!firstName.trim()) return setError("Укажите имя.");
-    if (!lastName.trim()) return setError("Укажите фамилию.");
     if (!consentData)
       return setError(
         "Без согласия на обработку персональных данных мы не сможем создать аккаунт.",
@@ -237,13 +255,9 @@ export function EmailAuthFlow() {
     startTransition(async () => {
       const res = await verifyCode({ email, code });
       if (!res.ok) return setError(res.error);
-      // После регистрации — шаг подключения мессенджера. Кроме случая, когда
-      // человек пришёл из бота: там мессенджер уже подключён.
-      if (mode === "register" && !res.messengerConnected) {
-        router.push(`/connect?next=${encodeURIComponent(next)}`);
-      } else {
-        router.push(next);
-      }
+      // Мессенджер больше не обязателен сразу после регистрации — предлагаем
+      // подключить его ненавязчиво, кружком на аватарке (см. AppShell).
+      router.push(next);
     });
   }
 
@@ -336,7 +350,7 @@ export function EmailAuthFlow() {
             Регистрация для{" "}
             <span className="font-semibold">{email}</span>. Как вас зовут?
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <input
               className={inputCls}
               placeholder="Имя"
@@ -348,11 +362,10 @@ export function EmailAuthFlow() {
             />
             <input
               className={inputCls}
-              placeholder="Фамилия"
+              placeholder="Фамилия (необязательно)"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               autoComplete="family-name"
-              required
             />
           </div>
           {/* Согласия. Показываем только при регистрации: у тех, кто уже
@@ -452,9 +465,9 @@ export function EmailAuthFlow() {
         </form>
       )}
 
-      {/* ===== Шаг 3: код из письма ===== */}
+      {/* ===== Шаг 3: выбор канала для кода ===== */}
       {step === "channel" && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <button
             type="button"
             onClick={goToEmail}
@@ -462,25 +475,48 @@ export function EmailAuthFlow() {
           >
             <ArrowLeft className="size-4" /> Изменить email
           </button>
-          <p className="text-sm text-[#4D4D4D]">
-            Куда прислать код для входа?
-          </p>
-          {channels.map((c) => (
-            <button
-              key={c}
-              type="button"
-              disabled={pending}
-              onClick={() => chooseChannel(c)}
-              className="w-full rounded-xl border border-black/[0.1] bg-white px-4 py-3 text-left shadow-sm transition-colors hover:border-[#8E1D2C]/40 disabled:opacity-60"
+
+          <div className="text-center">
+            <h1
+              className="text-[24px] font-normal leading-tight text-[#1A1A1A]"
+              style={{ fontFamily: "var(--font-playfair), serif" }}
             >
-              <span className="block text-sm font-semibold text-[#1A1A1A]">
-                {CHANNEL_LABEL[c]}
-              </span>
-              <span className="mt-0.5 block text-xs text-[#6b7078]">
-                {CHANNEL_HINT[c]}
-              </span>
-            </button>
-          ))}
+              Куда прислать код?
+            </h1>
+            <p className="mt-1.5 text-sm text-[#6b7078]">Выберите, где удобнее его получить</p>
+          </div>
+
+          <div className="space-y-2.5">
+            {channels.map((c) => {
+              const style = CHANNEL_STYLE[c];
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  disabled={pending}
+                  onClick={() => chooseChannel(c)}
+                  className="flex w-full items-center gap-3.5 rounded-2xl border border-black/[0.06] bg-white px-4 py-3.5 text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:opacity-60"
+                >
+                  <span
+                    className="flex size-11 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: style.bg, color: style.fg }}
+                  >
+                    <ChannelIcon channel={c} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold text-[#1A1A1A]">
+                      {CHANNEL_LABEL[c]}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-[#6b7078]">
+                      {CHANNEL_HINT[c]}
+                    </span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-[#c3c7cd]" />
+                </button>
+              );
+            })}
+          </div>
+
           {error && <p className="text-sm text-[#8E1D2C]">{error}</p>}
         </div>
       )}
