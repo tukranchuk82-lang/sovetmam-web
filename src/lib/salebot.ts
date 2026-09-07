@@ -76,3 +76,48 @@ export async function notifySalebotAnswer(params: {
     return { ok: false, detail: e instanceof Error ? e.message : String(e) };
   }
 }
+
+/**
+ * Код подтверждения в мессенджер.
+ *
+ * Человек выбирает, куда получить код: на почту, в MAX или во «ВКонтакте».
+ * Письмо может уйти в спам, а сообщение в боте приходит сразу и его видно —
+ * поэтому для тех, у кого бот уже подключён, это самый короткий путь.
+ *
+ * Текст сообщения собирает воронка Salebot: мы передаём кодовое слово, по
+ * которому стартует нужный блок, и переменные для подстановки. Сам код кладём
+ * в app_code — в блоке он читается как #{app_code}.
+ *
+ * Заодно ставим клиенту метку kod_podtverjdeniya_app с датой последней
+ * отправки (дд.мм.гггг): по ней в Salebot видно, кто получает коды в бота.
+ */
+export async function sendCodeViaSalebot(params: {
+  clientId: string;
+  code: string;
+}): Promise<{ ok: boolean; detail: string }> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return { ok: false, detail: "SALEBOT_API_KEY не задан" };
+
+  const trigger = process.env.SALEBOT_CODE_TRIGGER ?? "app_code";
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const stamp = `${dd}.${mm}.${now.getFullYear()}`;
+
+  try {
+    const res = await fetch(`https://chatter.salebot.pro/api/${key}/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: params.clientId,
+        message: trigger,
+        app_code: params.code,
+        kod_podtverjdeniya_app: stamp,
+      }),
+    });
+    const text = await res.text();
+    return { ok: res.ok, detail: `${res.status} ${text.slice(0, 300)}` };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}

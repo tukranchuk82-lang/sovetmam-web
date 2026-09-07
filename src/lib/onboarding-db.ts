@@ -17,6 +17,8 @@ export interface AppUser {
   telegramId: number | null;
   vkId: number | null;
   maxId: string | null;
+  /** Идентификатор клиента в Salebot: по нему бот шлёт код подтверждения. */
+  salebotClientId: string | null;
   survey: Record<string, unknown> | null;
   avatarUrl: string | null;
   avatarEmoji: string | null;
@@ -63,6 +65,7 @@ type Row = {
   telegram_id: number | null;
   vk_id: number | null;
   max_id: string | null;
+  salebot_client_id: string | null;
   survey: Record<string, unknown> | null;
   avatar_url: string | null;
   avatar_emoji: string | null;
@@ -83,6 +86,7 @@ function fromRow(r: Row): AppUser {
     telegramId: r.telegram_id,
     vkId: r.vk_id,
     maxId: r.max_id,
+    salebotClientId: r.salebot_client_id,
     survey: r.survey,
     avatarUrl: r.avatar_url,
     avatarEmoji: r.avatar_emoji,
@@ -92,7 +96,7 @@ function fromRow(r: Row): AppUser {
 }
 
 const SELECT =
-  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
 
 /** Подключён ли конкретный канал (по наличию id мессенджера). */
 export function channelConnected(u: AppUser, channel: MessengerChannel): boolean {

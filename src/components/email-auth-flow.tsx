@@ -8,6 +8,8 @@ import {
   sendLoginCode,
   requestCode,
   verifyCode,
+  codeChannels,
+  type CodeChannel,
 } from "@/app/(app)/login/onboarding-actions";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -113,7 +115,22 @@ const inputCls =
 const btnCls =
   "flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#8E1D2C] text-sm font-semibold text-white shadow-[0_10px_24px_-10px_rgba(142,29,44,0.6)] transition-colors hover:bg-[#7c1826] disabled:opacity-60";
 
-type Step = "email" | "register" | "code";
+type Step = "email" | "register" | "channel" | "code";
+
+/** Названия каналов — как их видит человек. */
+const CHANNEL_LABEL: Record<CodeChannel, string> = {
+  email: "На почту",
+  max: "В MAX",
+  vk: "Во «ВКонтакте»",
+  telegram: "В Telegram",
+};
+
+const CHANNEL_HINT: Record<CodeChannel, string> = {
+  email: "письмо приходит за минуту, иногда попадает в спам",
+  max: "сообщение от нашего бота — приходит сразу",
+  vk: "сообщение от нашего бота — приходит сразу",
+  telegram: "сообщение от нашего бота — приходит сразу",
+};
 type Mode = "login" | "register";
 
 export function EmailAuthFlow() {
@@ -130,6 +147,10 @@ export function EmailAuthFlow() {
   const [error, setError] = useState<string | null>(null);
   const [devCode, setDevCode] = useState<string | null>(null);
   const [noAccount, setNoAccount] = useState(false); // «У меня уже есть аккаунт»
+  // Куда можно прислать код. Мессенджер доступен, только если бот уже
+  // подключён к аккаунту — иначе боту некуда писать.
+  const [channels, setChannels] = useState<CodeChannel[]>(["email"]);
+  const [sentTo, setSentTo] = useState<CodeChannel>("email");
   // Согласия при регистрации. Обязательное — на обработку данных, без него
   // аккаунт не создаём; рассылка добровольна и ни на что не влияет.
   const [consentData, setConsentData] = useState(false);
@@ -156,10 +177,15 @@ export function EmailAuthFlow() {
       const res = await checkEmail(value);
       if (!res.ok) return setError(res.error);
       if (res.exists) {
+        setMode("login");
+        // Если бот подключён — сначала спрашиваем, куда прислать код.
+        const list = await codeChannels(value);
+        setChannels(list);
+        if (list.length > 1) return setStep("channel");
         const sent = await sendLoginCode(value);
         if (!sent.ok) return setError(sent.error);
-        setMode("login");
         setDevCode(sent.devCode ?? null);
+        setSentTo(sent.sentTo ?? "email");
         setStep("code");
       } else {
         setNoAccount(false);
@@ -192,7 +218,19 @@ export function EmailAuthFlow() {
     });
   }
 
-  // Шаг 3 — код из письма.
+  // Шаг 2а — выбранный канал доставки кода.
+  function chooseChannel(channel: CodeChannel) {
+    setError(null);
+    startTransition(async () => {
+      const sent = await sendLoginCode(email, channel);
+      if (!sent.ok) return setError(sent.error);
+      setDevCode(sent.devCode ?? null);
+      setSentTo(sent.sentTo ?? "email");
+      setStep("code");
+    });
+  }
+
+  // Шаг 3 — код из письма или из бота.
   function submitCode(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -216,9 +254,11 @@ export function EmailAuthFlow() {
       const res =
         mode === "register"
           ? await requestCode({ firstName, lastName, email })
-          : await sendLoginCode(email);
-      if (res.ok) setDevCode(res.devCode ?? null);
-      else setError(res.error);
+          : await sendLoginCode(email, sentTo);
+      if (res.ok) {
+        setDevCode(res.devCode ?? null);
+        setSentTo(res.sentTo ?? "email");
+      } else setError(res.error);
     });
   }
 
@@ -413,6 +453,38 @@ export function EmailAuthFlow() {
       )}
 
       {/* ===== Шаг 3: код из письма ===== */}
+      {step === "channel" && (
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={goToEmail}
+            className="inline-flex items-center gap-1.5 text-sm text-[#6b7078] hover:text-[#1A1A1A]"
+          >
+            <ArrowLeft className="size-4" /> Изменить email
+          </button>
+          <p className="text-sm text-[#4D4D4D]">
+            Куда прислать код для входа?
+          </p>
+          {channels.map((c) => (
+            <button
+              key={c}
+              type="button"
+              disabled={pending}
+              onClick={() => chooseChannel(c)}
+              className="w-full rounded-xl border border-black/[0.1] bg-white px-4 py-3 text-left shadow-sm transition-colors hover:border-[#8E1D2C]/40 disabled:opacity-60"
+            >
+              <span className="block text-sm font-semibold text-[#1A1A1A]">
+                {CHANNEL_LABEL[c]}
+              </span>
+              <span className="mt-0.5 block text-xs text-[#6b7078]">
+                {CHANNEL_HINT[c]}
+              </span>
+            </button>
+          ))}
+          {error && <p className="text-sm text-[#8E1D2C]">{error}</p>}
+        </div>
+      )}
+
       {step === "code" && (
         <form onSubmit={submitCode} className="space-y-3">
           <button
@@ -423,8 +495,20 @@ export function EmailAuthFlow() {
             <ArrowLeft className="size-4" /> Изменить email
           </button>
           <p className="text-sm text-[#4D4D4D]">
-            Код отправлен на <span className="font-semibold">{email}</span>.
-            Введите его ниже.
+            {sentTo === "email" ? (
+              <>
+                Код отправлен на{" "}
+                <span className="font-semibold">{email}</span>. Введите его ниже.
+              </>
+            ) : (
+              <>
+                Код отправлен сообщением{" "}
+                <span className="font-semibold">
+                  {sentTo === "max" ? "в MAX" : sentTo === "vk" ? "во «ВКонтакте»" : "в Telegram"}
+                </span>{" "}
+                — откройте чат с нашим ботом.
+              </>
+            )}
           </p>
           <input
             className={`${inputCls} text-center text-lg tracking-[0.4em]`}
