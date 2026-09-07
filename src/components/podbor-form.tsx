@@ -580,20 +580,20 @@ function GuestNotice({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-2xl border border-black/[0.08] bg-[#f6f7f9] p-3.5",
+        "flex items-start gap-3 rounded-2xl bg-[#2d2d2d] p-3.5 shadow-[0_10px_24px_-10px_rgba(0,0,0,0.35)]",
         className,
       )}
     >
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#1B3A6B]/10 text-[#1B3A6B]">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_4px_12px_-4px_rgba(142,29,44,0.6)]">
         <LogIn className="size-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm leading-snug text-[#4D4D4D]">
+        <p className="text-sm leading-snug text-white/85">
           Если хотите, чтобы данные анкеты были сохранены, войдите в свой
           личный кабинет, нажав кнопку{" "}
           <Link
             href="/login?next=/podbor"
-            className="font-semibold text-[#8E1D2C] hover:underline"
+            className="font-semibold text-white underline decoration-white/40 underline-offset-2 hover:decoration-white"
           >
             Войти
           </Link>
