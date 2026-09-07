@@ -537,6 +537,38 @@ export function EmailAuthFlow() {
           >
             Отправить код ещё раз
           </button>
+          {/* Для тех, кому код всё равно не приходит: боты подхватывают
+              заявку по кодовому слову helpcode и заводят её в админке. */}
+          <p className="pt-1 text-center text-xs leading-relaxed text-[#8f949a]">
+            Код не пришёл? Напишите нам в{" "}
+            <a
+              href="https://telegram.me/SovetMaterei_bot?start=helpcode"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#8E1D2C] hover:underline"
+            >
+              Telegram
+            </a>
+            ,{" "}
+            <a
+              href="https://max.ru/id9718148666_bot?start=helpcode"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#8E1D2C] hover:underline"
+            >
+              MAX
+            </a>{" "}
+            или{" "}
+            <a
+              href="https://vk.cc/d1nLwo"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#8E1D2C] hover:underline"
+            >
+              ВКонтакте
+            </a>{" "}
+            — поможем войти.
+          </p>
         </form>
       )}
     </div>

@@ -12,9 +12,10 @@ import type { MessengerChannel } from "@/lib/onboarding-db";
  * Ждём (в query или в теле POST):
  *   secret            — общий секрет (env SALEBOT_WEBHOOK_SECRET)
  *   salebot_client_id — id клиента в Salebot: по нему же потом отвечаем
- *   channel           — telegram | vk | max
+ *   channel           — код платформы бота: 0 = vk, 1 = telegram, 20 = max
+ *                       (принимаем и текстом telegram|vk|max — на случай
+ *                       ручной проверки вебхука)
  *   name              — имя из мессенджера            [необязательно]
- *   username          — ник                            [необязательно]
  *   note              — что человек написал            [необязательно]
  *
  * Секрет тот же, что у вебхука подключения мессенджера: настройка одна.
@@ -22,7 +23,17 @@ import type { MessengerChannel } from "@/lib/onboarding-db";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const CHANNELS = ["telegram", "vk", "max"] as const;
+// Бот передаёт канал числом — это внутренний код платформы в Salebot, не
+// наш собственный. Текст тоже принимаем: пригождается при ручной проверке
+// вебхука через curl.
+const CHANNEL_BY_CODE: Record<string, MessengerChannel> = {
+  "0": "vk",
+  "1": "telegram",
+  "20": "max",
+  vk: "vk",
+  telegram: "telegram",
+  max: "max",
+};
 
 async function handle(request: Request): Promise<Response> {
   const sp = new URL(request.url).searchParams;
@@ -58,16 +69,16 @@ async function handle(request: Request): Promise<Response> {
   }
 
   const clientId = get("salebot_client_id") || get("client_id");
-  const channel = get("channel") as MessengerChannel;
+  const channel = CHANNEL_BY_CODE[get("channel")];
   if (!clientId) {
     return NextResponse.json(
       { ok: false, error: "salebot_client_id required" },
       { status: 400 },
     );
   }
-  if (!CHANNELS.includes(channel as (typeof CHANNELS)[number])) {
+  if (!channel) {
     return NextResponse.json(
-      { ok: false, error: "channel must be telegram|vk|max" },
+      { ok: false, error: "channel must be 0 (vk), 1 (telegram) or 20 (max)" },
       { status: 400 },
     );
   }
@@ -76,7 +87,6 @@ async function handle(request: Request): Promise<Response> {
     salebotClientId: clientId,
     channel,
     name: get("name") || get("first_name") || null,
-    username: get("username") || null,
     note: get("note") || get("text") || null,
   });
 
