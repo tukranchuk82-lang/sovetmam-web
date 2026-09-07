@@ -122,14 +122,12 @@ const CHANNEL_LABEL: Record<CodeChannel, string> = {
   email: "На почту",
   max: "В MAX",
   vk: "Во «ВКонтакте»",
-  telegram: "В Telegram",
 };
 
 const CHANNEL_HINT: Record<CodeChannel, string> = {
   email: "письмо приходит за минуту, иногда попадает в спам",
   max: "сообщение от нашего бота — приходит сразу",
   vk: "сообщение от нашего бота — приходит сразу",
-  telegram: "сообщение от нашего бота — приходит сразу",
 };
 type Mode = "login" | "register";
 
@@ -504,7 +502,7 @@ export function EmailAuthFlow() {
               <>
                 Код отправлен сообщением{" "}
                 <span className="font-semibold">
-                  {sentTo === "max" ? "в MAX" : sentTo === "vk" ? "во «ВКонтакте»" : "в Telegram"}
+                  {sentTo === "max" ? "в MAX" : "во «ВКонтакте»"}
                 </span>{" "}
                 — откройте чат с нашим ботом.
               </>
