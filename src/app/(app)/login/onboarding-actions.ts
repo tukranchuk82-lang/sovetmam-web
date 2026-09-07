@@ -31,18 +31,21 @@ import { buildSalebotProxyLink, sendCodeViaSalebot } from "@/lib/salebot";
  *
  * email — письмо; остальное — сообщение от нашего бота через Salebot.
  *
- * Telegram здесь нет намеренно: использовать его для подтверждения входа
- * в России запрещено. Как канал общения с ботом он остаётся.
+ * Мессенджер здесь — только канал доставки кода, наравне с почтой: вход
+ * всё равно подтверждается кодом в нашем приложении.
  */
-export type CodeChannel = "email" | "vk" | "max";
+export type CodeChannel = "email" | "telegram" | "vk" | "max";
 
 /** Какие каналы доступны этому человеку — для кнопок на экране входа. */
 export async function codeChannels(emailRaw: string): Promise<CodeChannel[]> {
   const user = await getAppUserByEmail(emailRaw.trim().toLowerCase());
   if (!user?.salebotClientId) return ["email"];
+  // Кнопку показываем только для реально подключённых ботов: подключено
+  // два — две кнопки, один — одна, ни одного — только почта.
   const list: CodeChannel[] = ["email"];
   if (user.maxId != null) list.push("max");
   if (user.vkId != null) list.push("vk");
+  if (user.telegramId != null) list.push("telegram");
   return list;
 }
 
