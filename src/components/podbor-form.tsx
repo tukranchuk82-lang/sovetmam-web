@@ -9,7 +9,6 @@ import {
   MessageCircle,
   FileEdit,
   Download,
-  LogIn,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -566,52 +565,21 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
   };
 }
 
-// Анкета гостя без авторизации: анкету заполнили, но сохранить в профиль
-// нечего — некуда. Держим её в sessionStorage, пока человек не уйдёт логиниться
-// и не вернётся: тогда данные подтянутся в свежий личный кабинет сами (см.
-// эффект восстановления ниже) и в базу их положит тот же saveSurveyAction.
-const GUEST_RESULT_KEY = "podbor-guest-result-v1";
-
-// Мягкое напоминание для гостя без входа: анкету заполнить можно, но пока не
-// авторизован — результат не сохранится. Ссылка на вход несёт next=/podbor,
-// чтобы после кода вернуть человека сюда же и подтянуть уже введённые ответы
-// (см. эффект восстановления по GUEST_RESULT_KEY).
-function GuestNotice({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "flex items-start gap-3 rounded-2xl bg-[#2d2d2d] p-3.5 shadow-[0_10px_24px_-10px_rgba(0,0,0,0.35)]",
-        className,
-      )}
-    >
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-[0_4px_12px_-4px_rgba(142,29,44,0.6)]">
-        <LogIn className="size-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm leading-snug text-white/85">
-          Если хотите, чтобы данные анкеты были сохранены, войдите в свой
-          личный кабинет, нажав кнопку{" "}
-          <Link
-            href="/login?next=/podbor"
-            className="font-semibold text-white underline decoration-white/40 underline-offset-2 hover:decoration-white"
-          >
-            Войти
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
-}
+// Анкета доступна только авторизованным (см. PodborGate), но локальный
+// снимок последнего результата всё равно держим в sessionStorage: без него
+// возврат «назад» из карточки меры иногда попадал на страницу мимо клиентского
+// состояния (устаревший кеш навигации Next.js) и человек видел пустую анкету
+// вместо уже посчитанной подборки. Восстанавливаем из снимка, только если
+// сервер её не прислал, и тут же дозаписываем в профиль — на случай, если
+// исходное сохранение не успело дойти до базы.
+const LAST_RESULT_KEY = "podbor-last-result-v1";
 
 export function PodborForm({
   measures,
   savedSurvey,
-  authed = true,
 }: {
   measures: SupportMeasure[];
   savedSurvey?: Record<string, unknown> | null;
-  /** Заполняет ли анкету гость без входа — тогда её некуда сохранить сразу. */
-  authed?: boolean;
 }) {
   // Прошлые ответы из профиля (если анкета уже заполнялась) — восстанавливаем
   // и форму, и результат, чтобы подбор не слетал при возврате к странице.
@@ -1039,28 +1007,24 @@ export function PodborForm({
   const [draftDismissed, setDraftDismissed] = useState(false);
   const draftOffered = hasDraft && !hasSaved && !touched && !draftDismissed;
 
-  // Вернулись из входа с готовой гостевой анкетой, а в профиле своей ещё нет —
-  // подтягиваем её и сразу же сохраняем в базу, чтобы больше не заполнять.
+  // Сервер не прислал сохранённую анкету (savedSurvey пуст), но локальный
+  // снимок с прошлого раза есть — подтягиваем его, чтобы не гнать человека
+  // заполнять заново, и на всякий случай дозаписываем в профиль.
   useEffect(() => {
-    if (!authed || hasSaved) return;
+    if (hasSaved) return;
     let raw: string | null = null;
     try {
-      raw = sessionStorage.getItem(GUEST_RESULT_KEY);
+      raw = sessionStorage.getItem(LAST_RESULT_KEY);
     } catch {
       return;
     }
     if (!raw) return;
-    try {
-      sessionStorage.removeItem(GUEST_RESULT_KEY);
-    } catch {
-      /* не смогли стереть — не критично */
-    }
     const profile = JSON.parse(raw) as UserProfile;
     setResultProfile(profile);
     setResults(matchMeasures(profile, measures));
     void saveSurveyAction(profile as unknown as Record<string, unknown>);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, hasSaved]);
+  }, [hasSaved]);
 
   function applyDraft() {
     const d = readDraft();
@@ -1260,18 +1224,15 @@ export function PodborForm({
     setResults(
       matchMeasures(profile, measures),
     );
-    if (authed) {
-      // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли
-      // пользователь; при перезаполнении данные перезапишутся).
-      void saveSurveyAction(profile as unknown as Record<string, unknown>);
-    } else {
-      // Гостю сохранить некуда — держим анкету до входа: если авторизуется,
-      // эффект восстановления выше подхватит её и запишет в профиль сам.
-      try {
-        sessionStorage.setItem(GUEST_RESULT_KEY, JSON.stringify(profile));
-      } catch {
-        /* приватный режим — переживём и без восстановления после входа */
-      }
+    // Сохраняем анкету в профиль и держим локальный снимок под рукой — если
+    // возврат «назад» из карточки меры попадёт на устаревший клиентский кеш
+    // страницы, эффект восстановления выше подхватит снимок вместо пустой
+    // анкеты (см. LAST_RESULT_KEY).
+    void saveSurveyAction(profile as unknown as Record<string, unknown>);
+    try {
+      sessionStorage.setItem(LAST_RESULT_KEY, JSON.stringify(profile));
+    } catch {
+      /* приватный режим — переживём и без подстраховки */
     }
   }
 
@@ -1306,8 +1267,6 @@ export function PodborForm({
             </button>
           </div>
         </div>
-
-        {!authed && <GuestNotice className="mt-3" />}
 
         {/* Регион не указан — региональных мер в подборке нет вовсе.
             Молчать об этом нельзя: человек решит, что в его области ничего
@@ -1432,12 +1391,9 @@ export function PodborForm({
         Подбор мер поддержки
       </h1>
       <p className="mt-1 text-sm text-[#6b7078]">
-        {authed
-          ? "Ответьте на несколько вопросов о семье. Мы сохраним ваш подбор — сможете вернуться к нему в любой момент."
-          : "Ответьте на несколько вопросов о семье — покажем, что вам положено."}
+        Ответьте на несколько вопросов о семье. Мы сохраним ваш подбор —
+        сможете вернуться к нему в любой момент.
       </p>
-
-      {!authed && <GuestNotice />}
 
       {/* Незаконченная анкета — предлагаем продолжить с того же места. */}
       {draftOffered && (
