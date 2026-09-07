@@ -9,6 +9,7 @@ import {
   MessageCircle,
   FileEdit,
   Download,
+  LogIn,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -565,12 +566,52 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
   };
 }
 
+// Анкета гостя без авторизации: анкету заполнили, но сохранить в профиль
+// нечего — некуда. Держим её в sessionStorage, пока человек не уйдёт логиниться
+// и не вернётся: тогда данные подтянутся в свежий личный кабинет сами (см.
+// эффект восстановления ниже) и в базу их положит тот же saveSurveyAction.
+const GUEST_RESULT_KEY = "podbor-guest-result-v1";
+
+// Мягкое напоминание для гостя без входа: анкету заполнить можно, но пока не
+// авторизован — результат не сохранится. Ссылка на вход несёт next=/podbor,
+// чтобы после кода вернуть человека сюда же и подтянуть уже введённые ответы
+// (см. эффект восстановления по GUEST_RESULT_KEY).
+function GuestNotice({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 rounded-2xl border border-black/[0.08] bg-[#f6f7f9] p-3.5",
+        className,
+      )}
+    >
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#1B3A6B]/10 text-[#1B3A6B]">
+        <LogIn className="size-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm leading-snug text-[#4D4D4D]">
+          Если хотите, чтобы данные анкеты были сохранены, войдите в свой
+          личный кабинет, нажав кнопку{" "}
+          <Link
+            href="/login?next=/podbor"
+            className="font-semibold text-[#8E1D2C] hover:underline"
+          >
+            Войти
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function PodborForm({
   measures,
   savedSurvey,
+  authed = true,
 }: {
   measures: SupportMeasure[];
   savedSurvey?: Record<string, unknown> | null;
+  /** Заполняет ли анкету гость без входа — тогда её некуда сохранить сразу. */
+  authed?: boolean;
 }) {
   // Прошлые ответы из профиля (если анкета уже заполнялась) — восстанавливаем
   // и форму, и результат, чтобы подбор не слетал при возврате к странице.
@@ -998,6 +1039,29 @@ export function PodborForm({
   const [draftDismissed, setDraftDismissed] = useState(false);
   const draftOffered = hasDraft && !hasSaved && !touched && !draftDismissed;
 
+  // Вернулись из входа с готовой гостевой анкетой, а в профиле своей ещё нет —
+  // подтягиваем её и сразу же сохраняем в базу, чтобы больше не заполнять.
+  useEffect(() => {
+    if (!authed || hasSaved) return;
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(GUEST_RESULT_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      sessionStorage.removeItem(GUEST_RESULT_KEY);
+    } catch {
+      /* не смогли стереть — не критично */
+    }
+    const profile = JSON.parse(raw) as UserProfile;
+    setResultProfile(profile);
+    setResults(matchMeasures(profile, measures));
+    void saveSurveyAction(profile as unknown as Record<string, unknown>);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, hasSaved]);
+
   function applyDraft() {
     const d = readDraft();
     setDraftDismissed(true);
@@ -1196,9 +1260,19 @@ export function PodborForm({
     setResults(
       matchMeasures(profile, measures),
     );
-    // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли пользователь;
-    // при перезаполнении данные перезапишутся).
-    void saveSurveyAction(profile as unknown as Record<string, unknown>);
+    if (authed) {
+      // Сохраняем анкету в профиль (экшен сам проверит, залогинен ли
+      // пользователь; при перезаполнении данные перезапишутся).
+      void saveSurveyAction(profile as unknown as Record<string, unknown>);
+    } else {
+      // Гостю сохранить некуда — держим анкету до входа: если авторизуется,
+      // эффект восстановления выше подхватит её и запишет в профиль сам.
+      try {
+        sessionStorage.setItem(GUEST_RESULT_KEY, JSON.stringify(profile));
+      } catch {
+        /* приватный режим — переживём и без восстановления после входа */
+      }
+    }
   }
 
   function reset() {
@@ -1232,6 +1306,8 @@ export function PodborForm({
             </button>
           </div>
         </div>
+
+        {!authed && <GuestNotice className="mt-3" />}
 
         {/* Регион не указан — региональных мер в подборке нет вовсе.
             Молчать об этом нельзя: человек решит, что в его области ничего
@@ -1356,9 +1432,12 @@ export function PodborForm({
         Подбор мер поддержки
       </h1>
       <p className="mt-1 text-sm text-[#6b7078]">
-        Ответьте на несколько вопросов о семье. Мы сохраним ваш подбор — сможете
-        вернуться к нему в любой момент.
+        {authed
+          ? "Ответьте на несколько вопросов о семье. Мы сохраним ваш подбор — сможете вернуться к нему в любой момент."
+          : "Ответьте на несколько вопросов о семье — покажем, что вам положено."}
       </p>
+
+      {!authed && <GuestNotice />}
 
       {/* Незаконченная анкета — предлагаем продолжить с того же места. */}
       {draftOffered && (
