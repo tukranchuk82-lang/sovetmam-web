@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { fetchAllPages } from "@/lib/supabase/paged";
 import type { AppRole, MessengerChannel } from "@/lib/onboarding-db";
 
 // База зарегистрированных пользователей для админ-панели. Читаем через
@@ -85,29 +86,48 @@ const SELECT =
 export async function listAppUsersForAdmin(): Promise<AdminUser[]> {
   const sb = createSupabaseAdminClient();
 
+  // Читаем страницами: людей уже больше тысячи, а PostgREST молча режет
+  // выборку ровно на тысяче — из-за этого админка показывала «Всего 1000»
+  // при 1268 зарегистрированных. Сортировка с id на конце устойчива:
+  // при одинаковом created_at строки не перескакивают между страницами.
   const [users, saved, consents] = await Promise.all([
-    sb.from("app_users").select(SELECT).order("created_at", { ascending: false }),
-    sb.from("saved_measures").select("user_id"),
-    sb.from("user_consents").select("user_id,kind,doc_version,accepted_at,revoked_at"),
+    fetchAllPages<Row>((from, to) =>
+      sb
+        .from("app_users")
+        .select(SELECT)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ),
+    fetchAllPages<{ user_id: string }>((from, to) =>
+      sb.from("saved_measures").select("user_id").order("user_id").range(from, to),
+    ),
+    fetchAllPages<{
+      user_id: string;
+      kind: string;
+      doc_version: string;
+      accepted_at: string;
+      revoked_at: string | null;
+    }>((from, to) =>
+      sb
+        .from("user_consents")
+        .select("user_id,kind,doc_version,accepted_at,revoked_at")
+        .order("user_id")
+        .order("accepted_at")
+        .range(from, to),
+    ),
   ]);
-  if (users.error) throw users.error;
 
   // Избранное считаем в памяти: записей немного, отдельный запрос на каждого
   // пользователя был бы дороже. Если таблица недоступна — просто нули.
   const savedByUser = new Map<string, number>();
-  for (const r of (saved.data ?? []) as { user_id: string }[]) {
+  for (const r of saved) {
     savedByUser.set(r.user_id, (savedByUser.get(r.user_id) ?? 0) + 1);
   }
 
   // Согласия — тем же приёмом: одна выборка на всех, раскладываем по людям.
   const consentsByUser = new Map<string, AdminUser["consents"]>();
-  for (const c of (consents.data ?? []) as {
-    user_id: string;
-    kind: string;
-    doc_version: string;
-    accepted_at: string;
-    revoked_at: string | null;
-  }[]) {
+  for (const c of consents) {
     const list = consentsByUser.get(c.user_id) ?? [];
     list.push({
       kind: c.kind,
@@ -118,7 +138,7 @@ export async function listAppUsersForAdmin(): Promise<AdminUser[]> {
     consentsByUser.set(c.user_id, list);
   }
 
-  return (users.data as Row[]).map((r) => ({
+  return users.map((r) => ({
     id: r.id,
     email: r.email,
     firstName: r.first_name,

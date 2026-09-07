@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseAnonClient } from "@/lib/supabase/anon";
+import { fetchAllPages } from "@/lib/supabase/paged";
 import type {
   EligibilityCriteria,
   MeasureDeadline,
@@ -124,15 +125,19 @@ export async function getMeasuresBySegment(
   segmentId: SegmentId,
 ): Promise<SupportMeasure[]> {
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase
-    .from("measures")
-    .select(SELECT_FIELDS)
-    .eq("is_published", true)
-    .contains("segments", [segmentId])
-    .order("sort_order", { ascending: true });
-
-  if (error) throw error;
-  return (data as MeasureRow[]).map(fromRow);
+  // Страницами: в крупных метках больше полутора тысяч мер, а PostgREST
+  // отдаёт тысячу и молчит — остального человек на странице не увидит.
+  const rows = await fetchAllPages<MeasureRow>((from, to) =>
+    supabase
+      .from("measures")
+      .select(SELECT_FIELDS)
+      .eq("is_published", true)
+      .contains("segments", [segmentId])
+      .order("sort_order", { ascending: true })
+      .order("slug", { ascending: true })
+      .range(from, to),
+  );
+  return rows.map(fromRow);
 }
 
 /**
@@ -189,15 +194,19 @@ export async function getMeasureCountsBySegment(): Promise<
   Record<string, number>
 > {
   const supabase = createSupabaseAnonClient();
-  const { data, error } = await supabase
-    .from("measures")
-    .select("segments")
-    .eq("is_published", true);
-
-  if (error) throw error;
+  // Тоже страницами: иначе счётчики на плитках каталога считались бы по
+  // первой тысяче мер и всегда были бы занижены.
+  const rows = await fetchAllPages<{ segments: string[]; slug: string }>((from, to) =>
+    supabase
+      .from("measures")
+      .select("segments, slug")
+      .eq("is_published", true)
+      .order("slug", { ascending: true })
+      .range(from, to),
+  );
 
   const counts: Record<string, number> = {};
-  for (const row of data as { segments: string[] }[]) {
+  for (const row of rows) {
     for (const seg of row.segments) {
       counts[seg] = (counts[seg] ?? 0) + 1;
     }

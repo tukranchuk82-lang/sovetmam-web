@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { fetchAllPages } from "@/lib/supabase/paged";
 
 /**
  * Отчёты по кнопке «Поделиться» для админки.
@@ -52,13 +53,16 @@ export async function getShareStats(source?: string | null): Promise<ShareStats>
   // целиком и считаем на месте: так проще, чем шесть отдельных запросов с
   // count. Ограничение сверху на всякий случай — чтобы страница админки не
   // подвисла, если приложением вдруг начнут делиться тысячами.
-  const { data } = await sb
-    .from("share_events")
-    .select("kind, path, ref, channel, visitor, created_at")
-    .order("created_at", { ascending: false })
-    .limit(20_000);
-
-  const allRows = (data ?? []) as EventRow[];
+  // Страницами: .limit(20 000) не помогает — PostgREST всё равно отдаёт
+  // не больше тысячи строк за запрос, и отчёт молча недосчитывал заходы.
+  const allRows = await fetchAllPages<EventRow>((from, to) =>
+    sb
+      .from("share_events")
+      .select("kind, path, ref, channel, visitor, created_at")
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
   // Сводку по меткам считаем всегда по всем событиям — иначе, выбрав одну
   // метку, мы бы потеряли из виду остальные и не смогли переключиться.
   const rows = source ? allRows.filter((r) => (r.ref ?? "без метки") === source) : allRows;
@@ -127,12 +131,16 @@ export async function getShareStats(source?: string | null): Promise<ShareStats>
     bySourceMap.set(key, cell);
   }
 
-  const { data: signupRows } = await sb
-    .from("app_users")
-    .select("utm_source")
-    .not("utm_source", "is", null);
+  const signupRows = await fetchAllPages<{ utm_source: string }>((from, to) =>
+    sb
+      .from("app_users")
+      .select("utm_source")
+      .not("utm_source", "is", null)
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
   const signupsBySource = new Map<string, number>();
-  for (const u of (signupRows ?? []) as { utm_source: string }[]) {
+  for (const u of signupRows) {
     signupsBySource.set(u.utm_source, (signupsBySource.get(u.utm_source) ?? 0) + 1);
   }
 

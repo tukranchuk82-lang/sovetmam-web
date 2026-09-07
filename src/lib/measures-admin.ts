@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { fetchAllPages } from "@/lib/supabase/paged";
 import type { SupportMeasure } from "@/lib/measures";
 
 // Полная строка из public.measures, включая неопубликованные и админ-поля.
@@ -36,12 +37,17 @@ function rowToAdmin(r: Record<string, unknown>): MeasureAdminRow {
 
 export async function listMeasuresForAdmin(): Promise<MeasureAdminRow[]> {
   const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase
-    .from("measures")
-    .select(SELECT_FIELDS)
-    .order("sort_order", { ascending: true });
-  if (error) throw error;
-  return (data ?? []).map(rowToAdmin);
+  // Мер больше двух тысяч — читаем страницами, иначе вернётся ровно
+  // тысяча и без всякой ошибки.
+  const rows = await fetchAllPages<Record<string, unknown>>((from, to) =>
+    supabase
+      .from("measures")
+      .select(SELECT_FIELDS)
+      .order("sort_order", { ascending: true })
+      .order("slug", { ascending: true })
+      .range(from, to),
+  );
+  return rows.map(rowToAdmin);
 }
 
 /**
