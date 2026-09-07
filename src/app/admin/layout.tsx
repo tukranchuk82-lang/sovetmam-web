@@ -8,8 +8,10 @@ import {
   CalendarCheck,
   Users,
   Gauge,
+  Inbox,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
+import { countNewBotHelpRequests } from "@/lib/bot-help";
 import { getCurrentAdmin } from "@/lib/user-session";
 import { AdminNavLink } from "@/components/admin/nav-link";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
@@ -33,6 +35,9 @@ export default async function AdminLayout({
   if (!admin) redirect("/login?next=/admin");
 
   const newInquiries = await countNewInquiries();
+  // Заявки на кабинет: человек написал боту и ждёт входа — кружок в меню
+  // нужен не меньше, чем у обращений.
+  const newRequests = await countNewBotHelpRequests();
 
   return (
     <div
@@ -69,6 +74,9 @@ export default async function AdminLayout({
           </AdminNavLink>
           <AdminNavLink href="/admin/inquiries" icon={<MessageSquare className="size-4" />} badge={newInquiries}>
             Обращения
+          </AdminNavLink>
+          <AdminNavLink href="/admin/requests" icon={<Inbox className="size-4" />} badge={newRequests}>
+            Заявки на кабинет
           </AdminNavLink>
           <AdminNavLink
             href="/admin/verification"

@@ -121,3 +121,68 @@ export async function sendCodeViaSalebot(params: {
     return { ok: false, detail: e instanceof Error ? e.message : String(e) };
   }
 }
+
+/**
+ * Сообщение администратору в мессенджер: новая заявка на кабинет.
+ *
+ * Отдельная функция, а не notifySalebotAnswer: там кодовое слово про ответ на
+ * обращение, а здесь своё — воронка показывает другой текст.
+ */
+export async function notifyAdminsSalebot(params: {
+  clientId: string;
+  text: string;
+  link: string;
+}): Promise<{ ok: boolean; detail: string }> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return { ok: false, detail: "SALEBOT_API_KEY не задан" };
+
+  const trigger = process.env.SALEBOT_ADMIN_TRIGGER ?? "admin_alert";
+  try {
+    const res = await fetch(`https://chatter.salebot.pro/api/${key}/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: params.clientId,
+        message: trigger,
+        admin_text: params.text,
+        admin_link: params.link,
+      }),
+    });
+    const text = await res.text();
+    return { ok: res.ok, detail: `${res.status} ${text.slice(0, 300)}` };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/**
+ * Ссылка для входа — человеку, которому кабинет завели вручную.
+ *
+ * Текст собирает воронка Salebot по кодовому слову; мы передаём саму ссылку
+ * и срок её действия.
+ */
+export async function sendLoginLinkViaSalebot(params: {
+  clientId: string;
+  url: string;
+}): Promise<{ ok: boolean; detail: string }> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return { ok: false, detail: "SALEBOT_API_KEY не задан" };
+
+  const trigger = process.env.SALEBOT_LOGIN_LINK_TRIGGER ?? "kabinet_gotov";
+  try {
+    const res = await fetch(`https://chatter.salebot.pro/api/${key}/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: params.clientId,
+        message: trigger,
+        login_url: params.url,
+        login_hours: "24",
+      }),
+    });
+    const text = await res.text();
+    return { ok: res.ok, detail: `${res.status} ${text.slice(0, 300)}` };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}
