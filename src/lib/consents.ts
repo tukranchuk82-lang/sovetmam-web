@@ -21,7 +21,9 @@ export const DOCS_URL = "https://doc.sovetmam.ru";
  * согласия записываются уже с новым номером.
  */
 export const DOC_VERSION = {
-  personalData: "1.0",
+  // 1.1 — уточнён перечень: назван журнал входов и прямо сказано, что
+  // IP-адрес и местоположение не храним (7 сентября 2026).
+  personalData: "1.1",
   mailing: "1.0",
 } as const;
 
