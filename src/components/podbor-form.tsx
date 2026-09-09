@@ -5,10 +5,17 @@ import Link from "next/link";
 import {
   RotateCcw,
   ChevronDown,
+  ChevronRight,
   LayoutGrid,
   MessageCircle,
   FileEdit,
   Download,
+  Wallet,
+  Home,
+  HeartPulse,
+  GraduationCap,
+  Palmtree,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,6 +40,7 @@ import {
   type StudyFunding,
   type UserProfile,
 } from "@/lib/measures";
+import { PRIORITY_SITUATIONS, type PrioritySituationKey } from "@/lib/taxonomy";
 
 /** Ответ о системе налогообложения из сохранённой анкеты — с проверкой. */
 function isTaxSystem(v: unknown): v is TaxSystem {
@@ -506,6 +514,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
         ? Math.min(...ages)
         : null;
   return {
+    prioritySituation: v.prioritySituation ?? null,
     pregnant: !!v.pregnant,
     expectingChildNumber:
       v.pregnant && expecting >= 1 && expecting <= 10 ? expecting : null,
@@ -574,6 +583,79 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
 // исходное сохранение не успело дойти до базы.
 const LAST_RESULT_KEY = "podbor-last-result-v1";
 
+const SITUATION_ICON: Record<PrioritySituationKey, React.ComponentType<{ className?: string }>> = {
+  money: Wallet,
+  housing: Home,
+  health: HeartPulse,
+  "child-education": GraduationCap,
+  leisure: Palmtree,
+  "self-realization": Briefcase,
+};
+
+/**
+ * Экран перед анкетой: какая жизненная ситуация волнует сейчас больше всего.
+ * Меры по ней подбор потом покажет отдельным блоком в самом верху выдачи.
+ * Необязательный шаг — можно пропустить и получить список как раньше.
+ */
+function SituationPicker({
+  value,
+  onPick,
+  onSkip,
+}: {
+  value: PrioritySituationKey | null;
+  onPick: (key: PrioritySituationKey) => void;
+  onSkip: () => void;
+}) {
+  return (
+    <div className="px-4 py-5">
+      <h1
+        className="text-[26px] font-normal leading-tight text-[#1A1A1A]"
+        style={{ fontFamily: "var(--font-playfair), serif" }}
+      >
+        Что для вас важнее всего сейчас?
+      </h1>
+      <p className="mt-1 text-sm text-[#6b7078]">
+        Меры по этой теме покажем в подборе первыми — остальное найдёте следом,
+        как обычно.
+      </p>
+
+      <div className="mt-5 space-y-2.5">
+        {PRIORITY_SITUATIONS.map((s) => {
+          const Icon = SITUATION_ICON[s.key];
+          return (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => onPick(s.key)}
+              className={cn(
+                "flex w-full items-center gap-3.5 rounded-2xl border bg-white px-4 py-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
+                value === s.key ? "border-[#1B3A6B]" : "border-black/[0.08]",
+              )}
+            >
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#1B3A6B]/10 text-[#1B3A6B]">
+                <Icon className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-[#1A1A1A]">{s.title}</span>
+                <span className="mt-0.5 block text-xs text-[#6b7078]">{s.short}</span>
+              </span>
+              <ChevronRight className="size-4 shrink-0 text-[#c3c7cd]" />
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        onClick={onSkip}
+        className="mt-5 w-full text-center text-sm text-muted-foreground hover:text-foreground hover:underline"
+      >
+        Пропустить — показать все меры по обычному порядку
+      </button>
+    </div>
+  );
+}
+
 export function PodborForm({
   measures,
   savedSurvey,
@@ -585,6 +667,14 @@ export function PodborForm({
   // и форму, и результат, чтобы подбор не слетал при возврате к странице.
   const saved = (savedSurvey ?? null) as Partial<UserProfile> | null;
   const hasSaved = !!saved && typeof saved.hasChildren === "boolean";
+
+  // Какая жизненная ситуация волнует сейчас больше всего — спрашиваем один
+  // раз, перед самой анкетой. Возвращающимся (hasSaved) заново не показываем:
+  // они уже отвечали, вопрос сбивал бы с толку при обычном возврате к списку.
+  const [prioritySituation, setPrioritySituation] = useState<PrioritySituationKey | null>(
+    saved?.prioritySituation ?? null,
+  );
+  const [situationAsked, setSituationAsked] = useState(hasSaved);
 
   const [pregnant, setPregnant] = useState<boolean | null>(saved?.pregnant ?? null);
   const [expectingNumber, setExpectingNumber] = useState<number | null>(
@@ -1147,6 +1237,7 @@ export function PodborForm({
 
   function handleSubmit() {
     const profile: UserProfile = {
+      prioritySituation,
       pregnant: pregnant ?? false,
       expectingChildNumber: pregnant ? expectingNumber : null,
       hasChildren: hasChildren ?? false,
@@ -1378,6 +1469,20 @@ export function PodborForm({
           </div>
         )}
       </div>
+    );
+  }
+
+  // Экран выбора актуальной жизненной ситуации — один раз, перед анкетой.
+  if (!situationAsked) {
+    return (
+      <SituationPicker
+        value={prioritySituation}
+        onPick={(key) => {
+          setPrioritySituation(key);
+          setSituationAsked(true);
+        }}
+        onSkip={() => setSituationAsked(true)}
+      />
     );
   }
 

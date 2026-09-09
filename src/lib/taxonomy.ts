@@ -70,3 +70,57 @@ export type SituationKey = (typeof SITUATION_KEYS)[number];
 
 export const FAMILY_KEYS = ["1", "2", "3", "4", "5", "many"] as const;
 export type FamilyKey = (typeof FAMILY_KEYS)[number];
+
+/**
+ * Самая важная сейчас жизненная ситуация — вопрос перед анкетой подбора
+ * (заказчик, 2026-09-09). Меры, которые ей соответствуют, подбор поднимает
+ * отдельным блоком в начало выдачи, перед обычным федеральные/региональные.
+ *
+ * Сознательно не все 17 тем каталога, а шесть крупных, которые заказчик
+ * выбрал сам — они ложатся на уже существующие метки `topic-*`, отдельно
+ * размечать меры под это не нужно.
+ */
+export const PRIORITY_SITUATIONS = [
+  {
+    key: "money",
+    title: "Деньги",
+    short: "Выплаты и компенсации",
+    topics: ["money"],
+  },
+  {
+    key: "housing",
+    title: "Жильё",
+    short: "Получение жилья, компенсации за него",
+    topics: ["housing"],
+  },
+  {
+    key: "health",
+    title: "Здоровье",
+    short: "Лекарства, где и как лечиться, диспансеризация",
+    topics: ["health"],
+  },
+  {
+    key: "child-education",
+    title: "Образование ребёнка",
+    short: "Места в саду, школе, колледже, компенсации",
+    topics: ["education", "vuz"],
+  },
+  {
+    key: "leisure",
+    title: "Отдых и путешествия",
+    short: "Лагеря, путёвки, поездки",
+    topics: ["leisure"],
+  },
+  {
+    key: "self-realization",
+    title: "Самореализация",
+    short: "Обучение взрослых, новая профессия",
+    topics: ["employers"],
+  },
+] as const satisfies readonly {
+  key: string;
+  title: string;
+  short: string;
+  topics: readonly TopicKey[];
+}[];
+export type PrioritySituationKey = (typeof PRIORITY_SITUATIONS)[number]["key"];

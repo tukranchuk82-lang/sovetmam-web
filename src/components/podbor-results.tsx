@@ -12,6 +12,7 @@ import {
   type PodborItem,
   type PocketKey,
 } from "@/lib/podbor-groups";
+import { PRIORITY_SITUATIONS } from "@/lib/taxonomy";
 
 /**
  * Экран результатов подбора.
@@ -154,6 +155,9 @@ export function PodborResults({
   footer?: React.ReactNode;
 }) {
   const groups = useMemo(() => groupPodbor(profile, measures), [profile, measures]);
+  const priority = profile.prioritySituation
+    ? PRIORITY_SITUATIONS.find((s) => s.key === profile.prioritySituation)
+    : null;
 
   if (groups.total === 0) return null;
 
@@ -167,9 +171,21 @@ export function PodborResults({
         <p className="mt-1 text-xs leading-snug text-muted-foreground">
           {groups.urgentCount > 0
             ? "Меры со сгорающим сроком отмечены и подняты наверх — с них и начните."
-            : "Сначала федеральные меры, затем меры вашего региона."}
+            : priority && groups.priority.count > 0
+              ? `Сначала меры по теме «${priority.title}», затем остальные.`
+              : "Сначала федеральные меры, затем меры вашего региона."}
         </p>
       </section>
+
+      {/* Ситуация, которую человек назвал самой важной сейчас, — отдельным
+          блоком в самом верху, ещё до федеральных мер. */}
+      {priority && groups.priority.count > 0 && (
+        <Block
+          title={`Актуально для вас: ${priority.title}`}
+          note={priority.short}
+          block={groups.priority}
+        />
+      )}
 
       <Block
         title="Федеральные меры"

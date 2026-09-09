@@ -5,6 +5,7 @@ import {
   type SupportMeasure,
   type UserProfile,
 } from "./measures";
+import { PRIORITY_SITUATIONS } from "./taxonomy";
 
 /**
  * Раскладка подборки.
@@ -48,6 +49,13 @@ export type PodborBlock = {
 };
 
 export type PodborGroups = {
+  /**
+   * Меры по жизненной ситуации, которую человек назвал самой важной сейчас
+   * (см. PRIORITY_SITUATIONS в lib/taxonomy.ts). Пусто, если ситуацию не
+   * выбирали или под неё ничего не подошло. Эти меры вынуты из federal /
+   * regional — повторно там не встречаются.
+   */
+  priority: PodborBlock;
   federal: PodborBlock;
   regional: PodborBlock;
   /** Меры, которые ребёнок оформляет сам, — отдельным блоком в конце. */
@@ -101,18 +109,32 @@ function withAmountFirst(a: PodborItem, b: PodborItem) {
   return Number(Boolean(b.measure.amount)) - Number(Boolean(a.measure.amount));
 }
 
+/** Метки topic-* приоритетной ситуации — или null, если её не выбирали. */
+function priorityTopicSegments(profile: UserProfile): string[] | null {
+  if (!profile.prioritySituation) return null;
+  const situation = PRIORITY_SITUATIONS.find((s) => s.key === profile.prioritySituation);
+  return situation ? situation.topics.map((t) => `topic-${t}`) : null;
+}
+
+function matchesPriority(m: SupportMeasure, topicSegments: string[]): boolean {
+  const segments = m.segments as unknown as string[];
+  return topicSegments.some((t) => segments.includes(t));
+}
+
 export function groupPodbor(
   profile: UserProfile,
   measures: SupportMeasure[],
   now: Date = new Date(),
 ): PodborGroups {
   const groups: PodborGroups = {
+    priority: emptyBlock(),
     federal: emptyBlock(),
     regional: emptyBlock(),
     child: emptyBlock(),
     total: 0,
     urgentCount: 0,
   };
+  const priorityTopics = priorityTopicSegments(profile);
 
   for (const measure of measures) {
     const verdict = evaluateEligibility(profile, measure);
@@ -124,12 +146,15 @@ export function groupPodbor(
       deadline: deadlineStatus(profile, measure, now),
     };
     // Меры, которые оформляет сам ребёнок, идут в свой блок, а не к
-    // федеральным или региональным: родитель по ним не заявитель.
+    // федеральным или региональным: родитель по ним не заявитель. Блок
+    // приоритетной ситуации их не забирает — это отдельная категория.
     const block = measure.appliesByChild
       ? groups.child
-      : measure.level === "federal"
-        ? groups.federal
-        : groups.regional;
+      : priorityTopics && matchesPriority(measure, priorityTopics)
+        ? groups.priority
+        : measure.level === "federal"
+          ? groups.federal
+          : groups.regional;
     block.count += 1;
     // Общий счёт — только про самого человека: меры, которые оформляет
     // ребёнок, в «вам подходит N мер» не входят, у них свой счётчик.
@@ -145,7 +170,7 @@ export function groupPodbor(
     block.pockets[pocketOf(measure)].push(item);
   }
 
-  for (const block of [groups.federal, groups.regional, groups.child]) {
+  for (const block of [groups.priority, groups.federal, groups.regional, groups.child]) {
     block.urgent.sort(withAmountFirst);
     for (const key of POCKET_ORDER) block.pockets[key].sort(withAmountFirst);
   }
