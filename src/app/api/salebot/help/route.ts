@@ -15,6 +15,11 @@ import type { MessengerChannel } from "@/lib/onboarding-db";
  *   channel           — код платформы бота: 0 = vk, 1 = telegram, 20 = max
  *                       (принимаем и текстом telegram|vk|max — на случай
  *                       ручной проверки вебхука)
+ *   start_param       — параметр диплинка, с которым человек запустил бота.
+ *                       Ссылки в приложении зашивают туда email (см.
+ *                       emailStartParam в email-auth-flow.tsx): «helpcode» +
+ *                       email в base64url. Без этого поля Таня не видела,
+ *                       на какую почту заводить кабинет.        [необязательно]
  *   name              — имя из мессенджера            [необязательно]
  *   note              — что человек написал            [необязательно]
  *
@@ -22,6 +27,21 @@ import type { MessengerChannel } from "@/lib/onboarding-db";
  */
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const START_PREFIX = "helpcode";
+
+/** Email из start-параметра диплинка: «helpcode» + email в base64url. */
+function emailFromStartParam(raw: string): string | null {
+  if (!raw.startsWith(START_PREFIX)) return null;
+  const payload = raw.slice(START_PREFIX.length);
+  if (!payload) return null;
+  try {
+    const email = Buffer.from(payload, "base64url").toString("utf8").trim().toLowerCase();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
+  } catch {
+    return null;
+  }
+}
 
 // Бот передаёт канал числом — это внутренний код платформы в Salebot, не
 // наш собственный. Текст тоже принимаем: пригождается при ручной проверке
@@ -83,10 +103,14 @@ async function handle(request: Request): Promise<Response> {
     );
   }
 
+  const startParam = get("start_param") || get("ref") || get("payload");
+  const email = startParam ? emailFromStartParam(startParam) : null;
+
   const res = await createBotHelpRequest({
     salebotClientId: clientId,
     channel,
     name: get("name") || get("first_name") || null,
+    email,
     note: get("note") || get("text") || null,
   });
 

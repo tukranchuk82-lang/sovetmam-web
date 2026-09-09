@@ -14,6 +14,28 @@ import {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Ссылки «код не пришёл» ведут в бота с кодовым словом helpcode — но раньше
+// оно было одно и то же для всех, и бот не знал, кому заводить кабинет.
+// Зашиваем email прямо в start-параметр диплинка: "helpcode" + email в
+// base64url (декодирует /api/salebot/help). У Telegram и MAX параметр
+// ограничен 64 символами и алфавитом A-Za-z0-9_- — это ровно base64url,
+// поэтому кодируем вручную (у браузера нет base64url "из коробки").
+const START_PREFIX = "helpcode";
+const START_PARAM_MAX = 64;
+
+function emailStartParam(email: string): string | null {
+  const trimmed = email.trim();
+  if (!EMAIL_RE.test(trimmed)) return null;
+  const b64 = btoa(unescape(encodeURIComponent(trimmed)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  const param = START_PREFIX + b64;
+  // Очень длинный email в лимит не влезет — тогда просто ведём без него,
+  // ссылка всё равно рабочая, только без автоподстановки почты.
+  return param.length <= START_PARAM_MAX ? param : null;
+}
+
 /** Где лежат правовые документы — общий сайт для всех наших сервисов. */
 const DOCS_URL = "https://doc.sovetmam.ru";
 
@@ -574,11 +596,13 @@ export function EmailAuthFlow() {
             Отправить код ещё раз
           </button>
           {/* Для тех, кому код всё равно не приходит: боты подхватывают
-              заявку по кодовому слову helpcode и заводят её в админке. */}
+              заявку по кодовому слову helpcode и заводят её в админке. Email
+              зашит в start-параметр диплинка — админка сразу видит, кому
+              заводить кабинет, без переспрашивания. */}
           <p className="pt-1 text-center text-xs leading-relaxed text-[#8f949a]">
             Код не пришёл? Напишите нам в{" "}
             <a
-              href="https://telegram.me/SovetMaterei_bot?start=helpcode"
+              href={`https://telegram.me/SovetMaterei_bot?start=${emailStartParam(email) ?? START_PREFIX}`}
               target="_blank"
               rel="noreferrer"
               className="text-[#8E1D2C] hover:underline"
@@ -587,7 +611,7 @@ export function EmailAuthFlow() {
             </a>
             ,{" "}
             <a
-              href="https://max.ru/id9718148666_bot?start=helpcode"
+              href={`https://max.ru/id9718148666_bot?start=${emailStartParam(email) ?? START_PREFIX}`}
               target="_blank"
               rel="noreferrer"
               className="text-[#8E1D2C] hover:underline"

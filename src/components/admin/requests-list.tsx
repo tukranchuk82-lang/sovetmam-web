@@ -81,7 +81,7 @@ export function RequestsList({ items }: { items: BotHelpRequest[] }) {
 function RequestCard({ req }: { req: BotHelpRequest }) {
   const [firstName, setFirstName] = useState(req.name?.split(" ")[0] ?? "");
   const [lastName, setLastName] = useState(req.name?.split(" ").slice(1).join(" ") ?? "");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(req.email ?? "");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ sent: boolean; url: string } | null>(null);
   const [pending, start] = useTransition();
@@ -136,6 +136,14 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
           {CHANNEL[req.channel]} · {when(req.createdAt)}
         </span>
       </div>
+
+      {req.email ? (
+        <p className="mt-1 text-xs font-medium text-emerald-700">{req.email}</p>
+      ) : (
+        <p className="mt-1 text-xs text-amber-700">
+          Почта не распозналась — уточните у человека в {CHANNEL[req.channel]} и впишите ниже
+        </p>
+      )}
 
       {req.note && (
         <p className="mt-1.5 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">

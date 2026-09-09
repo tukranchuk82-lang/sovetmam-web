@@ -22,6 +22,10 @@ export interface BotHelpRequest {
   channel: MessengerChannel;
   name: string | null;
   username: string | null;
+  /** Email, который человек ввёл на сайте до ухода в бота — см. start-payload
+   * ссылок «код не пришёл» в email-auth-flow.tsx. Может быть пустым, если
+   * ссылку скопировали без параметра или email не декодировался. */
+  email: string | null;
   note: string | null;
   status: "new" | "done" | "declined";
   userId: string | null;
@@ -35,6 +39,7 @@ type Row = {
   channel: MessengerChannel;
   name: string | null;
   username: string | null;
+  email: string | null;
   note: string | null;
   status: BotHelpRequest["status"];
   user_id: string | null;
@@ -48,6 +53,7 @@ const fromRow = (r: Row): BotHelpRequest => ({
   channel: r.channel,
   name: r.name,
   username: r.username,
+  email: r.email,
   note: r.note,
   status: r.status,
   userId: r.user_id,
@@ -71,6 +77,7 @@ export async function createBotHelpRequest(input: {
   channel: MessengerChannel;
   name?: string | null;
   username?: string | null;
+  email?: string | null;
   note?: string | null;
 }): Promise<{ created: boolean; id: string | null }> {
   const sb = createSupabaseAdminClient();
@@ -81,7 +88,19 @@ export async function createBotHelpRequest(input: {
     .eq("salebot_client_id", input.salebotClientId)
     .eq("status", "new")
     .maybeSingle();
-  if (open) return { created: false, id: open.id as string };
+  if (open) {
+    // Email в первый раз мог не долететь (старая ссылка, битый payload) —
+    // если теперь он есть, а в заявке пусто, дозаполняем её же, а не плодим
+    // вторую строку на того же человека.
+    if (input.email) {
+      await sb
+        .from("bot_help_requests")
+        .update({ email: input.email })
+        .eq("id", open.id)
+        .is("email", null);
+    }
+    return { created: false, id: open.id as string };
+  }
 
   const { data, error } = await sb
     .from("bot_help_requests")
@@ -90,6 +109,7 @@ export async function createBotHelpRequest(input: {
       channel: input.channel,
       name: input.name ?? null,
       username: input.username ?? null,
+      email: input.email ?? null,
       note: input.note ?? null,
     })
     .select("id")
@@ -98,6 +118,7 @@ export async function createBotHelpRequest(input: {
 
   await notifyNewRequest({
     name: input.name ?? null,
+    email: input.email ?? null,
     channel: input.channel,
   });
   return { created: true, id: data.id as string };
@@ -106,6 +127,7 @@ export async function createBotHelpRequest(input: {
 /** Уведомление о новой заявке: пуш в приложение и сообщение в Telegram. */
 async function notifyNewRequest(req: {
   name: string | null;
+  email: string | null;
   channel: MessengerChannel;
 }): Promise<void> {
   const sb = createSupabaseAdminClient();
@@ -116,7 +138,9 @@ async function notifyNewRequest(req: {
 
   const who = req.name?.trim() || "Человек";
   const title = "Заявка на кабинет";
-  const body = `${who} написал в ${CHANNEL_LABEL[req.channel]} — кабинета нет, ждёт входа`;
+  const body = req.email
+    ? `${who} (${req.email}) написал в ${CHANNEL_LABEL[req.channel]} — кабинета нет, ждёт входа`
+    : `${who} написал в ${CHANNEL_LABEL[req.channel]} — кабинета нет, ждёт входа`;
 
   for (const a of (admins ?? []) as {
     id: string;
