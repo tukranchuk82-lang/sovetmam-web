@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, Check, X, Link2 } from "lucide-react";
+import { Loader2, Check, X, Link2, ExternalLink } from "lucide-react";
 import {
   createAccountForRequest,
   declineRequest,
@@ -22,6 +22,13 @@ const CHANNEL: Record<string, string> = {
   vk: "ВКонтакте",
   max: "MAX",
 };
+
+// Ссылка на переписку конкретного клиента в кабинете Salebot — узнать, кто
+// это, если почта не распозналась, или просто написать человеку напрямую.
+const SALEBOT_PROJECT_ID = "779751";
+function salebotClientUrl(clientId: string): string {
+  return `https://salebot.pro/projects/${SALEBOT_PROJECT_ID}/clients/${clientId}`;
+}
 
 function when(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -144,6 +151,14 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
           Почта не распозналась — уточните у человека в {CHANNEL[req.channel]} и впишите ниже
         </p>
       )}
+      <a
+        href={salebotClientUrl(req.salebotClientId)}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline"
+      >
+        <ExternalLink className="size-3" /> Открыть чат в Salebot
+      </a>
 
       {req.note && (
         <p className="mt-1.5 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
