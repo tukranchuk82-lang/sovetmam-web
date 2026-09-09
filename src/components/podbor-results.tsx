@@ -1,30 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Clock, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { Clock, AlertCircle, Sparkles } from "lucide-react";
 import { MeasureCard } from "@/components/measure-card";
-import { PENDING_TEXT, pluralMeasures, type SupportMeasure, type UserProfile } from "@/lib/measures";
+import { PENDING_TEXT } from "@/lib/measures";
 import {
-  groupPodbor,
   POCKET_ORDER,
   POCKET_TITLE,
   type PodborBlock,
+  type PodborGroups,
   type PodborItem,
   type PocketKey,
 } from "@/lib/podbor-groups";
-import { PRIORITY_SITUATIONS } from "@/lib/taxonomy";
+import { PRIORITY_SITUATIONS, type PrioritySituationKey } from "@/lib/taxonomy";
 
 /**
  * Экран результатов подбора.
  *
- * Сверху — одна общая цифра: сколько мер подошло семье. Дальше два блока:
- * федеральные меры и меры своего региона. Внутри каждого одинаковый порядок —
- * выплаты, бесплатное, скидки, права и поддержка, — а меры со сгорающим сроком
- * подняты в самое начало блока и выделены цветом: деньги теряют не от
- * незнания, а от опоздания.
+ * Порядок: сначала тема, которую человек назвал самой важной, затем
+ * федеральные меры и меры своего региона. Внутри каждого блока одинаковый
+ * порядок — выплаты, бесплатное, скидки, права и поддержка, — а меры со
+ * сгорающим сроком подняты в начало блока: деньги теряют не от незнания, а от
+ * опоздания.
+ *
+ * Оформление — фирменное: кремовый фон, засечные заголовки, бордо как
+ * единственный акцент. Раньше здесь были бледно-синие подложки на каждом
+ * блоке, и экран выглядел «как в больнице» (замечание заказчика 09.09.2026).
  */
 
 const PAGE = 5;
+const SERIF = { fontFamily: "var(--font-playfair), serif" } as const;
+const INK = "#15234A"; // тёмно-синий текст заголовков — как на главной
 
 function Pending({ item }: { item: PodborItem }) {
   if (item.pending.length === 0) return null;
@@ -75,10 +81,10 @@ function Item({ item }: { item: PodborItem }) {
  */
 function UrgentItem({ item }: { item: PodborItem }) {
   return (
-    <div className="rounded-2xl border border-[#8E1D2C]/30 bg-[#8E1D2C]/[0.05] p-2.5">
-      <p className="mb-2 inline-flex items-center gap-1.5 rounded-lg bg-[#8E1D2C] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.04em] text-white">
+    <div className="rounded-2xl bg-[#8E1D2C]/[0.045] p-2.5 ring-1 ring-[#8E1D2C]/20">
+      <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#8E1D2C] px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-[0_6px_14px_-8px_rgba(142,29,44,0.9)]">
         <Clock className="size-3" aria-hidden />
-        Скоро истечёт срок действия
+        Скоро истечёт срок
       </p>
       <Item item={item} />
     </div>
@@ -90,11 +96,13 @@ function Pocket({ pocket, items }: { pocket: PocketKey; items: PodborItem[] }) {
   const [shown, setShown] = useState(PAGE);
   if (items.length === 0) return null;
   return (
-    <div className="mt-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#3A4D63]">
-        {POCKET_TITLE[pocket]} · {items.length}
+    <div className="mt-5">
+      <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a8f97]">
+        <span className="h-px w-5 bg-[#8E1D2C]/45" aria-hidden />
+        {POCKET_TITLE[pocket]}
+        <span className="text-[#c3c7cd]">{items.length}</span>
       </p>
-      <div className="mt-2 space-y-3">
+      <div className="mt-2.5 space-y-3">
         {items.slice(0, shown).map((item) => (
           <Item key={item.measure.slug} item={item} />
         ))}
@@ -103,13 +111,29 @@ function Pocket({ pocket, items }: { pocket: PocketKey; items: PodborItem[] }) {
         <button
           type="button"
           onClick={() => setShown((n) => n + PAGE)}
-          className="mt-3 w-full rounded-xl border border-[#1B3A6B]/25 bg-[#1B3A6B]/[0.04] py-2.5 text-sm font-semibold text-[#1B3A6B] transition-colors hover:bg-[#1B3A6B]/[0.08]"
+          className="mt-3 w-full rounded-xl bg-white py-2.5 text-sm font-semibold text-[#8E1D2C] shadow-[0_8px_20px_-16px_rgba(26,26,26,0.5)] ring-1 ring-[#8E1D2C]/20 transition-all hover:bg-[#8E1D2C]/[0.04] active:scale-[0.99]"
         >
-          Показать ещё {Math.min(PAGE, items.length - shown)} из{" "}
-          {items.length - shown}
+          Показать ещё {Math.min(PAGE, items.length - shown)} из {items.length - shown}
         </button>
       )}
     </div>
+  );
+}
+
+function BlockBody({ block }: { block: PodborBlock }) {
+  return (
+    <>
+      {block.urgent.length > 0 && (
+        <div className="mt-3 space-y-3">
+          {block.urgent.map((item) => (
+            <UrgentItem key={item.measure.slug} item={item} />
+          ))}
+        </div>
+      )}
+      {POCKET_ORDER.map((key) => (
+        <Pocket key={key} pocket={key} items={block.pockets[key]} />
+      ))}
+    </>
   );
 }
 
@@ -124,67 +148,74 @@ function Block({
 }) {
   if (block.count === 0) return null;
   return (
-    <section className="mt-7">
-      <h2 className="text-[19px] font-semibold leading-tight text-[#1A1A1A]">
-        {title} · {block.count}
-      </h2>
-      <p className="mt-1 text-xs leading-snug text-muted-foreground">{note}</p>
+    <section className="mt-8">
+      <div className="flex items-baseline gap-2">
+        <h2
+          className="text-[22px] font-normal leading-tight"
+          style={{ ...SERIF, color: INK }}
+        >
+          {title}
+        </h2>
+        <span className="text-[13px] font-semibold text-[#8E1D2C]">{block.count}</span>
+      </div>
+      {/* Тонкая бордовая черта под заголовком — тот же приём, что на главной. */}
+      <div className="mt-1.5 h-px w-10 bg-[#8E1D2C]/50" aria-hidden />
+      <p className="mt-2 text-xs leading-snug text-muted-foreground">{note}</p>
+      <BlockBody block={block} />
+    </section>
+  );
+}
 
-      {block.urgent.length > 0 && (
-        <div className="mt-3 space-y-3">
-          {block.urgent.map((item) => (
-            <UrgentItem key={item.measure.slug} item={item} />
-          ))}
-        </div>
-      )}
-
-      {POCKET_ORDER.map((key) => (
-        <Pocket key={key} pocket={key} items={block.pockets[key]} />
-      ))}
+/** Блок выбранной темы — выделен карточкой: это то, за чем человек пришёл. */
+function PriorityBlock({
+  situation,
+  block,
+}: {
+  situation: (typeof PRIORITY_SITUATIONS)[number];
+  block: PodborBlock;
+}) {
+  return (
+    <section className="mt-5 rounded-3xl bg-white p-4 shadow-[0_16px_36px_-28px_rgba(26,26,26,0.7)] ring-1 ring-[#8E1D2C]/15">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#8E1D2C]/[0.08] px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#8E1D2C]">
+        <Sparkles className="size-3" aria-hidden />
+        Важно для вас сейчас
+      </span>
+      <div className="mt-2 flex items-baseline gap-2">
+        <h2
+          className="text-[24px] font-normal leading-tight"
+          style={{ ...SERIF, color: INK }}
+        >
+          {situation.title}
+        </h2>
+        <span className="text-[13px] font-semibold text-[#8E1D2C]">{block.count}</span>
+      </div>
+      <p className="mt-1 text-xs leading-snug text-muted-foreground">{situation.short}</p>
+      <BlockBody block={block} />
     </section>
   );
 }
 
 export function PodborResults({
-  profile,
-  measures,
+  groups,
+  prioritySituation,
   footer,
 }: {
-  profile: UserProfile;
-  measures: SupportMeasure[];
+  groups: PodborGroups;
+  prioritySituation?: PrioritySituationKey | null;
   footer?: React.ReactNode;
 }) {
-  const groups = useMemo(() => groupPodbor(profile, measures), [profile, measures]);
-  const priority = profile.prioritySituation
-    ? PRIORITY_SITUATIONS.find((s) => s.key === profile.prioritySituation)
-    : null;
+  const situation = prioritySituation
+    ? PRIORITY_SITUATIONS.find((s) => s.key === prioritySituation)
+    : undefined;
 
   if (groups.total === 0) return null;
 
   return (
     <div>
-      {/* Общий счёт — первое, что человек видит: сколько мер ему подошло. */}
-      <section className="mt-5 rounded-2xl border border-[#1B3A6B]/20 bg-[#1B3A6B]/[0.04] px-4 py-3.5">
-        <p className="text-[22px] font-semibold leading-tight text-[#1B3A6B]">
-          Вам подходит {pluralMeasures(groups.total)}
-        </p>
-        <p className="mt-1 text-xs leading-snug text-muted-foreground">
-          {groups.urgentCount > 0
-            ? "Меры со сгорающим сроком отмечены и подняты наверх — с них и начните."
-            : priority && groups.priority.count > 0
-              ? `Сначала меры по теме «${priority.title}», затем остальные.`
-              : "Сначала федеральные меры, затем меры вашего региона."}
-        </p>
-      </section>
-
-      {/* Ситуация, которую человек назвал самой важной сейчас, — отдельным
-          блоком в самом верху, ещё до федеральных мер. */}
-      {priority && groups.priority.count > 0 && (
-        <Block
-          title={`Актуально для вас: ${priority.title}`}
-          note={priority.short}
-          block={groups.priority}
-        />
+      {/* Тема, которую человек назвал самой важной сейчас, — до всего
+          остального: за ней он и пришёл. */}
+      {situation && groups.priority.count > 0 && (
+        <PriorityBlock situation={situation} block={groups.priority} />
       )}
 
       <Block

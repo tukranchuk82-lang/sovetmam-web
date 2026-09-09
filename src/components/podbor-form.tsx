@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import {
   RotateCcw,
   ChevronDown,
   ChevronRight,
-  LayoutGrid,
   MessageCircle,
   FileEdit,
   Download,
@@ -23,6 +22,7 @@ import { PodborResults } from "@/components/podbor-results";
 import { saveSurveyAction } from "@/app/(app)/login/onboarding-actions";
 import {
   matchMeasures,
+  pluralMeasures,
   REGIONS,
   TAX_SYSTEM_LABEL,
   YOUNG_FAMILY_MAX_AGE,
@@ -41,6 +41,8 @@ import {
   type UserProfile,
 } from "@/lib/measures";
 import { PRIORITY_SITUATIONS, type PrioritySituationKey } from "@/lib/taxonomy";
+import { groupPodbor } from "@/lib/podbor-groups";
+import { useBackHandler } from "@/components/back-handler";
 
 /** Ответ о системе налогообложения из сохранённой анкеты — с проверкой. */
 function isTaxSystem(v: unknown): v is TaxSystem {
@@ -607,14 +609,15 @@ function SituationPicker({
   onSkip: () => void;
 }) {
   return (
-    <div className="px-4 py-5">
+    <div className="bg-[#F8F7F6] px-4 pb-6 pt-4">
       <h1
-        className="text-[26px] font-normal leading-tight text-[#1A1A1A]"
-        style={{ fontFamily: "var(--font-playfair), serif" }}
+        className="text-[26px] font-normal leading-tight"
+        style={{ fontFamily: "var(--font-playfair), serif", color: "#15234A" }}
       >
         Что для вас важнее всего сейчас?
       </h1>
-      <p className="mt-1 text-sm text-[#6b7078]">
+      <div className="mt-2 h-px w-10 bg-[#8E1D2C]/50" aria-hidden />
+      <p className="mt-2.5 text-sm leading-snug text-[#6b7078]">
         Меры по этой теме покажем в подборе первыми — остальное найдёте следом,
         как обычно.
       </p>
@@ -622,24 +625,36 @@ function SituationPicker({
       <div className="mt-5 space-y-2.5">
         {PRIORITY_SITUATIONS.map((s) => {
           const Icon = SITUATION_ICON[s.key];
+          const active = value === s.key;
           return (
             <button
               key={s.key}
               type="button"
               onClick={() => onPick(s.key)}
               className={cn(
-                "flex w-full items-center gap-3.5 rounded-2xl border bg-white px-4 py-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
-                value === s.key ? "border-[#1B3A6B]" : "border-black/[0.08]",
+                "flex w-full items-center gap-3.5 rounded-2xl bg-white px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 active:scale-[0.99]",
+                active
+                  ? "shadow-[0_14px_30px_-22px_rgba(142,29,44,0.9)] ring-2 ring-[#8E1D2C]"
+                  : "shadow-[0_10px_26px_-20px_rgba(26,26,26,0.5)] ring-1 ring-black/[0.07] hover:ring-[#8E1D2C]/30",
               )}
             >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#1B3A6B]/10 text-[#1B3A6B]">
+              <span
+                className={cn(
+                  "flex size-11 shrink-0 items-center justify-center rounded-full transition-colors",
+                  active
+                    ? "bg-[#8E1D2C] text-white shadow-[0_8px_18px_-10px_rgba(142,29,44,0.9)]"
+                    : "bg-[#8E1D2C]/[0.08] text-[#8E1D2C]",
+                )}
+              >
                 <Icon className="size-5" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-[#1A1A1A]">{s.title}</span>
+                <span className="block text-sm font-semibold text-[#15234A]">{s.title}</span>
                 <span className="mt-0.5 block text-xs text-[#6b7078]">{s.short}</span>
               </span>
-              <ChevronRight className="size-4 shrink-0 text-[#c3c7cd]" />
+              <ChevronRight
+                className={cn("size-4 shrink-0", active ? "text-[#8E1D2C]" : "text-[#c3c7cd]")}
+              />
             </button>
           );
         })}
@@ -668,13 +683,15 @@ export function PodborForm({
   const saved = (savedSurvey ?? null) as Partial<UserProfile> | null;
   const hasSaved = !!saved && typeof saved.hasChildren === "boolean";
 
-  // Какая жизненная ситуация волнует сейчас больше всего — спрашиваем один
-  // раз, перед самой анкетой. Возвращающимся (hasSaved) заново не показываем:
-  // они уже отвечали, вопрос сбивал бы с толку при обычном возврате к списку.
+  // Какая жизненная ситуация волнует сейчас больше всего — спрашиваем перед
+  // анкетой КАЖДЫЙ раз, когда человек садится её заполнять или менять ответы:
+  // ситуация меняется чаще, чем состав семьи, и прошлый выбор мог устареть.
+  // Тем, кто просто открыл готовую подборку, вопрос не мешает — они попадают
+  // сразу на результат, минуя этот экран.
   const [prioritySituation, setPrioritySituation] = useState<PrioritySituationKey | null>(
     saved?.prioritySituation ?? null,
   );
-  const [situationAsked, setSituationAsked] = useState(hasSaved);
+  const [situationAsked, setSituationAsked] = useState(false);
 
   const [pregnant, setPregnant] = useState<boolean | null>(saved?.pregnant ?? null);
   const [expectingNumber, setExpectingNumber] = useState<number | null>(
@@ -1005,6 +1022,15 @@ export function PodborForm({
     hasSaved ? matchMeasures(toProfile(saved!), measures) : null,
   );
   const submitted = useRef(false);
+  // Подборка, от которой человек ушёл менять ответы, — чтобы «Назад» вернул
+  // её на место (см. useBackHandler ниже).
+  const prevResults = useRef<SupportMeasure[] | null>(null);
+  // Раскладка по блокам считается один раз здесь: общее число мер нужно шапке
+  // экрана результатов, а сами блоки рисует PodborResults.
+  const groups = useMemo(
+    () => (resultProfile && results ? groupPodbor(resultProfile, results) : null),
+    [resultProfile, results],
+  );
   const topRef = useRef<HTMLDivElement>(null);
 
   // Все ответы одним объектом — его и держим в черновике.
@@ -1110,6 +1136,9 @@ export function PodborForm({
     }
     if (!raw) return;
     const profile = JSON.parse(raw) as UserProfile;
+    // Восстановление из внешнего хранилища — ровно тот случай, ради которого
+    // эффект и нужен: состояние приходит не из React, а из sessionStorage.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResultProfile(profile);
     setResults(matchMeasures(profile, measures));
     void saveSurveyAction(profile as unknown as Record<string, unknown>);
@@ -1328,128 +1357,151 @@ export function PodborForm({
   }
 
   function reset() {
+    // Держим прошлую подборку под рукой: если человек передумает и нажмёт
+    // «Назад», он вернётся к ней, а не окажется на главной с пустыми руками.
+    prevResults.current = results;
     setResults(null);
+    setSituationAsked(false);
+    setStep(0);
   }
+
+  /**
+   * Кнопка «Назад» в шапке ведёт на шаг назад по анкете, а не со страницы:
+   * анкета многоэкранная, но живёт в состоянии, и обычный «назад» браузера
+   * уносил человека на главную вместе со всем заполненным.
+   *
+   * Порядок обратный ходу заполнения: шаг N → шаг N−1 → выбор ситуации →
+   * прошлая подборка (если была). Дальше — обычная история браузера.
+   */
+  useBackHandler(() => {
+    if (results) return false; // на экране результатов — обычный «назад»
+    if (situationAsked && step > 0) {
+      goToStep(step - 1);
+      return true;
+    }
+    if (situationAsked) {
+      setSituationAsked(false); // с первого шага — обратно к выбору ситуации
+      return true;
+    }
+    if (prevResults.current) {
+      setResults(prevResults.current); // с выбора ситуации — к прошлой подборке
+      return true;
+    }
+    return false;
+  });
 
   // Экран результатов
   if (results) {
+    const situation = prioritySituation
+      ? PRIORITY_SITUATIONS.find((s) => s.key === prioritySituation)
+      : undefined;
     return (
-      <div ref={topRef} className="px-4 py-5">
-        {/* Подборка уже составлена по сохранённой анкете — говорим об этом прямо
-            и даём заметную кнопку сменить ответы, а не бледную строчку. */}
-        <div className="flex items-start gap-3 rounded-2xl border border-[#1B3A6B]/15 bg-[#1B3A6B]/[0.05] p-3.5">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#1B3A6B]/10 text-[#1B3A6B]">
-            <FileEdit className="size-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-[#1A1A1A]">
-              У вас уже есть подборка
-            </p>
-            <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
-              Меры подобраны по вашей анкете. Если что-то изменилось — обновите
-              ответы, и мы пересоберём список.
-            </p>
-            <button
-              type="button"
-              onClick={reset}
-              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-[#1B3A6B] px-3.5 py-2 text-xs font-semibold text-white shadow-[0_4px_12px_-4px_rgba(27,58,107,0.45)] transition-all hover:bg-[#16305a] active:scale-[0.98]"
-            >
-              <RotateCcw className="size-3.5" /> Изменить ответы
-            </button>
-          </div>
-        </div>
-
-        {/* Регион не указан — региональных мер в подборке нет вовсе.
-            Молчать об этом нельзя: человек решит, что в его области ничего
-            не положено, хотя именно там самые крупные выплаты. */}
-        {!region && (
-          <div className="mt-3 rounded-2xl border border-[#8E1D2C]/20 bg-[#8E1D2C]/[0.04] p-3.5">
-            <p className="text-sm font-semibold text-[#8E1D2C]">
-              Регион не указан — показываем только федеральные меры
-            </p>
-            <p className="mt-1 text-sm leading-snug text-muted-foreground">
-              Они действуют по всей стране. Укажите регион, и к ним добавятся
-              меры вашей области: губернаторские выплаты, региональный
-              материнский капитал, льготы на ЖКУ, проезд и детский сад.
-            </p>
-            <button
-              type="button"
-              onClick={reset}
-              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-[#8E1D2C] px-3.5 py-2 text-xs font-semibold text-white transition-all hover:bg-[#7a1826] active:scale-[0.98]"
-            >
-              Указать регион
-            </button>
-          </div>
-        )}
-
-        {/* Детей нет и беременности нет — таким людям адресована лишь часть
-            базы, и об этом честнее сказать прямо, чем оставить человека гадать,
-            почему список короче, чем он ожидал. */}
-        {pregnant === false && hasChildren === false && (
-          <div className="mt-3 rounded-2xl border border-[#D9D2C6] bg-[#F7F4EE] p-3.5">
-            <p className="text-sm font-semibold text-[#3A4D63]">
-              Вы указали, что детей пока нет
-            </p>
-            <p className="mt-1 text-sm leading-snug text-muted-foreground">
-              Ниже — меры, которые положены до рождения ребёнка: лечение
-              бесплодия и ЭКО, возврат налога за лечение, жильё молодой семье.
-              Основная часть поддержки начинается с беременности — если что-то
-              изменилось, обновите ответы.
-            </p>
-            <Link
-              href="/situation/planning"
-              className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-[#8E1D2C]"
-            >
-              Все меры для планирующих →
-            </Link>
-          </div>
-        )}
-
-        {results.length > 0 ? (
+      <div ref={topRef} className="bg-[#F8F7F6] px-4 pb-5 pt-4">
+        {results.length > 0 && groups ? (
           <>
-            <h1
-              className="mt-3 text-[26px] font-normal leading-tight text-[#1A1A1A]"
-              style={{ fontFamily: "var(--font-playfair), serif" }}
+            {/* Первым делом — сколько мер подошло. Заказчик просил именно этот
+                порядок: число, потом кнопка скачивания, потом список. Плашка
+                «у вас уже есть подборка» растворилась здесь же: смысл тот же,
+                а экран не начинается с двух служебных карточек подряд. */}
+            <section
+              className="overflow-hidden rounded-3xl p-5 text-white ring-1 ring-white/10"
+              style={{
+                background:
+                  "linear-gradient(135deg, #B02539 0%, #8E1D2C 52%, #6E0F1C 100%)",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -24px 48px -24px rgba(0,0,0,0.4), 0 22px 42px -14px rgba(116,17,31,0.6)",
+              }}
             >
-              Вам может подойти
-            </h1>
-            {/* Скачивание — до списка: в соцзащите и МФЦ просят «принесите
-                список», и человек ищет эту кнопку сразу, а не после сотни
-                карточек. Обычная ссылка, а не действие: файл собирает сервер по
-                сохранённой анкете, поэтому работает и на телефоне, и с другого
-                устройства. */}
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/65">
+                Ваша подборка
+              </p>
+              <p
+                className="mt-2 text-[30px] font-normal leading-[1.12]"
+                style={{ fontFamily: "var(--font-playfair), serif" }}
+              >
+                Вам подходит {pluralMeasures(groups.total)}
+              </p>
+              <p className="mt-2 text-[13px] leading-snug text-white/75">
+                {groups.urgentCount > 0
+                  ? "Меры со сгорающим сроком подняты наверх — с них и начните."
+                  : situation && groups.priority.count > 0
+                    ? `Сначала — «${situation.title}», затем всё остальное.`
+                    : "Сначала федеральные меры, затем меры вашего региона."}
+              </p>
+              <button
+                type="button"
+                onClick={reset}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/[0.14] px-4 py-2 text-[13px] font-semibold ring-1 ring-white/25 transition-transform active:scale-[0.98]"
+              >
+                <RotateCcw className="size-3.5" /> Изменить ответы
+              </button>
+            </section>
+
+            {/* Скачивание — сразу под числом: в соцзащите и МФЦ просят
+                «принесите список», и человек ищет эту кнопку до карточек, а не
+                после сотни. Обычная ссылка, а не действие: файл собирает сервер
+                по сохранённой анкете, поэтому работает и с другого устройства. */}
             <a
               href="/podbor/pdf"
-              className={cn(
-                buttonVariants(),
-                "mt-4 h-11 w-full gap-2 bg-[#1B3A6B] text-white hover:bg-[#16305a]",
-              )}
+              className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-[#8E1D2C] shadow-[0_10px_26px_-18px_rgba(26,26,26,0.6)] ring-1 ring-[#8E1D2C]/20 transition-transform active:scale-[0.99]"
             >
               <Download className="size-4" /> Скачать подборку в PDF
             </a>
 
-            {/* Кнопка «Посмотреть все меры» — до списка, чтобы не листать вниз. */}
-            <Link
-              href="/catalog"
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "mt-2.5 h-11 w-full gap-2 border-[#1B3A6B]/25 text-[#1B3A6B]",
-              )}
-            >
-              <LayoutGrid className="size-4" /> Посмотреть все меры
-            </Link>
-
-            {/* Подборка разложена по группам: сначала сроки, затем
-                «положено всем» и «положено вам», внутри — деньги, скидки,
-                бесплатное. Раньше здесь была плоская лента, общая с разделами
-                каталога, и порядок в ней был случайным. */}
-            {resultProfile && (
-              <PodborResults
-                profile={resultProfile}
-                measures={results}
-                footer={<InquiryLinks />}
-              />
+            {/* Регион не указан — региональных мер в подборке нет вовсе.
+                Молчать об этом нельзя: человек решит, что в его области ничего
+                не положено, хотя именно там самые крупные выплаты. */}
+            {!region && (
+              <div className="mt-3 rounded-2xl bg-white p-3.5 shadow-[0_10px_26px_-20px_rgba(26,26,26,0.5)] ring-1 ring-[#8E1D2C]/20">
+                <p className="text-sm font-semibold text-[#8E1D2C]">
+                  Регион не указан — показываем только федеральные меры
+                </p>
+                <p className="mt-1 text-sm leading-snug text-muted-foreground">
+                  Они действуют по всей стране. Укажите регион, и к ним добавятся
+                  меры вашей области: губернаторские выплаты, региональный
+                  материнский капитал, льготы на ЖКУ, проезд и детский сад.
+                </p>
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-[#8E1D2C] px-3.5 py-2 text-xs font-semibold text-white transition-all hover:bg-[#7a1826] active:scale-[0.98]"
+                >
+                  Указать регион
+                </button>
+              </div>
             )}
+
+            {/* Детей нет и беременности нет — таким людям адресована лишь часть
+                базы, и об этом честнее сказать прямо, чем оставить человека
+                гадать, почему список короче, чем он ожидал. */}
+            {pregnant === false && hasChildren === false && (
+              <div className="mt-3 rounded-2xl bg-[#FBF8F3] p-3.5 ring-1 ring-[#E3D9C9]">
+                <p className="text-sm font-semibold text-[#15234A]">
+                  Вы указали, что детей пока нет
+                </p>
+                <p className="mt-1 text-sm leading-snug text-muted-foreground">
+                  Ниже — меры, которые положены до рождения ребёнка: лечение
+                  бесплодия и ЭКО, возврат налога за лечение, жильё молодой семье.
+                  Основная часть поддержки начинается с беременности — если
+                  что-то изменилось, обновите ответы.
+                </p>
+                <Link
+                  href="/situation/planning"
+                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-[#8E1D2C]"
+                >
+                  Все меры для планирующих →
+                </Link>
+              </div>
+            )}
+
+            {/* Подборка разложена по блокам: сначала выбранная тема, затем
+                федеральные и региональные меры, внутри — сроки, выплаты,
+                бесплатное, скидки. */}
+            <PodborResults
+              groups={groups}
+              prioritySituation={prioritySituation}
+              footer={<InquiryLinks />}
+            />
           </>
         ) : (
           <div className="py-10 text-center">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogIn, ChevronLeft } from "lucide-react";
 import { OrgName } from "@/components/org-name";
+import { runBackHandler } from "@/components/back-handler";
 import { BottomNav } from "@/components/bottom-nav";
 import { InstallBanner } from "@/components/install-banner";
 import { MessengerConnectedToast } from "@/components/messenger-connected-toast";
@@ -73,6 +74,9 @@ export function AppShell({
   // из поиска), истории нет — тогда ведём на главную, а не наружу из приложения.
   // Наличие истории проверяем в момент клика, чтобы не держать состояние.
   const goBack = () => {
+    // Экран мог забрать «Назад» себе: анкета подбора возвращает на предыдущий
+    // шаг, а не выкидывает со страницы (см. useBackHandler).
+    if (runBackHandler()) return;
     if (window.history.length > 1) router.back();
     else router.push("/");
   };
