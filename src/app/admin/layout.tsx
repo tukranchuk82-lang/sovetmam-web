@@ -9,9 +9,11 @@ import {
   Users,
   Gauge,
   Inbox,
+  HelpCircle,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { countNewBotHelpRequests } from "@/lib/bot-help";
+import { countOpenDisputes } from "@/lib/measure-disputes";
 import { getCurrentAdmin } from "@/lib/user-session";
 import { AdminNavLink } from "@/components/admin/nav-link";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
@@ -38,6 +40,7 @@ export default async function AdminLayout({
   // Заявки на кабинет: человек написал боту и ждёт входа — кружок в меню
   // нужен не меньше, чем у обращений.
   const newRequests = await countNewBotHelpRequests();
+  const openDisputes = await countOpenDisputes();
 
   return (
     <div
@@ -83,6 +86,13 @@ export default async function AdminLayout({
             icon={<CalendarCheck className="size-4" />}
           >
             Сверка
+          </AdminNavLink>
+          <AdminNavLink
+            href="/admin/disputes"
+            icon={<HelpCircle className="size-4" />}
+            badge={openDisputes}
+          >
+            Спорные меры
           </AdminNavLink>
           <AdminNavLink href="/admin/share" icon={<Share2 className="size-4" />}>
             Откуда приходят
