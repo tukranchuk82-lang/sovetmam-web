@@ -19,6 +19,8 @@ import {
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { PodborResults } from "@/components/podbor-results";
+import { RepresentativeBanner } from "@/components/representative-banner";
+import type { RegionalRepresentative } from "@/lib/representatives";
 import { saveSurveyAction } from "@/app/(app)/login/onboarding-actions";
 import {
   matchMeasures,
@@ -674,9 +676,12 @@ function SituationPicker({
 export function PodborForm({
   measures,
   savedSurvey,
+  representatives = [],
 }: {
   measures: SupportMeasure[];
   savedSurvey?: Record<string, unknown> | null;
+  /** Представители регионов — баннер и контакты в карточках мер. */
+  representatives?: RegionalRepresentative[];
 }) {
   // Прошлые ответы из профиля (если анкета уже заполнялась) — восстанавливаем
   // и форму, и результат, чтобы подбор не слетал при возврате к странице.
@@ -1494,12 +1499,21 @@ export function PodborForm({
               </div>
             )}
 
+            {/* Представитель региона — до списка мер: заказчик хочет, чтобы
+                человек узнал об аккредитованной организации сразу, а не
+                наткнулся на неё случайно внутри одной из карточек. */}
+            <RepresentativeBanner
+              representatives={representatives}
+              region={resultProfile?.region}
+            />
+
             {/* Подборка разложена по блокам: сначала выбранная тема, затем
                 федеральные и региональные меры, внутри — сроки, выплаты,
                 бесплатное, скидки. */}
             <PodborResults
               groups={groups}
               prioritySituation={prioritySituation}
+              representatives={representatives}
               footer={<InquiryLinks />}
             />
           </>

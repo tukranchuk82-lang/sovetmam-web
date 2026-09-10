@@ -2,6 +2,7 @@ import { PodborGate } from "@/components/podbor-gate";
 import { getAllMeasures } from "@/lib/measures-db";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { getCurrentAppUser } from "@/lib/user-session";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
 
 export const metadata = {
   title: "Подбор мер поддержки по вашей ситуации",
@@ -20,8 +21,14 @@ export default async function PodborPage() {
   // Восстанавливаем последнюю заполненную анкету, чтобы подбор не слетал после
   // перехода к мере и обратно (сохраняется в app_users.survey при отправке).
   const savedSurvey = appUser?.survey ?? null;
+  const representatives = await getPublishedRepresentatives();
 
   return (
-    <PodborGate authed={authed} measures={measures} savedSurvey={savedSurvey} />
+    <PodborGate
+      authed={authed}
+      measures={measures}
+      savedSurvey={savedSurvey}
+      representatives={representatives}
+    />
   );
 }

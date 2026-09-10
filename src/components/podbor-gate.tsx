@@ -8,6 +8,7 @@ import { PodborTeaser } from "@/components/podbor-teaser";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import type { SupportMeasure } from "@/lib/measures";
+import type { RegionalRepresentative } from "@/lib/representatives";
 
 /**
  * Индивидуальный подбор — только для авторизованных: список слишком зависит
@@ -19,10 +20,12 @@ export function PodborGate({
   authed,
   measures,
   savedSurvey,
+  representatives,
 }: {
   authed: boolean;
   measures: SupportMeasure[];
   savedSurvey: Record<string, unknown> | null;
+  representatives: RegionalRepresentative[];
 }) {
   const [showTeaser, setShowTeaser] = useState(false);
 
@@ -34,7 +37,13 @@ export function PodborGate({
     );
   }
 
-  return <PodborForm measures={measures} savedSurvey={savedSurvey} />;
+  return (
+    <PodborForm
+      measures={measures}
+      savedSurvey={savedSurvey}
+      representatives={representatives}
+    />
+  );
 }
 
 function AuthGate({ onTryQuiz }: { onTryQuiz: () => void }) {

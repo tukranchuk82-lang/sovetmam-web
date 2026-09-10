@@ -4,6 +4,7 @@ import { MeasureCard } from "@/components/measure-card";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { listSavedSlugs } from "@/lib/saved-measures-db";
 import { getMeasuresBySlugs } from "@/lib/measures-db";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
 
 export const metadata = { title: "Избранное", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -54,6 +55,7 @@ export default async function SavedPage() {
 
   const slugs = await listSavedSlugs(user.id);
   const measures = await getMeasuresBySlugs(slugs);
+  const representatives = await getPublishedRepresentatives();
 
   return (
     <div className="px-4 py-5">
@@ -76,7 +78,7 @@ export default async function SavedPage() {
       ) : (
         <div className="mt-4 space-y-3">
           {measures.map((m) => (
-            <MeasureCard key={m.slug} measure={m} />
+            <MeasureCard key={m.slug} measure={m} representatives={representatives} />
           ))}
         </div>
       )}

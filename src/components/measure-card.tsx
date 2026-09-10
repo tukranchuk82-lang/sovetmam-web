@@ -2,6 +2,9 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { categoryMeta } from "@/lib/category-meta";
 import { SaveHeart } from "@/components/save-heart";
+import { RepresentativeContactLine } from "@/components/representative-contact-line";
+import { findRepresentative, type RegionalRepresentative } from "@/lib/representatives";
+import { cn } from "@/lib/utils";
 
 // Карточке достаточно этих полей — принимаем и полную меру, и «облегчённую»
 // (например, из клиентского каталога). category держим как string, чтобы
@@ -22,9 +25,20 @@ type MeasureCardData = {
  * линии и чёткая иерархия — «государственная серьёзность» помогающего проекта.
  * Категория — единым navy-цветом (иконка+подпись), без пёстрых плиток.
  */
-export function MeasureCard({ measure }: { measure: MeasureCardData }) {
+export function MeasureCard({
+  measure,
+  representatives = [],
+}: {
+  measure: MeasureCardData;
+  /** Представители регионов — карточка сама находит своего по measure.region. */
+  representatives?: RegionalRepresentative[];
+}) {
   const isFederal = measure.level === "federal";
   const cat = categoryMeta(measure.category);
+  const representative = isFederal
+    ? null
+    : findRepresentative(representatives, measure.region);
+
   return (
     <div className="group relative transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.995]">
       {/* Сердечко «в избранное» — поверх карточки, вне ссылки (иначе кнопка
@@ -35,7 +49,10 @@ export function MeasureCard({ measure }: { measure: MeasureCardData }) {
       />
       <Link
         href={`/catalog/${measure.slug}`}
-        className="block rounded-xl border border-[#E5E0D6] bg-[#FCFBF9] p-4 shadow-[0_1px_2px_rgba(30,30,40,0.04)] transition-colors duration-200 hover:border-[#1B3A6B]/30 hover:shadow-[0_12px_26px_-16px_rgba(27,58,107,0.3)]"
+        className={cn(
+          "block border border-[#E5E0D6] bg-[#FCFBF9] p-4 shadow-[0_1px_2px_rgba(30,30,40,0.04)] transition-colors duration-200 hover:border-[#1B3A6B]/30 hover:shadow-[0_12px_26px_-16px_rgba(27,58,107,0.3)]",
+          representative ? "rounded-t-xl border-b-0" : "rounded-xl",
+        )}
       >
       {/* Мета: категория (navy) · уровень (бордовый). Справа оставляем место
           под сердечко, чтобы длинная подпись не залезала под него. */}
@@ -74,6 +91,9 @@ export function MeasureCard({ measure }: { measure: MeasureCardData }) {
         </span>
       </div>
       </Link>
+      {representative && (
+        <RepresentativeContactLine representative={representative} />
+      )}
     </div>
   );
 }

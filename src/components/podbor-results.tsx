@@ -13,6 +13,7 @@ import {
   type PocketKey,
 } from "@/lib/podbor-groups";
 import { PRIORITY_SITUATIONS, type PrioritySituationKey } from "@/lib/taxonomy";
+import type { RegionalRepresentative } from "@/lib/representatives";
 
 /**
  * Экран результатов подбора.
@@ -65,10 +66,16 @@ function Deadline({ item }: { item: PodborItem }) {
   );
 }
 
-function Item({ item }: { item: PodborItem }) {
+function Item({
+  item,
+  representatives,
+}: {
+  item: PodborItem;
+  representatives: RegionalRepresentative[];
+}) {
   return (
     <div>
-      <MeasureCard measure={item.measure} />
+      <MeasureCard measure={item.measure} representatives={representatives} />
       <Deadline item={item} />
       <Pending item={item} />
     </div>
@@ -79,20 +86,34 @@ function Item({ item }: { item: PodborItem }) {
  * Мера, у которой закрывается срок: подкрашенная подложка и прямая надпись.
  * Такую карточку нельзя пролистать не заметив — в этом весь смысл.
  */
-function UrgentItem({ item }: { item: PodborItem }) {
+function UrgentItem({
+  item,
+  representatives,
+}: {
+  item: PodborItem;
+  representatives: RegionalRepresentative[];
+}) {
   return (
     <div className="rounded-2xl bg-[#8E1D2C]/[0.045] p-2.5 ring-1 ring-[#8E1D2C]/20">
       <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#8E1D2C] px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-white shadow-[0_6px_14px_-8px_rgba(142,29,44,0.9)]">
         <Clock className="size-3" aria-hidden />
         Скоро истечёт срок
       </p>
-      <Item item={item} />
+      <Item item={item} representatives={representatives} />
     </div>
   );
 }
 
 /** Карман внутри блока: выплаты, бесплатное, скидки, права и поддержка. */
-function Pocket({ pocket, items }: { pocket: PocketKey; items: PodborItem[] }) {
+function Pocket({
+  pocket,
+  items,
+  representatives,
+}: {
+  pocket: PocketKey;
+  items: PodborItem[];
+  representatives: RegionalRepresentative[];
+}) {
   const [shown, setShown] = useState(PAGE);
   if (items.length === 0) return null;
   return (
@@ -104,7 +125,7 @@ function Pocket({ pocket, items }: { pocket: PocketKey; items: PodborItem[] }) {
       </p>
       <div className="mt-2.5 space-y-3">
         {items.slice(0, shown).map((item) => (
-          <Item key={item.measure.slug} item={item} />
+          <Item key={item.measure.slug} item={item} representatives={representatives} />
         ))}
       </div>
       {items.length > shown && (
@@ -120,18 +141,29 @@ function Pocket({ pocket, items }: { pocket: PocketKey; items: PodborItem[] }) {
   );
 }
 
-function BlockBody({ block }: { block: PodborBlock }) {
+function BlockBody({
+  block,
+  representatives,
+}: {
+  block: PodborBlock;
+  representatives: RegionalRepresentative[];
+}) {
   return (
     <>
       {block.urgent.length > 0 && (
         <div className="mt-3 space-y-3">
           {block.urgent.map((item) => (
-            <UrgentItem key={item.measure.slug} item={item} />
+            <UrgentItem key={item.measure.slug} item={item} representatives={representatives} />
           ))}
         </div>
       )}
       {POCKET_ORDER.map((key) => (
-        <Pocket key={key} pocket={key} items={block.pockets[key]} />
+        <Pocket
+          key={key}
+          pocket={key}
+          items={block.pockets[key]}
+          representatives={representatives}
+        />
       ))}
     </>
   );
@@ -141,10 +173,12 @@ function Block({
   title,
   note,
   block,
+  representatives,
 }: {
   title: string;
   note: string;
   block: PodborBlock;
+  representatives: RegionalRepresentative[];
 }) {
   if (block.count === 0) return null;
   return (
@@ -161,7 +195,7 @@ function Block({
       {/* Тонкая бордовая черта под заголовком — тот же приём, что на главной. */}
       <div className="mt-1.5 h-px w-10 bg-[#8E1D2C]/50" aria-hidden />
       <p className="mt-2 text-xs leading-snug text-muted-foreground">{note}</p>
-      <BlockBody block={block} />
+      <BlockBody block={block} representatives={representatives} />
     </section>
   );
 }
@@ -170,9 +204,11 @@ function Block({
 function PriorityBlock({
   situation,
   block,
+  representatives,
 }: {
   situation: (typeof PRIORITY_SITUATIONS)[number];
   block: PodborBlock;
+  representatives: RegionalRepresentative[];
 }) {
   return (
     <section className="mt-5 rounded-3xl bg-white p-4 shadow-[0_16px_36px_-28px_rgba(26,26,26,0.7)] ring-1 ring-[#8E1D2C]/15">
@@ -190,7 +226,7 @@ function PriorityBlock({
         <span className="text-[13px] font-semibold text-[#8E1D2C]">{block.count}</span>
       </div>
       <p className="mt-1 text-xs leading-snug text-muted-foreground">{situation.short}</p>
-      <BlockBody block={block} />
+      <BlockBody block={block} representatives={representatives} />
     </section>
   );
 }
@@ -198,10 +234,13 @@ function PriorityBlock({
 export function PodborResults({
   groups,
   prioritySituation,
+  representatives = [],
   footer,
 }: {
   groups: PodborGroups;
   prioritySituation?: PrioritySituationKey | null;
+  /** Представители регионов — доходят до каждой карточки меры своего региона. */
+  representatives?: RegionalRepresentative[];
   footer?: React.ReactNode;
 }) {
   const situation = prioritySituation
@@ -215,19 +254,25 @@ export function PodborResults({
       {/* Тема, которую человек назвал самой важной сейчас, — до всего
           остального: за ней он и пришёл. */}
       {situation && groups.priority.count > 0 && (
-        <PriorityBlock situation={situation} block={groups.priority} />
+        <PriorityBlock
+          situation={situation}
+          block={groups.priority}
+          representatives={representatives}
+        />
       )}
 
       <Block
         title="Федеральные меры"
         note="Действуют по всей стране — не зависят от того, где вы живёте."
         block={groups.federal}
+        representatives={representatives}
       />
 
       <Block
         title="Меры вашего региона"
         note="Их назначают местные власти, и в соседней области условия могут быть другими."
         block={groups.regional}
+        representatives={representatives}
       />
 
       {/* Последним — то, что оформляет сам ребёнок: родителю это знать
@@ -236,6 +281,7 @@ export function PodborResults({
         title="Положено вашему ребёнку"
         note="Заявление ребёнок подаёт на себя сам — с 14 лет через свои Госуслуги. Родитель помогает, но заявителем не будет."
         block={groups.child}
+        representatives={representatives}
       />
 
       <p className="mt-6 text-xs leading-relaxed text-muted-foreground">

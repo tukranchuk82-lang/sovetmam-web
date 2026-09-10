@@ -11,6 +11,7 @@ import {
 import { REGION_COOKIE, REGION_COOKIE_MAX_AGE } from "@/lib/region";
 import { useListPosition } from "@/lib/list-position";
 import { cn } from "@/lib/utils";
+import type { RegionalRepresentative } from "@/lib/representatives";
 
 type Level = "" | "federal" | "regional";
 
@@ -56,6 +57,7 @@ export function SegmentMeasures({
   primarySlugs,
   primaryLabel,
   restLabel,
+  representatives = [],
 }: {
   measures: SupportMeasure[];
   initialRegion: string | null;
@@ -73,6 +75,7 @@ export function SegmentMeasures({
   primarySlugs?: string[];
   primaryLabel?: string;
   restLabel?: string;
+  representatives?: RegionalRepresentative[];
 }) {
   const [level, setLevel] = useState<Level>("");
   const [region, setRegion] = useState<string | null>(initialRegion);
@@ -220,7 +223,7 @@ export function SegmentMeasures({
                 spaced
               />
             )}
-            <MeasureCard measure={m} />
+            <MeasureCard measure={m} representatives={representatives} />
           </div>
         ))}
       </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Sparkles, ChevronRight, Users } from "lucide-react";
 import { SegmentMeasures } from "@/components/segment-measures";
 import { getAllMeasures } from "@/lib/measures-db";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
 import type { SupportMeasure } from "@/lib/measures";
@@ -153,6 +154,7 @@ export default async function SituationPage({
 
   const all = await getAllMeasures();
   const list = all.filter(cfg.filter);
+  const representatives = await getPublishedRepresentatives();
 
   // Регион: cookie (явный выбор на экране) → анкета подбора. См. segment/[id].
   const cookieStore = await cookies();
@@ -193,7 +195,11 @@ export default async function SituationPage({
         <ChevronRight className="size-5 shrink-0 text-white/60" />
       </Link>
 
-      <SegmentMeasures measures={list} initialRegion={initialRegion} />
+      <SegmentMeasures
+        measures={list}
+        initialRegion={initialRegion}
+        representatives={representatives}
+      />
     </div>
   );
 }

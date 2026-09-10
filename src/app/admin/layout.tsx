@@ -10,6 +10,7 @@ import {
   Gauge,
   Inbox,
   HelpCircle,
+  Landmark,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { countNewBotHelpRequests } from "@/lib/bot-help";
@@ -74,6 +75,9 @@ export default async function AdminLayout({
           </AdminNavLink>
           <AdminNavLink href="/admin/users" icon={<Users className="size-4" />}>
             Пользователи
+          </AdminNavLink>
+          <AdminNavLink href="/admin/representatives" icon={<Landmark className="size-4" />}>
+            Представители в регионах
           </AdminNavLink>
           <AdminNavLink href="/admin/inquiries" icon={<MessageSquare className="size-4" />} badge={newInquiries}>
             Обращения

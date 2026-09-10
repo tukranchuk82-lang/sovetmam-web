@@ -14,6 +14,7 @@ import { MeasureCard } from "@/components/measure-card";
 import { pluralMeasures } from "@/lib/measures";
 import { useListPosition } from "@/lib/list-position";
 import { cn } from "@/lib/utils";
+import type { RegionalRepresentative } from "@/lib/representatives";
 
 // Облегчённая мера — только то, что нужно фильтру и карточке.
 export type SlimMeasure = {
@@ -85,10 +86,12 @@ export function CatalogBrowser({
   measures,
   categories,
   regions,
+  representatives = [],
 }: {
   measures: SlimMeasure[];
   categories: readonly string[];
   regions: readonly string[];
+  representatives?: RegionalRepresentative[];
 }) {
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState("");
@@ -354,7 +357,7 @@ export function CatalogBrowser({
         }
       >
         {shown.map((m) => (
-          <MeasureCard key={m.slug} measure={m} />
+          <MeasureCard key={m.slug} measure={m} representatives={representatives} />
         ))}
       </div>
 

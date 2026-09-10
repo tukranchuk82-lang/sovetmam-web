@@ -10,6 +10,8 @@ import { SaveHeart } from "@/components/save-heart";
 import { ShareButton } from "@/components/share-button";
 import { getAllMeasureSlugs, getMeasureBySlug } from "@/lib/measures-db";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
+import { RepresentativeBanner } from "@/components/representative-banner";
 import { JsonLd } from "@/components/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
@@ -60,6 +62,7 @@ export default async function MeasurePage({
   const m = await getMeasureBySlug(slug);
   if (!m) notFound();
   const user = await getCurrentDemoUser();
+  const representatives = await getPublishedRepresentatives();
   const inquiryHref = user
     ? `/profile/inquiries/new?measure=${m.slug}`
     : `/login?next=/profile/inquiries/new?measure=${m.slug}`;
@@ -206,6 +209,8 @@ export default async function MeasurePage({
             </ul>
           </section>
         )}
+
+        <RepresentativeBanner representatives={representatives} region={m.region} />
 
         <Separator className="my-6" />
 

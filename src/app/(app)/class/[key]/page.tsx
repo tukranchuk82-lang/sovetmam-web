@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SegmentMeasures } from "@/components/segment-measures";
 import { getAllMeasures } from "@/lib/measures-db";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
 import type { SupportMeasure } from "@/lib/measures";
@@ -139,6 +140,7 @@ export default async function ClassPage({
 
   const all = await getAllMeasures();
   const list = all.filter((m) => hasClass(m, key));
+  const representatives = await getPublishedRepresentatives();
 
   // Регион: cookie (явный выбор) → анкета подбора. См. segment/[id].
   const cookieStore = await cookies();
@@ -184,7 +186,11 @@ export default async function ClassPage({
         <ChevronRight className="size-5 shrink-0 text-white/60" />
       </Link>
 
-      <SegmentMeasures measures={list} initialRegion={initialRegion} />
+      <SegmentMeasures
+        measures={list}
+        initialRegion={initialRegion}
+        representatives={representatives}
+      />
     </div>
   );
 }

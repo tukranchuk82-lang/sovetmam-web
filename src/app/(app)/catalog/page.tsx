@@ -1,6 +1,7 @@
 import { CatalogBrowser, type SlimMeasure } from "@/components/catalog-browser";
 import { CATEGORIES, REGIONS } from "@/lib/measures";
 import { getAllMeasures } from "@/lib/measures-db";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
 
 export const metadata = {
   title: "Каталог мер поддержки семей с детьми",
@@ -21,8 +22,14 @@ export default async function CatalogPage() {
     level: m.level,
     region: m.region ?? null,
   }));
+  const representatives = await getPublishedRepresentatives();
 
   return (
-    <CatalogBrowser measures={slim} categories={CATEGORIES} regions={REGIONS} />
+    <CatalogBrowser
+      measures={slim}
+      categories={CATEGORIES}
+      regions={REGIONS}
+      representatives={representatives}
+    />
   );
 }

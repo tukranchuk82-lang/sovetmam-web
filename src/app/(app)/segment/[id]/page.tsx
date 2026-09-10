@@ -8,6 +8,7 @@ import { SEGMENTS, getSegment, type SegmentId } from "@/lib/measures";
 import { getMeasuresBySegment } from "@/lib/measures-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
 
 export function generateStaticParams() {
   return SEGMENTS.map((s) => ({ id: s.id }));
@@ -33,6 +34,7 @@ export default async function SegmentPage({
   if (!segment) notFound();
 
   const list = await getMeasuresBySegment(segment.id as SegmentId);
+  const representatives = await getPublishedRepresentatives();
   const Icon = SEGMENT_ICONS[segment.id];
 
   // Регион: сначала из cookie (пользователь явно выбрал регион на этом
@@ -81,7 +83,11 @@ export default async function SegmentPage({
         <ChevronRight className="size-5 shrink-0 text-white/60" />
       </Link>
 
-      <SegmentMeasures measures={list} initialRegion={initialRegion} />
+      <SegmentMeasures
+        measures={list}
+        initialRegion={initialRegion}
+        representatives={representatives}
+      />
     </div>
   );
 }

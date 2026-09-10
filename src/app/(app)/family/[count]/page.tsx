@@ -9,6 +9,7 @@ import {
 } from "@/lib/measures-db";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { REGION_COOKIE } from "@/lib/region";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
 import { FAMILY_KEYS, type FamilyKey } from "@/lib/taxonomy";
 
 // Плитки «Семья с N детьми» и «Многодетная семья» с главной. В отличие от
@@ -83,6 +84,7 @@ export default async function FamilyPage({
     cfg.count === "many"
       ? await getMeasuresForManyChildren()
       : await getMeasuresForFamilySize(cfg.count);
+  const representatives = await getPublishedRepresentatives();
 
   // Меры, где число детей — само условие («на третьего ребёнка», «многодетным»).
   // Их немного, и раньше они тонули среди универсальных: в разделе «Семья с
@@ -141,6 +143,7 @@ export default async function FamilyPage({
         primarySlugs={primarySlugs}
         primaryLabel="Положены за количество детей"
         restLabel="Подходят любой семье с детьми"
+        representatives={representatives}
       />
     </div>
   );
