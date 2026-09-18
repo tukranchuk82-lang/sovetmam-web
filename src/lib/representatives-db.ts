@@ -139,6 +139,19 @@ export async function updateRepresentative(
   if (error) throw error;
 }
 
+/** Быстрое включение/отключение — без похода в форму редактирования. */
+export async function setRepresentativePublished(
+  id: string,
+  isPublished: boolean,
+): Promise<void> {
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from("regional_representatives")
+    .update({ is_published: isPublished, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function deleteRepresentative(id: string): Promise<void> {
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase

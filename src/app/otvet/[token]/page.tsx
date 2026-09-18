@@ -22,10 +22,10 @@ export default async function ReplyByTokenPage({
   searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ sent?: string }>;
+  searchParams: Promise<{ sent?: string; author?: string }>;
 }) {
   const { token } = await params;
-  const { sent } = await searchParams;
+  const { sent, author } = await searchParams;
 
   const check = verifyReplyToken(token);
   if (!check.ok) {
@@ -156,6 +156,7 @@ export default async function ReplyByTokenPage({
             id="author"
             name="author"
             type="text"
+            defaultValue={author ?? ""}
             placeholder="Например: Татьяна Буцкая"
             className="mt-1 h-10 w-full rounded-xl border bg-background px-3 text-sm outline-none focus:border-primary"
           />

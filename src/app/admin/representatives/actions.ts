@@ -6,6 +6,7 @@ import {
   createRepresentative,
   updateRepresentative,
   deleteRepresentative,
+  setRepresentativePublished,
   type RepresentativeInput,
 } from "@/lib/representatives-db";
 
@@ -62,4 +63,10 @@ export async function deleteRepresentativeAction(id: string) {
   await deleteRepresentative(id);
   revalidate();
   redirect("/admin/representatives");
+}
+
+/** Включить/отключить прямо из списка — отключённый перестаёт получать обращения и не виден пользователям. */
+export async function toggleRepresentativePublishedAction(id: string, isPublished: boolean) {
+  await setRepresentativePublished(id, isPublished);
+  revalidate();
 }

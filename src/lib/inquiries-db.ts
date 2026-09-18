@@ -24,6 +24,13 @@ export interface Inquiry {
   respondedAt: string | null;
   respondedByName: string | null;
   createdAt: string;
+  /**
+   * Снимок представителя региона на момент маршрутизации — не связь по id.
+   * Если представителя потом отключат или заменят, уже созданные обращения
+   * не должны «переехать» к новому адресату посреди разговора.
+   */
+  representativeName: string | null;
+  representativeEmail: string | null;
 }
 
 interface InquiryRow {
@@ -41,6 +48,8 @@ interface InquiryRow {
   responded_at: string | null;
   responded_by_name: string | null;
   created_at: string;
+  representative_name: string | null;
+  representative_email: string | null;
 }
 
 function fromRow(r: InquiryRow): Inquiry {
@@ -59,6 +68,8 @@ function fromRow(r: InquiryRow): Inquiry {
     respondedAt: r.responded_at,
     respondedByName: r.responded_by_name,
     createdAt: r.created_at,
+    representativeName: r.representative_name,
+    representativeEmail: r.representative_email,
   };
 }
 
@@ -113,15 +124,45 @@ export async function listInquiriesForUser(userId: string): Promise<Inquiry[]> {
   return (data as InquiryRow[]).map(fromRow);
 }
 
-export async function listAllInquiries(): Promise<Inquiry[]> {
+export async function listAllInquiries(region?: string): Promise<Inquiry[]> {
+  const supabase = createSupabaseAdminClient();
+  let query = supabase
+    .from("inquiries")
+    .select()
+    // 'new' > 'answered' алфавитно — по возрастанию было бы наоборот,
+    // отвеченные сверху; нужно по убыванию, чтобы неотвеченные были первыми.
+    .order("status", { ascending: false })
+    .order("created_at", { ascending: false });
+  if (region) query = query.eq("region", region);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data as InquiryRow[]).map(fromRow);
+}
+
+/** Снимок представителя, которому направлено обращение — сохраняется один раз при маршрутизации. */
+export async function setInquiryRepresentative(
+  id: string,
+  name: string,
+  email: string,
+): Promise<void> {
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from("inquiries")
+    .update({ representative_name: name, representative_email: email })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+/** Различные регионы среди обращений — для фильтра в списке админки. */
+export async function listInquiryRegions(): Promise<string[]> {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("inquiries")
-    .select()
-    .order("status", { ascending: true }) // 'answered' > 'new' алфавитно: новые сверху
-    .order("created_at", { ascending: false });
+    .select("region")
+    .not("region", "is", null);
   if (error) throw error;
-  return (data as InquiryRow[]).map(fromRow);
+  const set = new Set((data ?? []).map((r) => r.region as string).filter(Boolean));
+  return [...set].sort((a, b) => a.localeCompare(b, "ru"));
 }
 
 export async function getInquiry(id: string): Promise<Inquiry | null> {

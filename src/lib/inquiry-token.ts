@@ -54,9 +54,14 @@ export function verifyReplyToken(token: string): ReplyTokenResult {
   return { ok: true, inquiryId };
 }
 
-/** Полный адрес формы ответа — для кнопки в письме. */
-export function buildReplyUrl(inquiryId: string): string {
-  return `${appUrl()}/otvet/${createReplyToken(inquiryId)}`;
+/**
+ * Полный адрес формы ответа — для кнопки в письме. `authorName`, если дан,
+ * заранее подставляется в поле «Кто отвечает» — представителю региона не
+ * нужно вписывать своё название вручную.
+ */
+export function buildReplyUrl(inquiryId: string, authorName?: string): string {
+  const url = `${appUrl()}/otvet/${createReplyToken(inquiryId)}`;
+  return authorName ? `${url}?author=${encodeURIComponent(authorName)}` : url;
 }
 
 /**

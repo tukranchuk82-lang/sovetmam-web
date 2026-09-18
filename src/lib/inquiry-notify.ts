@@ -6,12 +6,16 @@ import {
   sendNewInquiryEmail,
   sendInquiryAnswerEmail,
   sendInquiryFollowUpEmail,
+  sendInquiryToRepresentativeEmail,
+  sendInquiryRoutedCopyEmail,
 } from "@/lib/notify/email";
 import { notifySalebotAnswer } from "@/lib/salebot";
 import { appUrl, buildReplyUrl } from "@/lib/inquiry-token";
-import type { Inquiry } from "@/lib/inquiries-db";
+import { setInquiryRepresentative, type Inquiry } from "@/lib/inquiries-db";
 import { countUnreadForUser, getThread } from "@/lib/inquiry-thread";
 import { sendPushToUser } from "@/lib/push";
+import { getPublishedRepresentatives } from "@/lib/representatives-db";
+import { findRepresentative } from "@/lib/representatives";
 
 /**
  * Уведомления по обращениям.
@@ -56,15 +60,36 @@ async function userContacts(
   };
 }
 
-/** Новое обращение — письмо тем, кто на них отвечает. */
+/**
+ * Представитель этого региона, если он есть и включён (опубликован).
+ *
+ * Для уже маршрутизированного обращения (representative_name/email уже
+ * сохранены) свежий поиск не делаем — держимся исходного адресата на весь
+ * разговор, даже если представителя потом отключат или заменят другим.
+ */
+async function representativeFor(
+  inquiry: Inquiry,
+): Promise<{ name: string; email: string } | null> {
+  if (inquiry.representativeEmail) {
+    return { name: inquiry.representativeName ?? "представитель региона", email: inquiry.representativeEmail };
+  }
+  if (!inquiry.region) return null;
+  const published = await getPublishedRepresentatives();
+  const rep = findRepresentative(published, inquiry.region);
+  if (!rep || !rep.email) return null;
+  return { name: rep.name, email: rep.email };
+}
+
+/**
+ * Новое обращение.
+ *
+ * Если для региона есть включённый представитель — основное письмо уходит
+ * ему (с формой ответа по ссылке, как раньше уходило владельцам), а
+ * владельцы получают копию с пометкой и кнопкой «Посмотреть ответ». Если
+ * представителя нет — всё как раньше: полное письмо владельцам.
+ */
 export async function notifyStaffAboutInquiry(inquiry: Inquiry): Promise<void> {
   try {
-    const recipients = await inquiryRecipients();
-    if (recipients.length === 0) {
-      log("некому отправлять: владельцев с почтой не нашлось");
-      return;
-    }
-
     const { email: userEmail } = await userContacts(inquiry.userId);
     const measure = inquiry.measureSlug
       ? await getMeasureBySlug(inquiry.measureSlug).catch(() => null)
@@ -83,6 +108,49 @@ export async function notifyStaffAboutInquiry(inquiry: Inquiry): Promise<void> {
     };
     const replyUrl = buildReplyUrl(inquiry.id);
 
+    const rep = await representativeFor(inquiry).catch((e) => {
+      log(`не удалось найти представителя: ${e instanceof Error ? e.message : e}`);
+      return null;
+    });
+
+    if (rep) {
+      // Снимок сохраняем один раз — при первой маршрутизации.
+      if (!inquiry.representativeEmail) {
+        try {
+          await setInquiryRepresentative(inquiry.id, rep.name, rep.email);
+        } catch (e) {
+          log(`не сохранился снимок представителя: ${e instanceof Error ? e.message : e}`);
+        }
+      }
+
+      try {
+        await sendInquiryToRepresentativeEmail(
+          rep.email,
+          { ...data, representativeName: rep.name },
+          buildReplyUrl(inquiry.id, rep.name),
+        );
+        log(`письмо о новом обращении отправлено представителю: ${rep.email}`);
+      } catch (e) {
+        log(`письмо представителю не ушло на ${rep.email}: ${e instanceof Error ? e.message : e}`);
+      }
+
+      const owners = await inquiryRecipients();
+      for (const to of owners) {
+        try {
+          await sendInquiryRoutedCopyEmail(to, { ...data, representativeName: rep.name }, replyUrl);
+          log(`копия о маршрутизации отправлена: ${to}`);
+        } catch (e) {
+          log(`копия не ушла на ${to}: ${e instanceof Error ? e.message : e}`);
+        }
+      }
+      return;
+    }
+
+    const recipients = await inquiryRecipients();
+    if (recipients.length === 0) {
+      log("некому отправлять: владельцев с почтой не нашлось");
+      return;
+    }
     for (const to of recipients) {
       try {
         await sendNewInquiryEmail(to, data, replyUrl);
@@ -186,12 +254,18 @@ export async function notifyStaffAboutFollowUp(
     };
     const replyUrl = buildReplyUrl(inquiry.id);
 
-    for (const to of recipients) {
+    // Обращение уже маршрутизировано представителю — продолжение переписки
+    // тоже должно доходить до него, не только до владельцев в копии.
+    const to = inquiry.representativeEmail
+      ? [...recipients, inquiry.representativeEmail]
+      : recipients;
+
+    for (const addr of to) {
       try {
-        await sendInquiryFollowUpEmail(to, data, replyUrl);
-        log(`письмо о продолжении переписки отправлено: ${to}`);
+        await sendInquiryFollowUpEmail(addr, data, replyUrl);
+        log(`письмо о продолжении переписки отправлено: ${addr}`);
       } catch (e) {
-        log(`письмо не ушло на ${to}: ${e instanceof Error ? e.message : e}`);
+        log(`письмо не ушло на ${addr}: ${e instanceof Error ? e.message : e}`);
       }
     }
   } catch (e) {

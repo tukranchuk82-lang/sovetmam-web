@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Landmark, Plus, EyeOff } from "lucide-react";
+import { Landmark, Plus, Eye, EyeOff } from "lucide-react";
 import { listRepresentativesForAdmin } from "@/lib/representatives-db";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toggleRepresentativePublishedAction } from "./actions";
 
 export const metadata = { title: "Представители в регионах" };
 export const dynamic = "force-dynamic";
@@ -34,21 +35,49 @@ export default async function RepresentativesPage() {
       ) : (
         <div className="mt-5 space-y-2.5">
           {representatives.map((r) => (
-            <Link
+            <div
               key={r.id}
-              href={`/admin/representatives/${r.id}`}
-              className="block rounded-2xl border bg-card p-3.5 hover:border-primary/40"
+              className="flex items-center gap-2 rounded-2xl border bg-card p-3.5 hover:border-primary/40"
             >
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-semibold leading-snug">{r.name}</p>
-                {!r.isPublished && (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
-                    <EyeOff className="size-3" /> скрыто
-                  </span>
-                )}
-              </div>
-              <p className="mt-0.5 text-sm text-muted-foreground">{r.region}</p>
-            </Link>
+              <Link href={`/admin/representatives/${r.id}`} className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="min-w-0 truncate font-semibold leading-snug">{r.name}</p>
+                  {!r.isPublished && (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
+                      <EyeOff className="size-3" /> отключён
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-sm text-muted-foreground">{r.region}</p>
+              </Link>
+
+              {/* Быстрое включение/отключение — без похода в форму. Отдельно
+                  от Link, чтобы клик по кнопке не уводил на страницу. */}
+              <form
+                action={toggleRepresentativePublishedAction.bind(null, r.id, !r.isPublished)}
+              >
+                <button
+                  type="submit"
+                  title={r.isPublished ? "Отключить представителя" : "Включить представителя"}
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium",
+                    r.isPublished
+                      ? "text-muted-foreground hover:bg-muted"
+                      : "border-primary/40 bg-primary/10 text-primary",
+                  )}
+                >
+                  {r.isPublished ? (
+                    <>
+                      <EyeOff className="size-3.5" /> Отключить
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="size-3.5" /> Включить
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
           ))}
         </div>
       )}

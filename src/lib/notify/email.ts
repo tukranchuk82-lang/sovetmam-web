@@ -200,6 +200,155 @@ export async function sendNewInquiryEmail(
 }
 
 /**
+ * Обращение по региону, где есть аккредитованный представитель — письмо
+ * уходит ему напрямую, а не только владельцам приложения. Тон другой: это
+ * внешний человек, не сотрудник, ему нужно объяснить, почему письмо пришло
+ * именно ему и как ответить.
+ */
+export async function sendInquiryToRepresentativeEmail(
+  to: string,
+  data: InquiryEmailData & { representativeName: string },
+  replyUrl: string,
+): Promise<void> {
+  const transport = getTransport();
+  const date = new Date(data.createdAt).toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  if (!transport) {
+    console.log(`[Обращение][stub→представитель] ${to}: «${data.subject}» — ответить: ${replyUrl}`);
+    return;
+  }
+
+  const html = shell(`
+    <p style="font-size:13px;color:#6b7078;margin:0 0 4px">
+      Обращение от подписчика приложения «Шпаргалка для родителей» по мерам поддержки вашего региона
+    </p>
+    <h1 style="font-size:19px;line-height:1.35;margin:0 0 16px">${esc(data.subject)}</h1>
+
+    <p style="font-size:14px;line-height:1.55;margin:0 0 14px">
+      Здравствуйте! Вы получили это письмо как аккредитованный представитель
+      «Совета матерей» в регионе «${esc(data.region ?? "")}». К вам обратился
+      подписчик приложения — ниже его вопрос.
+    </p>
+
+    <table style="border-collapse:collapse;margin-bottom:18px">
+      ${row("От кого", data.userName)}
+      ${data.region ? row("Регион", data.region) : ""}
+      ${row("Тип", data.typeLabel)}
+      ${data.measureTitle ? row("О мере", data.measureTitle) : ""}
+      ${row("Когда", date)}
+    </table>
+
+    <div style="background:#F3F1EC;border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.55;white-space:pre-wrap">${esc(data.body)}</div>
+
+    <p style="margin:22px 0 8px">${button(replyUrl, "Ответить")}</p>
+    <p style="font-size:12px;color:#9aa0a8;margin:0">
+      Кнопка откроет простую форму ответа — входить в приложение не нужно.
+      Ответ сразу увидит подписчик: в приложении, на почту и в мессенджер.
+      Ссылка действует 14 дней.
+    </p>
+  `);
+
+  await transport.sendMail({
+    from: fromAddress(),
+    to,
+    subject: inquirySubject(data.subject),
+    messageId: inquiryThreadId(data.inquiryId),
+    text:
+      `Здравствуйте! Вы получили это письмо как аккредитованный представитель ` +
+      `«Совета матерей» в регионе «${data.region ?? ""}». К вам обратился подписчик приложения.\n\n` +
+      `От кого: ${data.userName}\n` +
+      (data.region ? `Регион: ${data.region}\n` : "") +
+      `Тип: ${data.typeLabel}\n` +
+      (data.measureTitle ? `О мере: ${data.measureTitle}\n` : "") +
+      `Когда: ${date}\n\n` +
+      `Тема: ${data.subject}\n\n${data.body}\n\n` +
+      `Ответить: ${replyUrl}`,
+    html,
+  });
+}
+
+/**
+ * Копия владельцам приложения о том, что обращение ушло представителю
+ * региона — не основному адресату. Кнопка «Посмотреть ответ» ведёт на ту же
+ * форму, что и у представителя: пока он не ответил, там просто виден статус
+ * «ждёт ответа», а как только ответит — сразу виден и ответ.
+ */
+export async function sendInquiryRoutedCopyEmail(
+  to: string,
+  data: InquiryEmailData & { representativeName: string },
+  viewUrl: string,
+): Promise<void> {
+  const transport = getTransport();
+  const date = new Date(data.createdAt).toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  if (!transport) {
+    console.log(
+      `[Обращение][stub→копия] ${to}: «${data.subject}» направлено ${data.representativeName} — ${viewUrl}`,
+    );
+    return;
+  }
+
+  const html = shell(`
+    <p style="font-size:13px;color:#6b7078;margin:0 0 4px">
+      Обращение направлено представителю региона — копия для вас
+    </p>
+    <h1 style="font-size:19px;line-height:1.35;margin:0 0 16px">${esc(data.subject)}</h1>
+
+    <p style="font-size:14px;line-height:1.55;margin:0 0 14px">
+      Основной запрос отправлен представителю «${esc(data.region ?? "")}» —
+      ${esc(data.representativeName)}. Отвечать не обязательно: вы в копии,
+      чтобы быть в курсе.
+    </p>
+
+    <table style="border-collapse:collapse;margin-bottom:18px">
+      ${row("От кого", data.userName)}
+      ${row("Почта", data.userEmail)}
+      ${data.region ? row("Регион", data.region) : ""}
+      ${row("Тип", data.typeLabel)}
+      ${data.measureTitle ? row("О мере", data.measureTitle) : ""}
+      ${row("Когда", date)}
+    </table>
+
+    <div style="background:#F3F1EC;border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.55;white-space:pre-wrap">${esc(data.body)}</div>
+
+    <p style="margin:22px 0 8px">${button(viewUrl, "Посмотреть ответ")}</p>
+    <p style="font-size:12px;color:#9aa0a8;margin:0">
+      Ответ появится по этой ссылке не сразу, а только когда представитель
+      отправит его подписчику. С этой же ссылки можно ответить самим, если
+      понадобится.
+    </p>
+  `);
+
+  await transport.sendMail({
+    from: fromAddress(),
+    to,
+    subject: inquirySubject(data.subject),
+    messageId: inquiryThreadId(data.inquiryId),
+    text:
+      `Обращение направлено представителю региона «${data.region ?? ""}» — ` +
+      `${data.representativeName}. Копия для вас, отвечать не обязательно.\n\n` +
+      `От кого: ${data.userName} (${data.userEmail})\n` +
+      (data.region ? `Регион: ${data.region}\n` : "") +
+      `Тип: ${data.typeLabel}\n` +
+      (data.measureTitle ? `О мере: ${data.measureTitle}\n` : "") +
+      `Когда: ${date}\n\n` +
+      `Тема: ${data.subject}\n\n${data.body}\n\n` +
+      `Посмотреть ответ (появится, когда представитель ответит подписчику): ${viewUrl}`,
+    html,
+  });
+}
+
+/**
  * Продолжение разговора: человек написал в уже созданное обращение.
  *
  * Письмо уходит в ту же ветку, что и первое, — Татьяна видит переписку целиком

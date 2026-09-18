@@ -1,7 +1,7 @@
 import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Clock, ExternalLink, Send } from "lucide-react";
+import { CheckCircle2, Clock, ExternalLink, Landmark, Send } from "lucide-react";
 import { getInquiry } from "@/lib/inquiries-db";
 import { getThread, markThreadRead } from "@/lib/inquiry-thread";
 import { getMeasureBySlug } from "@/lib/measures-db";
@@ -103,6 +103,19 @@ export default async function AdminInquiryDetailPage({
         >
           Привязано к мере: {measure.title} <ExternalLink className="size-3" />
         </Link>
+      )}
+
+      {inquiry.representativeName && (
+        <div className="mt-3 flex items-start gap-2 rounded-xl border border-primary/25 bg-primary/5 p-2.5 text-xs">
+          <Landmark className="mt-0.5 size-3.5 shrink-0 text-primary" />
+          <p className="text-muted-foreground">
+            Направлено представителю региона —{" "}
+            <span className="font-semibold text-foreground">{inquiry.representativeName}</span>
+            {inquiry.representativeEmail ? ` (${inquiry.representativeEmail})` : ""}. Ответ здесь
+            появится, когда представитель отправит его подписчику, — но ответить
+            можно и самим, прямо в этой переписке.
+          </p>
+        </div>
       )}
 
       {/* Переписка целиком: вопрос, ответы и уточнения человека подряд. */}

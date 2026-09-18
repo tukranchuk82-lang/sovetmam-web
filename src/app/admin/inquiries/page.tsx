@@ -1,11 +1,20 @@
 import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import Link from "next/link";
-import { Clock, CheckCircle2, ChevronRight, MapPin, MessageSquare, Mail } from "lucide-react";
-import { listAllInquiries } from "@/lib/inquiries-db";
+import {
+  Clock,
+  CheckCircle2,
+  ChevronRight,
+  MapPin,
+  MessageSquare,
+  Mail,
+  Landmark,
+} from "lucide-react";
+import { listAllInquiries, listInquiryRegions } from "@/lib/inquiries-db";
 import { resendAllNewInquiriesAction } from "./actions";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AdminPageHeader } from "@/components/admin/page-header";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Обращения" };
 export const dynamic = "force-dynamic";
@@ -27,10 +36,13 @@ const DEFAULT_AVATAR_COLOR = "#1B3A6B";
 export default async function AdminInquiriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sent?: string }>;
+  searchParams: Promise<{ sent?: string; region?: string }>;
 }) {
-  const { sent } = await searchParams;
-  const inquiries = await listAllInquiries();
+  const { sent, region } = await searchParams;
+  const [inquiries, regions] = await Promise.all([
+    listAllInquiries(region),
+    listInquiryRegions(),
+  ]);
   const newCount = inquiries.filter((i) => i.status === "new").length;
 
   return (
@@ -69,6 +81,32 @@ export default async function AdminInquiriesPage({
             Отправить письмом все новые ({newCount})
           </button>
         </form>
+      )}
+
+      {regions.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <Link
+            href="/admin/inquiries"
+            className={cn(
+              "rounded-full border px-2.5 py-1 text-xs font-medium",
+              !region ? "border-primary bg-primary/10 text-primary" : "bg-background hover:bg-muted",
+            )}
+          >
+            Все регионы
+          </Link>
+          {regions.map((r) => (
+            <Link
+              key={r}
+              href={`/admin/inquiries?region=${encodeURIComponent(r)}`}
+              className={cn(
+                "rounded-full border px-2.5 py-1 text-xs font-medium",
+                region === r ? "border-primary bg-primary/10 text-primary" : "bg-background hover:bg-muted",
+              )}
+            >
+              {r}
+            </Link>
+          ))}
+        </div>
       )}
 
       {inquiries.length === 0 ? (
@@ -126,6 +164,12 @@ export default async function AdminInquiriesPage({
                         style={{ color: CHANNEL_COLORS[inq.userChannel] }}
                       >
                         {CHANNEL_LABELS[inq.userChannel]}
+                      </span>
+                    )}
+                    {inq.representativeName && (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary">
+                        <Landmark className="size-3" />
+                        {inq.representativeName}
                       </span>
                     )}
                   </div>
