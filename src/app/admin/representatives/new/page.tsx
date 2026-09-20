@@ -2,7 +2,7 @@ import Link from "next/link";
 import { RepresentativeForm } from "@/components/admin/representative-form";
 import { createRepresentativeAction } from "@/app/admin/representatives/actions";
 
-export const metadata = { title: "Новый представитель" };
+export const metadata = { title: "Новый координатор" };
 
 export default function NewRepresentativePage() {
   return (
@@ -11,10 +11,10 @@ export default function NewRepresentativePage() {
         href="/admin/representatives"
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        ← К списку представителей
+        ← К списку координаторов
       </Link>
       <h1 className="mt-2 text-xl font-extrabold tracking-tight">
-        Новый представитель
+        Новый координатор
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Появится в подборке и в карточках мер выбранного региона сразу после

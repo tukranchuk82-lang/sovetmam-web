@@ -20,11 +20,13 @@ export function PodborGate({
   authed,
   measures,
   savedSurvey,
+  savedSurveyAt,
   representatives,
 }: {
   authed: boolean;
   measures: SupportMeasure[];
   savedSurvey: Record<string, unknown> | null;
+  savedSurveyAt: string | null;
   representatives: RegionalRepresentative[];
 }) {
   const [showTeaser, setShowTeaser] = useState(false);
@@ -41,6 +43,7 @@ export function PodborGate({
     <PodborForm
       measures={measures}
       savedSurvey={savedSurvey}
+      savedSurveyAt={savedSurveyAt}
       representatives={representatives}
     />
   );

@@ -109,10 +109,10 @@ export default async function AdminInquiryDetailPage({
         <div className="mt-3 flex items-start gap-2 rounded-xl border border-primary/25 bg-primary/5 p-2.5 text-xs">
           <Landmark className="mt-0.5 size-3.5 shrink-0 text-primary" />
           <p className="text-muted-foreground">
-            Направлено представителю региона —{" "}
+            Направлено координатору региона —{" "}
             <span className="font-semibold text-foreground">{inquiry.representativeName}</span>
             {inquiry.representativeEmail ? ` (${inquiry.representativeEmail})` : ""}. Ответ здесь
-            появится, когда представитель отправит его подписчику, — но ответить
+            появится, когда координатор отправит его подписчику, — но ответить
             можно и самим, прямо в этой переписке.
           </p>
         </div>

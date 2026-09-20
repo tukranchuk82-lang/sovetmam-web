@@ -38,7 +38,7 @@ export default async function EditRepresentativePage({
         href="/admin/representatives"
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        ← К списку представителей
+        ← К списку координаторов
       </Link>
 
       <h1 className="mt-2 text-xl font-extrabold leading-tight tracking-tight">
@@ -59,7 +59,7 @@ export default async function EditRepresentativePage({
           type="submit"
           className="inline-flex items-center gap-1.5 rounded-xl border border-destructive/30 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
         >
-          <Trash2 className="size-4" /> Удалить представителя
+          <Trash2 className="size-4" /> Удалить координатора
         </button>
       </form>
     </div>

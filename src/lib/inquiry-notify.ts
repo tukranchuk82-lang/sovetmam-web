@@ -71,7 +71,7 @@ async function representativeFor(
   inquiry: Inquiry,
 ): Promise<{ name: string; email: string } | null> {
   if (inquiry.representativeEmail) {
-    return { name: inquiry.representativeName ?? "представитель региона", email: inquiry.representativeEmail };
+    return { name: inquiry.representativeName ?? "координатор региона", email: inquiry.representativeEmail };
   }
   if (!inquiry.region) return null;
   const published = await getPublishedRepresentatives();

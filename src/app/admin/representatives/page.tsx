@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toggleRepresentativePublishedAction } from "./actions";
 
-export const metadata = { title: "Представители в регионах" };
+export const metadata = { title: "Координаторы в регионах" };
 export const dynamic = "force-dynamic";
 
 export default async function RepresentativesPage() {
@@ -16,7 +16,7 @@ export default async function RepresentativesPage() {
     <div className="px-4 py-5 md:px-6">
       <AdminPageHeader
         icon={<Landmark />}
-        title="Представители в регионах"
+        title="Координаторы в регионах"
         description="Аккредитованные организации, к которым человек может обратиться по мерам своего региона. Показываются в подборке и в карточках региональных мер."
         action={
           <Link
@@ -30,7 +30,7 @@ export default async function RepresentativesPage() {
 
       {representatives.length === 0 ? (
         <div className="mt-5 rounded-2xl border border-dashed bg-muted/30 p-6 text-center">
-          <p className="font-semibold">Пока нет ни одного представителя</p>
+          <p className="font-semibold">Пока нет ни одного координатора</p>
         </div>
       ) : (
         <div className="mt-5 space-y-2.5">
@@ -58,7 +58,7 @@ export default async function RepresentativesPage() {
               >
                 <button
                   type="submit"
-                  title={r.isPublished ? "Отключить представителя" : "Включить представителя"}
+                  title={r.isPublished ? "Отключить координатора" : "Включить координатора"}
                   className={cn(
                     "inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium",
                     r.isPublished

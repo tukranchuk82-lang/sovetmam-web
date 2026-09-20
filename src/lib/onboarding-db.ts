@@ -22,6 +22,8 @@ export interface AppUser {
   /** Открывал ли уже кабинет с напоминанием подключить мессенджер. */
   messengerHintSeenAt: string | null;
   survey: Record<string, unknown> | null;
+  /** Когда анкета сохранена в профиль — отличить свежую копию от устаревшей. */
+  surveyUpdatedAt: string | null;
   avatarUrl: string | null;
   avatarEmoji: string | null;
   avatarBg: string | null;
@@ -70,6 +72,7 @@ type Row = {
   salebot_client_id: string | null;
   messenger_hint_seen_at: string | null;
   survey: Record<string, unknown> | null;
+  survey_updated_at: string | null;
   avatar_url: string | null;
   avatar_emoji: string | null;
   avatar_bg: string | null;
@@ -92,6 +95,7 @@ function fromRow(r: Row): AppUser {
     salebotClientId: r.salebot_client_id,
     messengerHintSeenAt: r.messenger_hint_seen_at,
     survey: r.survey,
+    surveyUpdatedAt: r.survey_updated_at,
     avatarUrl: r.avatar_url,
     avatarEmoji: r.avatar_emoji,
     avatarBg: r.avatar_bg,
@@ -100,7 +104,7 @@ function fromRow(r: Row): AppUser {
 }
 
 const SELECT =
-  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, survey_updated_at, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
 
 /** Отметить, что человек уже открывал кабинет с напоминанием подключить
  * мессенджер, — кружочек на аватарке больше не должен показываться. */

@@ -200,7 +200,7 @@ export async function sendNewInquiryEmail(
 }
 
 /**
- * Обращение по региону, где есть аккредитованный представитель — письмо
+ * Обращение по региону, где есть координатор — письмо
  * уходит ему напрямую, а не только владельцам приложения. Тон другой: это
  * внешний человек, не сотрудник, ему нужно объяснить, почему письмо пришло
  * именно ему и как ответить.
@@ -219,7 +219,7 @@ export async function sendInquiryToRepresentativeEmail(
   });
 
   if (!transport) {
-    console.log(`[Обращение][stub→представитель] ${to}: «${data.subject}» — ответить: ${replyUrl}`);
+    console.log(`[Обращение][stub→координатор] ${to}: «${data.subject}» — ответить: ${replyUrl}`);
     return;
   }
 
@@ -230,7 +230,7 @@ export async function sendInquiryToRepresentativeEmail(
     <h1 style="font-size:19px;line-height:1.35;margin:0 0 16px">${esc(data.subject)}</h1>
 
     <p style="font-size:14px;line-height:1.55;margin:0 0 14px">
-      Здравствуйте! Вы получили это письмо как аккредитованный представитель
+      Здравствуйте! Вы получили это письмо как координатор
       «Совета матерей» в регионе «${esc(data.region ?? "")}». К вам обратился
       подписчик приложения — ниже его вопрос.
     </p>
@@ -259,7 +259,7 @@ export async function sendInquiryToRepresentativeEmail(
     subject: inquirySubject(data.subject),
     messageId: inquiryThreadId(data.inquiryId),
     text:
-      `Здравствуйте! Вы получили это письмо как аккредитованный представитель ` +
+      `Здравствуйте! Вы получили это письмо как координатор ` +
       `«Совета матерей» в регионе «${data.region ?? ""}». К вам обратился подписчик приложения.\n\n` +
       `От кого: ${data.userName}\n` +
       (data.region ? `Регион: ${data.region}\n` : "") +
@@ -300,12 +300,12 @@ export async function sendInquiryRoutedCopyEmail(
 
   const html = shell(`
     <p style="font-size:13px;color:#6b7078;margin:0 0 4px">
-      Обращение направлено представителю региона — копия для вас
+      Обращение направлено координатору региона — копия для вас
     </p>
     <h1 style="font-size:19px;line-height:1.35;margin:0 0 16px">${esc(data.subject)}</h1>
 
     <p style="font-size:14px;line-height:1.55;margin:0 0 14px">
-      Основной запрос отправлен представителю «${esc(data.region ?? "")}» —
+      Основной запрос отправлен координатору региона «${esc(data.region ?? "")}» —
       ${esc(data.representativeName)}. Отвечать не обязательно: вы в копии,
       чтобы быть в курсе.
     </p>
@@ -323,7 +323,7 @@ export async function sendInquiryRoutedCopyEmail(
 
     <p style="margin:22px 0 8px">${button(viewUrl, "Посмотреть ответ")}</p>
     <p style="font-size:12px;color:#9aa0a8;margin:0">
-      Ответ появится по этой ссылке не сразу, а только когда представитель
+      Ответ появится по этой ссылке не сразу, а только когда координатор
       отправит его подписчику. С этой же ссылки можно ответить самим, если
       понадобится.
     </p>
@@ -335,7 +335,7 @@ export async function sendInquiryRoutedCopyEmail(
     subject: inquirySubject(data.subject),
     messageId: inquiryThreadId(data.inquiryId),
     text:
-      `Обращение направлено представителю региона «${data.region ?? ""}» — ` +
+      `Обращение направлено координатору региона «${data.region ?? ""}» — ` +
       `${data.representativeName}. Копия для вас, отвечать не обязательно.\n\n` +
       `От кого: ${data.userName} (${data.userEmail})\n` +
       (data.region ? `Регион: ${data.region}\n` : "") +
@@ -343,7 +343,7 @@ export async function sendInquiryRoutedCopyEmail(
       (data.measureTitle ? `О мере: ${data.measureTitle}\n` : "") +
       `Когда: ${date}\n\n` +
       `Тема: ${data.subject}\n\n${data.body}\n\n` +
-      `Посмотреть ответ (появится, когда представитель ответит подписчику): ${viewUrl}`,
+      `Посмотреть ответ (появится, когда координатор ответит подписчику): ${viewUrl}`,
     html,
   });
 }

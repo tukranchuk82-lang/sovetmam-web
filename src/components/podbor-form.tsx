@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Link from "next/link";
 import {
   RotateCcw,
@@ -583,9 +590,63 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
 // возврат «назад» из карточки меры иногда попадал на страницу мимо клиентского
 // состояния (устаревший кеш навигации Next.js) и человек видел пустую анкету
 // вместо уже посчитанной подборки. Восстанавливаем из снимка, только если
-// сервер её не прислал, и тут же дозаписываем в профиль — на случай, если
-// исходное сохранение не успело дойти до базы.
+// сервер её не прислал или прислал более старую, и тут же дозаписываем в
+// профиль — на случай, если исходное сохранение не успело дойти до базы.
+//
+// «Более старую» — не теоретический случай: при возврате «назад» Next.js
+// отдаёт страницу из кеша навигации, а в нём лежит анкета того момента, когда
+// подбор впервые открыли. Если человек с тех пор пересчитал подборку (сменил
+// регион, например), кеш перебивал свежий результат — и из выдачи пропадал
+// баннер представителя нового региона, а меры показывались прежнего.
 const LAST_RESULT_KEY = "podbor-last-result-v1";
+
+interface ResultSnapshot {
+  /** Когда снимок записан (мс, часы браузера) — сравниваем со временем сохранения на сервере. */
+  at: number;
+  profile: UserProfile;
+}
+
+function readResultSnapshot(): ResultSnapshot | null {
+  try {
+    const raw = sessionStorage.getItem(LAST_RESULT_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw) as Partial<ResultSnapshot> & Partial<UserProfile>;
+    if (v && typeof v === "object" && v.profile && typeof v.at === "number") {
+      return { at: v.at, profile: v.profile };
+    }
+    // Снимок старого формата — голый профиль без времени: считаем самым давним.
+    if (v && typeof v === "object" && typeof v.hasChildren === "boolean") {
+      return { at: 0, profile: v as UserProfile };
+    }
+  } catch {
+    /* повреждённый или недоступный снимок — работаем без него */
+  }
+  return null;
+}
+
+function writeResultSnapshot(profile: UserProfile): void {
+  try {
+    const snapshot: ResultSnapshot = { at: Date.now(), profile };
+    sessionStorage.setItem(LAST_RESULT_KEY, JSON.stringify(snapshot));
+  } catch {
+    /* приватный режим — переживём и без подстраховки */
+  }
+}
+
+/** Сравнение анкет без оглядки на порядок ключей (jsonb в базе их переставляет). */
+function sameAnswers(a: unknown, b: unknown): boolean {
+  const canon = (v: unknown) =>
+    JSON.stringify(v, (_k, x) =>
+      x && typeof x === "object" && !Array.isArray(x)
+        ? Object.fromEntries(
+            Object.entries(x as Record<string, unknown>).sort(([p], [q]) =>
+              p < q ? -1 : p > q ? 1 : 0,
+            ),
+          )
+        : x,
+    );
+  return canon(a) === canon(b);
+}
 
 const SITUATION_ICON: Record<PrioritySituationKey, React.ComponentType<{ className?: string }>> = {
   money: Wallet,
@@ -673,7 +734,62 @@ function SituationPicker({
   );
 }
 
+/**
+ * Выбирает, какую анкету считать актуальной: присланную сервером или
+ * локальный снимок этой вкладки (см. LAST_RESULT_KEY). Решение принимается
+ * один раз, при открытии страницы, — иначе перерисовка родителя посреди
+ * заполнения анкеты обнулила бы введённое.
+ *
+ * Слой-обёртка нужен потому, что состояние формы целиком строится из
+ * savedSurvey при создании компонента; подменить анкету «на лету» нельзя, но
+ * можно пересоздать форму (key) до первой отрисовки: эффект-раскладка
+ * срабатывает раньше, чем браузер покажет кадр, так что устаревшая подборка
+ * человеку на глаза не попадает.
+ */
 export function PodborForm({
+  savedSurveyAt,
+  ...props
+}: {
+  measures: SupportMeasure[];
+  savedSurvey?: Record<string, unknown> | null;
+  /** Когда сохранена анкета на сервере (ISO) — чтобы понять, свежее ли она снимка. */
+  savedSurveyAt?: string | null;
+  representatives?: RegionalRepresentative[];
+}) {
+  const [snapshot, setSnapshot] = useState<ResultSnapshot | null>(null);
+
+  useLayoutEffect(() => {
+    const snap = readResultSnapshot();
+    if (!snap) return;
+    const server = props.savedSurvey as Partial<UserProfile> | null | undefined;
+    const serverHasSurvey = !!server && typeof server.hasChildren === "boolean";
+    const serverAt = savedSurveyAt ? Date.parse(savedSurveyAt) : 0;
+    if (serverHasSurvey && snap.at <= serverAt) return; // сервер свежее — верим ему
+    // Восстановление из внешнего хранилища — ровно тот случай, ради которого
+    // эффект и нужен: состояние приходит не из React, а из sessionStorage.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSnapshot(snap);
+    // Профиль в базе отстал (или пуст) — дозаписываем, чтобы другие экраны
+    // и PDF собирались по той же анкете, что видит человек.
+    if (!serverHasSurvey || !sameAnswers(server, snap.profile)) {
+      void saveSurveyAction(snap.profile as unknown as Record<string, unknown>);
+    }
+    // Решаем один раз, при открытии страницы.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <PodborFormInner
+      key={snapshot ? "snapshot" : "server"}
+      {...props}
+      savedSurvey={
+        snapshot ? (snapshot.profile as unknown as Record<string, unknown>) : props.savedSurvey
+      }
+    />
+  );
+}
+
+function PodborFormInner({
   measures,
   savedSurvey,
   representatives = [],
@@ -1128,28 +1244,6 @@ export function PodborForm({
   const [draftDismissed, setDraftDismissed] = useState(false);
   const draftOffered = hasDraft && !hasSaved && !touched && !draftDismissed;
 
-  // Сервер не прислал сохранённую анкету (savedSurvey пуст), но локальный
-  // снимок с прошлого раза есть — подтягиваем его, чтобы не гнать человека
-  // заполнять заново, и на всякий случай дозаписываем в профиль.
-  useEffect(() => {
-    if (hasSaved) return;
-    let raw: string | null = null;
-    try {
-      raw = sessionStorage.getItem(LAST_RESULT_KEY);
-    } catch {
-      return;
-    }
-    if (!raw) return;
-    const profile = JSON.parse(raw) as UserProfile;
-    // Восстановление из внешнего хранилища — ровно тот случай, ради которого
-    // эффект и нужен: состояние приходит не из React, а из sessionStorage.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setResultProfile(profile);
-    setResults(matchMeasures(profile, measures));
-    void saveSurveyAction(profile as unknown as Record<string, unknown>);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasSaved]);
-
   function applyDraft() {
     const d = readDraft();
     setDraftDismissed(true);
@@ -1351,14 +1445,10 @@ export function PodborForm({
     );
     // Сохраняем анкету в профиль и держим локальный снимок под рукой — если
     // возврат «назад» из карточки меры попадёт на устаревший клиентский кеш
-    // страницы, эффект восстановления выше подхватит снимок вместо пустой
-    // анкеты (см. LAST_RESULT_KEY).
+    // страницы, обёртка PodborForm подхватит снимок вместо пустой или
+    // устаревшей анкеты (см. LAST_RESULT_KEY).
     void saveSurveyAction(profile as unknown as Record<string, unknown>);
-    try {
-      sessionStorage.setItem(LAST_RESULT_KEY, JSON.stringify(profile));
-    } catch {
-      /* приватный режим — переживём и без подстраховки */
-    }
+    writeResultSnapshot(profile);
   }
 
   function reset() {
@@ -1499,8 +1589,8 @@ export function PodborForm({
               </div>
             )}
 
-            {/* Представитель региона — до списка мер: заказчик хочет, чтобы
-                человек узнал об аккредитованной организации сразу, а не
+            {/* Координатор региона — до списка мер: заказчик хочет, чтобы
+                человек узнал о координаторе сразу, а не
                 наткнулся на неё случайно внутри одной из карточек. */}
             <RepresentativeBanner
               representatives={representatives}

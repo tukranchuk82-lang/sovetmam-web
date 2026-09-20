@@ -21,6 +21,7 @@ export default async function PodborPage() {
   // Восстанавливаем последнюю заполненную анкету, чтобы подбор не слетал после
   // перехода к мере и обратно (сохраняется в app_users.survey при отправке).
   const savedSurvey = appUser?.survey ?? null;
+  const savedSurveyAt = appUser?.surveyUpdatedAt ?? null;
   const representatives = await getPublishedRepresentatives();
 
   return (
@@ -28,6 +29,7 @@ export default async function PodborPage() {
       authed={authed}
       measures={measures}
       savedSurvey={savedSurvey}
+      savedSurveyAt={savedSurveyAt}
       representatives={representatives}
     />
   );

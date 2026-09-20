@@ -77,7 +77,7 @@ export default async function AdminLayout({
             Пользователи
           </AdminNavLink>
           <AdminNavLink href="/admin/representatives" icon={<Landmark className="size-4" />}>
-            Представители в регионах
+            Координаторы в регионах
           </AdminNavLink>
           <AdminNavLink href="/admin/inquiries" icon={<MessageSquare className="size-4" />} badge={newInquiries}>
             Обращения
