@@ -1,7 +1,8 @@
+import { ORG_LEGAL_FORM, ORG_NAME } from "@/lib/org-brand";
+
 export const metadata = {
-  title: "Об организации «Совет матерей»",
-  description:
-    "Общероссийская общественная организация «Совет матерей» помогает семьям с детьми и будущим родителям разобраться в мерах государственной поддержки.",
+  title: `Об организации ${ORG_NAME}`,
+  description: `${ORG_LEGAL_FORM} ${ORG_NAME} помогает семьям с детьми и будущим родителям разобраться в мерах государственной поддержки.`,
   alternates: { canonical: "/about" },
 };
 
@@ -13,7 +14,7 @@ export default function AboutPage() {
     <div className="px-4 py-5">
       <h1 className="mt-3 text-xl font-extrabold tracking-tight">Об организации</h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        Общероссийская общественная организация <OrgName /> помогает семьям с детьми и будущим
+        {ORG_LEGAL_FORM} <OrgName /> помогает семьям с детьми и будущим
         родителям разобраться в мерах государственной поддержки — как федеральных, так и
         региональных.
       </p>

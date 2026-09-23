@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogIn, ChevronLeft } from "lucide-react";
 import { OrgName } from "@/components/org-name";
+import { ORG_NAME_PLAIN } from "@/lib/org-brand";
 import { runBackHandler } from "@/components/back-handler";
 import { BottomNav } from "@/components/bottom-nav";
 import { InstallBanner } from "@/components/install-banner";
@@ -219,7 +220,7 @@ export function AppShell({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={HEADER_LOGO_SRC}
-                alt="Совет матерей"
+                alt={ORG_NAME_PLAIN}
                 width={52}
                 height={52}
                 className="size-[52px] shrink-0 object-contain"

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { OrgName } from "@/components/org-name";
+import { ORG_LEGAL_FORM_GENITIVE } from "@/lib/org-brand";
 import { FamilyDoodle } from "@/components/family-doodle";
 
 /**
@@ -97,7 +98,7 @@ export function FounderHero() {
           — Татьяна Викторовна Бутская
         </figcaption>
         <p className="text-xs text-muted-foreground">
-          Председатель общероссийской общественной организации <OrgName />
+          Председатель {ORG_LEGAL_FORM_GENITIVE} <OrgName />
         </p>
       </figure>
     </section>

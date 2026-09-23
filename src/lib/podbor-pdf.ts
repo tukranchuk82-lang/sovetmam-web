@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import type { SupportMeasure } from "@/lib/measures";
+import { ORG_FOOTER_SHORT } from "@/lib/org-brand";
 
 /**
  * Подборка мер в PDF — чтобы забрать её с собой.
@@ -83,7 +84,7 @@ function addPage(ctx: Ctx): void {
 
 /** Подпись внизу страницы: откуда файл и какая это страница. */
 function footer(ctx: Ctx): void {
-  const text = `«Шпаргалка для родителей» — проект «Совета матерей»`;
+  const text = `«Шпаргалка для родителей» — проект ${ORG_FOOTER_SHORT}`;
   ctx.page.drawText(text, {
     x: MARGIN,
     y: MARGIN - 22,

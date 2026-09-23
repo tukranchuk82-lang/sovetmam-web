@@ -6,6 +6,7 @@ import { after } from "next/server";
 import { getInquiry, respondToInquiry } from "@/lib/inquiries-db";
 import { notifyUserAboutAnswer } from "@/lib/inquiry-notify";
 import { verifyReplyToken } from "@/lib/inquiry-token";
+import { ORG_NAME_GENITIVE } from "@/lib/org-brand";
 
 /**
  * Ответ по одноразовой ссылке из письма — без входа в приложение.
@@ -22,7 +23,7 @@ export async function replyByTokenAction(token: string, fd: FormData) {
   if (!response) throw new Error("Ответ не может быть пустым");
 
   const authorRaw = String(fd.get("author") ?? "").trim();
-  const author = authorRaw || "Команда «Совета матерей»";
+  const author = authorRaw || `Команда ${ORG_NAME_GENITIVE}`;
 
   await respondToInquiry(check.inquiryId, response, author);
 

@@ -10,6 +10,7 @@ import { PyramidSection } from "@/components/home/pyramid-section";
 import { ShareSection } from "@/components/home/share-section";
 import { JsonLd } from "@/components/json-ld";
 import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
+import { ORG_LEGAL_FORM, ORG_NAME, ORG_NAME_PLAIN } from "@/lib/org-brand";
 
 // Паспорт сайта и организации для поисковика. Отсюда берутся название
 // организации в выдаче и строка поиска по каталогу прямо в результатах Google.
@@ -19,12 +20,11 @@ const SITE_SCHEMA = {
     {
       "@type": "Organization",
       "@id": `${siteUrl()}/#organization`,
-      name: "Совет матерей",
-      alternateName: "Общероссийская общественная организация «Совет матерей»",
+      name: ORG_NAME_PLAIN,
+      alternateName: `${ORG_LEGAL_FORM} ${ORG_NAME}`,
       url: siteUrl(),
       logo: `${siteUrl()}/icon-512.png`,
-      description:
-        "Общероссийская общественная организация, помогает семьям с детьми и будущим родителям разобраться в мерах государственной поддержки.",
+      description: `${ORG_LEGAL_FORM}, помогает семьям с детьми и будущим родителям разобраться в мерах государственной поддержки.`,
     },
     {
       "@type": "WebSite",

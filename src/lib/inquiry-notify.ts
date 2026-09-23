@@ -14,6 +14,7 @@ import { appUrl, buildReplyUrl } from "@/lib/inquiry-token";
 import { setInquiryRepresentative, type Inquiry } from "@/lib/inquiries-db";
 import { countUnreadForUser, getThread } from "@/lib/inquiry-thread";
 import { sendPushToUser } from "@/lib/push";
+import { ORG_NAME_GENITIVE } from "@/lib/org-brand";
 import { getPublishedRepresentatives } from "@/lib/representatives-db";
 import { findRepresentative } from "@/lib/representatives";
 
@@ -197,7 +198,7 @@ export async function notifyUserAboutAnswer(inquiry: Inquiry): Promise<void> {
             response: inquiry.response ?? "",
             answeredBy: inquiry.respondedByName
               ? `Ответила ${inquiry.respondedByName}`
-              : "Команда «Совета матерей»",
+              : `Команда ${ORG_NAME_GENITIVE}`,
           },
           link,
         );

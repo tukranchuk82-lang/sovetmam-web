@@ -5,6 +5,7 @@ import { Send, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { replyToInquiryAction, type ReplyState } from "@/app/(app)/profile/inquiries/actions";
 import type { ThreadMessage } from "@/lib/inquiry-thread";
+import { ORG_NAME } from "@/lib/org-brand";
 
 const INITIAL: ReplyState = { error: null, ok: false };
 
@@ -50,7 +51,7 @@ export function InquiryThread({
                   m.author === "user" ? "text-white/70" : "text-muted-foreground",
                 )}
               >
-                {m.author === "user" ? "Вы" : (m.authorName ?? "«Совет матерей»")} ·{" "}
+                {m.author === "user" ? "Вы" : (m.authorName ?? ORG_NAME)} ·{" "}
                 {new Date(m.createdAt).toLocaleString("ru-RU", {
                   day: "2-digit",
                   month: "long",

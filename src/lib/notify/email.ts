@@ -1,5 +1,6 @@
 import "server-only";
 import nodemailer, { type Transporter } from "nodemailer";
+import { ORG_FULL_NAME, ORG_NAME_GENITIVE } from "@/lib/org-brand";
 
 /**
  * Отправка письма с кодом подтверждения.
@@ -44,7 +45,7 @@ function otpHtml(code: string): string {
     <div style="margin:20px 0;padding:14px 0;text-align:center;background:#F3F1EC;border-radius:10px;
                 font-size:30px;font-weight:700;letter-spacing:8px;color:#1B3A6B">${code}</div>
     <p style="font-size:13px;line-height:1.5;color:#6b7078">Код действует 10 минут. Если вы не запрашивали вход — просто проигнорируйте это письмо.</p>
-    <p style="font-size:12px;color:#9aa0a8;margin-top:20px">Проект «Совета матерей»</p>
+    <p style="font-size:12px;color:#9aa0a8;margin-top:20px">Проект ${ORG_FULL_NAME}</p>
   </div>`;
 }
 
@@ -95,7 +96,7 @@ function button(href: string, label: string): string {
 function shell(inner: string): string {
   return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1A1A1A">
     ${inner}
-    <p style="font-size:12px;color:#9aa0a8;margin-top:24px">Проект «Совета матерей»</p>
+    <p style="font-size:12px;color:#9aa0a8;margin-top:24px">Проект ${ORG_FULL_NAME}</p>
   </div>`;
 }
 
@@ -231,7 +232,7 @@ export async function sendInquiryToRepresentativeEmail(
 
     <p style="font-size:14px;line-height:1.55;margin:0 0 14px">
       Здравствуйте! Вы получили это письмо как координатор
-      «Совета матерей» в регионе «${esc(data.region ?? "")}». К вам обратился
+      ${ORG_NAME_GENITIVE} в регионе «${esc(data.region ?? "")}». К вам обратился
       подписчик приложения — ниже его вопрос.
     </p>
 
@@ -260,7 +261,7 @@ export async function sendInquiryToRepresentativeEmail(
     messageId: inquiryThreadId(data.inquiryId),
     text:
       `Здравствуйте! Вы получили это письмо как координатор ` +
-      `«Совета матерей» в регионе «${data.region ?? ""}». К вам обратился подписчик приложения.\n\n` +
+      `${ORG_NAME_GENITIVE} в регионе «${data.region ?? ""}». К вам обратился подписчик приложения.\n\n` +
       `От кого: ${data.userName}\n` +
       (data.region ? `Регион: ${data.region}\n` : "") +
       `Тип: ${data.typeLabel}\n` +
