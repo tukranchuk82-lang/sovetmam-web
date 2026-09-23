@@ -200,7 +200,9 @@ export const CATALOG_SITUATIONS: CatalogSituation[] = [
   { id: "student-family", title: "Студенческая семья", href: "/segment/student-family" },
   { id: "low-income", title: "Семья с низким доходом", href: "/situation/low-income" },
   { id: "single-parent", title: "Одинокий родитель", href: "/situation/single-parent" },
-  { id: "foster", title: "Приёмные родители", href: "/segment/foster-family" },
+  // ВРЕМЕННО скрыто (с 23.09.2026, по просьбе Тани, заодно с мерами про
+  // сирот/опеку/усыновление — см. scripts/_toggle-foster-measures.mjs).
+  // Вернуть: { id: "foster", title: "Приёмные родители", href: "/segment/foster-family" },
   { id: "svo-family", title: "Семья участника СВО", href: "/segment/svo-family" },
   { id: "loss", title: "Потеря в семье", href: "/situation/loss" },
   { id: "parent-disability", title: "Родитель-инвалид", href: "/situation/parent-disability" },
