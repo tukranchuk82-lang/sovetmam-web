@@ -35,6 +35,12 @@ function sectionOf(pathname: string): Section {
 // Тёмно-синяя тема шапки/меню — единая для всех разделов.
 const NAVY = "linear-gradient(135deg, #274A7E 0%, #1B3A6B 55%, #101D38 100%)";
 
+// ВРЕМЕННО (с 23.09.2026, по просьбе Тани): в шапке вместо обычного лого
+// стоит печать АНО «Выбор родителей». Прежний logo.svg никуда не делся —
+// когда скажут вернуть обратно, поменять HEADER_LOGO_SRC назад на "/logo.svg"
+// (и можно удалить public/logo-vybor-roditeley.png).
+const HEADER_LOGO_SRC = "/logo-vybor-roditeley.png";
+
 export function AppShell({
   avatarSlot,
   authed,
@@ -212,7 +218,7 @@ export function AppShell({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/logo.svg"
+                src={HEADER_LOGO_SRC}
                 alt="Совет матерей"
                 width={52}
                 height={52}
