@@ -61,9 +61,10 @@ export default async function AdminLayout({
               <OrgName />
             </Link>
           </div>
-          {/* Переключатель режима: уводит в личный кабинет и запоминает выбор,
-              чтобы кабинет открывался как у обычного пользователя. */}
-          <ViewModeSwitch mode="admin" className="shrink-0" />
+          {/* Переключатель режима: уводит на главную страницу приложения —
+              то, что видит обычный человек, — и запоминает выбор, чтобы
+              личный кабинет тоже открывался как у обычного пользователя. */}
+          <ViewModeSwitch mode="admin" className="shrink-0" userTo="/" />
         </div>
 
         <nav className="mt-3 flex flex-wrap gap-1.5">

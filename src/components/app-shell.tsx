@@ -44,12 +44,15 @@ const HEADER_LOGO_SRC = "/logo-vybor-roditeley.png";
 
 export function AppShell({
   avatarSlot,
+  adminSlot = null,
   authed,
   unread = 0,
   messengerHint = false,
   children,
 }: {
   avatarSlot: React.ReactNode;
+  /** Кнопка входа в админку — приходит только для владельца и техспеца. */
+  adminSlot?: React.ReactNode;
   authed: boolean;
   /** Непрочитанные ответы на обращения — кружок в меню и на иконке. */
   unread?: number;
@@ -246,29 +249,32 @@ export function AppShell({
               </span>
             </Link>
 
-            {authed ? (
-              <Link
-                href="/profile"
-                aria-label="Личный кабинет"
-                className="pointer-events-auto relative shrink-0"
-              >
-                {avatarSlot}
-                {showMessengerHint && (
-                  <span
-                    className="absolute -right-0.5 -top-0.5 size-3.5 rounded-full bg-[#E4374B] ring-2 ring-white"
-                    aria-label="Есть непрочитанное в личном кабинете"
-                  />
-                )}
-              </Link>
-            ) : (
-              <Link
-                href="/login"
-                className="pointer-events-auto inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/50 bg-white/30 px-5 text-sm font-semibold text-white backdrop-blur-sm"
-              >
-                <LogIn className="size-4" />
-                Войти
-              </Link>
-            )}
+            <div className="flex shrink-0 items-center gap-2">
+              {adminSlot}
+              {authed ? (
+                <Link
+                  href="/profile"
+                  aria-label="Личный кабинет"
+                  className="pointer-events-auto relative shrink-0"
+                >
+                  {avatarSlot}
+                  {showMessengerHint && (
+                    <span
+                      className="absolute -right-0.5 -top-0.5 size-3.5 rounded-full bg-[#E4374B] ring-2 ring-white"
+                      aria-label="Есть непрочитанное в личном кабинете"
+                    />
+                  )}
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="pointer-events-auto inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/50 bg-white/30 px-5 text-sm font-semibold text-white backdrop-blur-sm"
+                >
+                  <LogIn className="size-4" />
+                  Войти
+                </Link>
+              )}
+            </div>
           </div>
         </header>
 
