@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 /**
- * Пункт навигации админки — два вида разметки под один и тот же набор
- * данных (href/иконка/подпись/бейдж), чтобы список пунктов не приходилось
- * писать дважды для телефона и широкого экрана:
+ * Строка навигации админки — сайдбар на широком экране и узкий бар-иконки
+ * на телефоне (см. MobileAdminRail) используют один и тот же компонент:
+ * активный пункт — светлая подложка и бордовая полоска слева.
  *
- * - "pill" — таблетка в горизонтальном ряду (телефон, узкий экран).
- * - "sidebar" — строка на всю ширину тёмного сайдбара (широкий экран):
- *   активный пункт — светлая подложка и бордовая полоска слева.
+ * `collapsed` — только у бара-иконок: подпись остаётся в разметке (её видит
+ * читалка с экрана), но визуально скрыта, а бейдж переезжает точкой на
+ * иконку — иначе цифра бы просто обрубалась по ширине.
  */
 export function AdminNavLink({
   href,
@@ -19,54 +19,42 @@ export function AdminNavLink({
   children,
   badge,
   exact,
-  variant = "pill",
+  collapsed = false,
 }: {
   href: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   badge?: number;
   exact?: boolean;
-  variant?: "pill" | "sidebar";
+  collapsed?: boolean;
 }) {
   const pathname = usePathname();
   const active = exact ? pathname === href : pathname.startsWith(href);
-
-  if (variant === "sidebar") {
-    return (
-      <Link
-        href={href}
-        aria-current={active ? "page" : undefined}
-        className={cn(
-          "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white",
-          active &&
-            "-ml-[3px] border-l-[3px] border-[#B9384A] bg-white/[0.09] pl-2 font-semibold text-white",
-        )}
-      >
-        <span className="shrink-0 [&>svg]:size-[17px]">{icon}</span>
-        <span className="min-w-0 flex-1 truncate">{children}</span>
-        {badge !== undefined && badge > 0 && (
-          <span className="inline-flex h-[19px] min-w-[19px] shrink-0 items-center justify-center rounded-full bg-[#B9384A] px-1 text-[10.5px] font-bold text-white">
-            {badge}
-          </span>
-        )}
-      </Link>
-    );
-  }
+  const hasBadge = badge !== undefined && badge > 0;
 
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
+      title={collapsed ? String(children) : undefined}
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-        active
-          ? "border-primary bg-primary/10 text-primary"
-          : "bg-background hover:bg-muted",
+        "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white",
+        collapsed && "justify-center px-0",
+        active &&
+          (collapsed
+            ? "bg-white/[0.09] font-semibold text-white"
+            : "-ml-[3px] border-l-[3px] border-[#B9384A] bg-white/[0.09] pl-2 font-semibold text-white"),
       )}
     >
-      {icon}
-      {children}
-      {badge !== undefined && badge > 0 && (
-        <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white">
+      <span className="relative shrink-0 [&>svg]:size-[17px]">
+        {icon}
+        {collapsed && hasBadge && (
+          <span className="absolute -right-1 -top-1 size-2 rounded-full bg-[#B9384A] ring-2 ring-[#101A30]" />
+        )}
+      </span>
+      <span className={cn("min-w-0 flex-1 truncate", collapsed && "sr-only")}>{children}</span>
+      {!collapsed && hasBadge && (
+        <span className="inline-flex h-[19px] min-w-[19px] shrink-0 items-center justify-center rounded-full bg-[#B9384A] px-1 text-[10.5px] font-bold text-white">
           {badge}
         </span>
       )}
