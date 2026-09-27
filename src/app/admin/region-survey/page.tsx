@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Users } from "lucide-react";
 import { getCurrentStaff } from "@/lib/user-session";
 import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
+import { resolveRegion } from "@/lib/preview-region";
 import { countSurveyFillersByRegion, listSurveyFillersByRegion } from "@/lib/region-insights";
 import { AdminPageHeader } from "@/components/admin/page-header";
 
@@ -19,7 +20,7 @@ export default async function RegionSurveyPage() {
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
   if (scope !== "coordinator") redirect("/admin");
 
-  const region = staff.role === "coordinator" ? staff.region : null;
+  const region = await resolveRegion(staff, scope);
   const allUsers = await listSurveyFillersByRegion(region);
   // Без региона (просмотр «на себе» у владельца/техспеца) людей набирается
   // больше тысячи — у настоящего координатора их по одному региону в разы
@@ -37,8 +38,8 @@ export default async function RegionSurveyPage() {
         title="Анкеты региона"
         description={
           region
-            ? `Кто в «${region}» заполнил анкету подбора мер — ${total} человек.`
-            : `Координатор видит эту страницу по своему региону — например, «Пензенская область». У вас самих региона не закреплено, поэтому ниже все, кто заполнил анкету по всем регионам сразу — самые свежие ${users.length} из ${total}.`
+            ? `Кто в вашем регионе — «${region}» — заполнил анкету подбора мер: ${total} человек.`
+            : `Вы видите эту страницу по своему региону. Выберите регион справа сверху, чтобы посмотреть его вживую, — пока ниже все, кто заполнил анкету по всем регионам сразу: самые свежие ${users.length} из ${total}.`
         }
       />
 

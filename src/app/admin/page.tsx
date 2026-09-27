@@ -22,6 +22,7 @@ import { REGIONS } from "@/lib/measures";
 import { planFor } from "@/lib/verification";
 import { getCurrentStaff } from "@/lib/user-session";
 import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
+import { resolveRegion } from "@/lib/preview-region";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,7 @@ export default async function AdminHome() {
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
 
   if (scope === "coordinator") {
-    return <CoordinatorHome region={staff.role === "coordinator" ? staff.region : null} />;
+    return <CoordinatorHome region={await resolveRegion(staff, scope)} />;
   }
 
   const [measures, users, newInquiries] = await Promise.all([
@@ -255,8 +256,8 @@ async function CoordinatorHome({ region }: { region: string | null }) {
         title="Сводка"
         description={
           region
-            ? `Что происходит в «${region}»: обращения, анкеты, меры.`
-            : "Координатор видит эту сводку по своему региону — например, «Пензенская область». У вас самих региона не закреплено, поэтому ниже данные по всем регионам разом."
+            ? `Ваш регион — «${region}»: обращения, анкеты и меры ниже.`
+            : "Вы видите эту сводку по своему региону. Выберите регион справа сверху, чтобы посмотреть его вживую, — пока показаны данные по всем регионам разом."
         }
       />
 

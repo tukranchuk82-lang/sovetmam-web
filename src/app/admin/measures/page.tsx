@@ -4,6 +4,7 @@ import { listMeasuresIndexForAdmin } from "@/lib/measures-admin";
 import { CATEGORIES, REGIONS } from "@/lib/measures";
 import { getCurrentStaff } from "@/lib/user-session";
 import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
+import { resolveRegion } from "@/lib/preview-region";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { MeasuresList } from "@/components/admin/measures-list";
 import { buttonVariants } from "@/components/ui/button";
@@ -17,7 +18,7 @@ export default async function AdminMeasuresPage() {
   const staff = await getCurrentStaff();
   if (!staff) redirect("/login?next=/admin/measures");
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
-  const region = scope === "coordinator" ? staff.region : null;
+  const region = await resolveRegion(staff, scope);
 
   const all = await listMeasuresIndexForAdmin();
   // Координатор видит только меры своего региона — владелец/техспец,
@@ -35,7 +36,9 @@ export default async function AdminMeasuresPage() {
         title={scope === "coordinator" ? "Меры региона" : "Каталог мер"}
         description={
           scope === "coordinator"
-            ? "Меры вашего региона — опубликованные и черновики. Заводить новые и удалять нельзя, только править содержание."
+            ? region
+              ? `Меры вашего региона — «${region}»: опубликованные и черновики. Заводить новые и удалять нельзя, только править содержание.`
+              : "Выберите регион справа сверху, чтобы посмотреть его меры, — пока показаны все."
             : "Все меры поддержки: и опубликованные, и черновики. Нажмите на меру, чтобы отредактировать её или прикрепить материалы."
         }
         action={

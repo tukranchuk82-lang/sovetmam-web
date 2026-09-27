@@ -19,10 +19,12 @@ import { countNewBotHelpRequests } from "@/lib/bot-help";
 import { countOpenDisputes } from "@/lib/measure-disputes";
 import { getCurrentStaff } from "@/lib/user-session";
 import { ALLOWED_VIEW_MODES, effectiveAdminScope, getViewMode } from "@/lib/view-mode";
+import { resolveRegion } from "@/lib/preview-region";
 import { ROLE_LABELS } from "@/lib/onboarding-db";
 import { AdminNavLink } from "@/components/admin/nav-link";
 import { MobileAdminRail, type RailNavItem } from "@/components/admin/mobile-rail";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
+import { PreviewRegionPicker } from "@/components/admin/preview-region-picker";
 import { OrgName } from "@/components/org-name";
 
 export const metadata = {
@@ -49,10 +51,11 @@ export default async function AdminLayout({
 
   const mode = await getViewMode(staff.role);
   const scope = effectiveAdminScope(staff.role, mode);
-  // У владельца/техспеца, пробующих режим координатора «на себе», региона
-  // нет — тогда координаторский экран показывает данные по всем регионам
-  // разом, а не пустоту.
-  const region = scope === "coordinator" ? staff.region : null;
+  // У владельца/техспеца, пробующих режим координатора «на себе», своего
+  // региона нет — resolveRegion берёт тот, что выбран в PreviewRegionPicker
+  // (или ничего не выбрано — тогда данные по всем регионам разом).
+  const region = await resolveRegion(staff, scope);
+  const isPreviewingAsOwnerOrTech = scope === "coordinator" && staff.role !== "coordinator";
 
   const newInquiries = await countNewInquiries(scope === "coordinator" ? (region ?? undefined) : undefined);
   // Заявки на кабинет и спорные меры — общая, не региональная очередь.
@@ -154,7 +157,8 @@ export default async function AdminLayout({
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col pl-14 md:pl-0">
         {/* ── Тонкая шапка: только переключатель режима — название уже в
             сайдбаре/баре, заголовок раздела рисует сама страница ── */}
-        <div className="sticky top-0 z-10 flex items-center justify-end border-b bg-card/70 px-3 py-2.5 backdrop-blur md:px-6">
+        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-end gap-2 border-b bg-card/70 px-3 py-2.5 backdrop-blur md:px-6">
+          {isPreviewingAsOwnerOrTech && <PreviewRegionPicker region={region} />}
           <ViewModeSwitch mode={mode} available={ALLOWED_VIEW_MODES[staff.role]} userTo="/" />
         </div>
 

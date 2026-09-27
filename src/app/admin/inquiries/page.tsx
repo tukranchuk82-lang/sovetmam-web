@@ -14,6 +14,7 @@ import { listAllInquiries, listInquiryRegions } from "@/lib/inquiries-db";
 import { resendAllNewInquiriesAction } from "./actions";
 import { getCurrentStaff } from "@/lib/user-session";
 import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
+import { resolveRegion } from "@/lib/preview-region";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AdminPageHeader } from "@/components/admin/page-header";
@@ -48,9 +49,10 @@ export default async function AdminInquiriesPage({
 
   const { sent, region: requestedRegion } = await searchParams;
   // Координатор видит только свой регион — что бы ни было в адресной строке.
-  // У владельца/техспеца без региона (просматривают этот режим «на себе»)
-  // фильтра нет вовсе — весь список, как в обычном режиме.
-  const region = isCoordinator ? (staff.region ?? undefined) : requestedRegion;
+  // У владельца/техспеца регион — тот, что выбран в PreviewRegionPicker
+  // (см. lib/preview-region.ts); ничего не выбрано — весь список, как
+  // в обычном режиме.
+  const region = isCoordinator ? ((await resolveRegion(staff, scope)) ?? undefined) : requestedRegion;
   const [inquiries, regions] = await Promise.all([
     listAllInquiries(region),
     listInquiryRegions(),

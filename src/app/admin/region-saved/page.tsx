@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 import { getCurrentStaff } from "@/lib/user-session";
 import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
+import { resolveRegion } from "@/lib/preview-region";
 import { countSavedByRegion, listSavedByRegion } from "@/lib/region-insights";
 import { AdminPageHeader } from "@/components/admin/page-header";
 
@@ -19,7 +20,7 @@ export default async function RegionSavedPage() {
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
   if (scope !== "coordinator") redirect("/admin");
 
-  const region = staff.role === "coordinator" ? staff.region : null;
+  const region = await resolveRegion(staff, scope);
   const allRows = await listSavedByRegion(region);
   // Без региона (просмотр «на себе» у владельца/техспеца) строк набирается
   // под две тысячи — у настоящего координатора их по одному региону в разы
@@ -36,8 +37,8 @@ export default async function RegionSavedPage() {
         title="Избранное региона"
         description={
           region
-            ? `Какие меры сохраняют себе люди из «${region}» — не только региональные, любые.`
-            : `Координатор видит эту страницу по своему региону — например, «Пензенская область». У вас самих региона не закреплено, поэтому ниже избранное по всем регионам сразу — самые свежие ${rows.length} из ${total}.`
+            ? `Какие меры сохраняют себе люди из вашего региона — «${region}» — не только региональные, любые.`
+            : `Вы видите эту страницу по своему региону. Выберите регион справа сверху, чтобы посмотреть его вживую, — пока ниже избранное по всем регионам сразу: самые свежие ${rows.length} из ${total}.`
         }
       />
 
