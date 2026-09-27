@@ -3,7 +3,7 @@ import { createHash, randomInt } from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export type MessengerChannel = "telegram" | "vk" | "max";
-export type AppRole = "user" | "owner" | "tech";
+export type AppRole = "user" | "owner" | "tech" | "coordinator";
 
 export interface AppUser {
   id: string;
@@ -11,6 +11,8 @@ export interface AppUser {
   firstName: string;
   lastName: string;
   role: AppRole;
+  /** Регион координатора — только у role="coordinator". */
+  region: string | null;
   emailVerifiedAt: string | null;
   messengerConnected: boolean;
   messengerChoice: MessengerChannel | null;
@@ -30,15 +32,21 @@ export interface AppUser {
   messengerAvatarUrl: string | null;
 }
 
-/** Владелец и техспец имеют доступ к админ-панели. */
+/** Владелец и техспец — полный доступ к админ-панели, без ограничения по региону. */
 export function isAppAdmin(user: AppUser | null | undefined): boolean {
   return user?.role === "owner" || user?.role === "tech";
+}
+
+/** Владелец, техспец или координатор — у всех есть какой-то вход в /admin. */
+export function isStaff(user: AppUser | null | undefined): boolean {
+  return isAppAdmin(user) || user?.role === "coordinator";
 }
 
 export const ROLE_LABELS: Record<AppRole, string> = {
   user: "Пользователь",
   owner: "Владелец",
   tech: "Техспец",
+  coordinator: "Координатор",
 };
 
 export interface Utm {
@@ -63,6 +71,7 @@ type Row = {
   first_name: string;
   last_name: string;
   role: AppRole;
+  region: string | null;
   email_verified_at: string | null;
   messenger_connected: boolean;
   messenger_choice: MessengerChannel | null;
@@ -86,6 +95,7 @@ function fromRow(r: Row): AppUser {
     firstName: r.first_name,
     lastName: r.last_name,
     role: r.role,
+    region: r.region,
     emailVerifiedAt: r.email_verified_at,
     messengerConnected: r.messenger_connected,
     messengerChoice: r.messenger_choice,
@@ -104,7 +114,7 @@ function fromRow(r: Row): AppUser {
 }
 
 const SELECT =
-  "id, email, first_name, last_name, role, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, survey_updated_at, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+  "id, email, first_name, last_name, role, region, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, survey_updated_at, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
 
 /** Отметить, что человек уже открывал кабинет с напоминанием подключить
  * мессенджер, — кружочек на аватарке больше не должен показываться. */

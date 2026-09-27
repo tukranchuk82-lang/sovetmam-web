@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   LayoutGrid,
   Users,
@@ -8,6 +9,7 @@ import {
   ChevronRight,
   AlertTriangle,
   Gauge,
+  Heart,
 } from "lucide-react";
 import {
   listMeasuresIndexForAdmin,
@@ -15,8 +17,11 @@ import {
 } from "@/lib/measures-admin";
 import { listAppUsersForAdmin, computeUsersStats } from "@/lib/users-admin";
 import { countNewInquiries } from "@/lib/inquiries-db";
+import { countSurveyFillersByRegion, countMeasuresByRegion } from "@/lib/region-insights";
 import { REGIONS } from "@/lib/measures";
 import { planFor } from "@/lib/verification";
+import { getCurrentStaff } from "@/lib/user-session";
+import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -31,6 +36,14 @@ function isStale(iso: string | null): boolean {
 }
 
 export default async function AdminHome() {
+  const staff = await getCurrentStaff();
+  if (!staff) redirect("/login?next=/admin");
+  const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
+
+  if (scope === "coordinator") {
+    return <CoordinatorHome region={staff.role === "coordinator" ? staff.region : null} />;
+  }
+
   const [measures, users, newInquiries] = await Promise.all([
     listMeasuresIndexForAdmin(),
     listAppUsersForAdmin(),
@@ -226,5 +239,62 @@ function SectionLink({
       </span>
       <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
     </Link>
+  );
+}
+
+/** Сводка координатора — только его регион (или все регионы разом, если это владелец/техспец смотрят «на себе»). */
+async function CoordinatorHome({ region }: { region: string | null }) {
+  const [newInquiries, surveyCount, measuresCount] = await Promise.all([
+    countNewInquiries(region ?? undefined),
+    countSurveyFillersByRegion(region),
+    countMeasuresByRegion(region),
+  ]);
+
+  return (
+    <div className="px-4 py-5 md:px-6">
+      <AdminPageHeader
+        icon={<Gauge />}
+        title="Сводка"
+        description={
+          region
+            ? `Что происходит в «${region}»: обращения, анкеты, меры.`
+            : "Владелец и техспец смотрят этот режим без привязки к региону — данные по всем регионам разом."
+        }
+      />
+
+      <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <Stat label="Новых обращений" value={newInquiries} accent={newInquiries > 0} />
+        <Stat label="Заполнили анкету" value={surveyCount} />
+        <Stat label="Мер в регионе" value={measuresCount} />
+      </div>
+
+      <div className="mt-2 space-y-2">
+        <SectionLink
+          href="/admin/inquiries"
+          icon={<MessageSquare className="size-5" />}
+          title="Обращения"
+          hint={newInquiries > 0 ? `${newInquiries} новых — ждут ответа` : "Новых обращений нет"}
+          alert={newInquiries > 0}
+        />
+        <SectionLink
+          href="/admin/measures"
+          icon={<LayoutGrid className="size-5" />}
+          title="Меры региона"
+          hint={`${measuresCount} мер — можно поправить содержание`}
+        />
+        <SectionLink
+          href="/admin/region-survey"
+          icon={<Users className="size-5" />}
+          title="Анкеты региона"
+          hint={`${surveyCount} человек заполнили анкету`}
+        />
+        <SectionLink
+          href="/admin/region-saved"
+          icon={<Heart className="size-5" />}
+          title="Избранное региона"
+          hint="Какие меры сохраняют себе люди из региона"
+        />
+      </div>
+    </div>
   );
 }

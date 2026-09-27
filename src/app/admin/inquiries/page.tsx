@@ -9,8 +9,11 @@ import {
   Mail,
   Landmark,
 } from "lucide-react";
+import { redirect } from "next/navigation";
 import { listAllInquiries, listInquiryRegions } from "@/lib/inquiries-db";
 import { resendAllNewInquiriesAction } from "./actions";
+import { getCurrentStaff } from "@/lib/user-session";
+import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AdminPageHeader } from "@/components/admin/page-header";
@@ -38,7 +41,16 @@ export default async function AdminInquiriesPage({
 }: {
   searchParams: Promise<{ sent?: string; region?: string }>;
 }) {
-  const { sent, region } = await searchParams;
+  const staff = await getCurrentStaff();
+  if (!staff) redirect("/login?next=/admin/inquiries");
+  const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
+  const isCoordinator = scope === "coordinator";
+
+  const { sent, region: requestedRegion } = await searchParams;
+  // Координатор видит только свой регион — что бы ни было в адресной строке.
+  // У владельца/техспеца без региона (просматривают этот режим «на себе»)
+  // фильтра нет вовсе — весь список, как в обычном режиме.
+  const region = isCoordinator ? (staff.region ?? undefined) : requestedRegion;
   const [inquiries, regions] = await Promise.all([
     listAllInquiries(region),
     listInquiryRegions(),
@@ -83,7 +95,7 @@ export default async function AdminInquiriesPage({
         </form>
       )}
 
-      {regions.length > 0 && (
+      {!isCoordinator && regions.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           <Link
             href="/admin/inquiries"

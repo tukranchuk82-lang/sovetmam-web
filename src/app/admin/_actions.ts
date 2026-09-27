@@ -4,10 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   deleteMeasure as dbDeleteMeasure,
+  getMeasureForAdmin,
   insertMeasure,
   updateMeasure,
+  type MeasureAdminRow,
   type MeasureInput,
 } from "@/lib/measures-admin";
+import { getCurrentAdmin, getCurrentStaff } from "@/lib/user-session";
+import type { AppUser } from "@/lib/onboarding-db";
 
 function getString(fd: FormData, key: string): string {
   const v = fd.get(key);
@@ -102,7 +106,55 @@ function revalidate(slug: string) {
   revalidatePath("/segment/[id]", "page");
 }
 
+/**
+ * Координатор правит содержание меры своего региона, но не логику подбора и
+ * не её классификацию — иначе он мог бы (случайно или нет) перекинуть меру в
+ * другой регион или сломать критерии, от которых зависит вся выдача подбора.
+ * Поле формы для этих полей координатору вообще не показываем (см.
+ * MeasureForm mode="coordinator"), но это только удобство: здесь, на
+ * сервере, — настоящая граница. Что бы ни пришло в fd, технические поля
+ * берём из уже сохранённой меры, а не из запроса.
+ */
+function lockTechnicalFields(input: MeasureInput, original: MeasureAdminRow): MeasureInput {
+  return {
+    ...input,
+    slug: original.slug,
+    level: original.level,
+    region: original.region ?? null,
+    segments: original.segments,
+    criteria: original.criteria,
+    sortOrder: original.sortOrder,
+  };
+}
+
+/** Координатор — только если мера уже принадлежит его региону; иначе — полный админ. */
+async function authorizeMeasureEdit(originalSlug: string): Promise<{
+  admin: AppUser;
+  original: MeasureAdminRow;
+}> {
+  const staff = await getCurrentStaff();
+  if (!staff) redirect("/login?next=/admin/measures");
+
+  const original = await getMeasureForAdmin(originalSlug);
+  if (!original) throw new Error("Мера не найдена");
+
+  if (staff.role === "coordinator") {
+    if (!staff.region || original.region !== staff.region) {
+      throw new Error("Эта мера не в вашем регионе — правка недоступна");
+    }
+  } else if (staff.role !== "owner" && staff.role !== "tech") {
+    redirect("/login?next=/admin/measures");
+  }
+
+  return { admin: staff, original };
+}
+
 export async function createMeasureAction(fd: FormData) {
+  // Создавать новые меры может только полный админ — координатор правит то,
+  // что уже есть в его регионе, но не заводит новое.
+  const admin = await getCurrentAdmin();
+  if (!admin) redirect("/login?next=/admin/measures");
+
   const input = buildInput(fd);
   if (!input.slug || !input.title) {
     throw new Error("Заполните хотя бы slug и название");
@@ -113,7 +165,10 @@ export async function createMeasureAction(fd: FormData) {
 }
 
 export async function updateMeasureAction(originalSlug: string, fd: FormData) {
-  const input = buildInput(fd);
+  const { admin, original } = await authorizeMeasureEdit(originalSlug);
+
+  let input = buildInput(fd);
+  if (admin.role === "coordinator") input = lockTechnicalFields(input, original);
   if (!input.slug || !input.title) {
     throw new Error("Заполните хотя бы slug и название");
   }
@@ -124,6 +179,10 @@ export async function updateMeasureAction(originalSlug: string, fd: FormData) {
 }
 
 export async function deleteMeasureAction(slug: string) {
+  // Удалять меры может только полный админ.
+  const admin = await getCurrentAdmin();
+  if (!admin) redirect("/login?next=/admin/measures");
+
   await dbDeleteMeasure(slug);
   revalidate(slug);
   redirect("/admin/measures");

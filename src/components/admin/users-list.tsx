@@ -29,6 +29,7 @@ const ROLE_LABELS: Record<AppRole, string> = {
   user: "Пользователь",
   owner: "Владелец",
   tech: "Техспец",
+  coordinator: "Координатор",
 };
 
 const CHANNEL_COLORS: Record<MessengerChannel, string> = {

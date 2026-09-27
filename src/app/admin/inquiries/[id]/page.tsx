@@ -1,11 +1,12 @@
 import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { CheckCircle2, Clock, ExternalLink, Landmark, Send } from "lucide-react";
 import { getInquiry } from "@/lib/inquiries-db";
 import { getThread, markThreadRead } from "@/lib/inquiry-thread";
 import { getMeasureBySlug } from "@/lib/measures-db";
 import { replyInquiryAction } from "@/app/admin/inquiries/actions";
+import { getCurrentStaff } from "@/lib/user-session";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -31,8 +32,12 @@ export default async function AdminInquiryDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const staff = await getCurrentStaff();
+  if (!staff) redirect(`/login?next=/admin/inquiries/${id}`);
+
   const inquiry = await getInquiry(id);
   if (!inquiry) notFound();
+  if (staff.role === "coordinator" && inquiry.region !== staff.region) notFound();
 
   // Открыли обращение — сообщения человека считаем прочитанными.
   const messages = await getThread(inquiry.id);

@@ -23,13 +23,13 @@ import {
   ROLE_LABELS,
 } from "@/lib/demo-auth";
 import { getCurrentAppUser } from "@/lib/user-session";
-import { getViewMode } from "@/lib/view-mode";
+import { ALLOWED_VIEW_MODES, getViewMode } from "@/lib/view-mode";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
 import { logoutDemoUser } from "@/app/(app)/login/actions";
 import { logout } from "@/app/(app)/login/onboarding-actions";
 import { LegalLinks } from "@/components/legal-links";
 import {
-  isAppAdmin,
+  isStaff,
   markMessengerHintSeen,
   ROLE_LABELS as APP_ROLE_LABELS,
   type AppUser,
@@ -236,12 +236,12 @@ export default async function ProfilePage() {
 // Личный кабинет обычного (email) пользователя.
 async function AppUserProfile({ user }: { user: AppUser }) {
   const fullName = `${user.firstName} ${user.lastName}`.trim();
-  const isAdmin = isAppAdmin(user);
-  // Режим просмотра переключает сам админ. В режиме «пользователь» кабинет
-  // выглядит ровно так же, как у обычной мамы, — чтобы можно было проверить
-  // приложение её глазами, не заводя второй аккаунт.
-  const mode = isAdmin ? await getViewMode() : "user";
-  const asUser = !isAdmin || mode === "user";
+  const staff = isStaff(user);
+  // Режим просмотра переключает сам сотрудник. В режиме «пользователь»
+  // кабинет выглядит ровно так же, как у обычной мамы, — чтобы можно было
+  // проверить приложение её глазами, не заводя второй аккаунт.
+  const mode = staff ? await getViewMode(user.role) : "user";
+  const asUser = !staff || mode === "user";
   const initial = {
     telegram: user.telegramId != null,
     vk: user.vkId != null,
@@ -270,10 +270,10 @@ async function AppUserProfile({ user }: { user: AppUser }) {
         </div>
       </div>
 
-      {/* Переключатель режима — только у владельца и техспеца */}
-      {isAdmin && (
+      {/* Переключатель режима — владельцу, техспецу и координатору */}
+      {staff && (
         <div className="mt-4">
-          <ViewModeSwitch mode={mode} />
+          <ViewModeSwitch mode={mode} available={ALLOWED_VIEW_MODES[user.role]} />
           <p className="mt-1.5 text-xs text-muted-foreground">
             {mode === "user"
               ? "Вы смотрите приложение глазами обычного пользователя."
@@ -409,51 +409,97 @@ async function AppUserProfile({ user }: { user: AppUser }) {
         </section>
       )}
 
-      {isAdmin && mode === "admin" && (
+      {staff && mode !== "user" && (
         <section className="mt-7">
           <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
             Панель управления
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Доступно вам как {APP_ROLE_LABELS[user.role].toLowerCase()}
+            {mode !== user.role && ` (сейчас смотрите как ${APP_ROLE_LABELS[mode as "owner" | "tech" | "coordinator"].toLowerCase()})`}
           </p>
           <div className="mt-3 space-y-2">
-            <AdminLink
-              href="/admin"
-              icon={<Gauge className="size-5" />}
-              title="Сводка"
-              hint="Что в базе, кто пришёл, что сделать сегодня"
-            />
-            <AdminLink
-              href="/admin/measures"
-              icon={<LayoutGrid className="size-5" />}
-              title="Каталог мер"
-              hint="Добавлять и править меры"
-            />
-            <AdminLink
-              href="/admin/users"
-              icon={<Users className="size-5" />}
-              title="Пользователи"
-              hint="База зарегистрированных, выгрузка в CSV"
-            />
-            <AdminLink
-              href="/admin/inquiries"
-              icon={<MessageSquare className="size-5" />}
-              title="Обращения"
-              hint="Отвечать пользователям"
-            />
-            <AdminLink
-              href="/admin/verification"
-              icon={<CalendarCheck className="size-5" />}
-              title="Сверка"
-              hint="Порция мер на сегодня"
-            />
-            <AdminLink
-              href="/admin/knowledge"
-              icon={<FolderInput className="size-5" />}
-              title="База знаний"
-              hint="Загружать материалы для AI"
-            />
+            {mode === "coordinator" ? (
+              <>
+                <AdminLink
+                  href="/admin"
+                  icon={<Gauge className="size-5" />}
+                  title="Сводка по региону"
+                  hint="Обращения, анкеты, избранное — в одном месте"
+                />
+                <AdminLink
+                  href="/admin/inquiries"
+                  icon={<MessageSquare className="size-5" />}
+                  title="Обращения"
+                  hint="Только по вашему региону"
+                />
+                <AdminLink
+                  href="/admin/measures"
+                  icon={<LayoutGrid className="size-5" />}
+                  title="Меры региона"
+                  hint="Править существующие меры"
+                />
+                <AdminLink
+                  href="/admin/region-survey"
+                  icon={<Users className="size-5" />}
+                  title="Анкеты региона"
+                  hint="Кто заполнил анкету"
+                />
+                <AdminLink
+                  href="/admin/region-saved"
+                  icon={<LayoutGrid className="size-5" />}
+                  title="Избранное региона"
+                  hint="Какие меры сохраняют"
+                />
+              </>
+            ) : (
+              <>
+                <AdminLink
+                  href="/admin"
+                  icon={<Gauge className="size-5" />}
+                  title="Сводка"
+                  hint="Что в базе, кто пришёл, что сделать сегодня"
+                />
+                <AdminLink
+                  href="/admin/measures"
+                  icon={<LayoutGrid className="size-5" />}
+                  title="Каталог мер"
+                  hint="Добавлять и править меры"
+                />
+                <AdminLink
+                  href="/admin/users"
+                  icon={<Users className="size-5" />}
+                  title="Пользователи"
+                  hint="База зарегистрированных, выгрузка в CSV"
+                />
+                <AdminLink
+                  href="/admin/inquiries"
+                  icon={<MessageSquare className="size-5" />}
+                  title="Обращения"
+                  hint="Отвечать пользователям"
+                />
+                <AdminLink
+                  href="/admin/verification"
+                  icon={<CalendarCheck className="size-5" />}
+                  title="Сверка"
+                  hint="Порция мер на сегодня"
+                />
+                <AdminLink
+                  href="/admin/knowledge"
+                  icon={<FolderInput className="size-5" />}
+                  title="База знаний"
+                  hint="Загружать материалы для AI"
+                />
+                {mode === "tech" && (
+                  <AdminLink
+                    href="/admin/staff"
+                    icon={<Users className="size-5" />}
+                    title="Доступ и роли"
+                    hint="Координаторы, техспецы, передача прав владельца"
+                  />
+                )}
+              </>
+            )}
           </div>
         </section>
       )}

@@ -1,10 +1,20 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { MeasureForm } from "@/components/admin/measure-form";
 import { createMeasureAction } from "@/app/admin/_actions";
+import { getCurrentAdmin } from "@/lib/user-session";
+import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 
 export const metadata = { title: "Новая мера" };
+export const dynamic = "force-dynamic";
 
-export default function NewMeasurePage() {
+export default async function NewMeasurePage() {
+  // Заводить новые меры может только полный админ — координатор здесь
+  // делать нечего, редиректим к списку (уже своего региона).
+  const admin = await getCurrentAdmin();
+  if (!admin) redirect("/login?next=/admin/measures");
+  const scope = effectiveAdminScope(admin.role, await getViewMode(admin.role));
+
   return (
     <div className="px-4 py-5 md:px-6">
       <Link
@@ -25,6 +35,7 @@ export default function NewMeasurePage() {
           initial={null}
           action={createMeasureAction}
           submitLabel="Создать меру"
+          mode={scope === "tech" ? "tech" : "owner"}
         />
       </div>
     </div>
