@@ -95,7 +95,7 @@ export default async function AdminHome() {
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-brand"
+            className="h-full rounded-full bg-primary"
             style={{
               width: `${Math.round((stats.regionsCovered / REGIONS.length) * 100)}%`,
             }}
@@ -127,7 +127,7 @@ export default async function AdminHome() {
         </p>
         <Link
           href="/admin/verification"
-          className="mt-2.5 inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline"
+          className="mt-2.5 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
         >
           Перейти к сверке <ChevronRight className="size-3.5" />
         </Link>
@@ -189,16 +189,14 @@ function Stat({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border bg-card px-3 py-2.5">
+    <div className="rounded-2xl border bg-card px-3.5 py-3">
       <p
-        className={cn(
-          "text-2xl font-extrabold leading-none",
-          accent && "text-brand",
-        )}
+        className={cn("text-[26px] font-bold leading-none", accent && "text-primary")}
+        style={{ fontFamily: "var(--font-playfair), serif" }}
       >
         {value}
       </p>
-      <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
+      <p className="mt-1.5 text-[11px] leading-tight text-muted-foreground">
         {label}
       </p>
     </div>
@@ -226,7 +224,7 @@ function SectionLink({
       <span
         className={cn(
           "grid size-10 shrink-0 place-items-center rounded-xl",
-          alert ? "bg-amber-100 text-amber-700" : "bg-muted text-brand",
+          alert ? "bg-amber-100 text-amber-700" : "bg-muted text-primary",
         )}
       >
         {icon}

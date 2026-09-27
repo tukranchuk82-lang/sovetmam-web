@@ -46,7 +46,7 @@ export default async function RegionSavedPage() {
               <Link
                 href={`/catalog/${r.measureSlug}`}
                 target="_blank"
-                className="min-w-0 truncate font-semibold leading-snug text-brand hover:underline"
+                className="min-w-0 truncate font-semibold leading-snug text-primary hover:underline"
               >
                 {r.measureTitle ?? r.measureSlug}
               </Link>

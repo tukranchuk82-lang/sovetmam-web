@@ -194,7 +194,7 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
         >
           {pending ? (
             <Loader2 className="size-3.5 animate-spin" />

@@ -58,7 +58,7 @@ function DisputeCard({ dispute }: { dispute: MeasureDispute }) {
           {dispute.measureSlug ? (
             <Link
               href={`/admin/measures/${dispute.measureSlug}`}
-              className="font-semibold leading-snug hover:text-brand hover:underline"
+              className="font-semibold leading-snug hover:text-primary hover:underline"
             >
               {dispute.measureTitle ?? dispute.title}
             </Link>

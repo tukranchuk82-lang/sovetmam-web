@@ -60,7 +60,7 @@ function Stat({
       <p
         className={
           accent
-            ? "text-2xl font-extrabold leading-none text-brand"
+            ? "text-2xl font-extrabold leading-none text-primary"
             : "text-2xl font-extrabold leading-none"
         }
       >
