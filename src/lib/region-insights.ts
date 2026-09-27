@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { fetchAllPages } from "@/lib/supabase/paged";
 
 // Региональные срезы для координатора: кто в его регионе заполнил анкету и
 // какие меры сохраняют в избранное. Регион человека — это survey->>region
@@ -71,38 +72,114 @@ export interface RegionSavedMeasure {
   savedAt: string;
 }
 
+/**
+ * `.in("col", ids)` кладёт все id прямо в URL запроса — у координатора
+ * пользователей из региона обычно горстка, это безопасно. А вот когда
+ * владелец/техспец смотрят этот экран «на себе» (без региона — region=null,
+ * см. listSavedByRegion), пользователей с анкетой набирается больше тысячи,
+ * и один такой запрос падает с «URI too long». Режем список на пачки и
+ * собираем результат — так работает при любом количестве id.
+ */
+async function selectInChunks<T>(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  table: string,
+  select: string,
+  column: string,
+  ids: string[],
+  chunkSize = 150,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const chunk = ids.slice(i, i + chunkSize);
+    const { data, error } = await supabase.from(table).select(select).in(column, chunk);
+    if (error) throw error;
+    out.push(...((data ?? []) as T[]));
+  }
+  return out;
+}
+
+/** Точное общее число (не урезанное лимитом PostgREST в 1000 строк на запрос) — для подписи «всего N» в предпросмотре без региона. */
+async function countInChunks(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  table: string,
+  column: string,
+  ids: string[],
+  chunkSize = 150,
+): Promise<number> {
+  let total = 0;
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const chunk = ids.slice(i, i + chunkSize);
+    const { count, error } = await supabase
+      .from(table)
+      .select("*", { count: "exact", head: true })
+      .in(column, chunk);
+    if (error) throw error;
+    total += count ?? 0;
+  }
+  return total;
+}
+
+/**
+ * Все пользователи с анкетой (нужного региона, если он задан) — постранично.
+ * PostgREST сам режет любой SELECT на 1000 строк за раз, а без региона (когда
+ * владелец/техспец смотрят координаторский экран «на себе») анкет заполнено
+ * больше тысячи — обычный запрос без .range() тихо терял бы «лишних».
+ */
+async function fetchSurveyedUsers<T extends { id: string }>(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  region: string | null,
+  select: string,
+): Promise<T[]> {
+  return fetchAllPages<T>((from, to) => {
+    let q = supabase.from("app_users").select(select).not("survey", "is", null).range(from, to);
+    if (region) q = q.eq("survey->>region", region);
+    return q as unknown as PromiseLike<{ data: T[] | null; error: { message: string } | null }>;
+  });
+}
+
+export async function countSavedByRegion(region: string | null): Promise<number> {
+  const supabase = createSupabaseAdminClient();
+  const users = await fetchSurveyedUsers<{ id: string }>(supabase, region, "id");
+  if (users.length === 0) return 0;
+  return countInChunks(supabase, "saved_measures", "user_id", users.map((u) => u.id));
+}
+
 export async function listSavedByRegion(region: string | null): Promise<RegionSavedMeasure[]> {
   const supabase = createSupabaseAdminClient();
 
   // Сначала — кто из региона вообще сохранял меры (без этого пришлось бы
   // тянуть saved_measures целиком и фильтровать в памяти на тысячах строк).
-  let usersQuery = supabase
-    .from("app_users")
-    .select("id, email, first_name, last_name, survey")
-    .not("survey", "is", null);
-  if (region) usersQuery = usersQuery.eq("survey->>region", region);
-  const { data: users, error: usersError } = await usersQuery;
-  if (usersError) throw usersError;
-  if (!users || users.length === 0) return [];
+  const users = await fetchSurveyedUsers<{
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    survey: Record<string, unknown> | null;
+  }>(supabase, region, "id, email, first_name, last_name, survey");
+  if (users.length === 0) return [];
 
-  const byId = new Map(users.map((u) => [u.id as string, u]));
+  const byId = new Map(users.map((u) => [u.id, u]));
 
-  const { data: saved, error: savedError } = await supabase
-    .from("saved_measures")
-    .select("user_id, measure_slug, created_at")
-    .in("user_id", [...byId.keys()])
-    .order("created_at", { ascending: false })
-    .limit(5000);
-  if (savedError) throw savedError;
-  if (!saved || saved.length === 0) return [];
+  const saved = await selectInChunks<{ user_id: string; measure_slug: string; created_at: string }>(
+    supabase,
+    "saved_measures",
+    "user_id, measure_slug, created_at",
+    "user_id",
+    [...byId.keys()],
+  );
+  saved.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  if (saved.length === 0) return [];
+  if (saved.length > 5000) saved.length = 5000;
 
-  const slugs = [...new Set(saved.map((s) => s.measure_slug as string))];
-  const { data: measures, error: measuresError } = await supabase
-    .from("measures")
-    .select("slug, title")
-    .in("slug", slugs);
-  if (measuresError) throw measuresError;
-  const titleBySlug = new Map((measures ?? []).map((m) => [m.slug as string, m.title as string]));
+  const slugs = [...new Set(saved.map((s) => s.measure_slug))];
+  const measures = await selectInChunks<{ slug: string; title: string }>(
+    supabase,
+    "measures",
+    "slug, title",
+    "slug",
+    slugs,
+  );
+  const titleBySlug = new Map(measures.map((m) => [m.slug, m.title]));
 
   return saved.map((s) => {
     const u = byId.get(s.user_id as string);
