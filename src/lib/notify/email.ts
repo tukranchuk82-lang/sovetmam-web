@@ -471,3 +471,67 @@ export async function sendInquiryAnswerEmail(
     html,
   });
 }
+
+// ── Письма по внутреннему чату с координатором ─────────────────────────────
+
+/** Письмо пользователю: координатор ответил в чате. */
+export async function sendCoordinatorChatReplyEmail(
+  to: string,
+  data: { region: string; preview: string },
+  chatLink: string,
+): Promise<void> {
+  const transport = getTransport();
+
+  if (!transport) {
+    console.log(`[Чат с координатором][stub] ${to}: «${data.preview}» — ${chatLink}`);
+    return;
+  }
+
+  const html = shell(`
+    <p style="font-size:13px;color:#6b7078;margin:0 0 4px">Новое сообщение от координатора региона «${esc(data.region)}»</p>
+    <div style="background:#F3F1EC;border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.55;white-space:pre-wrap">${esc(data.preview)}</div>
+
+    <p style="margin:22px 0 8px">${button(chatLink, "Открыть чат")}</p>
+    <p style="font-size:12px;color:#9aa0a8;margin:0">Переписка целиком — в вашем личном кабинете.</p>
+  `);
+
+  await transport.sendMail({
+    from: fromAddress(),
+    to,
+    subject: `Координатор ответил вам в чате`,
+    text: `Координатор региона «${data.region}» ответил вам:\n\n${data.preview}\n\nОткрыть чат: ${chatLink}`,
+    html,
+  });
+}
+
+/** Письмо координатору: пользователь написал новое сообщение в чате. */
+export async function sendCoordinatorChatNewMessageEmail(
+  to: string,
+  data: { region: string; userName: string; preview: string },
+  chatLink: string,
+): Promise<void> {
+  const transport = getTransport();
+
+  if (!transport) {
+    console.log(
+      `[Чат с координатором][stub→координатор] ${to}: от ${data.userName} — «${data.preview}» — ${chatLink}`,
+    );
+    return;
+  }
+
+  const html = shell(`
+    <p style="font-size:13px;color:#6b7078;margin:0 0 4px">Новое сообщение в чате — регион «${esc(data.region)}»</p>
+    <p style="font-size:14px;line-height:1.55;margin:0 0 14px"><b>${esc(data.userName)}</b> написал(а) вам:</p>
+    <div style="background:#F3F1EC;border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.55;white-space:pre-wrap">${esc(data.preview)}</div>
+
+    <p style="margin:22px 0 8px">${button(chatLink, "Ответить")}</p>
+  `);
+
+  await transport.sendMail({
+    from: fromAddress(),
+    to,
+    subject: `${data.userName}: новое сообщение в чате`,
+    text: `${data.userName} написал(а) вам в чате (регион «${data.region}»):\n\n${data.preview}\n\nОтветить: ${chatLink}`,
+    html,
+  });
+}

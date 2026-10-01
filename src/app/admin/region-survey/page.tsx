@@ -6,7 +6,7 @@ import { resolveRegion } from "@/lib/preview-region";
 import { countSurveyFillersByRegion, listSurveyFillersByRegion } from "@/lib/region-insights";
 import { AdminPageHeader } from "@/components/admin/page-header";
 
-export const metadata = { title: "Анкеты региона" };
+export const metadata = { title: "Пользователи региона" };
 export const dynamic = "force-dynamic";
 
 function formatDate(iso: string | null): string {
@@ -35,7 +35,7 @@ export default async function RegionSurveyPage() {
     <div className="px-4 py-5 md:px-6">
       <AdminPageHeader
         icon={<Users />}
-        title="Анкеты региона"
+        title="Пользователи региона"
         description={
           region
             ? `Кто в вашем регионе — «${region}» — заполнил анкету подбора мер: ${total} человек.`

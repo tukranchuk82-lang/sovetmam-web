@@ -42,16 +42,24 @@ export default async function NewInquiryPage({
       : "";
 
   return (
-    <div className="px-4 py-5">
-      <h1 className="mt-3 text-xl font-extrabold tracking-tight">
+    // Тот же приём, что в чате с координатором: тёмный фон страницы выносит
+    // светлую панель формы на первый план — сразу видно, где заполнять.
+    <div
+      className="min-h-[75vh] px-4 py-5"
+      style={{ background: "linear-gradient(180deg, #16233F 0%, #101A30 100%)" }}
+    >
+      <h1 className="mt-3 text-xl font-extrabold tracking-tight text-white">
         Новое обращение
       </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <p className="mt-1 text-sm text-white/60">
         Опишите вопрос или предложение. Ответ придёт в личный кабинет
         {user.messengerConnected ? " и в подключённый мессенджер" : ""}.
       </p>
 
-      <div className="mt-5">
+      {/* Панель заметно темнее полей формы — иначе подписи «Регион», «Кратко о
+          вашей ситуации» и сами белые поля ввода сливаются в одно бледное
+          пятно и непонятно, где именно нужно писать. */}
+      <div className="mt-4 rounded-3xl bg-[#DDD9CD] p-4 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.45)]">
         <NewInquiryForm
           action={createInquiryAction}
           initialType={initialType}

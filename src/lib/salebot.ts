@@ -36,6 +36,31 @@ export function buildSalebotProxyLink(
 }
 
 /**
+ * Фото профиля из мессенджера — по client_id Salebot.
+ *
+ * Ссылку на фото воронка нам не присылает (её вебхук про факт подключения, не
+ * про аватарку), а сам Salebot её уже знает и хранит на своём CDN
+ * (files.salebot.pro) — забираем оттуда через get_variables. Без API-ключа
+ * или если Salebot ничего не вернул — молча null, это не повод ронять
+ * подключение мессенджера.
+ */
+export async function fetchSalebotAvatar(clientId: string): Promise<string | null> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await fetch(
+      `https://chatter.salebot.pro/api/${key}/get_variables?client_id=${encodeURIComponent(clientId)}`,
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as Record<string, unknown>;
+    const avatar = typeof data.avatar === "string" ? data.avatar.trim() : "";
+    return /^https?:\/\//i.test(avatar) ? avatar : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Уведомление в мессенджер через Salebot.
  *
  * Мы не составляем текст сообщения — его собирает воронка на стороне Salebot.
@@ -68,6 +93,38 @@ export async function notifySalebotAnswer(params: {
         // и #{inquiry_link}.
         inquiry_subject: params.subject,
         inquiry_link: params.link,
+      }),
+    });
+    const text = await res.text();
+    return { ok: res.ok, detail: `${res.status} ${text.slice(0, 300)}` };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/**
+ * Ответ координатора в внутреннем чате — уведомление в мессенджер.
+ *
+ * Тот же приём, что и notifySalebotAnswer: своё кодовое слово, воронка
+ * Salebot сама собирает текст и подставляет ссылку на чат.
+ */
+export async function notifyCoordinatorChatReply(params: {
+  clientId: string;
+  link: string;
+}): Promise<{ ok: boolean; detail: string }> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return { ok: false, detail: "SALEBOT_API_KEY не задан" };
+
+  const trigger = process.env.SALEBOT_COORDINATOR_CHAT_TRIGGER ?? "coordinator_chat_reply";
+
+  try {
+    const res = await fetch(`https://chatter.salebot.pro/api/${key}/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: params.clientId,
+        message: trigger,
+        coordinator_chat_link: params.link,
       }),
     });
     const text = await res.text();

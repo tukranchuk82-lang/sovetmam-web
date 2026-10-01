@@ -1,41 +1,15 @@
-import { INQUIRY_TYPE_LABEL } from "@/lib/inquiries";
-import Link from "next/link";
-import {
-  Clock,
-  CheckCircle2,
-  ChevronRight,
-  MapPin,
-  MessageSquare,
-  Mail,
-  Landmark,
-} from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react";
 import { redirect } from "next/navigation";
 import { listAllInquiries, listInquiryRegions } from "@/lib/inquiries-db";
 import { resendAllNewInquiriesAction } from "./actions";
 import { getCurrentStaff } from "@/lib/user-session";
 import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 import { resolveRegion } from "@/lib/preview-region";
-import { Avatar } from "@/components/avatar";
-import { Badge } from "@/components/ui/badge";
-import { AdminPageHeader } from "@/components/admin/page-header";
-import { cn } from "@/lib/utils";
+import { AdminPage } from "@/components/admin/ui/admin-page";
+import { InquiriesTable } from "@/components/admin/inquiries-table";
 
 export const metadata = { title: "Обращения" };
 export const dynamic = "force-dynamic";
-
-const CHANNEL_LABELS = {
-  telegram: "TG",
-  vk: "VK",
-  max: "MAX",
-} as const;
-
-const CHANNEL_COLORS = {
-  telegram: "#229ED9",
-  vk: "#0077FF",
-  max: "#7C3AED",
-} as const;
-
-const DEFAULT_AVATAR_COLOR = "#1B3A6B";
 
 export default async function AdminInquiriesPage({
   searchParams,
@@ -47,12 +21,11 @@ export default async function AdminInquiriesPage({
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
   const isCoordinator = scope === "coordinator";
 
-  const { sent, region: requestedRegion } = await searchParams;
+  const { sent } = await searchParams;
   // Координатор видит только свой регион — что бы ни было в адресной строке.
   // У владельца/техспеца регион — тот, что выбран в PreviewRegionPicker
-  // (см. lib/preview-region.ts); ничего не выбрано — весь список, как
-  // в обычном режиме.
-  const region = isCoordinator ? ((await resolveRegion(staff, scope)) ?? undefined) : requestedRegion;
+  // (см. lib/preview-region.ts); ничего не выбрано — весь список.
+  const region = isCoordinator ? ((await resolveRegion(staff, scope)) ?? undefined) : undefined;
   const [inquiries, regions] = await Promise.all([
     listAllInquiries(region),
     listInquiryRegions(),
@@ -60,146 +33,30 @@ export default async function AdminInquiriesPage({
   const newCount = inquiries.filter((i) => i.status === "new").length;
 
   return (
-    <div className="px-4 py-5 md:px-6">
-      <AdminPageHeader
-        icon={<MessageSquare />}
-        title="Обращения"
-        description={
-          <>
-            Всего: {inquiries.length}
-            {newCount > 0 && (
-              <>
-                {" · "}
-                <span className="font-semibold text-amber-600">
-                  новых: {newCount}
-                </span>
-              </>
-            )}
-          </>
-        }
-      />
-
+    <AdminPage
+      icon={<MessageSquare />}
+      title="Обращения"
+      description="Вопросы, идеи и уточнения от пользователей. Откройте обращение, чтобы ответить."
+      actions={
+        newCount > 0 ? (
+          <form action={resendAllNewInquiriesAction}>
+            <button
+              type="submit"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border bg-card px-3 text-[13px] font-medium shadow-[0_1px_2px_rgba(32,36,44,0.04)] transition-colors hover:bg-muted"
+            >
+              <Mail className="size-3.5" />
+              Отправить письмом новые ({newCount})
+            </button>
+          </form>
+        ) : undefined
+      }
+    >
       {sent && (
-        <p className="mt-3 rounded-xl border border-emerald-300/60 bg-emerald-50/60 px-3 py-2 text-xs text-emerald-800">
+        <p className="mb-3 rounded-lg border border-emerald-300/60 bg-emerald-50/70 px-3 py-2 text-[13px] text-emerald-800">
           Письма поставлены в отправку: {sent}. Дойдут в течение минуты.
         </p>
       )}
-
-      {newCount > 0 && (
-        <form action={resendAllNewInquiriesAction} className="mt-3">
-          <button
-            type="submit"
-            className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs font-medium hover:bg-muted"
-          >
-            <Mail className="size-3.5" />
-            Отправить письмом все новые ({newCount})
-          </button>
-        </form>
-      )}
-
-      {!isCoordinator && regions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          <Link
-            href="/admin/inquiries"
-            className={cn(
-              "rounded-full border px-2.5 py-1 text-xs font-medium",
-              !region ? "border-primary bg-primary/10 text-primary" : "bg-background hover:bg-muted",
-            )}
-          >
-            Все регионы
-          </Link>
-          {regions.map((r) => (
-            <Link
-              key={r}
-              href={`/admin/inquiries?region=${encodeURIComponent(r)}`}
-              className={cn(
-                "rounded-full border px-2.5 py-1 text-xs font-medium",
-                region === r ? "border-primary bg-primary/10 text-primary" : "bg-background hover:bg-muted",
-              )}
-            >
-              {r}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {inquiries.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed bg-muted/40 px-4 py-10 text-center">
-          <p className="text-sm font-medium">Пока обращений нет</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Когда пользователь оставит вопрос или предложение — он появится
-            здесь
-          </p>
-        </div>
-      ) : (
-        <div className="mt-5 space-y-2">
-          {inquiries.map((inq) => (
-            <Link
-              key={inq.id}
-              href={`/admin/inquiries/${inq.id}`}
-              className="block rounded-2xl border bg-card p-3 transition-colors hover:border-primary/50"
-            >
-              <div className="flex items-start gap-3">
-                <Avatar
-                  name={inq.userName}
-                  color={
-                    inq.userChannel
-                      ? CHANNEL_COLORS[inq.userChannel]
-                      : DEFAULT_AVATAR_COLOR
-                  }
-                  size={36}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {inq.status === "new" ? (
-                      <Badge
-                        variant="outline"
-                        className="gap-1 text-amber-600"
-                      >
-                        <Clock className="size-3" /> новое
-                      </Badge>
-                    ) : (
-                      <Badge className="gap-1 bg-emerald-600 hover:bg-emerald-600">
-                        <CheckCircle2 className="size-3" /> отвечено
-                      </Badge>
-                    )}
-                    <Badge variant="secondary" className="text-[10px]">
-                      {INQUIRY_TYPE_LABEL[inq.type]}
-                    </Badge>
-                    {inq.region && (
-                      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground">
-                        <MapPin className="size-3" />
-                        {inq.region}
-                      </span>
-                    )}
-                    {inq.userChannel && (
-                      <span
-                        className="text-[10px] font-semibold"
-                        style={{ color: CHANNEL_COLORS[inq.userChannel] }}
-                      >
-                        {CHANNEL_LABELS[inq.userChannel]}
-                      </span>
-                    )}
-                    {inq.representativeName && (
-                      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary">
-                        <Landmark className="size-3" />
-                        {inq.representativeName}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1.5 font-semibold leading-snug">
-                    {inq.subject}
-                  </p>
-                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-                    {inq.userName} · {inq.body}
-                  </p>
-                </div>
-                <ChevronRight className="mt-1 size-4 shrink-0 text-muted-foreground" />
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+      <InquiriesTable inquiries={inquiries} regions={regions} showRegionFilter={!isCoordinator} />
+    </AdminPage>
   );
 }

@@ -15,6 +15,7 @@ import {
   Gauge,
   LayoutGrid,
   Users,
+  MessageCircle,
 } from "lucide-react";
 import {
   CHANNEL_COLORS,
@@ -31,16 +32,23 @@ import { LegalLinks } from "@/components/legal-links";
 import {
   isStaff,
   markMessengerHintSeen,
+  channelConnected,
   ROLE_LABELS as APP_ROLE_LABELS,
   type AppUser,
+  type MessengerChannel,
 } from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
 import { listSavedSlugs } from "@/lib/saved-measures-db";
+import {
+  hasCoordinatorForRegion,
+  countUnreadForUser as countCoordinatorChatUnread,
+} from "@/lib/coordinator-chat-db";
 import { Avatar } from "@/components/avatar";
 import { AvatarEditor } from "@/components/avatar-editor";
 import { MessengerManager } from "@/components/messenger-manager";
 import { PushToggle } from "@/components/push-toggle";
+import { CoordinatorChatNotifyPicker } from "@/components/coordinator-chat-notify-picker";
 import { Badge } from "@/components/ui/badge";
 import { MotionFadeIn } from "@/components/motion";
 
@@ -250,6 +258,18 @@ async function AppUserProfile({ user }: { user: AppUser }) {
   const inquiries = await listInquiriesForUser(user.id);
   const savedCount = (await listSavedSlugs(user.id)).length;
 
+  // Регион пользователя — из анкеты подбора (survey->>region), а не
+  // app_users.region: та колонка только у самих координаторов. Чат виден,
+  // только если в регионе реально назначен координатор — по мере того как
+  // координаторов будут добавлять в новые регионы, карточка появится сама.
+  const region = typeof user.survey?.region === "string" ? user.survey.region : null;
+  const chatAvailable = asUser && region ? await hasCoordinatorForRegion(region) : false;
+  const chatUnread = chatAvailable ? await countCoordinatorChatUnread(user.id) : 0;
+  const notifyChannels: (MessengerChannel | "email")[] = [
+    "email",
+    ...(["telegram", "vk", "max"] as MessengerChannel[]).filter((ch) => channelConnected(user, ch)),
+  ];
+
   // Открыл кабинет — напоминание про мессенджер своё дело сделало: человек
   // увидел блок «Мессенджеры» ниже. Кружочек на аватарке больше не нужен.
   if (!user.messengerConnected && !user.messengerHintSeenAt) {
@@ -260,7 +280,7 @@ async function AppUserProfile({ user }: { user: AppUser }) {
     <div className="px-4 py-5">
       <div className="flex items-center gap-3">
         <AvatarEditor avatar={resolveUserAvatar(user)} size={64} />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-extrabold leading-tight">
             {fullName}
           </h1>
@@ -268,19 +288,16 @@ async function AppUserProfile({ user }: { user: AppUser }) {
             {user.email}
           </p>
         </div>
+        {/* Переключатель режима — только владельцу, техспецу и координатору;
+            у обычного пользователя роль одна, переключать нечего. */}
+        {staff && (
+          <ViewModeSwitch
+            mode={mode}
+            available={ALLOWED_VIEW_MODES[user.role]}
+            className="shrink-0"
+          />
+        )}
       </div>
-
-      {/* Переключатель режима — владельцу, техспецу и координатору */}
-      {staff && (
-        <div className="mt-4">
-          <ViewModeSwitch mode={mode} available={ALLOWED_VIEW_MODES[user.role]} />
-          <p className="mt-1.5 text-xs text-muted-foreground">
-            {mode === "user"
-              ? "Вы смотрите приложение глазами обычного пользователя."
-              : "Рабочий режим: кабинет заменён панелью управления."}
-          </p>
-        </div>
-      )}
 
       {/* Промо-баннер про индивидуальный подбор мер — только обычным пользователям */}
       {asUser && (
@@ -324,20 +341,51 @@ async function AppUserProfile({ user }: { user: AppUser }) {
         </Link>
       )}
 
+      {/* Чат с координатором — только там, где координатор реально назначен.
+          Отдельно от «Обращений»: это личная непрерывная переписка, а не тикет. */}
+      {chatAvailable && (
+        <Link
+          href="/profile/coordinator-chat"
+          className="mt-4 flex items-center gap-3 rounded-2xl bg-white p-3.5 text-foreground shadow-[0_8px_22px_-10px_rgba(0,0,0,0.18)] ring-1 ring-stone-100 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_12px_26px_-8px_rgba(0,0,0,0.25)]"
+        >
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#1B3A6B]/10 text-[#1B3A6B]">
+            <MessageCircle className="size-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold leading-snug">Чат с координатором</p>
+            <p className="text-xs text-muted-foreground">
+              Личная переписка с координатором региона «{region}»
+            </p>
+          </div>
+          {chatUnread > 0 ? (
+            <span className="grid size-5 shrink-0 place-items-center rounded-full bg-[#E4374B] text-[10px] font-bold text-white">
+              {chatUnread > 9 ? "9+" : chatUnread}
+            </span>
+          ) : (
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          )}
+        </Link>
+      )}
+
       {/* Свои обращения — только обычным пользователям. Владелец и техспец
-          разбирают чужие обращения в админке, свои им заводить незачем. */}
-      {asUser && (
+          разбирают чужие обращения в админке, свои им заводить незачем.
+          Там, где уже есть чат с координатором, «+ Новое» скрываем — заводить
+          новую переписку через старую форму незачем, а старую историю
+          обращений (если она есть) всё равно показываем. */}
+      {asUser && (!chatAvailable || inquiries.length > 0) && (
         <section className="mt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
               Мои обращения
             </h2>
-            <Link
-              href="/profile/inquiries/new"
-              className="text-xs font-semibold text-brand hover:underline"
-            >
-              + Новое
-            </Link>
+            {!chatAvailable && (
+              <Link
+                href="/profile/inquiries/new"
+                className="text-xs font-semibold text-brand hover:underline"
+              >
+                + Новое
+              </Link>
+            )}
           </div>
 
           <div className="mt-2 space-y-2">
@@ -406,6 +454,21 @@ async function AppUserProfile({ user }: { user: AppUser }) {
           <div className="mt-3">
             <PushToggle />
           </div>
+
+          {chatAvailable && (
+            <div className="mt-5">
+              <p className="text-sm font-medium">Уведомлять об ответе координатора</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Один канал на выбор — переписка в чате видна в любом случае.
+              </p>
+              <div className="mt-2">
+                <CoordinatorChatNotifyPicker
+                  current={user.coordinatorChatNotifyChannel}
+                  available={notifyChannels}
+                />
+              </div>
+            </div>
+          )}
         </section>
       )}
 
@@ -442,7 +505,7 @@ async function AppUserProfile({ user }: { user: AppUser }) {
                 <AdminLink
                   href="/admin/region-survey"
                   icon={<Users className="size-5" />}
-                  title="Анкеты региона"
+                  title="Пользователи региона"
                   hint="Кто заполнил анкету"
                 />
                 <AdminLink

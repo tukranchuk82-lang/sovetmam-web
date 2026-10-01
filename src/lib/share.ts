@@ -48,7 +48,7 @@ export function shareUrl(path: string): string {
  * Это случайное число и ничего больше: по нему нельзя узнать человека, только
  * понять, что заходы сделаны с одного устройства.
  */
-async function visitorId(): Promise<string> {
+export async function visitorId(): Promise<string> {
   const jar = await cookies();
   const existing = jar.get(VISITOR_COOKIE)?.value;
   if (existing) return existing;

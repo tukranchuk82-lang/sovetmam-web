@@ -37,6 +37,18 @@ export async function listByRole(role: AppRole): Promise<StaffRow[]> {
   return (data ?? []).map(fromRow);
 }
 
+/** Почты координаторов конкретного региона — кому слать уведомление о новом сообщении в чате. */
+export async function listCoordinatorEmailsForRegion(region: string): Promise<string[]> {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("app_users")
+    .select("email")
+    .eq("role", "coordinator")
+    .eq("region", region);
+  if (error) throw error;
+  return (data ?? []).map((r) => r.email as string).filter(Boolean);
+}
+
 /** Назначить роль (и, для координатора, регион). region игнорируется для остальных ролей. */
 export async function setUserRole(
   userId: string,

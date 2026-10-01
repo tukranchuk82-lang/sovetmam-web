@@ -1,7 +1,7 @@
 import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { getCurrentAppUser } from "@/lib/user-session";
-import { isStaff } from "@/lib/onboarding-db";
-import { AdminEntryButton } from "@/components/view-mode-switch";
+import { logout } from "@/app/(app)/login/onboarding-actions";
+import { logoutDemoUser } from "@/app/(app)/login/actions";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { Avatar } from "@/components/avatar";
 import { UserAvatar } from "@/components/user-avatar";
@@ -11,6 +11,10 @@ import { UtmCapture } from "@/components/utm-capture";
 import { ShareArrival } from "@/components/share-arrival";
 import { VisitPing } from "@/components/visit-ping";
 import { countUnreadForUser } from "@/lib/inquiry-thread";
+import {
+  countUnreadForUser as countCoordinatorChatUnread,
+  hasCoordinatorForRegion,
+} from "@/lib/coordinator-chat-db";
 import { AppBadge } from "@/components/app-badge";
 
 export default async function AppLayout({
@@ -27,17 +31,22 @@ export default async function AppLayout({
     <UserAvatar avatar={resolveUserAvatar(appUser)} size={44} />
   ) : null;
 
-  // Вход в админку из шапки — владельцу, техспецу и координатору. Всем
-  // остальным кнопка не рисуется вовсе (а action на сервере всё равно
-  // проверяет роль).
-  const adminSlot = isStaff(appUser) ? <AdminEntryButton role={appUser!.role} /> : null;
-
   // Сохранять меры может только «настоящий» (email) пользователь — на него и
   // завязано избранное. Демо-роли (заказчик/техспец) — служебные.
   const canSave = Boolean(appUser);
 
   // Кружок на «Обращении»: сколько ответов человек ещё не открывал.
   const unread = appUser ? await countUnreadForUser(appUser.id) : 0;
+  const coordinatorChatUnread = appUser ? await countCoordinatorChatUnread(appUser.id) : 0;
+
+  // Пункт «Обращение» в нижнем меню — единая точка входа «поговорить с нами»:
+  // ведёт в чат с координатором региона, если он там назначен, иначе — в
+  // обычную форму обращения (она уходит на почту). Обе системы человеку
+  // видеть незачем — только одна дорога, та, что реально доведёт до ответа.
+  const region = typeof appUser?.survey?.region === "string" ? appUser.survey.region : null;
+  const hasCoordinator = region ? await hasCoordinatorForRegion(region) : false;
+  const inquiryHref = hasCoordinator ? "/profile/coordinator-chat" : "/profile/inquiries/new";
+  const inquiryUnread = hasCoordinator ? coordinatorChatUnread : unread;
 
   // Кружок на аватарке: напомнить подключить мессенджер. Показывается только
   // тем, кто ещё ни разу не открывал кабинет после регистрации без бота, —
@@ -51,9 +60,10 @@ export default async function AppLayout({
       <SavedProvider authed={canSave}>
         <AppShell
           avatarSlot={avatarSlot}
-          adminSlot={adminSlot}
           authed={Boolean(demoUser || appUser)}
-          unread={unread}
+          logoutAction={demoUser ? logoutDemoUser : logout}
+          inquiryHref={inquiryHref}
+          unread={inquiryUnread}
           messengerHint={messengerHint}
         >
           {children}
@@ -66,7 +76,7 @@ export default async function AppLayout({
           пришёл по размеченной ссылке. */}
       <VisitPing />
       {/* Кружок на иконке установленного приложения. */}
-      <AppBadge count={unread} />
+      <AppBadge count={unread + coordinatorChatUnread} />
     </>
   );
 }

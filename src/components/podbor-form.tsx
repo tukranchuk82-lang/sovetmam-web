@@ -16,6 +16,7 @@ import {
   MessageCircle,
   FileEdit,
   Download,
+  Loader2,
   Wallet,
   Home,
   HeartPulse,
@@ -1460,6 +1461,36 @@ function PodborFormInner({
     setStep(0);
   }
 
+  // Файл собирает сервер не быстро (перебирает все меры), а простая ссылка
+  // на скачивание в это время не подаёт вообще никакого знака жизни — человек
+  // решает, что кнопка не работает, и уходит. Поэтому качаем через fetch, с
+  // явным «Готовим файл…» на кнопке, пока ответ не придёт целиком.
+  const [pdfPending, setPdfPending] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
+
+  async function downloadPdf() {
+    setPdfPending(true);
+    setPdfError(false);
+    try {
+      const res = await fetch("/podbor/pdf");
+      if (!res.ok) throw new Error(String(res.status));
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const date = new Date().toISOString().slice(0, 10);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Меры поддержки ${date}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setPdfError(true);
+    } finally {
+      setPdfPending(false);
+    }
+  }
+
   /**
    * Кнопка «Назад» в шапке ведёт на шаг назад по анкете, а не со страницы:
    * анкета многоэкранная, но живёт в состоянии, и обычный «назад» браузера
@@ -1534,14 +1565,31 @@ function PodborFormInner({
 
             {/* Скачивание — сразу под числом: в соцзащите и МФЦ просят
                 «принесите список», и человек ищет эту кнопку до карточек, а не
-                после сотни. Обычная ссылка, а не действие: файл собирает сервер
-                по сохранённой анкете, поэтому работает и с другого устройства. */}
-            <a
-              href="/podbor/pdf"
-              className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-[#8E1D2C] shadow-[0_10px_26px_-18px_rgba(26,26,26,0.6)] ring-1 ring-[#8E1D2C]/20 transition-transform active:scale-[0.99]"
+                после сотни. Файл собирает сервер по сохранённой анкете
+                (перебирает все меры — небыстро), поэтому кнопка явно
+                показывает «Готовим файл…», пока ответ не придёт целиком —
+                иначе человек решает, что ничего не происходит, и уходит. */}
+            <button
+              type="button"
+              onClick={downloadPdf}
+              disabled={pdfPending}
+              className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm font-semibold text-[#8E1D2C] shadow-[0_10px_26px_-18px_rgba(26,26,26,0.6)] ring-1 ring-[#8E1D2C]/20 transition-transform active:scale-[0.99] disabled:opacity-70"
             >
-              <Download className="size-4" /> Скачать подборку в PDF
-            </a>
+              {pdfPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Готовим файл…
+                </>
+              ) : (
+                <>
+                  <Download className="size-4" /> Скачать подборку в PDF
+                </>
+              )}
+            </button>
+            {pdfError && (
+              <p className="mt-1.5 text-center text-xs font-medium text-[#8E1D2C]">
+                Не получилось собрать файл. Попробуйте ещё раз.
+              </p>
+            )}
 
             {/* Регион не указан — региональных мер в подборке нет вовсе.
                 Молчать об этом нельзя: человек решит, что в его области ничего

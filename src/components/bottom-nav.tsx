@@ -15,7 +15,7 @@ type Tab = {
   match: (p: string) => boolean;
 };
 
-const tabs: Tab[] = [
+const staticTabs: Tab[] = [
   {
     href: "/",
     label: "Главная",
@@ -37,14 +37,20 @@ const tabs: Tab[] = [
     emoji: "⭐️",
     match: (p) => p.startsWith("/podbor"),
   },
-  {
-    href: "/profile/inquiries/new",
+];
+
+// «Обращение» — единая точка входа «поговорить с нами»: адрес приходит
+// снаружи (chat с координатором региона или обычная форма, см. AppShell) —
+// человеку не нужно знать, что за этим стоят две разные системы.
+function inquiryTab(href: string): Tab {
+  return {
+    href,
     label: "Обращение",
     icon: Mail,
     emoji: "✉️",
-    match: (p) => p.startsWith("/profile/inquiries"),
-  },
-];
+    match: (p) => p.startsWith("/profile/inquiries") || p.startsWith("/profile/coordinator-chat"),
+  };
+}
 
 // Пятый слот меню: «Избранное». Личный кабинет открывается по тапу на аватар
 // в шапке — отдельной вкладки под него больше нет.
@@ -61,13 +67,17 @@ const navClasses =
 
 export function BottomNav({
   background,
+  inquiryHref = "/profile/inquiries/new",
   unread = 0,
 }: {
   background?: string;
+  /** Куда ведёт «Обращение» — чат с координатором региона или обычная форма. */
+  inquiryHref?: string;
   /** Сколько ответов человек ещё не прочитал — кружок на «Обращении». */
   unread?: number;
 }) {
   const pathname = usePathname();
+  const tabs = [...staticTabs, inquiryTab(inquiryHref)];
 
   return (
     <nav
@@ -87,7 +97,7 @@ export function BottomNav({
             key={t.href}
             tab={t}
             active={t.match(pathname)}
-            badge={t.href.startsWith("/profile/inquiries") ? unread : 0}
+            badge={t.href === inquiryHref ? unread : 0}
           />
         ))}
 

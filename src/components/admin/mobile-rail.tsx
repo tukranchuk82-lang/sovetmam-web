@@ -3,10 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Landmark } from "lucide-react";
+import { ChevronRight, Landmark, LogOut } from "lucide-react";
 import { AdminNavLink } from "@/components/admin/nav-link";
 import { OrgName } from "@/components/org-name";
 import { cn } from "@/lib/utils";
+
+export interface NavGroup {
+  title?: string;
+  items: RailNavItem[];
+}
 
 export interface RailNavItem {
   href: string;
@@ -32,12 +37,14 @@ export function MobileAdminRail({
   userInitials,
   userName,
   userRoleLabel,
+  logoutAction,
 }: {
-  groups: RailNavItem[][];
+  groups: NavGroup[];
   region?: string | null;
   userInitials: string;
   userName: string;
   userRoleLabel: string;
+  logoutAction: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -124,7 +131,12 @@ export function MobileAdminRail({
           {groups.map((group, gi) => (
             <div key={gi} className="flex flex-col gap-0.5">
               {gi > 0 && <div className="my-2.5 h-px shrink-0 bg-white/10" />}
-              {group.map((item) => (
+              {group.title && open && (
+                <p className="px-2.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+                  {group.title}
+                </p>
+              )}
+              {group.items.map((item) => (
                 <AdminNavLink
                   key={item.href}
                   href={item.href}
@@ -150,10 +162,21 @@ export function MobileAdminRail({
             {userInitials}
           </span>
           {open && (
-            <div className="min-w-0">
-              <p className="truncate text-[12.5px] font-semibold text-white">{userName}</p>
-              <p className="text-[11px] text-white/50">{userRoleLabel}</p>
-            </div>
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[12.5px] font-semibold text-white">{userName}</p>
+                <p className="text-[11px] text-white/50">{userRoleLabel}</p>
+              </div>
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  aria-label="Выйти"
+                  className="grid size-[30px] shrink-0 place-items-center rounded-full text-white/50 hover:bg-white/[0.1] hover:text-white"
+                >
+                  <LogOut className="size-4" strokeWidth={1.8} />
+                </button>
+              </form>
+            </>
           )}
         </div>
       </aside>

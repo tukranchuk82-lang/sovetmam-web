@@ -19,7 +19,6 @@ import type { AppRole } from "@/lib/onboarding-db";
 export type ViewMode = "owner" | "tech" | "coordinator" | "user";
 
 const COOKIE = "sm_view";
-const MAX_AGE = 60 * 60 * 24 * 180; // полгода — переключать каждый заход не нужно
 
 /** В какие режимы может переключаться каждая настоящая роль. */
 export const ALLOWED_VIEW_MODES: Record<AppRole, ViewMode[]> = {
@@ -29,15 +28,15 @@ export const ALLOWED_VIEW_MODES: Record<AppRole, ViewMode[]> = {
   user: ["user"],
 };
 
-/** Режим по умолчанию для роли — тот, с которого начинают работу. */
-export function defaultViewMode(role: AppRole): ViewMode {
-  if (role === "owner") return "owner";
-  if (role === "tech") return "tech";
-  if (role === "coordinator") return "coordinator";
-  return "user";
-}
-
-/** Режим из cookie — только если он разрешён настоящей роли, иначе режим по умолчанию. */
+/**
+ * Режим из cookie — только если он разрешён настоящей роли, иначе —
+ * «пользователь». Раньше владелец/техспец/координатор по умолчанию
+ * попадали сразу в свою рабочую роль, а сама cookie жила полгода — на деле
+ * это путало: человек заходил в приложение через несколько дней и попадал
+ * не в личный кабинет, а в панель управления или в её обрезанный вид на
+ * /profile, без объяснения, почему. Теперь при входе всегда «пользователь»,
+ * а рабочая роль — осознанный выбор через переключатель на каждый заход.
+ */
 export async function getViewMode(role: AppRole): Promise<ViewMode> {
   const c = await cookies();
   const raw = c.get(COOKIE)?.value;
@@ -45,7 +44,7 @@ export async function getViewMode(role: AppRole): Promise<ViewMode> {
   if (raw === "owner" || raw === "tech" || raw === "coordinator" || raw === "user") {
     if (allowed.includes(raw)) return raw;
   }
-  return defaultViewMode(role);
+  return "user";
 }
 
 /**
@@ -68,10 +67,11 @@ export function effectiveAdminScope(role: AppRole, mode: ViewMode): AdminScope {
 
 export async function setViewMode(mode: ViewMode): Promise<void> {
   const c = await cookies();
+  // Без maxAge — сессионная cookie: держит выбранную роль, пока открыт
+  // браузер/приложение, но не переживает следующий вход (см. getViewMode).
   c.set(COOKIE, mode, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    maxAge: MAX_AGE,
   });
 }

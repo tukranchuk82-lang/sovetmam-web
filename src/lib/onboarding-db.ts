@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash, randomInt } from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { fetchSalebotAvatar } from "@/lib/salebot";
 
 export type MessengerChannel = "telegram" | "vk" | "max";
 export type AppRole = "user" | "owner" | "tech" | "coordinator";
@@ -30,6 +31,8 @@ export interface AppUser {
   avatarEmoji: string | null;
   avatarBg: string | null;
   messengerAvatarUrl: string | null;
+  /** Один выбранный канал уведомлений о новом сообщении в чате с координатором региона. */
+  coordinatorChatNotifyChannel: MessengerChannel | "email" | null;
 }
 
 /** Владелец и техспец — полный доступ к админ-панели, без ограничения по региону. */
@@ -86,6 +89,7 @@ type Row = {
   avatar_emoji: string | null;
   avatar_bg: string | null;
   messenger_avatar_url: string | null;
+  coordinator_chat_notify_channel: MessengerChannel | "email" | null;
 };
 
 function fromRow(r: Row): AppUser {
@@ -110,11 +114,12 @@ function fromRow(r: Row): AppUser {
     avatarEmoji: r.avatar_emoji,
     avatarBg: r.avatar_bg,
     messengerAvatarUrl: r.messenger_avatar_url,
+    coordinatorChatNotifyChannel: r.coordinator_chat_notify_channel,
   };
 }
 
 const SELECT =
-  "id, email, first_name, last_name, role, region, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, survey_updated_at, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url";
+  "id, email, first_name, last_name, role, region, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, survey_updated_at, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url, coordinator_chat_notify_channel";
 
 /** Отметить, что человек уже открывал кабинет с напоминанием подключить
  * мессенджер, — кружочек на аватарке больше не должен показываться. */
@@ -281,12 +286,19 @@ export async function markMessengerConnected(params: {
     messenger_connected_at: new Date().toISOString(),
   };
   if (params.salebotClientId) update.salebot_client_id = params.salebotClientId;
-  // Фото из мессенджера пишем, только если оно пришло: пустое значение не должно
-  // затирать уже сохранённую аватарку (мессенджер мог прислать «фото есть» в один
-  // заход и «фото нет» в другой). Свою загруженную фотку/смайлик оно не перебьёт —
+
+  // Фото из мессенджера: если ссылку не прислали явно (вебхук/ссылка из бота
+  // её обычно не несут — это про факт подключения, не про аватарку), сами
+  // спрашиваем Salebot по client_id — он уже хранит фото профиля на своём CDN.
+  // Пустой результат не затирает уже сохранённую аватарку (мессенджер мог
+  // однажды не отдать фото). Свою загруженную фотку/смайлик это не перебьёт —
   // за приоритет отвечает resolveUserAvatar.
-  if (params.avatarUrl && /^https?:\/\//i.test(params.avatarUrl))
-    update.messenger_avatar_url = params.avatarUrl;
+  let avatarUrl =
+    params.avatarUrl && /^https?:\/\//i.test(params.avatarUrl) ? params.avatarUrl : null;
+  if (!avatarUrl && params.salebotClientId) {
+    avatarUrl = await fetchSalebotAvatar(params.salebotClientId);
+  }
+  if (avatarUrl) update.messenger_avatar_url = avatarUrl;
   if (params.messengerId) {
     if (params.channel === "telegram")
       update.telegram_id = Number(params.messengerId) || null;
@@ -388,5 +400,17 @@ export async function clearAvatar(userId: string): Promise<void> {
   await sb
     .from("app_users")
     .update({ avatar_url: null, avatar_emoji: null, avatar_bg: null })
+    .eq("id", userId);
+}
+
+/** Канал уведомлений о новом сообщении в чате с координатором — один на выбор, null = выключено. */
+export async function setCoordinatorChatNotifyChannel(
+  userId: string,
+  channel: MessengerChannel | "email" | null,
+): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  await sb
+    .from("app_users")
+    .update({ coordinator_chat_notify_channel: channel })
     .eq("id", userId);
 }

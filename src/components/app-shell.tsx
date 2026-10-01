@@ -10,6 +10,7 @@ import { runBackHandler } from "@/components/back-handler";
 import { BottomNav } from "@/components/bottom-nav";
 import { InstallBanner } from "@/components/install-banner";
 import { MessengerConnectedToast } from "@/components/messenger-connected-toast";
+import { ProfileMenu } from "@/components/profile-menu";
 
 // useLayoutEffect на сервере ругается — на SSR подменяем его на useEffect.
 // Восстановление скролла должно идти синхронно (до отрисовки), поэтому в
@@ -44,17 +45,20 @@ const HEADER_LOGO_SRC = "/logo-vybor-roditeley.png";
 
 export function AppShell({
   avatarSlot,
-  adminSlot = null,
   authed,
+  logoutAction,
+  inquiryHref = "/profile/inquiries/new",
   unread = 0,
   messengerHint = false,
   children,
 }: {
   avatarSlot: React.ReactNode;
-  /** Кнопка входа в админку — приходит только для владельца и техспеца. */
-  adminSlot?: React.ReactNode;
   authed: boolean;
-  /** Непрочитанные ответы на обращения — кружок в меню и на иконке. */
+  /** Выход из аккаунта — пункт выпадающего меню на аватарке. */
+  logoutAction: () => Promise<void>;
+  /** Куда ведёт «Обращение» в нижнем меню — чат с координатором или форма обращения. */
+  inquiryHref?: string;
+  /** Непрочитанное по этому же адресу — кружок в меню и на иконке. */
   unread?: number;
   /** Напомнить подключить мессенджер — кружок на аватарке, с задержкой. */
   messengerHint?: boolean;
@@ -250,21 +254,12 @@ export function AppShell({
             </Link>
 
             <div className="flex shrink-0 items-center gap-2">
-              {adminSlot}
               {authed ? (
-                <Link
-                  href="/profile"
-                  aria-label="Личный кабинет"
-                  className="pointer-events-auto relative shrink-0"
-                >
-                  {avatarSlot}
-                  {showMessengerHint && (
-                    <span
-                      className="absolute -right-0.5 -top-0.5 size-3.5 rounded-full bg-[#E4374B] ring-2 ring-white"
-                      aria-label="Есть непрочитанное в личном кабинете"
-                    />
-                  )}
-                </Link>
+                <ProfileMenu
+                  avatarSlot={avatarSlot}
+                  showHint={showMessengerHint}
+                  logoutAction={logoutAction}
+                />
               ) : (
                 <Link
                   href="/login"
@@ -317,7 +312,7 @@ export function AppShell({
         <MessengerConnectedToast />
       </div>
 
-      <BottomNav background={NAVY} unread={unread} />
+      <BottomNav background={NAVY} inquiryHref={inquiryHref} unread={unread} />
     </div>
   );
 }

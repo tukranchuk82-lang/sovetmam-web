@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import {
   LayoutGrid,
   MessageSquare,
+  MessageCircle,
   FolderInput,
   Share2,
   CalendarCheck,
@@ -13,16 +14,23 @@ import {
   Landmark,
   Heart,
   ShieldCheck,
+  LogOut,
+  Map,
+  ClipboardList,
+  Eye,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
+import { countUnreadForRegion as countUnreadCoordinatorChat } from "@/lib/coordinator-chat-db";
 import { countNewBotHelpRequests } from "@/lib/bot-help";
 import { countOpenDisputes } from "@/lib/measure-disputes";
 import { getCurrentStaff } from "@/lib/user-session";
 import { ALLOWED_VIEW_MODES, effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 import { resolveRegion } from "@/lib/preview-region";
 import { ROLE_LABELS } from "@/lib/onboarding-db";
+import { logout } from "@/app/(app)/login/onboarding-actions";
 import { AdminNavLink } from "@/components/admin/nav-link";
-import { MobileAdminRail, type RailNavItem } from "@/components/admin/mobile-rail";
+import { AdminTopbar } from "@/components/admin/topbar";
+import { MobileAdminRail, type NavGroup } from "@/components/admin/mobile-rail";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
 import { PreviewRegionPicker } from "@/components/admin/preview-region-picker";
 import { OrgName } from "@/components/org-name";
@@ -58,6 +66,7 @@ export default async function AdminLayout({
   const isPreviewingAsOwnerOrTech = scope === "coordinator" && staff.role !== "coordinator";
 
   const newInquiries = await countNewInquiries(scope === "coordinator" ? (region ?? undefined) : undefined);
+  const unreadChat = scope === "coordinator" ? await countUnreadCoordinatorChat(region) : 0;
   // Заявки на кабинет и спорные меры — общая, не региональная очередь.
   const newRequests = scope !== "coordinator" ? await countNewBotHelpRequests() : 0;
   const openDisputes = scope !== "coordinator" ? await countOpenDisputes() : 0;
@@ -69,39 +78,55 @@ export default async function AdminLayout({
   // Пункты меню — один список данных на сайдбар широкого экрана и на бар
   // телефона (MobileAdminRail): раньше приходилось держать в порядке две (а
   // сейчас были бы три) копии одной и той же разметки.
-  const navGroups: RailNavItem[][] = isCoordinatorScope
+  const navGroups: NavGroup[] = isCoordinatorScope
     ? [
-        [
-          { href: "/admin", label: "Сводка", icon: <Gauge />, exact: true },
-          { href: "/admin/inquiries", label: "Обращения", icon: <MessageSquare />, badge: newInquiries },
-          { href: "/admin/measures", label: "Меры региона", icon: <LayoutGrid /> },
-          { href: "/admin/region-survey", label: "Анкеты региона", icon: <Users /> },
-          { href: "/admin/region-saved", label: "Избранное региона", icon: <Heart /> },
-        ],
+        {
+          items: [
+            { href: "/admin", label: "Сводка", icon: <Gauge />, exact: true },
+            { href: "/admin/inquiries", label: "Обращения", icon: <MessageSquare />, badge: newInquiries },
+            { href: "/admin/region-chat", label: "Чат с регионом", icon: <MessageCircle />, badge: unreadChat },
+            { href: "/admin/measures", label: "Меры региона", icon: <LayoutGrid /> },
+            { href: "/admin/region-survey", label: "Пользователи региона", icon: <Users /> },
+            { href: "/admin/region-saved", label: "Избранное региона", icon: <Heart /> },
+          ],
+        },
       ]
     : [
-        [
-          { href: "/admin", label: "Сводка", icon: <Gauge />, exact: true },
-          { href: "/admin/measures", label: "Каталог мер", icon: <LayoutGrid /> },
-          { href: "/admin/users", label: "Пользователи", icon: <Users /> },
-        ],
-        [
-          { href: "/admin/representatives", label: "Координаторы в регионах", icon: <Landmark /> },
-          { href: "/admin/inquiries", label: "Обращения", icon: <MessageSquare />, badge: newInquiries },
-          { href: "/admin/requests", label: "Заявки на кабинет", icon: <Inbox />, badge: newRequests },
-          { href: "/admin/verification", label: "Сверка", icon: <CalendarCheck /> },
-          { href: "/admin/disputes", label: "Спорные меры", icon: <HelpCircle />, badge: openDisputes },
-        ],
-        [
-          { href: "/admin/share", label: "Откуда приходят", icon: <Share2 /> },
-          { href: "/admin/knowledge", label: "База знаний", icon: <FolderInput /> },
-          // Управление ролями — технический раздел: аккаунты координаторов,
-          // техспецов, передача прав владельца. Видно только в режиме
-          // техспеца; владелец доберётся сюда, переключившись.
-          ...(scope === "tech"
-            ? [{ href: "/admin/staff", label: "Доступ и роли", icon: <ShieldCheck /> }]
-            : []),
-        ],
+        {
+          title: "Аудитория",
+          items: [
+            { href: "/admin", label: "Обзор", icon: <Gauge />, exact: true },
+            { href: "/admin/users", label: "Люди", icon: <Users /> },
+            { href: "/admin/share", label: "Откуда приходят", icon: <Share2 /> },
+            { href: "/admin/regions", label: "Регионы", icon: <Map /> },
+          ],
+        },
+        {
+          title: "Поведение",
+          items: [
+            { href: "/admin/views", label: "Что смотрят", icon: <Eye /> },
+            { href: "/admin/surveys", label: "Анкеты", icon: <ClipboardList /> },
+            { href: "/admin/saved", label: "Избранное", icon: <Heart /> },
+          ],
+        },
+        {
+          title: "Работа",
+          items: [
+            { href: "/admin/inquiries", label: "Обращения", icon: <MessageSquare />, badge: newInquiries },
+            { href: "/admin/requests", label: "Заявки на кабинет", icon: <Inbox />, badge: newRequests },
+            { href: "/admin/disputes", label: "Спорные меры", icon: <HelpCircle />, badge: openDisputes },
+            { href: "/admin/verification", label: "Сверка", icon: <CalendarCheck /> },
+            { href: "/admin/measures", label: "Каталог мер", icon: <LayoutGrid /> },
+            { href: "/admin/representatives", label: "Координаторы в регионах", icon: <Landmark /> },
+            { href: "/admin/knowledge", label: "База знаний", icon: <FolderInput /> },
+            // Управление ролями — технический раздел: аккаунты координаторов,
+            // техспецов, передача прав владельца. Видно только в режиме
+            // техспеца; владелец доберётся сюда, переключившись.
+            ...(scope === "tech"
+              ? [{ href: "/admin/staff", label: "Доступ и роли", icon: <ShieldCheck /> }]
+              : []),
+          ],
+        },
       ];
 
   return (
@@ -125,7 +150,12 @@ export default async function AdminLayout({
           {navGroups.map((group, gi) => (
             <div key={gi} className="flex flex-col gap-0.5">
               {gi > 0 && <div className="my-2.5 h-px bg-white/10" />}
-              {group.map((item) => (
+              {group.title && (
+                <p className="px-2.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+                  {group.title}
+                </p>
+              )}
+              {group.items.map((item) => (
                 <AdminNavLink key={item.href} href={item.href} icon={item.icon} badge={item.badge} exact={item.exact}>
                   {item.label}
                 </AdminNavLink>
@@ -138,10 +168,19 @@ export default async function AdminLayout({
           <span className="grid size-[30px] shrink-0 place-items-center rounded-full bg-white/[0.14] text-[11px] font-bold text-white">
             {initials}
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-[12.5px] font-semibold text-white">{userName}</p>
             <p className="text-[11px] text-white/50">{ROLE_LABELS[staff.role]}</p>
           </div>
+          <form action={logout}>
+            <button
+              type="submit"
+              aria-label="Выйти"
+              className="grid size-[30px] shrink-0 place-items-center rounded-full text-white/50 hover:bg-white/[0.1] hover:text-white"
+            >
+              <LogOut className="size-4" strokeWidth={1.8} />
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -152,17 +191,20 @@ export default async function AdminLayout({
         userInitials={initials}
         userName={userName}
         userRoleLabel={ROLE_LABELS[staff.role]}
+        logoutAction={logout}
       />
 
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col pl-14 md:pl-0">
-        {/* ── Тонкая шапка: только переключатель режима — название уже в
-            сайдбаре/баре, заголовок раздела рисует сама страница ── */}
-        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-end gap-2 border-b bg-card/70 px-3 py-2.5 backdrop-blur md:px-6">
+        {/* ── Верхняя полоса: где я (раздел) слева, режим просмотра справа ── */}
+        <AdminTopbar sections={navGroups.flatMap((g) => g.items).map((i) => ({ href: i.href, label: i.label }))}>
           {isPreviewingAsOwnerOrTech && <PreviewRegionPicker region={region} />}
-          <ViewModeSwitch mode={mode} available={ALLOWED_VIEW_MODES[staff.role]} userTo="/" />
-        </div>
+          <span className="hidden text-xs text-muted-foreground sm:inline">Режим:</span>
+          <ViewModeSwitch mode={mode} available={ALLOWED_VIEW_MODES[staff.role]} />
+        </AdminTopbar>
 
-        <main className="flex-1">{children}</main>
+        {/* Единая колонка контента: на широком экране строки не растягиваются
+            на весь монитор — читать и сканировать глазом проще. */}
+        <main className="mx-auto w-full max-w-[1280px] flex-1">{children}</main>
       </div>
     </div>
   );

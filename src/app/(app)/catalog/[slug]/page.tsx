@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { RichText } from "@/components/rich-text";
 import { SaveHeart } from "@/components/save-heart";
 import { ShareButton } from "@/components/share-button";
+import { MeasureViewPing } from "@/components/measure-view-ping";
 import { getAllMeasureSlugs, getMeasureBySlug } from "@/lib/measures-db";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { getPublishedRepresentatives } from "@/lib/representatives-db";
@@ -114,6 +115,7 @@ export default async function MeasurePage({
   return (
     <div className="px-4 py-5">
       <JsonLd data={measureSchema} />
+      <MeasureViewPing slug={m.slug} />
 
       <article className="mt-3 rounded-2xl bg-white p-5 text-foreground shadow-[0_12px_32px_-12px_rgba(0,0,0,0.4)]">
         <div className="flex flex-wrap items-center gap-1.5">

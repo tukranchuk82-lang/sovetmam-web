@@ -61,7 +61,7 @@ export function NewInquiryForm({
       </div>
 
       {measureTitle && (
-        <div className="rounded-xl border bg-muted/40 px-3 py-2 text-xs">
+        <div className="rounded-xl border border-black/[0.06] bg-white px-3 py-2 text-xs">
           <span className="text-muted-foreground">Привязано к мере:</span>{" "}
           <span className="font-medium">{measureTitle}</span>
         </div>
@@ -79,7 +79,7 @@ export function NewInquiryForm({
             required
             maxLength={160}
             placeholder="например: «Единое пособие на детей до 17 лет»"
-            className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="mt-1 w-full rounded-xl border border-black/20 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </label>
       )}
@@ -93,7 +93,7 @@ export function NewInquiryForm({
           name="region"
           required
           defaultValue={defaultRegion}
-          className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="mt-1 w-full rounded-xl border border-black/20 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="" disabled>
             Выберите регион
@@ -132,7 +132,7 @@ export function NewInquiryForm({
                   ? "например: «изменилась сумма выплаты»"
                   : "например: «компенсация за детский лагерь»"
             }
-            className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="mt-1 w-full rounded-xl border border-black/20 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </label>
       )}
@@ -157,7 +157,7 @@ export function NewInquiryForm({
                 ? "Что не так с мерой: устарела сумма, изменились условия, неверная ссылка? Если знаете источник — приложите ссылку."
                 : "Какая мера поддержки была бы полезна? Кому она нужна?"
           }
-          className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="mt-1 w-full rounded-xl border border-black/20 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </label>
 
@@ -198,8 +198,8 @@ function TypeChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col gap-1.5 rounded-xl border p-2.5 text-left transition-colors",
-        active ? "border-primary bg-primary/10" : "bg-background hover:bg-muted",
+        "flex flex-col gap-1.5 rounded-xl border p-2.5 text-left shadow-sm transition-colors",
+        active ? "border-primary bg-primary/10" : "border-black/20 bg-white hover:bg-muted",
       )}
     >
       <span

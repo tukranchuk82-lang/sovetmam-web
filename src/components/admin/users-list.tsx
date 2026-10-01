@@ -1,14 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  Search,
-  MapPin,
-  Heart,
-  MailCheck,
-  MailWarning,
-  ChevronDown,
-} from "lucide-react";
+import { MapPin, MailCheck, MailWarning, Users } from "lucide-react";
 import type { AdminUser } from "@/lib/users-admin";
 import { TAX_SYSTEM_LABEL, type TaxSystem } from "@/lib/measures";
 // Только типы: onboarding-db — серверный модуль (server-only), его константы
@@ -16,8 +9,16 @@ import { TAX_SYSTEM_LABEL, type TaxSystem } from "@/lib/measures";
 import type { AppRole, MessengerChannel } from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { UserAvatar } from "@/components/user-avatar";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { DataTable, type Column } from "@/components/admin/ui/data-table";
+import { Drawer } from "@/components/admin/ui/drawer";
+import {
+  FilterBar,
+  FilterSearch,
+  FilterSelect,
+  ResetFilters,
+  SegmentTabs,
+} from "@/components/admin/ui/filter-bar";
+import { EmptyState, StatusBadge } from "@/components/admin/ui/primitives";
 
 const CHANNEL_LABELS: Record<MessengerChannel, string> = {
   telegram: "Telegram",
@@ -95,19 +96,31 @@ function channelsOf(u: AdminUser): MessengerChannel[] {
 
 type Filter = "all" | "verified" | "messenger" | "survey";
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: "all", label: "Все" },
-  { key: "verified", label: "Подтвердили почту" },
-  { key: "messenger", label: "С мессенджером" },
-  { key: "survey", label: "С анкетой" },
-];
-
 export function UsersList({ users }: { users: AdminUser[] }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [region, setRegion] = useState("");
+  const [selected, setSelected] = useState<AdminUser | null>(null);
 
-  const visible = useMemo(() => {
+  const counts = useMemo(
+    () => ({
+      all: users.length,
+      verified: users.filter((u) => u.emailVerifiedAt).length,
+      messenger: users.filter((u) => channelsOf(u).length > 0).length,
+      survey: users.filter((u) => u.survey).length,
+    }),
+    [users],
+  );
+
+  const regions = useMemo(
+    () =>
+      [...new Set(users.map((u) => u.survey?.region).filter((r): r is string => Boolean(r)))].sort((a, b) =>
+        a.localeCompare(b, "ru"),
+      ),
+    [users],
+  );
+
+  const rows = useMemo(() => {
     // Слова запроса ищем по отдельности: тогда находится и «Иванова Мария»,
     // и «Мария Иванова», и просто «иванов» — порядок ввода не важен.
     const words = normalize(query).split(" ").filter(Boolean);
@@ -115,132 +128,171 @@ export function UsersList({ users }: { users: AdminUser[] }) {
       if (filter === "verified" && !u.emailVerifiedAt) return false;
       if (filter === "messenger" && channelsOf(u).length === 0) return false;
       if (filter === "survey" && !u.survey) return false;
+      if (region && u.survey?.region !== region) return false;
       if (words.length === 0) return true;
-      const haystack = normalize(
-        [u.lastName, u.firstName, u.email, u.survey?.region ?? ""].join(" "),
-      );
+      const haystack = normalize([u.lastName, u.firstName, u.email, u.survey?.region ?? ""].join(" "));
       return words.every((w) => haystack.includes(w));
     });
-  }, [users, query, filter]);
+  }, [users, query, filter, region]);
+
+  const fullName = (u: AdminUser) => `${u.lastName} ${u.firstName}`.trim() || u.email;
+  const resetKey = `${filter}|${query}|${region}`;
+
+  const columns: Column<AdminUser>[] = [
+    {
+      key: "name",
+      header: "Пользователь",
+      sort: (a, b) => fullName(a).localeCompare(fullName(b), "ru"),
+      cell: (u) => (
+        <div className="flex min-w-0 items-center gap-3">
+          <UserAvatar avatar={resolveUserAvatar(u)} size={34} />
+          <div className="min-w-0">
+            <p className="flex items-center gap-1.5 font-semibold leading-snug">
+              <span className="truncate">{fullName(u)}</span>
+              {u.role !== "user" && <StatusBadge tone="brand">{ROLE_LABELS[u.role]}</StatusBadge>}
+            </p>
+            <p className="truncate text-[12px] text-muted-foreground">{u.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "region",
+      header: "Регион",
+      hideBelow: "lg",
+      className: "w-[200px]",
+      sort: (a, b) => (a.survey?.region ?? "").localeCompare(b.survey?.region ?? "", "ru"),
+      cell: (u) => (
+        <span className="line-clamp-2 text-[13px] text-muted-foreground">{u.survey?.region ?? "—"}</span>
+      ),
+    },
+    {
+      key: "email",
+      header: "Почта",
+      className: "w-[90px]",
+      sort: (a, b) => Number(Boolean(b.emailVerifiedAt)) - Number(Boolean(a.emailVerifiedAt)),
+      cell: (u) =>
+        u.emailVerifiedAt ? (
+          <StatusBadge tone="done" icon={<MailCheck />}>
+            ок
+          </StatusBadge>
+        ) : (
+          <StatusBadge tone="new" icon={<MailWarning />}>
+            нет
+          </StatusBadge>
+        ),
+    },
+    {
+      key: "messenger",
+      header: "Мессенджер",
+      hideBelow: "lg",
+      className: "w-[130px]",
+      sort: (a, b) => channelsOf(b).length - channelsOf(a).length,
+      cell: (u) => {
+        const ch = channelsOf(u);
+        return ch.length === 0 ? (
+          <span className="text-[13px] text-muted-foreground">—</span>
+        ) : (
+          <span className="flex flex-wrap gap-x-2 text-[12px] font-semibold">
+            {ch.map((c) => (
+              <span key={c} style={{ color: CHANNEL_COLORS[c] }}>
+                {CHANNEL_LABELS[c]}
+              </span>
+            ))}
+          </span>
+        );
+      },
+    },
+    {
+      key: "saved",
+      header: "Избр.",
+      hideBelow: "xl",
+      className: "w-[70px] text-right",
+      sort: (a, b) => a.savedCount - b.savedCount,
+      cell: (u) => <span className="tabular-nums text-[13px] text-muted-foreground">{u.savedCount || "—"}</span>,
+    },
+    {
+      key: "created",
+      header: "Регистрация",
+      className: "w-[120px] text-right",
+      sort: (a, b) => a.createdAt.localeCompare(b.createdAt),
+      cell: (u) => <span className="tabular-nums text-[13px] text-muted-foreground">{formatDate(u.createdAt)}</span>,
+    },
+  ];
+
+  const FILTERS: { key: Filter; label: string }[] = [
+    { key: "all", label: "Все" },
+    { key: "verified", label: "С почтой" },
+    { key: "messenger", label: "С мессенджером" },
+    { key: "survey", label: "С анкетой" },
+  ];
 
   return (
     <>
-      <div className="mt-4 space-y-2">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по фамилии, имени, почте или региону"
-            autoComplete="off"
-            className="h-10 w-full rounded-xl border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setFilter(f.key)}
-              className={cn(
-                "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
-                filter === f.key
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "bg-background hover:bg-muted",
-              )}
-            >
-              {f.label}
-            </button>
+      <FilterBar>
+        <SegmentTabs
+          value={filter}
+          onChange={setFilter}
+          items={FILTERS.map((f) => ({ ...f, count: counts[f.key] }))}
+        />
+        <FilterSearch value={query} onChange={setQuery} placeholder="Фамилия, имя, почта или регион" />
+        <FilterSelect label="Регион" value={region} onChange={setRegion}>
+          <option value="">Все регионы</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
           ))}
-        </div>
-      </div>
+        </FilterSelect>
+        <ResetFilters
+          visible={Boolean(query || region)}
+          onClick={() => {
+            setQuery("");
+            setRegion("");
+          }}
+        />
+      </FilterBar>
 
-      <p className="mt-3 text-xs text-muted-foreground">
-        Показано: {visible.length} из {users.length}
-      </p>
+      <DataTable
+        rows={rows}
+        columns={columns}
+        rowKey={(u) => u.id}
+        onRowClick={setSelected}
+        resetKey={resetKey}
+        initialSort={{ key: "created", dir: "desc" }}
+        empty={
+          <EmptyState icon={<Users />} title="Никого не нашлось">
+            Попробуйте другой запрос или сбросьте фильтры.
+          </EmptyState>
+        }
+        mobileCard={(u) => (
+          <div className="flex items-start gap-3">
+            <UserAvatar avatar={resolveUserAvatar(u)} size={38} />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold leading-snug">{fullName(u)}</p>
+              <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+              <p className="mt-1 flex flex-wrap items-center gap-x-3 text-[11px] text-muted-foreground">
+                <span>рег. {formatDate(u.createdAt)}</span>
+                {u.survey?.region && (
+                  <span className="inline-flex items-center gap-0.5">
+                    <MapPin className="size-3" />
+                    {u.survey.region}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+        )}
+      />
 
-      {visible.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed bg-muted/40 px-4 py-10 text-center">
-          <p className="text-sm font-medium">Никого не нашлось</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Попробуйте другой запрос или снимите фильтр
-          </p>
-        </div>
-      ) : (
-        <div className="mt-3 space-y-2">
-          {visible.map((u) => {
-            const channels = channelsOf(u);
-            const open = openId === u.id;
-            const fullName = `${u.lastName} ${u.firstName}`.trim() || u.email;
-
-            return (
-              <div key={u.id} className="rounded-xl border bg-card">
-                <button
-                  type="button"
-                  onClick={() => setOpenId(open ? null : u.id)}
-                  className="flex w-full items-start gap-3 p-3 text-left"
-                >
-                  <UserAvatar avatar={resolveUserAvatar(u)} size={38} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-semibold leading-snug">
-                        {fullName}
-                      </span>
-                      {u.role !== "user" && (
-                        <Badge variant="default" className="text-[10px]">
-                          {ROLE_LABELS[u.role]}
-                        </Badge>
-                      )}
-                      {u.emailVerifiedAt ? (
-                        <MailCheck className="size-3.5 text-emerald-600" />
-                      ) : (
-                        <MailWarning className="size-3.5 text-amber-600" />
-                      )}
-                      {channels.map((ch) => (
-                        <span
-                          key={ch}
-                          className="text-[10px] font-semibold"
-                          style={{ color: CHANNEL_COLORS[ch] }}
-                        >
-                          {CHANNEL_LABELS[ch]}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {u.email}
-                    </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                      <span>рег. {formatDate(u.createdAt)}</span>
-                      {u.survey?.region && (
-                        <span className="inline-flex items-center gap-0.5">
-                          <MapPin className="size-3" />
-                          {u.survey.region}
-                        </span>
-                      )}
-                      {u.savedCount > 0 && (
-                        <span className="inline-flex items-center gap-0.5">
-                          <Heart className="size-3" />
-                          {u.savedCount}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <ChevronDown
-                    className={cn(
-                      "mt-1 size-4 shrink-0 text-muted-foreground transition-transform",
-                      open && "rotate-180",
-                    )}
-                  />
-                </button>
-
-                {open && <UserDetails user={u} />}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <Drawer
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        title={selected ? fullName(selected) : ""}
+        subtitle={selected?.email}
+      >
+        {selected && <UserDetails user={selected} />}
+      </Drawer>
     </>
   );
 }
@@ -253,7 +305,7 @@ function UserDetails({ user }: { user: AdminUser }) {
   const ages = s?.childrenAges?.length ? s.childrenAges.join(", ") : null;
 
   return (
-    <div className="space-y-2 border-t px-3 py-3 text-xs">
+    <div className="space-y-2.5 text-[13px]">
       <Field label="Почта подтверждена">
         {user.emailVerifiedAt ? formatDate(user.emailVerifiedAt) : "нет"}
       </Field>
@@ -333,7 +385,7 @@ function Field({
 }) {
   return (
     <div className="flex gap-2">
-      <span className="w-36 shrink-0 text-muted-foreground">{label}</span>
+      <span className="w-32 shrink-0 text-muted-foreground">{label}</span>
       <span className="min-w-0 flex-1">{children}</span>
     </div>
   );

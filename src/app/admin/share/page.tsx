@@ -1,20 +1,11 @@
 import Link from "next/link";
 import { Share2, ExternalLink } from "lucide-react";
 import { getShareStats } from "@/lib/share-admin";
+import { SOURCE_LABEL } from "@/lib/analytics/labels";
 import { AdminPageHeader } from "@/components/admin/page-header";
 
 export const metadata = { title: "Откуда приходят" };
 export const dynamic = "force-dynamic";
-
-/** Понятное имя метки вместо служебного слова в ссылке. */
-const SOURCE_LABEL: Record<string, string> = {
-  share: "Кнопка «Поделиться»",
-  quiz: "Квиз «Сколько вам положено»",
-  kurs: "Курс «Шпаргалка»",
-  bot: "Чат-боты",
-  baza: "База знаний",
-  "без метки": "Без метки",
-};
 
 /** Куда уводят наши собственные ссылки наружу. */
 const EXIT_LABEL: Record<string, string> = {
