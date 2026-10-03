@@ -45,6 +45,7 @@ import {
   type WorkField,
   type SettlementType,
   type PregnancyStage,
+  type Gender,
   type SvoRole,
   type StudyLevel,
   type StudyFunding,
@@ -527,6 +528,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
         : null;
   return {
     prioritySituation: v.prioritySituation ?? null,
+    gender: v.gender === "female" || v.gender === "male" ? v.gender : null,
     pregnant: !!v.pregnant,
     expectingChildNumber:
       v.pregnant && expecting >= 1 && expecting <= 10 ? expecting : null,
@@ -815,6 +817,9 @@ function PodborFormInner({
   );
   const [situationAsked, setSituationAsked] = useState(false);
 
+  const [gender, setGender] = useState<Gender | null>(
+    saved?.gender === "female" || saved?.gender === "male" ? saved.gender : null,
+  );
   const [pregnant, setPregnant] = useState<boolean | null>(saved?.pregnant ?? null);
   const [expectingNumber, setExpectingNumber] = useState<number | null>(
     saved?.expectingChildNumber ?? null,
@@ -1159,6 +1164,7 @@ function PodborFormInner({
   const answers = {
     step,
     region,
+    gender,
     pregnant,
     expectingNumber,
     hasChildren,
@@ -1255,6 +1261,7 @@ function PodborFormInner({
       setStep(d.step);
     }
     if (typeof d.region === "string") setRegion(d.region);
+    if (d.gender === "female" || d.gender === "male") setGender(d.gender);
     if (typeof d.exactCount === "string") setExactCount(d.exactCount);
     if (d.birthByChild && typeof d.birthByChild === "object") {
       setBirthByChild(d.birthByChild as Record<number, ChildBirth>);
@@ -1367,6 +1374,7 @@ function PodborFormInner({
   function handleSubmit() {
     const profile: UserProfile = {
       prioritySituation,
+      gender,
       pregnant: pregnant ?? false,
       expectingChildNumber: pregnant ? expectingNumber : null,
       hasChildren: hasChildren ?? false,
@@ -1760,6 +1768,25 @@ function PodborFormInner({
         {/* Экран 1: Где вы живёте */}
         {step === 0 && (
           <div className="space-y-6">
+        {/* Пол — чтобы не показывать меры, которые по закону положены только
+            женщинам (ЭКО, выплаты беременным) или только мужчинам. Вопрос не
+            обязательный: без ответа подбор показывает всё, как раньше. */}
+        <div>
+          <p className="text-sm font-medium">Ваш пол</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Часть мер положена только женщинам или только мужчинам — лишнего
+            показывать не будем.
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Choice active={gender === "female"} onClick={() => setGender("female")}>
+              Женский
+            </Choice>
+            <Choice active={gender === "male"} onClick={() => setGender("male")}>
+              Мужской
+            </Choice>
+          </div>
+        </div>
+
         {/* Регион — первым и обязательно. Без него подбор теряет три четверти
             базы: региональных мер 2264 против 109 федеральных. Раньше вариант
             «Не указывать» стоял по умолчанию, и каждая пятая анкета уходила без
@@ -1841,7 +1868,13 @@ function PodborFormInner({
         {/* Экран 2: Дети */}
         {step === 1 && (
           <div className="space-y-6">
-        <Question label="Вы в ожидании ребёнка?">
+        <Question
+          label={
+            gender === "male"
+              ? "Ваша жена или партнёрша в ожидании ребёнка?"
+              : "Вы в ожидании ребёнка?"
+          }
+        >
           <YesNo
             value={pregnant}
             onChange={(v) => {
@@ -1872,7 +1905,9 @@ function PodborFormInner({
 
         {pregnant && (
           <div className="rounded-2xl border bg-card p-3.5">
-            <p className="text-sm font-medium">Какой у вас срок?</p>
+            <p className="text-sm font-medium">
+              {gender === "male" ? "Какой срок беременности?" : "Какой у вас срок?"}
+            </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               От срока зависят выплаты: пособие беременной жене призывника
               назначают с 180 дней, а некоторые региональные меры — только на
@@ -1895,7 +1930,7 @@ function PodborFormInner({
                 срока, и позже право уже не появится. */}
             <div className="mt-3.5">
               <p className="text-sm font-medium">
-                Встали на учёт в женской консультации до 12 недель?
+                {gender === "male" ? "Она встала" : "Встали"} на учёт в женской консультации до 12 недель?
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Это условие единого пособия для беременных. Если срок ещё не

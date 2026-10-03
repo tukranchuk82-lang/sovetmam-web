@@ -52,6 +52,9 @@ function getCriteria(fd: FormData): MeasureInput["criteria"] {
   if (fd.get("criteria_requiresEntrepreneur")) c.requiresEntrepreneur = true;
   if (fd.get("criteria_requiresTeacher")) c.requiresTeacher = true;
 
+  const gender = getOptionalString(fd, "criteria_gender");
+  if (gender === "female" || gender === "male") c.gender = gender;
+
   const minChildren = getOptionalString(fd, "criteria_minChildren");
   if (minChildren) c.minChildren = Number(minChildren);
 

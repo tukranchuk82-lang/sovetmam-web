@@ -247,6 +247,22 @@ export function MeasureForm({
           </div>
           <div className="mt-3">
             <Field
+              label="Пол"
+              hint="Для мер, положенных только женщинам (ЭКО, выплаты беременным) или только мужчинам. Тем, кто не указал пол в анкете, мера показывается."
+            >
+              <select
+                name="criteria_gender"
+                defaultValue={initial?.criteria.gender ?? ""}
+                className={inputCls}
+              >
+                <option value="">любой</option>
+                <option value="female">только женщины</option>
+                <option value="male">только мужчины</option>
+              </select>
+            </Field>
+          </div>
+          <div className="mt-3">
+            <Field
               label="Потолок дохода на человека"
               hint="Мера подойдёт всем, чей доход не выше указанного порога. «До 1 ПМ» — то же, что галочка «низкий доход»."
             >
@@ -402,6 +418,9 @@ function CriteriaHiddenFields({
           value={criteria.maxYoungestChildAgeYears}
           readOnly
         />
+      )}
+      {criteria.gender && (
+        <input type="hidden" name="criteria_gender" value={criteria.gender} readOnly />
       )}
       {criteria.maxIncomePm != null && (
         <input type="hidden" name="criteria_maxIncomePm" value={criteria.maxIncomePm} readOnly />

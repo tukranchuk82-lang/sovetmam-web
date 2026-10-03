@@ -273,6 +273,9 @@ export type StudyFunding = "budget" | "paid";
 /** Срок беременности — влияет на единое пособие и выплаты жене призывника. */
 export type PregnancyStage = "under12" | "12-27" | "28-35" | "36plus";
 
+/** Пол заполняющего анкету. */
+export type Gender = "female" | "male";
+
 /**
  * Ребёнок: месяц и год рождения вместо возраста.
  *
@@ -398,6 +401,12 @@ export interface EligibilityCriteria {
   requiresSvoFamily?: boolean;
   requiresSingleParent?: boolean;
   requiresStudent?: boolean;
+  /**
+   * Мера положена только людям одного пола: ЭКО по ОМС, выплаты беременным,
+   * «Мать-героиня» — женщинам; «Отцовская слава» — мужчинам. Если пол в анкете
+   * не указан (анкета заполнена до появления вопроса), условие пропускаем.
+   */
+  gender?: Gender;
   /** Мера только для родителей младше 35 лет («молодая семья»). */
   requiresParentUnder35?: boolean;
   /**
@@ -689,6 +698,9 @@ export interface UserProfile {
   // Все поля необязательные: 40+ анкет заполнены по старой форме, и они
   // должны продолжать работать. Где нового ответа нет, движок берёт старое
   // поле или пропускает условие — молча пропавшая мера хуже лишней.
+
+  /** Пол того, кто заполняет анкету. `null` — не указан. */
+  gender?: Gender | null;
 
   /**
    * Самая важная сейчас жизненная ситуация — выбирается перед анкетой.
@@ -1072,6 +1084,7 @@ function matchesCriteria(
   // Мера показывается только в каталоге — в подборе её быть не должно.
   if (c.excludeFromMatching) return false;
 
+  if (c.gender && profile.gender && c.gender !== profile.gender) return false;
   if (c.requiresFamily && !profile.pregnant && !profile.hasChildren) return false;
   if (c.requiresPregnancy && !profile.pregnant) return false;
   if (c.requiresChildren && !profile.hasChildren) return false;
