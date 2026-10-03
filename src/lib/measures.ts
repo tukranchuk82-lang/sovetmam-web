@@ -784,13 +784,14 @@ export function getSegment(id: string): Segment | undefined {
  * хотя бы одно жёсткое — меры нет вовсе, чтобы не обнадёживать зря.
  */
 export function evaluateEligibility(
-  profile: UserProfile,
+  rawProfile: UserProfile,
   m: SupportMeasure,
   {
     ignoreRegion = false,
     strict = false,
   }: { ignoreRegion?: boolean; strict?: boolean } = {},
 ): { fits: boolean; pending: PendingReason[] } {
+  const profile = withoutGrownChildren(rawProfile);
   const c = m.criteria;
 
   // Региональные меры показываем ТОЛЬКО при совпадении региона. Источник региона —
@@ -990,6 +991,35 @@ function hasStudyingAdultChild(profile: UserProfile): boolean {
     const years = Math.floor(childAgeMonths(ch) / 12);
     return years >= 18 && years <= 23 && ch.studiesFullTime === true;
   });
+}
+
+/** Старше этого возраста ребёнок в анкете остаётся, но на подбор не влияет. */
+const MAX_COUNTED_CHILD_AGE = 23;
+
+/**
+ * Профиль без взрослых детей (старше 23 лет).
+ *
+ * Анкета позволяет вписать ребёнка любого возраста — родителям важно, чтобы
+ * он был в составе семьи. Но ни одна мера не учитывает его, поэтому для
+ * подбора такие дети вычёркиваются: не считаются в числе детей, в возрастах
+ * и в «есть дети». Сам профиль и сохранённая анкета не меняются.
+ */
+function withoutGrownChildren(profile: UserProfile): UserProfile {
+  const kids = profile.children;
+  if (!kids || kids.length === 0) return profile;
+  const kept = kids.filter(
+    (ch) => Math.floor(childAgeMonths(ch) / 12) <= MAX_COUNTED_CHILD_AGE,
+  );
+  if (kept.length === kids.length) return profile;
+  const ages = kept.map((ch) => Math.floor(childAgeMonths(ch) / 12));
+  return {
+    ...profile,
+    children: kept,
+    childrenCount: kept.length,
+    childrenAges: ages,
+    hasChildren: kept.length > 0,
+    youngestChildAgeYears: ages.length ? Math.min(...ages) : null,
+  };
 }
 
 /** Нижняя граница срока беременности в неделях — по выбранной группе. */
