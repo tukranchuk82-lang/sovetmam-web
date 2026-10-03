@@ -1043,6 +1043,10 @@ function PodborFormInner({
 
   // «Молодая семья» — если ценз проходят оба супруга. Возраст не указан вовсе —
   // считаем, что не проходят: лучше не предложить, чем обнадёжить зря.
+  // Про мужа-призывника спрашиваем женщин, у которых есть супруг: мужчине и
+  // тому, кто отметил, что супруга нет, вопрос ни к чему.
+  const askConscriptSpouse = gender !== "male" && hasSpouse !== false;
+
   const parentAges = [parentAge, hasSpouse === false ? null : spouseAge].filter(
     (a): a is number => a != null,
   );
@@ -1400,7 +1404,7 @@ function PodborFormInner({
       studyFunding: student ? studyFunding : null,
       targetedContract: student ? targetedContract : null,
       svoRoles: svoFamily ? svoRoles : [],
-      conscriptSpouse: conscriptSpouse ?? false,
+      conscriptSpouse: askConscriptSpouse ? (conscriptSpouse ?? false) : false,
       veteranCombat: veteranCombat ?? false,
       radiationAffected: radiationAffected ?? false,
       hardship: hardship ?? false,
@@ -2602,6 +2606,7 @@ function PodborFormInner({
         {/* Срочная служба — это не СВО, и меры совсем другие: беременной жене
             призывника положено единовременное пособие, а на ребёнка — выплата
             до трёх лет, а не до полутора, как обычно. */}
+        {askConscriptSpouse && (
         <div className="rounded-2xl border bg-card p-3.5">
           <p className="text-sm font-medium">
             Муж проходит срочную службу по призыву?
@@ -2614,6 +2619,7 @@ function PodborFormInner({
             <YesNo value={conscriptSpouse} onChange={setConscriptSpouse} />
           </div>
         </div>
+        )}
 
         <Question label="В семье есть ветеран боевых действий?">
           <YesNo value={veteranCombat} onChange={setVeteranCombat} />
