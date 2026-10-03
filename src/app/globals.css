@@ -1031,7 +1031,7 @@ html:has(.admin-shell) {
    красный на тёмно-синем плохо читается. Кнопки и кружки (bg-primary) остаются
    красными. */
 html:has(.admin-shell) .text-primary,
-html:has(.admin-shell) .hover:text-primary:hover {
+html:has(.admin-shell) .hover\:text-primary:hover {
   color: #bfd2f5;
 }
 
@@ -1054,7 +1054,7 @@ html:has(.admin-shell) .hover:text-primary:hover {
   color-scheme: light;
 }
 html:has(.admin-shell) .light-surface .text-primary,
-html:has(.admin-shell) .light-surface .hover:text-primary:hover {
+html:has(.admin-shell) .light-surface .hover\:text-primary:hover {
   color: #8e1d2c;
 }
 

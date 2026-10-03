@@ -15,6 +15,7 @@ import {
   Heart,
   ShieldCheck,
   LifeBuoy,
+  PlayCircle,
   UserPlus,
   LogOut,
   Map,
@@ -99,6 +100,7 @@ export default async function AdminLayout({
             { href: "/admin/region-saved", label: "Избранное региона", icon: <Heart /> },
             { href: "/admin/region-views", label: "Что смотрят", icon: <Eye /> },
             { href: "/admin/invite", label: "Пригласить пользователя", icon: <UserPlus /> },
+            { href: "/admin/instructions", label: "Инструкции", icon: <PlayCircle /> },
             { href: "/admin/support", label: "Техподдержка", icon: <LifeBuoy />, badge: supportBadge },
           ],
         },
@@ -131,6 +133,7 @@ export default async function AdminLayout({
             { href: "/admin/measures", label: "Каталог мер", icon: <LayoutGrid /> },
             { href: "/admin/representatives", label: "Координаторы в регионах", icon: <Landmark /> },
             { href: "/admin/knowledge", label: "База знаний", icon: <FolderInput /> },
+            { href: "/admin/instructions", label: "Инструкции", icon: <PlayCircle /> },
             { href: "/admin/support", label: "Техподдержка", icon: <LifeBuoy />, badge: supportBadge },
             // Сотрудники: координаторы по регионам, техспецы, владельцы и
             // передача прав. Видно и владельцу, и техспецу.
