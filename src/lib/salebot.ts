@@ -180,6 +180,41 @@ export async function sendCodeViaSalebot(params: {
 }
 
 /**
+ * Уведомление сотруднику (координатору, техспецу, владельцу) в его мессенджер.
+ *
+ * Своё кодовое слово staff_alert, а не admin_alert: блок admin_alert в Salebot
+ * пересылает текст в служебный чат админов (заявки на кабинет), а здесь нужно
+ * написать самому сотруднику. Воронка отдаёт #{staff_text} как сообщение и
+ * #{staff_link} как ссылку на кнопке «Открыть».
+ */
+export async function notifyStaffSalebot(params: {
+  clientId: string;
+  text: string;
+  link: string;
+}): Promise<{ ok: boolean; detail: string }> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return { ok: false, detail: "SALEBOT_API_KEY не задан" };
+
+  const trigger = process.env.SALEBOT_STAFF_TRIGGER ?? "staff_alert";
+  try {
+    const res = await fetch(`https://chatter.salebot.pro/api/${key}/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: params.clientId,
+        message: trigger,
+        staff_text: params.text,
+        staff_link: params.link,
+      }),
+    });
+    const text = await res.text();
+    return { ok: res.ok, detail: `${res.status} ${text.slice(0, 300)}` };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/**
  * Сообщение администратору в мессенджер: новая заявка на кабинет.
  *
  * Отдельная функция, а не notifySalebotAnswer: там кодовое слово про ответ на

@@ -1,7 +1,7 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { absoluteUrl } from "@/lib/site";
-import { notifyCoordinatorChatReply, notifyAdminsSalebot } from "@/lib/salebot";
+import { notifyCoordinatorChatReply, notifyStaffSalebot } from "@/lib/salebot";
 import { sendCoordinatorChatReplyEmail, sendCoordinatorChatNewMessageEmail } from "@/lib/notify/email";
 import { sendPushToUser } from "@/lib/push";
 import { countUnreadForUser as countChatUnreadForUser, countUnreadForRegion } from "@/lib/coordinator-chat-db";
@@ -153,7 +153,7 @@ export async function notifyCoordinatorsAboutUserMessage(
         log(`пуш координатору не ушёл: ${e instanceof Error ? e.message : e}`);
       }
       if (ch.messenger && c.salebot_client_id) {
-        const res = await notifyAdminsSalebot({
+        const res = await notifyStaffSalebot({
           clientId: c.salebot_client_id,
           text: `${userName} написал(а) в чате: ${preview.slice(0, 200)}`,
           link,

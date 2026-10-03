@@ -1,7 +1,7 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { absoluteUrl } from "@/lib/site";
-import { notifyAdminsSalebot } from "@/lib/salebot";
+import { notifyStaffSalebot } from "@/lib/salebot";
 import { sendPushToUser } from "@/lib/push";
 import { sendSupportEmail } from "@/lib/notify/email";
 import { resolveChannels, TARGET_FIELDS } from "@/lib/coordinator-notify";
@@ -49,7 +49,7 @@ async function deliver(
     log(`пуш не ушёл: ${e instanceof Error ? e.message : e}`);
   }
   if (ch.messenger && t.salebot_client_id) {
-    const res = await notifyAdminsSalebot({ clientId: t.salebot_client_id, text: `${opts.title}: ${opts.text.slice(0, 220)}`, link });
+    const res = await notifyStaffSalebot({ clientId: t.salebot_client_id, text: `${opts.title}: ${opts.text.slice(0, 220)}`, link });
     log(`бот: ${res.ok ? "ок" : "не ушло"} — ${res.detail}`);
   }
   if (ch.email && t.email) {
