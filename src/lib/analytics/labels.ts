@@ -5,6 +5,7 @@ export const SOURCE_LABEL: Record<string, string> = {
   kurs: "Курс «Шпаргалка»",
   bot: "Чат-боты",
   baza: "База знаний",
+  coordinator: "Приглашения координаторов",
   "без метки": "Без метки",
 };
 

@@ -7,6 +7,7 @@ import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 import { resolveRegion } from "@/lib/preview-region";
 import { AdminPage } from "@/components/admin/ui/admin-page";
 import { MeasuresList } from "@/components/admin/measures-list";
+import { MeasureFeedbackNote } from "@/components/admin/measure-feedback-note";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
@@ -36,8 +37,8 @@ export default async function AdminMeasuresPage() {
       description={
         scope === "coordinator"
           ? region
-            ? `Меры вашего региона — «${region}»: опубликованные и черновики. Заводить новые и удалять нельзя, только править содержание.`
-            : "Выберите регион справа сверху, чтобы посмотреть его меры, — пока показаны все."
+            ? `Меры вашего региона — «${region}»: опубликованные и черновики. Нажмите на меру, чтобы открыть её целиком.`
+            : "Меры всех регионов."
           : "Все меры поддержки: и опубликованные, и черновики. Нажмите на меру, чтобы отредактировать её или прикрепить материалы."
       }
       actions={
@@ -51,10 +52,12 @@ export default async function AdminMeasuresPage() {
         ) : undefined
       }
     >
+      {scope === "coordinator" && <MeasureFeedbackNote className="mb-4" />}
       <MeasuresList
         measures={measures}
         regions={[...usedRegions]}
         categories={[...CATEGORIES]}
+        hideLevelAndRegion={scope === "coordinator"}
       />
     </AdminPage>
   );

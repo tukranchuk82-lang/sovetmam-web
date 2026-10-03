@@ -535,3 +535,32 @@ export async function sendCoordinatorChatNewMessageEmail(
     html,
   });
 }
+
+/** Письмо о сообщении в чате техподдержки (в обе стороны: и координатору, и техспецу). */
+export async function sendSupportEmail(
+  to: string,
+  data: { subject: string; text: string },
+  chatLink: string,
+): Promise<void> {
+  const transport = getTransport();
+
+  if (!transport) {
+    console.log(`[Техподдержка][stub] ${to}: «${data.text}» — ${chatLink}`);
+    return;
+  }
+
+  const html = shell(`
+    <p style="font-size:13px;color:#6b7078;margin:0 0 4px">Техническая поддержка</p>
+    <div style="background:#F3F1EC;border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.55;white-space:pre-wrap">${esc(data.text)}</div>
+
+    <p style="margin:22px 0 8px">${button(chatLink, "Открыть переписку")}</p>
+  `);
+
+  await transport.sendMail({
+    from: fromAddress(),
+    to,
+    subject: data.subject,
+    text: `${data.text}\n\nОткрыть переписку: ${chatLink}`,
+    html,
+  });
+}

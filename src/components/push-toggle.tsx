@@ -32,7 +32,14 @@ function permissionSnapshot(): NotificationPermission | "unsupported" {
   return Notification.permission;
 }
 
-export function PushToggle() {
+export function PushToggle({
+  description = "Придут, когда ответим на ваше обращение — даже если приложение закрыто.",
+  bare = false,
+}: {
+  description?: string;
+  /** Без рамки карточки — когда переключатель стоит внутри другой панели. */
+  bare?: boolean;
+}) {
   const permission = useSyncExternalStore(
     subscribe,
     permissionSnapshot,
@@ -99,16 +106,14 @@ export function PushToggle() {
   const on = permission === "granted";
 
   return (
-    <div className="rounded-2xl border bg-card p-4">
+    <div className={bare ? "" : "rounded-2xl border bg-card p-4"}>
       <div className="flex items-start gap-3">
         <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
           {on ? <Bell className="size-4" /> : <BellOff className="size-4" />}
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">Уведомления на этом устройстве</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Придут, когда ответим на ваше обращение — даже если приложение закрыто.
-          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
 
           {note && <p className="mt-2 text-xs font-medium text-brand">{note}</p>}
 

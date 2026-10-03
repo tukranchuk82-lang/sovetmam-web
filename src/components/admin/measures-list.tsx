@@ -12,6 +12,7 @@ import {
   SegmentTabs,
 } from "@/components/admin/ui/filter-bar";
 import { EmptyState, StatusBadge } from "@/components/admin/ui/primitives";
+import { MeasureCards } from "@/components/admin/measure-cards";
 
 // Список мер в админке. Мер больше двух тысяч: плотная таблица с сортировкой,
 // постраничным выводом и липкой панелью фильтров — найти нужную можно за
@@ -34,10 +35,13 @@ export function MeasuresList({
   measures,
   regions,
   categories,
+  hideLevelAndRegion = false,
 }: {
   measures: MeasureIndexRow[];
   regions: string[];
   categories: string[];
+  /** У координатора регион один, а уровень и регион выбирать незачем. */
+  hideLevelAndRegion?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<Status>("all");
@@ -153,20 +157,23 @@ export function MeasuresList({
             { key: "draft", label: "Черновики", count: counts.draft },
           ]}
         />
-        <FilterSearch value={query} onChange={setQuery} placeholder="Название, регион или slug" />
-        <FilterSelect label="Уровень" value={level} onChange={setLevel}>
-          <option value="">Любой уровень</option>
-          <option value="federal">Федеральные</option>
-          <option value="regional">Региональные</option>
-        </FilterSelect>
-        <FilterSelect label="Регион" value={region} onChange={setRegion}>
-          <option value="">Все регионы</option>
-          {regions.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </FilterSelect>
+        {!hideLevelAndRegion && (
+          <>
+            <FilterSelect label="Уровень" value={level} onChange={setLevel}>
+              <option value="">Любой уровень</option>
+              <option value="federal">Федеральные</option>
+              <option value="regional">Региональные</option>
+            </FilterSelect>
+            <FilterSelect label="Регион" value={region} onChange={setRegion}>
+              <option value="">Все регионы</option>
+              {regions.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </FilterSelect>
+          </>
+        )}
         <FilterSelect label="Категория" value={category} onChange={setCategory}>
           <option value="">Все категории</option>
           {categories.map((c) => (
@@ -175,6 +182,13 @@ export function MeasuresList({
             </option>
           ))}
         </FilterSelect>
+        {/* Поиск — на отдельной строке под фильтрами. */}
+        <FilterSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Поиск по названию"
+          className="basis-full md:max-w-md"
+        />
         <ResetFilters
           visible={filtered}
           onClick={() => {
@@ -186,40 +200,46 @@ export function MeasuresList({
         />
       </FilterBar>
 
-      <DataTable
-        rows={rows}
-        columns={columns}
-        rowKey={(m) => m.slug}
-        rowHref={(m) => `/admin/measures/${m.slug}`}
-        resetKey={resetKey}
-        empty={
-          <EmptyState icon={<LayoutGrid />} title="Ничего не нашлось">
-            Попробуйте другой запрос или сбросьте фильтры.
-          </EmptyState>
-        }
-        mobileCard={(m) => (
-          <div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {m.level === "federal" ? (
-                <StatusBadge tone="brand">Федеральная</StatusBadge>
-              ) : (
-                <StatusBadge tone="info">{m.region ?? "Региональная"}</StatusBadge>
-              )}
-              {m.isPublished ? (
-                <StatusBadge tone="done" icon={<Eye />}>
-                  Опубликована
-                </StatusBadge>
-              ) : (
-                <StatusBadge tone="draft" icon={<EyeOff />}>
-                  Черновик
-                </StatusBadge>
-              )}
+      {hideLevelAndRegion ? (
+        <div className="mt-5">
+          <MeasureCards rows={rows} />
+        </div>
+      ) : (
+        <DataTable
+          rows={rows}
+          columns={columns}
+          rowKey={(m) => m.slug}
+          rowHref={(m) => `/admin/measures/${m.slug}`}
+          resetKey={resetKey}
+          empty={
+            <EmptyState icon={<LayoutGrid />} title="Ничего не нашлось">
+              Попробуйте другой запрос или сбросьте фильтры.
+            </EmptyState>
+          }
+          mobileCard={(m) => (
+            <div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {m.level === "federal" ? (
+                  <StatusBadge tone="brand">Федеральная</StatusBadge>
+                ) : (
+                  <StatusBadge tone="info">{m.region ?? "Региональная"}</StatusBadge>
+                )}
+                {m.isPublished ? (
+                  <StatusBadge tone="done" icon={<Eye />}>
+                    Опубликована
+                  </StatusBadge>
+                ) : (
+                  <StatusBadge tone="draft" icon={<EyeOff />}>
+                    Черновик
+                  </StatusBadge>
+                )}
+              </div>
+              <p className="mt-1.5 font-semibold leading-snug">{m.title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{m.amount || "размер не указан"}</p>
             </div>
-            <p className="mt-1.5 font-semibold leading-snug">{m.title}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{m.amount || "размер не указан"}</p>
-          </div>
-        )}
-      />
+          )}
+        />
+      )}
     </>
   );
 }

@@ -26,7 +26,7 @@ export function AdminPage({
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
             {icon && (
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary [&>svg]:size-[18px]">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#F6EDE8] text-[#8E1D2C] [&>svg]:size-[18px]">
                 {icon}
               </span>
             )}

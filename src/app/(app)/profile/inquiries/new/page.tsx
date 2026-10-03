@@ -4,6 +4,8 @@ import { getCurrentAppUser } from "@/lib/user-session";
 import { getMeasureBySlug } from "@/lib/measures-db";
 import { REGIONS } from "@/lib/measures";
 import { REGION_COOKIE } from "@/lib/region";
+import { hasCoordinatorForRegion } from "@/lib/coordinator-chat-db";
+import { getUserChatRegion } from "@/lib/chat-region";
 import { createInquiryAction } from "@/app/(app)/profile/inquiries/actions";
 import { NewInquiryForm } from "@/components/new-inquiry-form";
 import type { InquiryType } from "@/lib/inquiries";
@@ -25,6 +27,15 @@ export default async function NewInquiryPage({
   }
 
   const sp = await searchParams;
+
+  // Регион определяет дорогу: есть координатор — чат, нет — эта форма (письмо
+  // председателю). Не знаем регион — сначала просим выбрать.
+  const chatRegion = await getUserChatRegion(user);
+  const here = `/profile/inquiries/new${sp.measure ? `?measure=${encodeURIComponent(sp.measure)}` : ""}`;
+  if (!chatRegion) redirect(`/profile/coordinator-chat/region?next=${encodeURIComponent(here)}`);
+  if (await hasCoordinatorForRegion(chatRegion)) {
+    redirect(`/profile/coordinator-chat${sp.measure ? `?measure=${encodeURIComponent(sp.measure)}` : ""}`);
+  }
   const measure = sp.measure ? await getMeasureBySlug(sp.measure) : null;
   const initialType: InquiryType =
     sp.type === "proposal"

@@ -3,19 +3,20 @@
 import { Eye } from "lucide-react";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { EmptyState } from "@/components/admin/ui/primitives";
+import type { MeasureViewRow } from "@/lib/analytics/views";
 
-interface Row {
-  slug: string;
-  title: string;
-  views: number;
-  people: number;
-  saved: number;
-  href: string;
+function fmtSeconds(s: number | null): string {
+  if (s == null) return "—";
+  if (s < 60) return `${s} с`;
+  return `${Math.floor(s / 60)} мин ${String(s % 60).padStart(2, "0")} с`;
 }
 
-/** Топ мер по просмотрам; «сохранили» рядом показывает, сколько интереса превращается в закладку. */
-export function MeasureViewsTable({ rows }: { rows: Row[] }) {
-  const columns: Column<Row>[] = [
+const fmtPct = (p: number | null) => (p == null ? "—" : `${p}%`);
+
+/** Топ мер: сколько открывали, как долго читали, дочитывали ли и что нажимали. */
+export function MeasureViewsTable({ rows }: { rows: MeasureViewRow[] }) {
+  const num = "tabular-nums";
+  const columns: Column<MeasureViewRow>[] = [
     {
       key: "title",
       header: "Мера",
@@ -24,25 +25,50 @@ export function MeasureViewsTable({ rows }: { rows: Row[] }) {
     },
     {
       key: "views",
-      header: "Просмотров",
-      className: "w-[130px] text-right",
+      header: "Открыли",
+      className: "w-[100px] text-right",
       sort: (a, b) => a.views - b.views,
-      cell: (r) => <span className="tabular-nums font-semibold">{r.views}</span>,
+      cell: (r) => <span className={`${num} font-semibold`}>{r.views}</span>,
     },
     {
       key: "people",
       header: "Людей",
-      className: "w-[100px] text-right",
+      className: "w-[80px] text-right",
+      hideBelow: "lg",
       sort: (a, b) => a.people - b.people,
-      cell: (r) => <span className="tabular-nums">{r.people}</span>,
+      cell: (r) => <span className={num}>{r.people}</span>,
+    },
+    {
+      key: "time",
+      header: "Время",
+      className: "w-[110px] text-right",
+      hideBelow: "lg",
+      sort: (a, b) => (a.avgSeconds ?? -1) - (b.avgSeconds ?? -1),
+      cell: (r) => <span className={num}>{fmtSeconds(r.avgSeconds)}</span>,
+    },
+    {
+      key: "read",
+      header: "Дочитали",
+      className: "w-[100px] text-right",
+      hideBelow: "xl",
+      sort: (a, b) => (a.readPct ?? -1) - (b.readPct ?? -1),
+      cell: (r) => <span className={num}>{fmtPct(r.readPct)}</span>,
+    },
+    {
+      key: "action",
+      header: "Нажали",
+      className: "w-[90px] text-right",
+      hideBelow: "xl",
+      sort: (a, b) => (a.actionPct ?? -1) - (b.actionPct ?? -1),
+      cell: (r) => <span className={num}>{fmtPct(r.actionPct)}</span>,
     },
     {
       key: "saved",
       header: "Сохранили",
-      className: "w-[120px] text-right",
+      className: "w-[100px] text-right",
       sort: (a, b) => a.saved - b.saved,
       cell: (r) =>
-        r.saved > 0 ? <span className="tabular-nums">{r.saved}</span> : <span className="text-muted-foreground/50">—</span>,
+        r.saved > 0 ? <span className={num}>{r.saved}</span> : <span className="text-muted-foreground/50">—</span>,
     },
   ];
 
@@ -58,7 +84,10 @@ export function MeasureViewsTable({ rows }: { rows: Row[] }) {
         <div>
           <p className="font-semibold leading-snug">{r.title}</p>
           <p className="mt-1 text-[12.5px] text-muted-foreground">
-            просмотров <b className="text-foreground">{r.views}</b> · людей {r.people} · сохранили {r.saved}
+            открыли <b className="text-foreground">{r.views}</b> · людей {r.people} · сохранили {r.saved}
+          </p>
+          <p className="mt-0.5 text-[12.5px] text-muted-foreground">
+            время {fmtSeconds(r.avgSeconds)} · дочитали {fmtPct(r.readPct)} · нажали {fmtPct(r.actionPct)}
           </p>
         </div>
       )}

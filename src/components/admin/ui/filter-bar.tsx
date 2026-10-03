@@ -39,13 +39,13 @@ export function FilterSearch({
 }) {
   return (
     <div className={cn("relative min-w-[220px] flex-1 md:max-w-sm", className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6f7580]" />
       <input
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-9 w-full rounded-lg border border-input bg-card pl-9 pr-3 text-sm shadow-[0_1px_2px_rgba(32,36,44,0.04)] outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/15"
+        className="h-9 w-full rounded-lg border border-transparent bg-[#E9EBEF] pl-9 pr-3 text-sm text-[#20242c] outline-none transition-colors [color-scheme:light] placeholder:text-[#6f7580] focus:border-[#8E1D2C]/50 focus:ring-2 focus:ring-[#8E1D2C]/20"
       />
     </div>
   );
@@ -70,8 +70,8 @@ export function FilterSelect({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={cn(
-        "h-9 max-w-[220px] rounded-lg border border-input bg-card px-2.5 text-sm shadow-[0_1px_2px_rgba(32,36,44,0.04)] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15",
-        value && "border-primary/50 bg-primary/[0.04] font-medium text-primary",
+        "h-9 max-w-[240px] rounded-lg border border-white/25 bg-white/[0.08] px-2.5 text-sm font-medium text-white outline-none transition-colors [color-scheme:dark] focus:border-white/60",
+        value && "border-white bg-white/[0.16] font-semibold",
         className,
       )}
     >
@@ -91,7 +91,7 @@ export function SegmentTabs<T extends string>({
   items: { key: T; label: string; count?: number }[];
 }) {
   return (
-    <div className="inline-flex rounded-lg bg-muted p-0.5" role="tablist">
+    <div className="inline-flex max-w-full overflow-x-auto rounded-lg bg-muted p-0.5" role="tablist">
       {items.map((it) => {
         const active = it.key === value;
         return (

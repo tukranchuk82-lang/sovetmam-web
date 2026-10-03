@@ -84,7 +84,7 @@ export function DataTable<T>({
 
   if (sorted.length === 0) {
     return (
-      <div className="mt-4 rounded-2xl border bg-card">
+      <div className="mt-4 light-surface rounded-2xl border bg-card">
         {empty ?? <EmptyState title="Ничего не найдено">Попробуйте изменить условия поиска.</EmptyState>}
       </div>
     );
@@ -93,7 +93,7 @@ export function DataTable<T>({
   return (
     <div className="mt-4">
       {/* Таблица — от md */}
-      <div className="hidden overflow-hidden rounded-2xl border bg-card shadow-[0_1px_2px_rgba(32,36,44,0.04)] md:block">
+      <div className="light-surface hidden overflow-hidden light-surface rounded-2xl border bg-card shadow-[0_1px_2px_rgba(32,36,44,0.04)] md:block">
         <table className="w-full table-fixed border-collapse text-sm">
           <thead>
             <tr className="border-b bg-muted/60 text-left">
@@ -187,7 +187,7 @@ export function DataTable<T>({
             <Link
               key={rowKey(row)}
               href={href}
-              className="block rounded-xl border bg-card p-3 active:bg-muted/50"
+              className="light-surface block rounded-xl border bg-card p-3 active:bg-muted/50"
             >
               {body}
             </Link>
@@ -196,12 +196,12 @@ export function DataTable<T>({
               key={rowKey(row)}
               type="button"
               onClick={() => onRowClick(row)}
-              className="block w-full rounded-xl border bg-card p-3 text-left active:bg-muted/50"
+              className="light-surface block w-full rounded-xl border bg-card p-3 text-left active:bg-muted/50"
             >
               {body}
             </button>
           ) : (
-            <div key={rowKey(row)} className="rounded-xl border bg-card p-3">
+            <div key={rowKey(row)} className="light-surface rounded-xl border bg-card p-3">
               {body}
             </div>
           );

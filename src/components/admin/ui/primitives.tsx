@@ -7,6 +7,8 @@ export function StatCard({
   hint,
   delta,
   tone = "default",
+  icon,
+  color = "rose",
   className,
 }: {
   label: string;
@@ -15,15 +17,25 @@ export function StatCard({
   /** Изменение к прошлому периоду, %; null — сравнивать не с чем. */
   delta?: number | null;
   tone?: "default" | "accent" | "warn";
+  /** Значок слева в цветной плитке — оживляет ряд цифр. */
+  icon?: React.ReactNode;
+  color?: keyof typeof ICON_COLORS;
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border bg-card px-4 py-3.5 shadow-[0_1px_2px_rgba(32,36,44,0.04)]",
+        "light-surface rounded-2xl border bg-card px-4 py-3.5 shadow-[0_1px_2px_rgba(32,36,44,0.04)]",
+        icon && "sm:flex sm:items-center sm:gap-3",
         className,
       )}
     >
+      {icon && (
+        <span className={cn("hidden size-11 shrink-0 place-items-center rounded-xl sm:grid [&>svg]:size-5", ICON_COLORS[color])}>
+          {icon}
+        </span>
+      )}
+      <div className="min-w-0">
       <p
         className={cn(
           "text-[26px] font-bold leading-none tracking-tight tabular-nums",
@@ -49,16 +61,25 @@ export function StatCard({
         </p>
       )}
       {hint && <p className="mt-0.5 text-[11px] text-muted-foreground/80">{hint}</p>}
+      </div>
     </div>
   );
 }
+
+/** Подложки значков: фирменные оттенки — бордовый, синий, небесный, мятный. */
+const ICON_COLORS = {
+  rose: "bg-[#F6E4E6] text-[#8E1D2C]",
+  blue: "bg-[#E4EBF7] text-[#1B3A6B]",
+  sky: "bg-[#DDEEFB] text-[#1F6AA8]",
+  green: "bg-[#DFF1E8] text-[#23735A]",
+} as const;
 
 const TONES = {
   new: "bg-amber-50 text-amber-700 ring-amber-200",
   done: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   draft: "bg-stone-100 text-stone-600 ring-stone-200",
   danger: "bg-red-50 text-red-700 ring-red-200",
-  info: "bg-[#1B3A6B]/[0.07] text-[#1B3A6B] ring-[#1B3A6B]/15",
+  info: "bg-[#5E86C9]/20 text-[#A9C3F0] ring-[#5E86C9]/30",
   brand: "bg-primary/[0.08] text-primary ring-primary/20",
 } as const;
 

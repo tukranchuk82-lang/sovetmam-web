@@ -47,7 +47,7 @@ export function RequestsList({ items }: { items: BotHelpRequest[] }) {
   return (
     <div className="mt-4 space-y-3">
       {open.length === 0 && (
-        <p className="rounded-2xl border bg-card p-4 text-sm text-muted-foreground">
+        <p className="light-surface rounded-2xl border bg-card p-4 text-sm text-muted-foreground">
           Новых заявок нет. Они появятся здесь, когда человек напишет боту из
           формы входа — там есть строчка «код не пришёл».
         </p>
@@ -58,7 +58,7 @@ export function RequestsList({ items }: { items: BotHelpRequest[] }) {
       ))}
 
       {closed.length > 0 && (
-        <details className="rounded-2xl border bg-card p-4">
+        <details className="light-surface rounded-2xl border bg-card p-4">
           <summary className="cursor-pointer text-sm font-medium">
             Разобранные заявки · {closed.length}
           </summary>
@@ -129,7 +129,7 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border bg-card p-4">
+    <form onSubmit={submit} className="light-surface rounded-2xl border bg-card p-4">
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-sm font-semibold">
           {req.name || "Без имени"}
@@ -188,7 +188,7 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
         />
       </div>
 
-      {error && <p className="mt-2 text-sm text-[#8E1D2C]">{error}</p>}
+      {error && <p className="mt-2 text-sm text-[#FF8A97]">{error}</p>}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button

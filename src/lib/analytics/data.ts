@@ -219,6 +219,12 @@ export interface ViewLite {
   visitor: string | null;
   user_id: string | null;
   created_at: string;
+  source: string | null;
+  region: string | null;
+  dwell_seconds: number;
+  max_scroll: number;
+  sections: string[];
+  actions: string[];
 }
 
 export const loadViews = unstable_cache(
@@ -227,7 +233,7 @@ export const loadViews = unstable_cache(
     return fetchAllPages<ViewLite>((from, to) =>
       sb
         .from("measure_views")
-        .select("slug, visitor, user_id, created_at")
+        .select("slug, visitor, user_id, created_at, source, region, dwell_seconds, max_scroll, sections, actions")
         .order("created_at", { ascending: false })
         .order("id", { ascending: true })
         .range(from, to),

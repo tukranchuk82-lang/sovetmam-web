@@ -17,7 +17,7 @@ export function AdminPageHeader({
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2.5">
-          <span className="text-primary [&>svg]:size-6">{icon}</span>
+          <span className="grid size-9 place-items-center rounded-xl bg-[#F6EDE8] text-[#8E1D2C] [&>svg]:size-5">{icon}</span>
           <h1
             className="text-[22px] font-bold leading-tight tracking-tight text-foreground"
             style={{ fontFamily: "var(--font-playfair), serif" }}

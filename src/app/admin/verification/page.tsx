@@ -99,7 +99,7 @@ export default async function VerificationPage({
         </DayLink>
       </div>
 
-      <div className="mt-4 rounded-2xl border bg-card p-4">
+      <div className="mt-4 light-surface rounded-2xl border bg-card p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Порция дня
         </p>
@@ -133,7 +133,7 @@ export default async function VerificationPage({
               <div
                 key={r.slug}
                 className={cn(
-                  "flex items-start gap-3 rounded-2xl border bg-card p-3.5",
+                  "flex items-start gap-3 light-surface rounded-2xl border bg-card p-3.5",
                   !stale && "border-emerald-300/60 bg-emerald-50/40",
                 )}
               >

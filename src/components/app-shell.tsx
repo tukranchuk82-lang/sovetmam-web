@@ -48,6 +48,7 @@ export function AppShell({
   authed,
   logoutAction,
   inquiryHref = "/profile/inquiries/new",
+  inquiryLabel = "Обращение",
   unread = 0,
   messengerHint = false,
   children,
@@ -58,6 +59,8 @@ export function AppShell({
   logoutAction: () => Promise<void>;
   /** Куда ведёт «Обращение» в нижнем меню — чат с координатором или форма обращения. */
   inquiryHref?: string;
+  /** Подпись пункта: «Координатор» там, где есть чат, иначе «Обращение». */
+  inquiryLabel?: string;
   /** Непрочитанное по этому же адресу — кружок в меню и на иконке. */
   unread?: number;
   /** Напомнить подключить мессенджер — кружок на аватарке, с задержкой. */
@@ -312,7 +315,7 @@ export function AppShell({
         <MessengerConnectedToast />
       </div>
 
-      <BottomNav background={NAVY} inquiryHref={inquiryHref} unread={unread} />
+      <BottomNav background={NAVY} inquiryHref={inquiryHref} inquiryLabel={inquiryLabel} unread={unread} />
     </div>
   );
 }

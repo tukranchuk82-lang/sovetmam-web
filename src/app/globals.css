@@ -137,32 +137,37 @@
   --sidebar-ring: oklch(0.62 0.23 29);
 }
 
-/* Админка — один цельный дизайн (раньше здесь было 4 недоделанных темы на
-   выбор через [data-admin-theme]; переключатель убрали, оставили одну).
-   Тёплый кремовый рабочий фон, белые карточки с тонкой рамкой вместо теней,
-   тот же бордовый акцент, что и в бренд-ките. Сайдбар — тёмно-синий, его
-   цвета заданы прямо в разметке (src/app/admin/layout.tsx), не через токены:
-   это единственная тёмная поверхность на светлом фоне, а не отдельная тема. */
-.admin-shell {
-  --background: #f7f5f0;
-  --foreground: #20242c;
-  --card: #ffffff;
-  --card-foreground: #20242c;
-  --popover: #ffffff;
-  --popover-foreground: #20242c;
-  --primary: #8e1d2c;
+/* Админка — тёмная тема целиком (с 03.10.2026, по просьбе Тани: «намного
+   лучше смотрится»). Фон и карточки — глубокий тёмно-синий, как у чата с
+   координатором, акцент — фирменный красный, но только на светлой подложке
+   (иконки в светлых плитках) или сплошной заливкой с белым текстом (кружки,
+   кнопки). Красный текст и тонкие линии на тёмно-синем резали глаз — такой
+   текст (ссылки) в админке светло-голубой, см. правило ниже.
+   Токены заданы и на самом .admin-shell, и на html, пока админка на экране:
+   всплывающие панели (Drawer, меню) рисуются в body, вне .admin-shell, и без
+   этого остались бы светлыми. */
+.admin-shell,
+html:has(.admin-shell) {
+  --background: #0e1830;
+  --foreground: #eef1f7;
+  --card: #1f3258;
+  --card-foreground: #eef1f7;
+  --popover: #1f3258;
+  --popover-foreground: #eef1f7;
+  --primary: #b9384a;
   --primary-foreground: #ffffff;
-  --secondary: #f7d9dc;
-  --secondary-foreground: #8e1d2c;
-  --muted: #f0ece2;
-  --muted-foreground: #8c8676;
-  --accent: #f7d9dc;
-  --accent-foreground: #8e1d2c;
-  --destructive: oklch(0.55 0.2 27);
-  --border: #ece7dc;
-  --input: #e4e0d6;
-  --ring: #8e1d2c;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.09);
+  --muted-foreground: rgba(238, 241, 247, 0.62);
+  --accent: rgba(185, 56, 74, 0.2);
+  --accent-foreground: #ffb3bd;
+  --destructive: #ff6b7d;
+  --border: rgba(255, 255, 255, 0.13);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #b9384a;
   --radius: 0.875rem;
+  color-scheme: dark;
 }
 
 /* ===================== Тема «Яркая» (детская) =====================
@@ -1021,4 +1026,45 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
+}
+/* Админка: «акцентный» текст и ссылки — светло-голубые, а не красные: тонкий
+   красный на тёмно-синем плохо читается. Кнопки и кружки (bg-primary) остаются
+   красными. */
+html:has(.admin-shell) .text-primary,
+html:has(.admin-shell) .hover:text-primary:hover {
+  color: #bfd2f5;
+}
+
+/* Светлая поверхность внутри тёмной админки (таблицы, карточки списков): токены
+   возвращены к светлым значениям, чтобы всё внутри — бейджи, подписи, ссылки —
+   читалось как на светлом фоне. */
+.light-surface {
+  --foreground: #20242c;
+  --card-foreground: #20242c;
+  --card: #ffffff;
+  --muted: #f0ece2;
+  --muted-foreground: #7d776a;
+  --border: #e8e1d4;
+  --input: #e4e0d6;
+  --primary: #8e1d2c;
+  --primary-foreground: #ffffff;
+  --accent: #f7d9dc;
+  --accent-foreground: #8e1d2c;
+  color: #20242c;
+  color-scheme: light;
+}
+html:has(.admin-shell) .light-surface .text-primary,
+html:has(.admin-shell) .light-surface .hover:text-primary:hover {
+  color: #8e1d2c;
+}
+
+/* Цвета графиков: на тёмной подложке — светло-голубая линия, на светлой — фирменные. */
+.admin-shell,
+html:has(.admin-shell) {
+  --chart-line: #8fb0e8;
+  --chart-grid: rgba(255, 255, 255, 0.1);
+}
+.light-surface {
+  --chart-line: #8e1d2c;
+  --chart-grid: #e4e0d6;
 }

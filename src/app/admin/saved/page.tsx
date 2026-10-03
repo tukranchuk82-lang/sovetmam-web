@@ -45,12 +45,12 @@ export default async function AdminSavedPage({
         <StatCard label="Людей в базе" value={r.totalPeople} />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-5">
-        <section className="rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)] lg:col-span-3">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-5">
+        <section className="light-surface rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)] lg:col-span-3">
           <h2 className="mb-3 text-[11.5px] font-semibold uppercase tracking-wide text-muted-foreground">Сохранения по дням</h2>
           <AreaChart data={r.perDay} unit=" сохр." />
         </section>
-        <section className="rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)] lg:col-span-2">
+        <section className="light-surface rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)] lg:col-span-2">
           <h2 className="mb-3 text-[11.5px] font-semibold uppercase tracking-wide text-muted-foreground">Топ мер</h2>
           <BarList
             items={r.top.map((t) => ({ label: t.title, value: t.value, hint: t.people > 1 ? `· ${t.people} чел.` : undefined, href: t.href }))}

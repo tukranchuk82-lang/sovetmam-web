@@ -32,10 +32,8 @@ import { LegalLinks } from "@/components/legal-links";
 import {
   isStaff,
   markMessengerHintSeen,
-  channelConnected,
   ROLE_LABELS as APP_ROLE_LABELS,
   type AppUser,
-  type MessengerChannel,
 } from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { listInquiriesForUser } from "@/lib/inquiries-db";
@@ -46,9 +44,9 @@ import {
 } from "@/lib/coordinator-chat-db";
 import { Avatar } from "@/components/avatar";
 import { AvatarEditor } from "@/components/avatar-editor";
+import { getUserChatRegion } from "@/lib/chat-region";
 import { MessengerManager } from "@/components/messenger-manager";
 import { PushToggle } from "@/components/push-toggle";
-import { CoordinatorChatNotifyPicker } from "@/components/coordinator-chat-notify-picker";
 import { Badge } from "@/components/ui/badge";
 import { MotionFadeIn } from "@/components/motion";
 
@@ -262,13 +260,9 @@ async function AppUserProfile({ user }: { user: AppUser }) {
   // app_users.region: та колонка только у самих координаторов. Чат виден,
   // только если в регионе реально назначен координатор — по мере того как
   // координаторов будут добавлять в новые регионы, карточка появится сама.
-  const region = typeof user.survey?.region === "string" ? user.survey.region : null;
+  const region = await getUserChatRegion(user);
   const chatAvailable = asUser && region ? await hasCoordinatorForRegion(region) : false;
   const chatUnread = chatAvailable ? await countCoordinatorChatUnread(user.id) : 0;
-  const notifyChannels: (MessengerChannel | "email")[] = [
-    "email",
-    ...(["telegram", "vk", "max"] as MessengerChannel[]).filter((ch) => channelConnected(user, ch)),
-  ];
 
   // Открыл кабинет — напоминание про мессенджер своё дело сделало: человек
   // увидел блок «Мессенджеры» ниже. Кружочек на аватарке больше не нужен.
@@ -456,18 +450,13 @@ async function AppUserProfile({ user }: { user: AppUser }) {
           </div>
 
           {chatAvailable && (
-            <div className="mt-5">
-              <p className="text-sm font-medium">Уведомлять об ответе координатора</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Один канал на выбор — переписка в чате видна в любом случае.
-              </p>
-              <div className="mt-2">
-                <CoordinatorChatNotifyPicker
-                  current={user.coordinatorChatNotifyChannel}
-                  available={notifyChannels}
-                />
-              </div>
-            </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Уведомления о сообщениях координатора — бот, пуш и письмо — настраиваются в самом{" "}
+              <Link href="/profile/coordinator-chat" className="font-medium text-primary underline">
+                чате с координатором
+              </Link>
+              .
+            </p>
           )}
         </section>
       )}
@@ -553,14 +542,12 @@ async function AppUserProfile({ user }: { user: AppUser }) {
                   title="База знаний"
                   hint="Загружать материалы для AI"
                 />
-                {mode === "tech" && (
-                  <AdminLink
-                    href="/admin/staff"
-                    icon={<Users className="size-5" />}
-                    title="Доступ и роли"
-                    hint="Координаторы, техспецы, передача прав владельца"
-                  />
-                )}
+                <AdminLink
+                  href="/admin/staff"
+                  icon={<Users className="size-5" />}
+                  title="Сотрудники"
+                  hint="Координаторы по регионам, техспецы, передача прав владельца"
+                />
               </>
             )}
           </div>

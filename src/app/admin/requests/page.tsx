@@ -19,7 +19,7 @@ export default async function AdminRequestsPage() {
       />
 
       {open > 0 && (
-        <p className="mt-4 rounded-xl border border-[#8E1D2C]/20 bg-[#8E1D2C]/[0.05] px-4 py-3 text-sm">
+        <p className="mt-4 rounded-xl border border-white/15 bg-white/[0.07] px-4 py-3 text-sm">
           <b>{open}</b>{" "}
           {open === 1 ? "человек ждёт" : open < 5 ? "человека ждут" : "человек ждут"}{" "}
           входа в приложение.

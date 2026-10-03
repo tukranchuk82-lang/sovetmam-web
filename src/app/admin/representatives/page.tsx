@@ -37,7 +37,7 @@ export default async function RepresentativesPage() {
           {representatives.map((r) => (
             <div
               key={r.id}
-              className="flex items-center gap-2 rounded-2xl border bg-card p-3.5 hover:border-primary/40"
+              className="flex items-center gap-2 light-surface rounded-2xl border bg-card p-3.5 hover:border-primary/40"
             >
               <Link href={`/admin/representatives/${r.id}`} className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">

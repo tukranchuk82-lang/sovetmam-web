@@ -70,8 +70,8 @@ export function AreaChart({
         >
           <defs>
             <linearGradient id="area-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#8E1D2C" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#8E1D2C" stopOpacity="0.02" />
+              <stop offset="0%" style={{ stopColor: "var(--chart-line)" }} stopOpacity="0.28" />
+              <stop offset="100%" style={{ stopColor: "var(--chart-line)" }} stopOpacity="0.02" />
             </linearGradient>
           </defs>
           {[niceMax, niceMax / 2, 0].map((v) => (
@@ -81,7 +81,7 @@ export function AreaChart({
               x2={W}
               y1={y(v)}
               y2={y(v)}
-              stroke="#E4E0D6"
+              style={{ stroke: "var(--chart-grid)" }}
               strokeWidth="1"
               vectorEffect="non-scaling-stroke"
             />
@@ -91,7 +91,7 @@ export function AreaChart({
             <path
               d={line}
               fill="none"
-              stroke="#8E1D2C"
+              style={{ stroke: "var(--chart-line)" }}
               strokeWidth="2"
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
@@ -107,10 +107,7 @@ export function AreaChart({
               height={H}
               fill="transparent"
             >
-              <title>
-                {dayLabel(d.day)}: {d.value}
-                {unit}
-              </title>
+              <title>{`${dayLabel(d.day)}: ${d.value}${unit}`}</title>
             </rect>
           ))}
         </svg>

@@ -42,10 +42,10 @@ const staticTabs: Tab[] = [
 // «Обращение» — единая точка входа «поговорить с нами»: адрес приходит
 // снаружи (chat с координатором региона или обычная форма, см. AppShell) —
 // человеку не нужно знать, что за этим стоят две разные системы.
-function inquiryTab(href: string): Tab {
+function inquiryTab(href: string, label: string): Tab {
   return {
     href,
-    label: "Обращение",
+    label,
     icon: Mail,
     emoji: "✉️",
     match: (p) => p.startsWith("/profile/inquiries") || p.startsWith("/profile/coordinator-chat"),
@@ -68,16 +68,18 @@ const navClasses =
 export function BottomNav({
   background,
   inquiryHref = "/profile/inquiries/new",
+  inquiryLabel = "Обращение",
   unread = 0,
 }: {
   background?: string;
   /** Куда ведёт «Обращение» — чат с координатором региона или обычная форма. */
   inquiryHref?: string;
+  inquiryLabel?: string;
   /** Сколько ответов человек ещё не прочитал — кружок на «Обращении». */
   unread?: number;
 }) {
   const pathname = usePathname();
-  const tabs = [...staticTabs, inquiryTab(inquiryHref)];
+  const tabs = [...staticTabs, inquiryTab(inquiryHref, inquiryLabel)];
 
   return (
     <nav

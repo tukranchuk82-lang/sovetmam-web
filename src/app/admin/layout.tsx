@@ -14,15 +14,18 @@ import {
   Landmark,
   Heart,
   ShieldCheck,
+  LifeBuoy,
+  UserPlus,
   LogOut,
   Map,
   ClipboardList,
   Eye,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
-import { countUnreadForRegion as countUnreadCoordinatorChat } from "@/lib/coordinator-chat-db";
+import { getChatInquiryCounts } from "@/lib/coordinator-insights";
 import { countNewBotHelpRequests } from "@/lib/bot-help";
 import { countOpenDisputes } from "@/lib/measure-disputes";
+import { countUnreadForCoordinator as countSupportUnread, countWaitingForTech } from "@/lib/support-chat-db";
 import { getCurrentStaff } from "@/lib/user-session";
 import { ALLOWED_VIEW_MODES, effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 import { resolveRegion } from "@/lib/preview-region";
@@ -32,7 +35,6 @@ import { AdminNavLink } from "@/components/admin/nav-link";
 import { AdminTopbar } from "@/components/admin/topbar";
 import { MobileAdminRail, type NavGroup } from "@/components/admin/mobile-rail";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
-import { PreviewRegionPicker } from "@/components/admin/preview-region-picker";
 import { OrgName } from "@/components/org-name";
 
 export const metadata = {
@@ -63,11 +65,19 @@ export default async function AdminLayout({
   // региона нет — resolveRegion берёт тот, что выбран в PreviewRegionPicker
   // (или ничего не выбрано — тогда данные по всем регионам разом).
   const region = await resolveRegion(staff, scope);
-  const isPreviewingAsOwnerOrTech = scope === "coordinator" && staff.role !== "coordinator";
 
   const newInquiries = await countNewInquiries(scope === "coordinator" ? (region ?? undefined) : undefined);
-  const unreadChat = scope === "coordinator" ? await countUnreadCoordinatorChat(region) : 0;
+  // Кружок «Обращений»: сколько бесед ждут ответа — то же число, что на сводке.
+  const unreadChat = scope === "coordinator" ? (await getChatInquiryCounts(region)).waiting : 0;
   // Заявки на кабинет и спорные меры — общая, не региональная очередь.
+  // Кружок «Техподдержки»: у координатора — непрочитанные ответы, у техспеца и
+  // владельца — сколько координаторов ждут ответа.
+  const supportBadge =
+    staff.role === "coordinator"
+      ? await countSupportUnread(staff.id)
+      : staff.role === "tech" || staff.role === "owner"
+        ? await countWaitingForTech()
+        : 0;
   const newRequests = scope !== "coordinator" ? await countNewBotHelpRequests() : 0;
   const openDisputes = scope !== "coordinator" ? await countOpenDisputes() : 0;
 
@@ -83,11 +93,13 @@ export default async function AdminLayout({
         {
           items: [
             { href: "/admin", label: "Сводка", icon: <Gauge />, exact: true },
-            { href: "/admin/inquiries", label: "Обращения", icon: <MessageSquare />, badge: newInquiries },
-            { href: "/admin/region-chat", label: "Чат с регионом", icon: <MessageCircle />, badge: unreadChat },
+            { href: "/admin/region-chat", label: "Обращения", icon: <MessageCircle />, badge: unreadChat },
             { href: "/admin/measures", label: "Меры региона", icon: <LayoutGrid /> },
             { href: "/admin/region-survey", label: "Пользователи региона", icon: <Users /> },
             { href: "/admin/region-saved", label: "Избранное региона", icon: <Heart /> },
+            { href: "/admin/region-views", label: "Что смотрят", icon: <Eye /> },
+            { href: "/admin/invite", label: "Пригласить пользователя", icon: <UserPlus /> },
+            { href: "/admin/support", label: "Техподдержка", icon: <LifeBuoy />, badge: supportBadge },
           ],
         },
       ]
@@ -119,12 +131,10 @@ export default async function AdminLayout({
             { href: "/admin/measures", label: "Каталог мер", icon: <LayoutGrid /> },
             { href: "/admin/representatives", label: "Координаторы в регионах", icon: <Landmark /> },
             { href: "/admin/knowledge", label: "База знаний", icon: <FolderInput /> },
-            // Управление ролями — технический раздел: аккаунты координаторов,
-            // техспецов, передача прав владельца. Видно только в режиме
-            // техспеца; владелец доберётся сюда, переключившись.
-            ...(scope === "tech"
-              ? [{ href: "/admin/staff", label: "Доступ и роли", icon: <ShieldCheck /> }]
-              : []),
+            { href: "/admin/support", label: "Техподдержка", icon: <LifeBuoy />, badge: supportBadge },
+            // Сотрудники: координаторы по регионам, техспецы, владельцы и
+            // передача прав. Видно и владельцу, и техспецу.
+            { href: "/admin/staff", label: "Сотрудники", icon: <ShieldCheck /> },
           ],
         },
       ];
@@ -196,8 +206,7 @@ export default async function AdminLayout({
 
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col pl-14 md:pl-0">
         {/* ── Верхняя полоса: где я (раздел) слева, режим просмотра справа ── */}
-        <AdminTopbar sections={navGroups.flatMap((g) => g.items).map((i) => ({ href: i.href, label: i.label }))}>
-          {isPreviewingAsOwnerOrTech && <PreviewRegionPicker region={region} />}
+        <AdminTopbar backToSummary={isCoordinatorScope} sections={navGroups.flatMap((g) => g.items).map((i) => ({ href: i.href, label: i.label }))}>
           <span className="hidden text-xs text-muted-foreground sm:inline">Режим:</span>
           <ViewModeSwitch mode={mode} available={ALLOWED_VIEW_MODES[staff.role]} />
         </AdminTopbar>

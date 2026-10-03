@@ -43,18 +43,18 @@ export function AdminNavLink({
         active &&
           (collapsed
             ? "bg-white/[0.09] font-semibold text-white"
-            : "-ml-[3px] border-l-[3px] border-[#B9384A] bg-white/[0.09] pl-2 font-semibold text-white"),
+            : "-ml-[3px] border-l-[3px] border-[#C2334A] bg-white/[0.09] pl-2 font-semibold text-white"),
       )}
     >
       <span className="relative shrink-0 [&>svg]:size-[17px]">
         {icon}
         {collapsed && hasBadge && (
-          <span className="absolute -right-1 -top-1 size-2 rounded-full bg-[#B9384A] ring-2 ring-[#101A30]" />
+          <span className="absolute -right-1 -top-1 size-2 rounded-full bg-[#C2334A] ring-2 ring-[#101A30]" />
         )}
       </span>
       <span className={cn("min-w-0 flex-1 truncate", collapsed && "sr-only")}>{children}</span>
       {!collapsed && hasBadge && (
-        <span className="inline-flex h-[19px] min-w-[19px] shrink-0 items-center justify-center rounded-full bg-[#B9384A] px-1 text-[10.5px] font-bold text-white">
+        <span className="inline-flex h-[19px] min-w-[19px] shrink-0 items-center justify-center rounded-full bg-[#C2334A] px-1 text-[10.5px] font-bold text-white">
           {badge}
         </span>
       )}

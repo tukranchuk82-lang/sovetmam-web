@@ -116,6 +116,8 @@ export interface RegionConversation {
   lastAuthor: ChatAuthor;
   lastAt: string;
   unread: boolean;
+  /** Сколько сообщений человека координатор ещё не открывал. */
+  unreadCount: number;
 }
 
 /**
@@ -147,10 +149,10 @@ export async function listConversationsByRegion(
   // Строки отсортированы по убыванию даты — первая встреченная на каждого
   // пользователя и есть последнее сообщение его беседы.
   const lastByUser = new Map<string, (typeof rows)[number]>();
-  const unreadUsers = new Set<string>();
+  const unreadByUser = new Map<string, number>();
   for (const r of rows) {
     if (!lastByUser.has(r.user_id)) lastByUser.set(r.user_id, r);
-    if (r.author === "user" && !r.read_at) unreadUsers.add(r.user_id);
+    if (r.author === "user" && !r.read_at) unreadByUser.set(r.user_id, (unreadByUser.get(r.user_id) ?? 0) + 1);
   }
 
   const userIds = [...lastByUser.keys()];
@@ -173,7 +175,8 @@ export async function listConversationsByRegion(
         lastMessage: last.body,
         lastAuthor: last.author,
         lastAt: last.created_at,
-        unread: unreadUsers.has(id),
+        unread: unreadByUser.has(id),
+        unreadCount: unreadByUser.get(id) ?? 0,
       };
     })
     .sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));

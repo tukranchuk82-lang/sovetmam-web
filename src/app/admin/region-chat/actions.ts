@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { getCurrentStaff } from "@/lib/user-session";
 import { getAppUserById } from "@/lib/onboarding-db";
+import { getThreadRegion } from "@/lib/chat-region";
 import { addMessage } from "@/lib/coordinator-chat-db";
 import { notifyUserAboutCoordinatorReply } from "@/lib/coordinator-notify";
 import type { ChatSendState } from "@/components/coordinator-chat-thread";
@@ -15,7 +16,7 @@ async function authorize(targetUserId: string): Promise<{ region: string }> {
   if (!staff) redirect("/login?next=/admin/region-chat");
 
   const target = await getAppUserById(targetUserId);
-  const region = typeof target?.survey?.region === "string" ? target.survey.region : null;
+  const region = await getThreadRegion(targetUserId, target);
   if (!region) throw new Error("У этого человека не указан регион");
 
   if (staff.role === "coordinator" && region !== staff.region) {

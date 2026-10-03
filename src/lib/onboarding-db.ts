@@ -33,6 +33,12 @@ export interface AppUser {
   messengerAvatarUrl: string | null;
   /** Один выбранный канал уведомлений о новом сообщении в чате с координатором региона. */
   coordinatorChatNotifyChannel: MessengerChannel | "email" | null;
+  /** Бот в мессенджере: null — не решал, true/false — выбор человека. */
+  chatNotifyMessenger: boolean | null;
+  /** Письмо о сообщении в чате: null — не решал. */
+  chatNotifyEmail: boolean | null;
+  /** Когда человеку уже предлагали включить уведомления чата. */
+  chatNotifyAskedAt: string | null;
 }
 
 /** Владелец и техспец — полный доступ к админ-панели, без ограничения по региону. */
@@ -90,6 +96,9 @@ type Row = {
   avatar_bg: string | null;
   messenger_avatar_url: string | null;
   coordinator_chat_notify_channel: MessengerChannel | "email" | null;
+  chat_notify_messenger: boolean | null;
+  chat_notify_email: boolean | null;
+  chat_notify_asked_at: string | null;
 };
 
 function fromRow(r: Row): AppUser {
@@ -115,11 +124,14 @@ function fromRow(r: Row): AppUser {
     avatarBg: r.avatar_bg,
     messengerAvatarUrl: r.messenger_avatar_url,
     coordinatorChatNotifyChannel: r.coordinator_chat_notify_channel,
+    chatNotifyMessenger: r.chat_notify_messenger,
+    chatNotifyEmail: r.chat_notify_email,
+    chatNotifyAskedAt: r.chat_notify_asked_at,
   };
 }
 
 const SELECT =
-  "id, email, first_name, last_name, role, region, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, survey_updated_at, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url, coordinator_chat_notify_channel";
+  "id, email, first_name, last_name, role, region, email_verified_at, messenger_connected, messenger_choice, telegram_id, vk_id, max_id, salebot_client_id, messenger_hint_seen_at, survey, survey_updated_at, avatar_url, avatar_emoji, avatar_bg, messenger_avatar_url, coordinator_chat_notify_channel, chat_notify_messenger, chat_notify_email, chat_notify_asked_at";
 
 /** Отметить, что человек уже открывал кабинет с напоминанием подключить
  * мессенджер, — кружочек на аватарке больше не должен показываться. */
@@ -413,4 +425,32 @@ export async function setCoordinatorChatNotifyChannel(
     .from("app_users")
     .update({ coordinator_chat_notify_channel: channel })
     .eq("id", userId);
+}
+
+/** Включить или выключить письма о сообщениях чата. */
+export async function setChatNotifyEmail(userId: string, on: boolean): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  await sb
+    .from("app_users")
+    .update({ chat_notify_email: on, chat_notify_asked_at: new Date().toISOString() })
+    .eq("id", userId);
+}
+
+/** Включить или выключить сообщения в боте о сообщениях чата. */
+export async function setChatNotifyMessenger(userId: string, on: boolean): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  await sb
+    .from("app_users")
+    .update({ chat_notify_messenger: on, chat_notify_asked_at: new Date().toISOString() })
+    .eq("id", userId);
+}
+
+/** Человек закрыл предложение про уведомления — больше не показываем его сами. */
+export async function markChatNotifyAsked(userId: string): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  await sb
+    .from("app_users")
+    .update({ chat_notify_asked_at: new Date().toISOString() })
+    .eq("id", userId)
+    .is("chat_notify_asked_at", null);
 }

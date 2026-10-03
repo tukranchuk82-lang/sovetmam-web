@@ -96,7 +96,7 @@ export function KnowledgeUploadStub() {
                 key={f.id}
                 className="flex items-center gap-3 rounded-xl border bg-card p-3"
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#F6EDE8] text-[#8E1D2C]">
                   {iconForMime(f.type)}
                 </div>
                 <div className="min-w-0 flex-1">

@@ -142,9 +142,9 @@ async function authorizeMeasureEdit(originalSlug: string): Promise<{
   if (!original) throw new Error("Мера не найдена");
 
   if (staff.role === "coordinator") {
-    if (!staff.region || original.region !== staff.region) {
-      throw new Error("Эта мера не в вашем регионе — правка недоступна");
-    }
+    // Меры координатор только смотрит (с 03.10.2026): правки и новые меры
+    // принимает председатель.
+    throw new Error("Координатору меры доступны только для просмотра");
   } else if (staff.role !== "owner" && staff.role !== "tech") {
     redirect("/login?next=/admin/measures");
   }

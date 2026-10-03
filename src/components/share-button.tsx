@@ -30,6 +30,12 @@ type Props = {
   text?: string;
   variant?: "button" | "wide";
   className?: string;
+  /**
+   * Свои метки вместо utm_source=share — для пригласительной ссылки
+   * координатора. Тогда нажатия в общий учёт «Поделились» не пишем: это не
+   * пересылка приложения родителями, и она исказила бы их статистику.
+   */
+  utm?: Record<string, string>;
 };
 
 /**
@@ -88,6 +94,7 @@ export function ShareButton({
   text,
   variant = "button",
   className,
+  utm,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<null | "sent" | "copied">(null);
@@ -96,13 +103,18 @@ export function ShareButton({
   // ради одной строки ни к чему.
   function buildLink(): string {
     const url = new URL(path, window.location.origin);
-    url.searchParams.set("utm_source", SHARE_SOURCE);
+    if (utm) {
+      for (const [k, v] of Object.entries(utm)) url.searchParams.set(k, v);
+    } else {
+      url.searchParams.set("utm_source", SHARE_SOURCE);
+    }
     return url.toString();
   }
 
   const caption = text ?? title;
 
   function note(channel: ShareChannel) {
+    if (utm) return;
     void recordShareAction({ path, channel });
   }
 

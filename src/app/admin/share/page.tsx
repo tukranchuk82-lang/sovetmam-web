@@ -3,6 +3,7 @@ import { Share2, ExternalLink } from "lucide-react";
 import { getShareStats } from "@/lib/share-admin";
 import { SOURCE_LABEL } from "@/lib/analytics/labels";
 import { AdminPageHeader } from "@/components/admin/page-header";
+import { listInvitesByCoordinator } from "@/lib/coordinator-insights";
 
 export const metadata = { title: "Откуда приходят" };
 export const dynamic = "force-dynamic";
@@ -31,6 +32,7 @@ export default async function SharePage({
   const { source } = await searchParams;
   const stats = await getShareStats(source || null);
   const label = (key: string) => SOURCE_LABEL[key] ?? key;
+  const invites = await listInvitesByCoordinator();
 
   return (
     <div className="px-4 py-5 md:px-6">
@@ -39,6 +41,38 @@ export default async function SharePage({
         title="Откуда приходят"
         description="Сколько людей пришло по размеченным ссылкам — из квиза, ботов, рассылок и кнопки «Поделиться» — и сколько из них зарегистрировалось."
       />
+
+      {/* Приглашения координаторов: у каждого своя ссылка с меткой, по ней видно,
+          сколько человек зарегистрировалось от каждого. */}
+      <section className="mt-5 light-surface rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)]">
+        <h2 className="text-[11.5px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Приглашения координаторов
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Сколько человек зарегистрировалось по личной ссылке каждого координатора.
+        </p>
+        {invites.rows.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">Координаторов пока нет.</p>
+        ) : (
+          <ul className="mt-3 divide-y">
+            {invites.rows.map((r) => (
+              <li key={r.id} className="flex items-center justify-between gap-3 py-2">
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold">{r.region ?? "Регион не указан"}</span>
+                  <span className="block truncate text-xs text-muted-foreground">{r.name || r.email}</span>
+                </span>
+                <span className="shrink-0 text-lg font-bold tabular-nums">{r.invited}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {invites.unknown > 0 && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Ещё {invites.unknown} — по ссылкам, которые не принадлежат ни одному нынешнему координатору (в том числе
+            бывшим).
+          </p>
+        )}
+      </section>
 
       {/* Выбор источника: все цифры ниже считаются по выбранной метке. */}
       <div className="mt-4 flex flex-wrap gap-1.5">
@@ -78,7 +112,7 @@ export default async function SharePage({
 
       {!stats.source && (
         <>
-      <div className="mt-2 rounded-2xl border bg-card p-4">
+      <div className="mt-2 light-surface rounded-2xl border bg-card p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Чем делятся чаще всего
         </p>
@@ -111,7 +145,7 @@ export default async function SharePage({
         )}
       </div>
 
-      <div className="mt-2 rounded-2xl border bg-card p-4">
+      <div className="mt-2 light-surface rounded-2xl border bg-card p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Куда отправляют
         </p>
@@ -146,7 +180,7 @@ export default async function SharePage({
         </>
       )}
 
-      <div className="mt-2 rounded-2xl border bg-card p-4">
+      <div className="mt-2 light-surface rounded-2xl border bg-card p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Откуда приходят
         </p>
@@ -198,7 +232,7 @@ export default async function SharePage({
           наша ссылка наружу. Показываем только на общем виде: к выбранной
           метке уходы отношения не имеют. */}
       {!stats.source && stats.exits.length > 0 && (
-        <div className="mt-2 rounded-2xl border bg-card p-4">
+        <div className="mt-2 light-surface rounded-2xl border bg-card p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Уходят к нам же — в другие приложения
           </p>
@@ -264,7 +298,7 @@ function SourceTab({
       href={href}
       className={
         active
-          ? "rounded-full bg-[#1B3A6B] px-3 py-1.5 text-xs font-semibold text-white"
+          ? "rounded-full bg-[#5E86C9] px-3 py-1.5 text-xs font-semibold text-white"
           : "rounded-full border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent"
       }
     >
@@ -283,14 +317,14 @@ function Stat({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border bg-card p-4">
+    <div className="light-surface rounded-2xl border bg-card p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
       <p
         className={
           accent
-            ? "mt-1 text-2xl font-extrabold text-[#8E1D2C]"
+            ? "mt-1 text-2xl font-extrabold text-primary"
             : "mt-1 text-2xl font-extrabold"
         }
       >

@@ -139,7 +139,7 @@ export default async function MeasurePage({
             <Separator className="my-6" />
             {/* «Кому положено» идёт до порядка оформления: сначала человек
                 должен понять, его ли это мера, и только потом читать шаги. */}
-            <section>
+            <section data-mv-section="eligibility">
               <h2 className="text-lg font-bold">Кому положено</h2>
               <div className="mt-3 space-y-2.5">
                 {m.eligibility.split(/\n+/).filter(Boolean).map((line, i) => (
@@ -155,7 +155,7 @@ export default async function MeasurePage({
         {m.howToApply.length > 0 && (
           <>
             <Separator className="my-6" />
-            <section>
+            <section data-mv-section="howto">
               <h2 className="text-lg font-bold">Как оформить</h2>
               <ol className="mt-3 space-y-3">
                 {m.howToApply.map((step, i) => (
@@ -174,7 +174,7 @@ export default async function MeasurePage({
         )}
 
         {m.documents.length > 0 && (
-          <section className="mt-6">
+          <section className="mt-6" data-mv-section="documents">
             <h2 className="text-lg font-bold">Какие документы нужны</h2>
             <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
               {m.documents.map((d, i) => (
@@ -192,7 +192,7 @@ export default async function MeasurePage({
         )}
 
         {m.tips.length > 0 && (
-          <section className="mt-6 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200">
+          <section className="mt-6 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200" data-mv-section="tips">
             <h2 className="flex items-center gap-2 text-base font-bold text-amber-900">
               <Lightbulb className="size-5 shrink-0" />
               Полезно знать
@@ -224,6 +224,7 @@ export default async function MeasurePage({
             text={m.amount ? `${m.title} — ${m.amount}` : m.title}
           />
           <Link
+            data-mv-action="ask"
             href={inquiryHref}
             className={cn(
               buttonVariants(),

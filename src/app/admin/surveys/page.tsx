@@ -49,14 +49,14 @@ export default async function AdminSurveysPage({
           За этот период анкет нет. Выберите период подлиннее или другой регион.
         </p>
       ) : (
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           {report.distributions
             .filter((d) => d.items.length > 0 && !(region && d.key === "region"))
             .map((d) => (
               <section
                 key={d.key}
                 className={cn(
-                  "rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)]",
+                  "light-surface rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)]",
                   d.key === "region" && "lg:col-span-2",
                 )}
               >
@@ -68,7 +68,7 @@ export default async function AdminSurveysPage({
               </section>
             ))}
           {report.flags.length > 0 && (
-            <section className="rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)] lg:col-span-2">
+            <section className="light-surface rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)] lg:col-span-2">
               <div className="mb-3 flex items-baseline justify-between gap-3">
                 <h2 className="text-[11.5px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Отметили в анкете (доля от анкет)

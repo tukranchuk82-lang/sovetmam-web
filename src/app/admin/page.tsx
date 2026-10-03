@@ -7,7 +7,6 @@ import {
   CalendarCheck,
   ChevronRight,
   Gauge,
-  Heart,
   HelpCircle,
   Inbox,
 } from "lucide-react";
@@ -15,6 +14,10 @@ import { listMeasuresIndexForAdmin } from "@/lib/measures-admin";
 import { getAudienceOverview } from "@/lib/analytics/audience";
 import { parsePeriod } from "@/lib/analytics/period";
 import { countNewInquiries } from "@/lib/inquiries-db";
+import { InviteCopyBanner } from "@/components/admin/invite-copy-banner";
+import { absoluteUrl } from "@/lib/site";
+import { getChatInquiryCounts, countInvited, inviteCode, buildInviteParams } from "@/lib/coordinator-insights";
+import { regionDative } from "@/lib/region-case";
 import { countNewBotHelpRequests } from "@/lib/bot-help";
 import { countOpenDisputes } from "@/lib/measure-disputes";
 import { countSurveyFillersByRegion, countMeasuresByRegion } from "@/lib/region-insights";
@@ -47,7 +50,7 @@ export default async function AdminHome({
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
 
   if (scope === "coordinator") {
-    return <CoordinatorHome region={await resolveRegion(staff, scope)} />;
+    return <CoordinatorHome staff={staff} region={await resolveRegion(staff, scope)} />;
   }
 
   const period = parsePeriod((await searchParams).period);
@@ -108,7 +111,7 @@ export default async function AdminHome({
         />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-5">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-5">
         <Panel title="Регистрации по дням" className="lg:col-span-3">
           <AreaChart data={audience.registrations} unit=" чел." />
         </Panel>
@@ -120,7 +123,7 @@ export default async function AdminHome({
         </Panel>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
         <Panel title="Откуда пришли" action={<PanelLink href="/admin/share">Подробнее</PanelLink>}>
           <BarList items={audience.sources} max={7} emptyText="За этот период новых людей нет" />
         </Panel>
@@ -138,7 +141,7 @@ export default async function AdminHome({
         </Panel>
       </div>
 
-      <section className="mt-4 rounded-2xl border bg-card p-1.5 shadow-[0_1px_2px_rgba(32,36,44,0.04)]">
+      <section className="mt-4 light-surface rounded-2xl border bg-card p-1.5 shadow-[0_1px_2px_rgba(32,36,44,0.04)]">
         <h2 className="px-3 pb-1 pt-2.5 text-[11.5px] font-semibold uppercase tracking-wide text-muted-foreground">
           Что сделать сегодня
         </h2>
@@ -194,7 +197,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)]", className)}>
+    <section className={cn("light-surface rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)]", className)}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-[11.5px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</h2>
         {action}
@@ -249,7 +252,7 @@ function TaskRow({
       <span
         className={cn(
           "grid size-9 shrink-0 place-items-center rounded-lg [&>svg]:size-[18px]",
-          hot ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+          hot ? "bg-[#F6EDE8] text-[#8E1D2C]" : "bg-muted text-muted-foreground",
         )}
       >
         {icon}
@@ -269,91 +272,122 @@ function TaskRow({
   );
 }
 
-function SectionLink({
+/** Крупная карточка раздела на сводке координатора. */
+function BigCard({
   href,
   icon,
   title,
-  hint,
-  alert,
+  value,
+  caption,
+  note,
+  badge,
+  className,
 }: {
   href: string;
   icon: React.ReactNode;
   title: string;
-  hint: string;
-  alert?: boolean;
+  value: number;
+  caption: string;
+  note?: string;
+  /** Красный кружок с числом в углу: «тут что-то ждёт вас». */
+  badge?: number;
+  className?: string;
 }) {
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-2xl border bg-card p-3.5 shadow-[0_1px_2px_rgba(32,36,44,0.04)] transition-colors hover:border-primary/40"
+      className={cn(
+        "group relative flex min-h-[128px] flex-col rounded-2xl border bg-card p-4 shadow-[0_1px_2px_rgba(32,36,44,0.04)] transition-colors hover:border-primary/40",
+        className,
+      )}
     >
-      <span
-        className={cn(
-          "grid size-10 shrink-0 place-items-center rounded-xl [&>svg]:size-5",
-          alert ? "bg-amber-100 text-amber-700" : "bg-muted text-primary",
-        )}
-      >
-        {icon}
+      {badge != null && badge > 0 && (
+        <span
+          aria-label={`Не отвечено: ${badge}`}
+          className="absolute right-3.5 top-3.5 grid min-w-7 place-items-center rounded-full bg-[#C2334A] px-2 py-1 text-[13px] font-bold leading-none text-white"
+        >
+          {badge}
+        </span>
+      )}
+      <span className="flex items-center gap-3 pr-10">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F6EDE8] text-[#8E1D2C] [&>svg]:size-5">{icon}</span>
+        <span className="min-w-0 truncate text-[15px] font-semibold leading-snug">{title}</span>
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block font-semibold leading-snug">{title}</span>
-        <span className="block truncate text-[12.5px] text-muted-foreground">{hint}</span>
+      <span className="mt-3 flex items-baseline gap-2">
+        <span className="text-[32px] font-bold leading-none tabular-nums">{value}</span>
+        <span className="text-[13px] text-muted-foreground">{caption}</span>
       </span>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5" />
+      {note && <span className="mt-auto pt-2 pr-5 text-[12.5px] leading-snug text-muted-foreground">{note}</span>}
+      <ChevronRight className="absolute bottom-4 right-4 size-4 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
 }
 
 /** Сводка координатора — только его регион (или все регионы разом, если это владелец/техспец смотрят «на себе»). */
-async function CoordinatorHome({ region }: { region: string | null }) {
-  const [newInquiries, surveyCount, measuresCount] = await Promise.all([
-    countNewInquiries(region ?? undefined),
+async function CoordinatorHome({
+  staff,
+  region,
+}: {
+  staff: { id: string; role: string };
+  region: string | null;
+}) {
+  // Ссылку-приглашение и счётчик считаем только у настоящего координатора:
+  // у владельца в просмотре «на себе» своей ссылки нет.
+  const code = staff.role === "coordinator" ? inviteCode(staff.id) : null;
+  const [chatCounts, surveyCount, measuresCount, invited] = await Promise.all([
+    getChatInquiryCounts(region),
     countSurveyFillersByRegion(region),
     countMeasuresByRegion(region),
+    code ? countInvited(code) : Promise.resolve(0),
   ]);
+
+  const inviteUrl = new URL(absoluteUrl("/"));
+  for (const [k, v] of Object.entries(buildInviteParams(code ? staff.id : null, region))) {
+    inviteUrl.searchParams.set(k, v);
+  }
+  const inviteLink = inviteUrl.toString();
 
   return (
     <AdminPage
       icon={<Gauge />}
-      title="Сводка"
+      title={region ? `Сводка по ${regionDative(region)}` : "Сводка по всем регионам"}
       description={
         region
-          ? `Ваш регион — «${region}»: обращения, пользователи и меры ниже.`
-          : "Вы видите эту сводку по своему региону. Выберите регион справа сверху, чтобы посмотреть его вживую, — пока показаны данные по всем регионам разом."
+          ? "Обращения, меры и люди вашего региона."
+          : "Так выглядит сводка координатора. Здесь показаны данные по всем регионам разом."
       }
     >
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <StatCard label="Новых обращений" value={newInquiries} tone={newInquiries > 0 ? "accent" : "default"} />
-        <StatCard label="Заполнили анкету" value={surveyCount} />
-        <StatCard label="Мер в регионе" value={measuresCount} className="col-span-2 sm:col-span-1" />
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <SectionLink
-          href="/admin/inquiries"
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <BigCard
+          href="/admin/region-chat"
           icon={<MessageSquare />}
           title="Обращения"
-          hint={newInquiries > 0 ? `${newInquiries} новых — ждут ответа` : "Новых обращений нет"}
-          alert={newInquiries > 0}
+          value={chatCounts.total}
+          caption="всего"
+          note={chatCounts.waiting > 0 ? `Не отвечено: ${chatCounts.waiting}` : "Все обращения отвечены"}
+          badge={chatCounts.waiting}
         />
-        <SectionLink
+        <BigCard
           href="/admin/measures"
           icon={<LayoutGrid />}
           title="Меры региона"
-          hint={`${measuresCount} мер — можно поправить содержание`}
+          value={measuresCount}
+          caption="мер"
+          note="Все меры поддержки вашего региона: выплаты, льготы, услуги."
         />
-        <SectionLink
+        <BigCard
           href="/admin/region-survey"
           icon={<Users />}
           title="Пользователи региона"
-          hint={`${surveyCount} человек заполнили анкету`}
+          value={surveyCount}
+          caption="заполнили анкету"
+          note="Сводка: избранное, мессенджеры, составы семей."
+          className="sm:col-span-2 lg:col-span-1"
         />
-        <SectionLink
-          href="/admin/region-saved"
-          icon={<Heart />}
-          title="Избранное региона"
-          hint="Какие меры сохраняют себе люди из региона"
-        />
+      </div>
+
+      <div className="mt-4">
+        <InviteCopyBanner link={inviteLink} invited={invited} sample={!code} />
       </div>
     </AdminPage>
   );

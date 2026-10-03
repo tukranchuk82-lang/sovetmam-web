@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Landmark, LogOut } from "lucide-react";
+import { ChevronRight, LogOut } from "lucide-react";
 import { AdminNavLink } from "@/components/admin/nav-link";
 import { OrgName } from "@/components/org-name";
 import { cn } from "@/lib/utils";
@@ -99,7 +99,7 @@ export function MobileAdminRail({
         >
           <span
             className={cn(
-              "grid size-8 shrink-0 place-items-center rounded-[9px] bg-[#8E1D2C] transition-transform",
+              "grid size-8 shrink-0 place-items-center rounded-[9px] bg-[#B9384A] transition-transform",
               open && "rotate-180",
             )}
           >
@@ -120,12 +120,6 @@ export function MobileAdminRail({
             </span>
           )}
         </button>
-
-        {!open && (
-          <span className="mx-auto mt-1 grid size-8 shrink-0 place-items-center rounded-[9px] bg-white/[0.08]" aria-hidden>
-            <Landmark className="size-4 text-white/70" strokeWidth={1.8} />
-          </span>
-        )}
 
         <nav className="mt-4 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
           {groups.map((group, gi) => (

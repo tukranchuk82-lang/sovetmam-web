@@ -20,6 +20,8 @@ export interface RegionSurveyUser {
   childrenCount: number | null;
   surveyUpdatedAt: string | null;
   createdAt: string;
+  /** Анкета целиком — для просмотра координатором. */
+  survey: Record<string, unknown> | null;
 }
 
 export async function countSurveyFillersByRegion(region: string | null): Promise<number> {
@@ -58,6 +60,7 @@ export async function listSurveyFillersByRegion(
       childrenCount: (survey?.childrenCount as number | null) ?? null,
       surveyUpdatedAt: r.survey_updated_at as string | null,
       createdAt: r.created_at as string,
+      survey,
     };
   });
 }

@@ -1,3 +1,4 @@
+import { getUserChatRegion } from "@/lib/chat-region";
 import { getCurrentDemoUser } from "@/lib/demo-auth";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { logout } from "@/app/(app)/login/onboarding-actions";
@@ -9,6 +10,7 @@ import { AppShell } from "@/components/app-shell";
 import { SavedProvider } from "@/components/saved-provider";
 import { UtmCapture } from "@/components/utm-capture";
 import { ShareArrival } from "@/components/share-arrival";
+import { NavTrail } from "@/components/nav-trail";
 import { VisitPing } from "@/components/visit-ping";
 import { countUnreadForUser } from "@/lib/inquiry-thread";
 import {
@@ -43,7 +45,7 @@ export default async function AppLayout({
   // ведёт в чат с координатором региона, если он там назначен, иначе — в
   // обычную форму обращения (она уходит на почту). Обе системы человеку
   // видеть незачем — только одна дорога, та, что реально доведёт до ответа.
-  const region = typeof appUser?.survey?.region === "string" ? appUser.survey.region : null;
+  const region = appUser ? await getUserChatRegion(appUser) : null;
   const hasCoordinator = region ? await hasCoordinatorForRegion(region) : false;
   const inquiryHref = hasCoordinator ? "/profile/coordinator-chat" : "/profile/inquiries/new";
   const inquiryUnread = hasCoordinator ? coordinatorChatUnread : unread;
@@ -63,6 +65,7 @@ export default async function AppLayout({
           authed={Boolean(demoUser || appUser)}
           logoutAction={demoUser ? logoutDemoUser : logout}
           inquiryHref={inquiryHref}
+          inquiryLabel={hasCoordinator ? "Координатор" : "Обращение"}
           unread={inquiryUnread}
           messengerHint={messengerHint}
         >
@@ -72,6 +75,7 @@ export default async function AppLayout({
       <UtmCapture />
       {/* Отметка о приходе по размеченной ссылке — считает пересылки и рассылки. */}
       <ShareArrival />
+      <NavTrail />
       {/* Одна отметка о заходе в сутки: без неё видны только те, кто
           пришёл по размеченной ссылке. */}
       <VisitPing />

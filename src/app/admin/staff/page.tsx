@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { getCurrentAdmin } from "@/lib/user-session";
 import { listByRole, listPendingOwnerRequests } from "@/lib/staff-db";
 import { REGIONS } from "@/lib/measures";
-import { AdminPageHeader } from "@/components/admin/page-header";
+import { AdminPage } from "@/components/admin/ui/admin-page";
 import {
   decideOwnerRequestAction,
   demoteCoordinatorAction,
@@ -14,27 +14,34 @@ import {
   requestOwnerAction,
 } from "./actions";
 
-export const metadata = { title: "Доступ и роли" };
+export const metadata = { title: "Сотрудники" };
 export const dynamic = "force-dynamic";
 
 export default async function StaffPage() {
   const admin = await getCurrentAdmin();
   if (!admin) redirect("/login?next=/admin/staff");
 
-  const [coordinators, techs, owners, pending] = await Promise.all([
+  const [coordinatorsRaw, techs, owners, pending] = await Promise.all([
     listByRole("coordinator"),
     listByRole("tech"),
     listByRole("owner"),
     admin.role === "owner" ? listPendingOwnerRequests() : Promise.resolve([]),
   ]);
 
+  // Координаторы — по алфавиту названий регионов; без региона — в конце.
+  const coordinators = [...coordinatorsRaw].sort((a, b) => {
+    if (!a.region && !b.region) return 0;
+    if (!a.region) return 1;
+    if (!b.region) return -1;
+    return a.region.localeCompare(b.region, "ru");
+  });
+
   return (
-    <div className="px-4 py-5 md:px-6">
-      <AdminPageHeader
-        icon={<ShieldCheck />}
-        title="Доступ и роли"
-        description="Кто ведёт какой регион, кто отвечает за техническую часть и кому переданы права владельца."
-      />
+    <AdminPage
+      icon={<ShieldCheck />}
+      title="Сотрудники"
+      description="Кто ведёт какой регион, кто отвечает за техническую часть и кому переданы права владельца."
+    >
 
       {/* ── Координаторы ─────────────────────────────────────────────── */}
       <section className="mt-6">
@@ -50,13 +57,13 @@ export default async function StaffPage() {
             <p className="text-sm text-muted-foreground">Пока никто не назначен.</p>
           )}
           {coordinators.map((c) => (
-            <div key={c.id} className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-3.5">
+            <div key={c.id} className="flex items-center justify-between gap-3 light-surface rounded-2xl border bg-card p-3.5">
               <div className="min-w-0">
                 <p className="truncate font-semibold leading-snug">
-                  {c.firstName} {c.lastName}
+                  {c.region ?? "Регион не указан"}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {c.email} · {c.region ?? "регион не указан"}
+                  {c.firstName} {c.lastName} · {c.email}
                 </p>
               </div>
               <form action={demoteCoordinatorAction.bind(null, c.id)}>
@@ -118,7 +125,7 @@ export default async function StaffPage() {
             <p className="text-sm text-muted-foreground">Пока никто не назначен.</p>
           )}
           {techs.map((t) => (
-            <div key={t.id} className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-3.5">
+            <div key={t.id} className="flex items-center justify-between gap-3 light-surface rounded-2xl border bg-card p-3.5">
               <div className="min-w-0">
                 <p className="truncate font-semibold leading-snug">
                   {t.firstName} {t.lastName}
@@ -166,7 +173,7 @@ export default async function StaffPage() {
         </h2>
         <div className="mt-3 space-y-2">
           {owners.map((o) => (
-            <div key={o.id} className="rounded-2xl border bg-card p-3.5">
+            <div key={o.id} className="light-surface rounded-2xl border bg-card p-3.5">
               <p className="font-semibold leading-snug">
                 {o.firstName} {o.lastName}
               </p>
@@ -226,7 +233,7 @@ export default async function StaffPage() {
           <div className="mt-3 space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Ждут вашего решения:</p>
             {pending.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-[#8E1D2C]/25 bg-[#8E1D2C]/[0.04] p-3.5">
+              <div key={p.id} className="rounded-2xl border border-white/15 bg-white/[0.07] p-3.5">
                 <p className="text-sm">
                   <b>{p.requestedByName}</b> предлагает сделать владельцем{" "}
                   <b>{p.targetName}</b> ({p.targetEmail})
@@ -248,6 +255,6 @@ export default async function StaffPage() {
           </div>
         )}
       </section>
-    </div>
+    </AdminPage>
   );
 }
