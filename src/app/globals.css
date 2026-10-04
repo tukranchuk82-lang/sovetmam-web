@@ -1068,3 +1068,12 @@ html:has(.admin-shell) {
   --chart-line: #8e1d2c;
   --chart-grid: #e4e0d6;
 }
+
+/* Выпадающие списки в тёмной админке: сами поля тёмные со светлым текстом, а
+   раскрытый список браузер рисует светлым — белый текст на белом не читался.
+   Пункты списка красим явно: тёмный текст на светлом фоне. */
+html:has(.admin-shell) option,
+html:has(.admin-shell) optgroup {
+  background-color: #ffffff;
+  color: #20242c;
+}

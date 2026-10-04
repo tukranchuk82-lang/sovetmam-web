@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowDown, ArrowUp, CheckCircle2, Eye, EyeOff, Pencil, PlayCircle, Plus } from "lucide-react";
 import { getCurrentStaff } from "@/lib/user-session";
 import { getWatchedIds, listLessons } from "@/lib/lessons-db";
+import { effectiveAdminScope, getViewMode } from "@/lib/view-mode";
 import { AdminPage } from "@/components/admin/ui/admin-page";
 import { moveLessonAction } from "./actions";
 
@@ -21,6 +22,11 @@ export default async function InstructionsPage() {
   if (!staff) redirect("/login?next=/admin/instructions");
 
   const manager = staff.role === "owner" || staff.role === "tech";
+  // Служебные пометки («Видят координаторы», «Черновик», размер видео — только в
+  // режиме владельца и техспеца. В режиме «Координатор» экран выглядит так, как
+  // его увидит настоящий координатор, — в том числе на записи обучающего видео.
+  const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
+  const showMarks = manager && scope !== "coordinator";
   const [lessons, watched] = await Promise.all([
     listLessons({ publishedOnly: !manager }),
     getWatchedIds(staff.id),
@@ -83,12 +89,12 @@ export default async function InstructionsPage() {
                             <CheckCircle2 className="size-3" /> Просмотрено
                           </span>
                         )}
-                        {manager && !l.isPublished && (
+                        {showMarks && !l.isPublished && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-600 ring-1 ring-inset ring-stone-300">
                             <EyeOff className="size-3" /> Черновик
                           </span>
                         )}
-                        {manager && l.isPublished && (
+                        {showMarks && l.isPublished && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700 ring-1 ring-inset ring-sky-200">
                             <Eye className="size-3" /> Видят координаторы
                           </span>
@@ -100,7 +106,7 @@ export default async function InstructionsPage() {
                           {l.description}
                         </span>
                       )}
-                      {manager && l.videoSize ? (
+                      {showMarks && l.videoSize ? (
                         <span className="mt-1.5 block text-xs text-[#8a8f98]">Видео · {mb(l.videoSize)}</span>
                       ) : null}
                     </span>

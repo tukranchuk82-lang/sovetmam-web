@@ -65,7 +65,7 @@ export default async function AppLayout({
           authed={Boolean(demoUser || appUser)}
           logoutAction={demoUser ? logoutDemoUser : logout}
           inquiryHref={inquiryHref}
-          inquiryLabel={hasCoordinator ? "Координатор" : "Обращение"}
+          inquiryLabel={hasCoordinator ? "Чат" : "Обращение"}
           unread={inquiryUnread}
           messengerHint={messengerHint}
         >
