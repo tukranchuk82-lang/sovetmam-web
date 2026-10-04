@@ -1261,7 +1261,13 @@ function matchesCriteria(
   if (c.requiresEmployed && profile.employmentStatus === "not-working") {
     return false;
   }
-  if (c.requiresNotEmployed && profile.employmentStatus !== "not-working") {
+  // Работающим мера не подходит; тем, кто про занятость не ответил, — показываем:
+  // молча пропавшая мера хуже лишней (так же ведут себя остальные условия).
+  if (
+    c.requiresNotEmployed &&
+    profile.employmentStatus != null &&
+    profile.employmentStatus !== "not-working"
+  ) {
     return false;
   }
 
