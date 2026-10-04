@@ -275,7 +275,23 @@ export async function setMessengerChoice(
   channel: MessengerChannel,
 ): Promise<void> {
   const sb = createSupabaseAdminClient();
-  await sb.from("app_users").update({ messenger_choice: channel }).eq("id", userId);
+  await sb
+    .from("app_users")
+    .update({ messenger_choice: channel, messenger_conflict_channel: null, messenger_conflict_at: null })
+    .eq("id", userId);
+}
+
+/** Прошлое подключение не удалось из-за занятого мессенджера (не старше 15 минут). */
+export async function getMessengerConflict(userId: string): Promise<MessengerChannel | null> {
+  const sb = createSupabaseAdminClient();
+  const { data } = await sb
+    .from("app_users")
+    .select("messenger_conflict_channel, messenger_conflict_at")
+    .eq("id", userId)
+    .maybeSingle();
+  const at = data?.messenger_conflict_at ? new Date(data.messenger_conflict_at as string).getTime() : 0;
+  if (!at || Date.now() - at > 15 * 60 * 1000) return null;
+  return (data?.messenger_conflict_channel as MessengerChannel | null) ?? null;
 }
 
 /**
@@ -296,6 +312,8 @@ export async function markMessengerConnected(params: {
     messenger_connected: true,
     messenger_choice: params.channel,
     messenger_connected_at: new Date().toISOString(),
+    messenger_conflict_channel: null,
+    messenger_conflict_at: null,
   };
   if (params.salebotClientId) update.salebot_client_id = params.salebotClientId;
 
@@ -324,6 +342,24 @@ export async function markMessengerConnected(params: {
     .eq("id", params.appId)
     .select("id")
     .maybeSingle();
+  if (error && error.code === "23505") {
+    // Этот мессенджер уже привязан к другому аккаунту: запоминаем причину, чтобы
+    // приложение не ждало молча, а объяснило человеку, что делать.
+    await sb
+      .from("app_users")
+      .update({ messenger_conflict_channel: params.channel, messenger_conflict_at: new Date().toISOString() })
+      .eq("id", params.appId);
+    return false;
+  }
+  if (data) {
+    // Подключил бота — значит, выбор про уведомления сделан: зелёную плашку
+    // «Включить уведомления» больше не показываем.
+    await sb
+      .from("app_users")
+      .update({ chat_notify_asked_at: new Date().toISOString() })
+      .eq("id", params.appId)
+      .is("chat_notify_asked_at", null);
+  }
   return Boolean(data) && !error;
 }
 

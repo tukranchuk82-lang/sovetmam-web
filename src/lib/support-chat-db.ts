@@ -150,3 +150,17 @@ export async function listSupportConversations(): Promise<SupportConversation[]>
     })
     .sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));
 }
+
+/** Вернуть обращение координатора в непрочитанные (для техспеца). */
+export async function markLastCoordinatorMessageUnread(coordinatorId: string): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  const { data } = await sb
+    .from("support_messages")
+    .select("id")
+    .eq("coordinator_id", coordinatorId)
+    .eq("author", "coordinator")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (data) await sb.from("support_messages").update({ read_at: null }).eq("id", data.id as string);
+}

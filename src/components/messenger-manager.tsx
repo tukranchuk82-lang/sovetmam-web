@@ -45,12 +45,22 @@ export function MessengerManager({ initial }: { initial: ChannelState }) {
   const [waiting, setWaiting] = useState<MessengerChannel | null>(null); // ждём бота
   const [disc, setDisc] = useState<MessengerChannel | null>(null); // отключаем
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [conflict, setConflict] = useState<MessengerChannel | null>(null);
 
   // Пока ждём подтверждения из бота — опрашиваем статус нужного канала.
   useEffect(() => {
     if (!waiting) return;
     pollRef.current = setInterval(async () => {
       const s = await messengerStatus();
+      // Бот ответил «готово», но этот мессенджер уже привязан к другому аккаунту:
+      // перестаём ждать и объясняем, что делать.
+      if (s.conflict === waiting) {
+        if (pollRef.current) clearInterval(pollRef.current);
+        setConflict(waiting);
+        setWaiting(null);
+        setBusy(null);
+        return;
+      }
       if (s.channels[waiting]) {
         if (pollRef.current) clearInterval(pollRef.current);
         setState(s.channels);
@@ -65,6 +75,7 @@ export function MessengerManager({ initial }: { initial: ChannelState }) {
   }, [waiting, router]);
 
   function connect(ch: MessengerChannel) {
+    setConflict(null);
     setBusy(ch);
     const win = window.open("", "_blank");
     chooseMessenger(ch).then((res) => {
@@ -151,6 +162,14 @@ export function MessengerManager({ initial }: { initial: ChannelState }) {
           </div>
         );
       })}
+
+      {conflict && (
+        <p className="rounded-xl bg-[#FBEFEF] px-3 py-2.5 text-xs leading-snug text-[#8E1D2C]">
+          Не получилось подключить {CHANNELS.find((c) => c.id === conflict)?.label ?? "мессенджер"}: этот аккаунт
+          в мессенджере уже привязан к другому профилю в приложении (например, к вашему второму аккаунту). Отключите
+          его там или подключите другой мессенджер.
+        </p>
+      )}
 
       {waiting && (
         <p className="pt-1 text-center text-xs text-[#9aa0a8]">

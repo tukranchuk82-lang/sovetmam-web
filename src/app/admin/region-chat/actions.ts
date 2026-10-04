@@ -6,7 +6,7 @@ import { after } from "next/server";
 import { getCurrentStaff } from "@/lib/user-session";
 import { getAppUserById } from "@/lib/onboarding-db";
 import { getThreadRegion } from "@/lib/chat-region";
-import { addMessage } from "@/lib/coordinator-chat-db";
+import { addMessage, markLastUserMessageUnread } from "@/lib/coordinator-chat-db";
 import { notifyUserAboutCoordinatorReply } from "@/lib/coordinator-notify";
 import type { ChatSendState } from "@/components/coordinator-chat-thread";
 
@@ -45,4 +45,13 @@ export async function sendCoordinatorReplyAction(
   revalidatePath("/profile/coordinator-chat");
   revalidatePath("/profile");
   return { error: null, ok: true };
+}
+
+/** Вернуть беседу в непрочитанные и уйти к списку — чтобы вернуться к ней позже. */
+export async function markConversationUnreadAction(targetUserId: string): Promise<void> {
+  await authorize(targetUserId);
+  await markLastUserMessageUnread(targetUserId);
+  revalidatePath("/admin/region-chat");
+  revalidatePath("/admin/region-chat/[userId]", "page");
+  redirect("/admin/region-chat");
 }

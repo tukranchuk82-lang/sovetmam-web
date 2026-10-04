@@ -18,11 +18,16 @@ import { listConversationsByRegion } from "@/lib/coordinator-chat-db";
  * Обращения региона теперь живут в чате: беседа — это человек, который писал.
  * «Не отвечено» — беседы, где последнее слово за человеком.
  */
-export async function getChatInquiryCounts(region: string | null): Promise<{ total: number; waiting: number }> {
+export async function getChatInquiryCounts(
+  region: string | null,
+): Promise<{ total: number; waiting: number; unread: number }> {
   const conversations = await listConversationsByRegion(region);
   return {
     total: conversations.length,
+    // Последнее слово за человеком — ответа ещё не было (даже если координатор уже прочитал).
     waiting: conversations.filter((c) => c.lastAuthor === "user").length,
+    // Не открытые координатором — именно они горят кружком, пока их не прочитают.
+    unread: conversations.filter((c) => c.unread).length,
   };
 }
 

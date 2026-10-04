@@ -68,8 +68,8 @@ export default async function AdminLayout({
   const region = await resolveRegion(staff, scope);
 
   const newInquiries = await countNewInquiries(scope === "coordinator" ? (region ?? undefined) : undefined);
-  // Кружок «Обращений»: сколько бесед ждут ответа — то же число, что на сводке.
-  const unreadChat = scope === "coordinator" ? (await getChatInquiryCounts(region)).waiting : 0;
+  // Кружок «Обращений»: сколько бесед ещё не открыты — исчезает, когда прочитал.
+  const unreadChat = scope === "coordinator" ? (await getChatInquiryCounts(region)).unread : 0;
   // Заявки на кабинет и спорные меры — общая, не региональная очередь.
   // Кружок «Техподдержки»: у координатора — непрочитанные ответы, у техспеца и
   // владельца — сколько координаторов ждут ответа.

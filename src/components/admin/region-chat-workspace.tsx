@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, MapPin, MessageCircle } from "lucide-react";
+import { ArrowLeft, MailPlus, MapPin, MessageCircle } from "lucide-react";
+import { markConversationUnreadAction } from "@/app/admin/region-chat/actions";
 import type { AppUser } from "@/lib/onboarding-db";
 import { listConversationsByRegion, type ChatMessage } from "@/lib/coordinator-chat-db";
 import type { ClientCard } from "@/lib/chat-client-card";
@@ -107,6 +108,16 @@ export async function RegionChatWorkspace({
                   </p>
                 )}
               </div>
+              <form action={markConversationUnreadAction.bind(null, selected.userId)}>
+                <button
+                  type="submit"
+                  title="Отметить непрочитанным и вернуться к списку"
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-white/10 px-3 text-[13px] font-semibold text-white transition-colors hover:bg-white/20"
+                >
+                  <MailPlus className="size-4" />
+                  <span className="hidden sm:inline">Непрочитанным</span>
+                </button>
+              </form>
               {selected.card && (
                 <ChatCardSheet name={selected.name}>
                   <ChatClientCardView card={selected.card} />

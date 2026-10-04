@@ -2,6 +2,7 @@
 
 import { getCurrentAppUser } from "@/lib/user-session";
 import { removeSubscription, saveSubscription } from "@/lib/push";
+import { markChatNotifyAsked } from "@/lib/onboarding-db";
 
 /**
  * Подписка устройства на уведомления.
@@ -25,6 +26,8 @@ export async function subscribeToPushAction(input: {
     auth: input.auth,
     userAgent: input.userAgent,
   });
+  // Включил уведомления на устройстве — предложение про уведомления закрыто.
+  await markChatNotifyAsked(user.id);
   return { ok: true };
 }
 

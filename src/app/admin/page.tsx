@@ -365,7 +365,7 @@ async function CoordinatorHome({
           value={chatCounts.total}
           caption="всего"
           note={chatCounts.waiting > 0 ? `Не отвечено: ${chatCounts.waiting}` : "Все обращения отвечены"}
-          badge={chatCounts.waiting}
+          badge={chatCounts.unread}
         />
         <BigCard
           href="/admin/measures"

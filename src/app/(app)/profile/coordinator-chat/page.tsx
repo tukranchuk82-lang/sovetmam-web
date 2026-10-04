@@ -4,6 +4,7 @@ import { getCurrentAppUser } from "@/lib/user-session";
 import { getThread, markThreadRead, hasCoordinatorForRegion } from "@/lib/coordinator-chat-db";
 import { getUserChatRegion } from "@/lib/chat-region";
 import { getMeasureBySlug } from "@/lib/measures-db";
+import { RefreshOnce } from "@/components/refresh-once";
 import { CoordinatorChatThread } from "@/components/coordinator-chat-thread";
 import { ChatNotifyPanel } from "@/components/chat-notify-panel";
 import { sendCoordinatorChatMessageAction } from "./actions";
@@ -33,6 +34,7 @@ export default async function CoordinatorChatPage({
   const measure = sp.measure ? await getMeasureBySlug(sp.measure) : null;
 
   const messages = await getThread(user.id);
+  const hadUnread = messages.some((m) => m.author === "coordinator" && !m.readAt);
   await markThreadRead(user.id, "user");
 
   // Первое сообщение отправлено, а про уведомления человека ещё не спрашивали —
@@ -46,6 +48,7 @@ export default async function CoordinatorChatPage({
       className="min-h-[75vh] px-4 py-5"
       style={{ background: "linear-gradient(180deg, #16233F 0%, #101A30 100%)" }}
     >
+      <RefreshOnce when={hadUnread} />
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-xl font-extrabold leading-tight tracking-tight text-white">
           Чат с координатором

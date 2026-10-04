@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentStaff } from "@/lib/user-session";
 import { getSupportThread, markSupportRead } from "@/lib/support-chat-db";
+import { RefreshOnce } from "@/components/refresh-once";
 import { SupportForCoordinator, SupportForTech } from "@/components/admin/support-workspace";
 import { sendSupportMessageAction } from "./actions";
 
@@ -17,8 +18,14 @@ export default async function SupportPage() {
 
   if (staff.role === "coordinator") {
     const messages = await getSupportThread(staff.id);
+    const hadUnread = messages.some((m) => m.author === "coordinator" && !m.readAt);
     await markSupportRead(staff.id, "coordinator");
-    return <SupportForCoordinator user={staff} messages={messages} sendAction={sendSupportMessageAction} />;
+    return (
+      <>
+        <RefreshOnce when={hadUnread} />
+        <SupportForCoordinator user={staff} messages={messages} sendAction={sendSupportMessageAction} />
+      </>
+    );
   }
 
   return <SupportForTech staff={staff} />;

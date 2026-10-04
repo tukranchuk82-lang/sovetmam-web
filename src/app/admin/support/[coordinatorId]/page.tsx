@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentStaff } from "@/lib/user-session";
 import { getAppUserById } from "@/lib/onboarding-db";
 import { getSupportThread, markSupportRead } from "@/lib/support-chat-db";
+import { RefreshOnce } from "@/components/refresh-once";
 import { SupportForTech } from "@/components/admin/support-workspace";
 import { sendSupportReplyAction } from "../actions";
 
@@ -23,9 +24,12 @@ export default async function SupportThreadPage({
   if (!coordinator || coordinator.role !== "coordinator") notFound();
 
   const messages = await getSupportThread(coordinatorId);
+  const hadUnread = messages.some((m) => m.author === "user" && !m.readAt);
   await markSupportRead(coordinatorId, "tech");
 
   return (
+    <>
+      <RefreshOnce when={hadUnread} />
     <SupportForTech
       staff={staff}
       selected={{
@@ -42,5 +46,6 @@ export default async function SupportThreadPage({
         sendAction: sendSupportReplyAction.bind(null, coordinatorId),
       }}
     />
+    </>
   );
 }

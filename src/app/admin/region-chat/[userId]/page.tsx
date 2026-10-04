@@ -6,6 +6,7 @@ import { getAppUserById } from "@/lib/onboarding-db";
 import { getThread, markThreadRead } from "@/lib/coordinator-chat-db";
 import { getThreadRegion } from "@/lib/chat-region";
 import { getClientCard } from "@/lib/chat-client-card";
+import { RefreshOnce } from "@/components/refresh-once";
 import { RegionChatWorkspace } from "@/components/admin/region-chat-workspace";
 import { sendCoordinatorReplyAction } from "../actions";
 
@@ -31,9 +32,12 @@ export default async function RegionChatThreadPage({
   const region = await resolveRegion(staff, scope);
 
   const [messages, card] = await Promise.all([getThread(userId), getClientCard(userId, threadRegion)]);
+  const hadUnread = messages.some((m) => m.author === "user" && !m.readAt);
   await markThreadRead(userId, "coordinator");
 
   return (
+    <>
+      <RefreshOnce when={hadUnread} />
     <RegionChatWorkspace
       staff={staff}
       region={region}
@@ -46,5 +50,6 @@ export default async function RegionChatThreadPage({
         sendAction: sendCoordinatorReplyAction.bind(null, userId),
       }}
     />
+    </>
   );
 }

@@ -10,6 +10,7 @@ import {
   verifyOtp,
   getAppUserByEmail,
   setMessengerChoice,
+  getMessengerConflict,
   channelConnected,
   disconnectMessengerChannel,
   saveSurvey,
@@ -227,12 +228,15 @@ export async function chooseMessenger(
 export async function messengerStatus(): Promise<{
   connected: boolean;
   channels: { telegram: boolean; vk: boolean; max: boolean };
+  /** Канал, который не удалось подключить: он уже занят другим аккаунтом. */
+  conflict: MessengerChannel | null;
 }> {
   const user = await getCurrentAppUser();
   const on = (c: MessengerChannel) => (user ? channelConnected(user, c) : false);
   return {
     connected: Boolean(user?.messengerConnected),
     channels: { telegram: on("telegram"), vk: on("vk"), max: on("max") },
+    conflict: user ? await getMessengerConflict(user.id) : null,
   };
 }
 

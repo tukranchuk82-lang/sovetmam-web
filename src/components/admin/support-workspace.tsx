@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, LifeBuoy, MapPin, MessageCircle } from "lucide-react";
+import { ArrowLeft, LifeBuoy, MailPlus, MapPin, MessageCircle } from "lucide-react";
+import { markSupportUnreadAction } from "@/app/admin/support/actions";
 import type { AppUser } from "@/lib/onboarding-db";
 import type { ChatMessage } from "@/lib/coordinator-chat-db";
 import { listSupportConversations } from "@/lib/support-chat-db";
@@ -153,6 +154,16 @@ export async function SupportForTech({
                   <span className="truncate">{selected.email}</span>
                 </p>
               </div>
+              <form action={markSupportUnreadAction.bind(null, selected.coordinatorId)}>
+                <button
+                  type="submit"
+                  title="Отметить непрочитанным и вернуться к списку"
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-white/10 px-3 text-[13px] font-semibold text-white transition-colors hover:bg-white/20"
+                >
+                  <MailPlus className="size-4" />
+                  <span className="hidden sm:inline">Непрочитанным</span>
+                </button>
+              </form>
             </header>
             <div className="min-h-0 flex-1">
               <CoordinatorChatThread

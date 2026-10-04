@@ -15,7 +15,7 @@ export interface ConversationItem {
   unreadCount: number;
 }
 
-type Filter = "all" | "waiting";
+type Filter = "all" | "unread" | "waiting";
 
 /** Две буквы из имени для кружка-аватара (общий Avatar тянет серверный код и сюда не годится). */
 function initials(name: string): string {
@@ -50,10 +50,12 @@ export function ChatConversationList({
   const [filter, setFilter] = useState<Filter>("all");
 
   const waiting = items.filter((c) => c.lastAuthor === "user").length;
+  const unread = items.filter((c) => c.unreadCount > 0).length;
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
     return items.filter((c) => {
       if (filter === "waiting" && c.lastAuthor !== "user") return false;
+      if (filter === "unread" && c.unreadCount === 0) return false;
       if (!q) return true;
       return c.userName.toLowerCase().includes(q) || c.lastMessage.toLowerCase().includes(q);
     });
@@ -75,6 +77,7 @@ export function ChatConversationList({
           {(
             [
               ["all", `Все · ${items.length}`],
+              ["unread", `Новые · ${unread}`],
               ["waiting", `Ждут ответа · ${waiting}`],
             ] as [Filter, string][]
           ).map(([key, label]) => (

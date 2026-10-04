@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { getCurrentStaff } from "@/lib/user-session";
-import { addSupportMessage } from "@/lib/support-chat-db";
+import { addSupportMessage, markLastCoordinatorMessageUnread } from "@/lib/support-chat-db";
 import { notifyTechAboutSupportMessage, notifyCoordinatorAboutSupportReply } from "@/lib/support-notify";
 import type { ChatSendState } from "@/components/coordinator-chat-thread";
 
@@ -49,4 +50,14 @@ export async function sendSupportReplyAction(
   after(() => notifyCoordinatorAboutSupportReply(coordinatorId, body));
   refresh(coordinatorId);
   return { error: null, ok: true };
+}
+
+/** Техспец возвращает обращение в непрочитанные и уходит к списку. */
+export async function markSupportUnreadAction(coordinatorId: string): Promise<void> {
+  const staff = await getCurrentStaff();
+  if (!staff || (staff.role !== "tech" && staff.role !== "owner")) return;
+  await markLastCoordinatorMessageUnread(coordinatorId);
+  revalidatePath("/admin/support");
+  revalidatePath("/admin/support/[coordinatorId]", "page");
+  redirect("/admin/support");
 }

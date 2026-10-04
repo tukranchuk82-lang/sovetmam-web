@@ -95,6 +95,32 @@ export async function countUnreadForUser(userId: string): Promise<number> {
   return count ?? 0;
 }
 
+/**
+ * Вернуть беседу в «непрочитанные»: снимаем отметку о прочтении с последнего
+ * сообщения человека. Нужно, чтобы отложить ответ и не потерять разговор.
+ */
+export async function markLastUserMessageUnread(userId: string): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  const { data } = await sb
+    .from("coordinator_messages")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("author", "user")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (data) await sb.from("coordinator_messages").update({ read_at: null }).eq("id", data.id as string);
+}
+
+/** Сколько БЕСЕД содержат непрочитанные сообщения людей — кружок в меню и на сводке. */
+export async function countUnreadConversations(region: string | null): Promise<number> {
+  const sb = createSupabaseAdminClient();
+  let query = sb.from("coordinator_messages").select("user_id").eq("author", "user").is("read_at", null);
+  if (region) query = query.eq("region", region);
+  const { data } = await query;
+  return new Set((data ?? []).map((r) => r.user_id as string)).size;
+}
+
 /** Сколько сообщений от людей ждут координатора — бейдж в админке. `region` null — без фильтра. */
 export async function countUnreadForRegion(region: string | null): Promise<number> {
   const sb = createSupabaseAdminClient();
