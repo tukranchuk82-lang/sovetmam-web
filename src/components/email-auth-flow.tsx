@@ -321,8 +321,14 @@ export function EmailAuthFlow() {
         <form onSubmit={submitEmail} className="space-y-3" noValidate>
           <input
             className={inputCls}
-            type="email"
-            inputMode="email"
+            // Обычное текстовое поле, а не type="email": у почтового поля некоторые
+            // клавиатуры Android ограничивают смену раскладки (долгое нажатие на
+            // пробел), и ввести адрес латиницей было невозможно. Формат адреса мы
+            // проверяем сами (и подсказываем опечатки ниже).
+            type="text"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             placeholder="Ваш email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
