@@ -17,19 +17,32 @@ function requireAdmin() {
   });
 }
 
+/**
+ * Результат формы на странице сотрудников. Ошибки возвращаем текстом, а не
+ * бросаем: брошенная ошибка уводила на страницу сбоя, из которой в
+ * установленном приложении не вернуться.
+ */
+export type StaffFormState = { error: string | null; done: string | null };
+
+const NOT_REGISTERED =
+  "Такого email нет среди зарегистрированных. Сначала человек должен один раз войти в приложение по этой почте — после этого его можно назначить.";
+
 /** Назначить существующего пользователя координатором региона. */
-export async function promoteToCoordinatorAction(fd: FormData) {
+export async function promoteToCoordinatorAction(_prev: StaffFormState, fd: FormData): Promise<StaffFormState> {
   await requireAdmin();
   const email = String(fd.get("email") ?? "").trim().toLowerCase();
   const region = String(fd.get("region") ?? "").trim();
-  if (!email || !region) throw new Error("Укажите почту и регион");
+  if (!email || !region) return { error: "Укажите почту и выберите регион.", done: null };
 
   const user = await getAppUserByEmail(email);
-  if (!user) throw new Error("Такого email нет среди зарегистрированных пользователей — сначала человек должен один раз войти в приложение");
-  if (user.role === "owner") throw new Error("Нельзя понизить владельца назначением координатором — сначала снимите с него роль владельца");
+  if (!user) return { error: NOT_REGISTERED, done: null };
+  if (user.role === "owner") {
+    return { error: "Нельзя понизить владельца назначением координатором — сначала снимите с него роль владельца.", done: null };
+  }
 
   await setUserRole(user.id, "coordinator", region);
   revalidatePath("/admin/staff");
+  return { error: null, done: `${email} назначен координатором: ${region}.` };
 }
 
 /** Разжаловать координатора — обратно в обычного пользователя. */
@@ -48,40 +61,43 @@ export async function demoteTechAction(userId: string) {
 }
 
 /** Назначить техспеца — владелец и сам техспец (растить себе команду можно вдвоём). */
-export async function promoteToTechAction(fd: FormData) {
+export async function promoteToTechAction(_prev: StaffFormState, fd: FormData): Promise<StaffFormState> {
   await requireAdmin();
   const email = String(fd.get("techEmail") ?? "").trim().toLowerCase();
-  if (!email) throw new Error("Укажите почту");
+  if (!email) return { error: "Укажите почту.", done: null };
   const user = await getAppUserByEmail(email);
-  if (!user) throw new Error("Такого email нет среди зарегистрированных пользователей");
-  if (user.role === "owner") throw new Error("Уже владелец");
+  if (!user) return { error: NOT_REGISTERED, done: null };
+  if (user.role === "owner") return { error: "Этот человек уже владелец.", done: null };
   await setUserRole(user.id, "tech");
   revalidatePath("/admin/staff");
+  return { error: null, done: `${email} назначен техспецом.` };
 }
 
 /** Владелец передаёт права владельца напрямую — подтверждения не требуется, он и так полностью доверен. */
-export async function grantOwnerDirectAction(fd: FormData) {
+export async function grantOwnerDirectAction(_prev: StaffFormState, fd: FormData): Promise<StaffFormState> {
   const admin = await requireAdmin();
-  if (admin.role !== "owner") throw new Error("Передать права владельца может только владелец");
+  if (admin.role !== "owner") return { error: "Передать права владельца может только владелец.", done: null };
   const email = String(fd.get("ownerEmail") ?? "").trim().toLowerCase();
-  if (!email) throw new Error("Укажите почту");
+  if (!email) return { error: "Укажите почту.", done: null };
   const user = await getAppUserByEmail(email);
-  if (!user) throw new Error("Такого email нет среди зарегистрированных пользователей");
+  if (!user) return { error: NOT_REGISTERED, done: null };
   await setUserRole(user.id, "owner");
   revalidatePath("/admin/staff");
+  return { error: null, done: `${email} теперь владелец.` };
 }
 
 /** Техспец только предлагает кандидата — нужно подтверждение владельца. */
-export async function requestOwnerAction(fd: FormData) {
+export async function requestOwnerAction(_prev: StaffFormState, fd: FormData): Promise<StaffFormState> {
   const admin = await requireAdmin();
-  if (admin.role !== "tech") throw new Error("Предложить кандидата может только техспец");
+  if (admin.role !== "tech") return { error: "Предложить кандидата может только техспец.", done: null };
   const email = String(fd.get("candidateEmail") ?? "").trim().toLowerCase();
-  if (!email) throw new Error("Укажите почту");
+  if (!email) return { error: "Укажите почту.", done: null };
   const user = await getAppUserByEmail(email);
-  if (!user) throw new Error("Такого email нет среди зарегистрированных пользователей");
-  if (user.role === "owner") throw new Error("Уже владелец");
+  if (!user) return { error: NOT_REGISTERED, done: null };
+  if (user.role === "owner") return { error: "Этот человек уже владелец.", done: null };
   await createOwnerRequest(admin.id, user.id);
   revalidatePath("/admin/staff");
+  return { error: null, done: "Заявка отправлена — её должен подтвердить владелец." };
 }
 
 export async function decideOwnerRequestAction(requestId: string, approve: boolean) {

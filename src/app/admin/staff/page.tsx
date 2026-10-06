@@ -4,6 +4,7 @@ import { getCurrentAdmin } from "@/lib/user-session";
 import { listByRole, listPendingOwnerRequests } from "@/lib/staff-db";
 import { REGIONS } from "@/lib/measures";
 import { AdminPage } from "@/components/admin/ui/admin-page";
+import { StaffForm } from "@/components/admin/staff-form";
 import {
   decideOwnerRequestAction,
   demoteCoordinatorAction,
@@ -78,7 +79,7 @@ export default async function StaffPage() {
           ))}
         </div>
 
-        <form action={promoteToCoordinatorAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
+        <StaffForm action={promoteToCoordinatorAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
           <label className="min-w-[220px] flex-1">
             <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
             <input
@@ -108,7 +109,7 @@ export default async function StaffPage() {
           >
             Назначить
           </button>
-        </form>
+        </StaffForm>
       </section>
 
       {/* ── Техспецы ──────────────────────────────────────────────────── */}
@@ -146,7 +147,7 @@ export default async function StaffPage() {
           ))}
         </div>
 
-        <form action={promoteToTechAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
+        <StaffForm action={promoteToTechAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
           <label className="min-w-[220px] flex-1">
             <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
             <input
@@ -163,7 +164,7 @@ export default async function StaffPage() {
           >
             Назначить техспецем
           </button>
-        </form>
+        </StaffForm>
       </section>
 
       {/* ── Владелец ──────────────────────────────────────────────────── */}
@@ -183,7 +184,7 @@ export default async function StaffPage() {
         </div>
 
         {admin.role === "owner" ? (
-          <form action={grantOwnerDirectAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
+          <StaffForm action={grantOwnerDirectAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
             <label className="min-w-[220px] flex-1">
               <span className="text-xs font-medium text-muted-foreground">
                 Передать права владельца — почта человека
@@ -202,9 +203,9 @@ export default async function StaffPage() {
             >
               Сделать владельцем
             </button>
-          </form>
+          </StaffForm>
         ) : (
-          <form action={requestOwnerAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
+          <StaffForm action={requestOwnerAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
             <label className="min-w-[220px] flex-1">
               <span className="text-xs font-medium text-muted-foreground">
                 Предложить кандидата во владельцы — почта человека
@@ -226,7 +227,7 @@ export default async function StaffPage() {
             <p className="basis-full text-xs text-muted-foreground">
               Заявка вступит в силу только после подтверждения действующего владельца.
             </p>
-          </form>
+          </StaffForm>
         )}
 
         {admin.role === "owner" && pending.length > 0 && (
