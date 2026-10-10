@@ -1058,6 +1058,22 @@ html:has(.admin-shell) .light-surface .hover\:text-primary:hover {
   color: #8e1d2c;
 }
 
+/* Поля ввода на светлых карточках админки: белый фон, чёрный текст, синяя рамка.
+   Раньше они брали тёмный фон страницы, и введённый текст не был виден. */
+html:has(.admin-shell) .light-surface :is(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]) {
+  background-color: #ffffff;
+  color: #111111;
+  border-color: #1b3a6b;
+}
+html:has(.admin-shell) .light-surface :is(input, textarea)::placeholder {
+  color: #7d8594;
+}
+html:has(.admin-shell) .light-surface :is(input, textarea, select):focus {
+  outline: none;
+  border-color: #1b3a6b;
+  box-shadow: 0 0 0 3px rgba(27, 58, 107, 0.2);
+}
+
 /* Цвета графиков: на тёмной подложке — светло-голубая линия, на светлой — фирменные. */
 .admin-shell,
 html:has(.admin-shell) {

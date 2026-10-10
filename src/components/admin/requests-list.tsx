@@ -166,29 +166,38 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
         </p>
       )}
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <input
-          className="rounded-lg border bg-background px-3 py-2 text-sm"
-          placeholder="Имя"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-        />
-        <input
-          className="rounded-lg border bg-background px-3 py-2 text-sm"
-          placeholder="Фамилия"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-        />
-        <input
-          className="rounded-lg border bg-background px-3 py-2 text-sm"
-          placeholder="Почта"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <label className="block">
+          <span className="text-xs font-semibold text-[#20242c]">Имя</span>
+          <input
+            className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+            placeholder="Например, Анна"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-semibold text-[#20242c]">Фамилия</span>
+          <input
+            className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+            placeholder="Например, Иванова"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs font-semibold text-[#20242c]">Почта человека</span>
+          <input
+            className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+            placeholder="name@example.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
       </div>
 
-      {error && <p className="mt-2 text-sm text-[#FF8A97]">{error}</p>}
+      {error && <p className="mt-2 text-sm font-medium text-red-700">{error}</p>}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
