@@ -1,15 +1,21 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
-import { getCurrentAdmin } from "@/lib/user-session";
+import { ShieldCheck, ChevronRight } from "lucide-react";
+import { getCurrentAdminOrAnalyst } from "@/lib/user-session";
 import { listByRole, listPendingOwnerRequests } from "@/lib/staff-db";
 import { REGIONS } from "@/lib/measures";
 import { AdminPage } from "@/components/admin/ui/admin-page";
 import { StaffForm } from "@/components/admin/staff-form";
+import { CoordinatorStatusBadge } from "@/components/admin/coordinators-table";
+import { getCoordinatorsOverview } from "@/lib/analytics/coordinator-report";
+import { parsePeriod } from "@/lib/analytics/period";
 import {
   decideOwnerRequestAction,
+  demoteAnalystAction,
   demoteCoordinatorAction,
   demoteTechAction,
   grantOwnerDirectAction,
+  promoteToAnalystAction,
   promoteToCoordinatorAction,
   promoteToTechAction,
   requestOwnerAction,
@@ -19,12 +25,19 @@ export const metadata = { title: "Сотрудники" };
 export const dynamic = "force-dynamic";
 
 export default async function StaffPage() {
-  const admin = await getCurrentAdmin();
+  const admin = await getCurrentAdminOrAnalyst();
   if (!admin) redirect("/login?next=/admin/staff");
 
-  const [coordinatorsRaw, techs, owners, pending] = await Promise.all([
+  // Аналитик видит всю страницу, но кнопок и форм у него нет.
+  const canEdit = admin.role !== "analyst";
+
+  const overview = await getCoordinatorsOverview(parsePeriod("30"));
+  const statusById = new Map(overview.map((o) => [o.id, o.status]));
+
+  const [coordinatorsRaw, techs, analysts, owners, pending] = await Promise.all([
     listByRole("coordinator"),
     listByRole("tech"),
+    listByRole("analyst"),
     listByRole("owner"),
     admin.role === "owner" ? listPendingOwnerRequests() : Promise.resolve([]),
   ]);
@@ -50,7 +63,10 @@ export default async function StaffPage() {
           Координаторы
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Видят и отвечают на обращения своего региона, правят его меры, видят анкеты и избранное региона.
+          Видят и отвечают на обращения своего региона, видят меры, анкеты и избранное региона. Нажмите на карточку, чтобы открыть отчёт по работе.{" "}
+          <Link href="/admin/coordinators" className="font-medium text-primary underline">
+            Сравнить всех координаторов
+          </Link>
         </p>
 
         <div className="mt-3 space-y-2">
@@ -59,15 +75,27 @@ export default async function StaffPage() {
           )}
           {coordinators.map((c) => (
             <div key={c.id} className="flex items-center justify-between gap-3 light-surface rounded-2xl border bg-card p-3.5">
-              <div className="min-w-0">
-                <p className="truncate font-semibold leading-snug">
-                  {c.region ?? "Регион не указан"}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {c.firstName} {c.lastName} · {c.email}
-                </p>
-              </div>
-              <form action={demoteCoordinatorAction.bind(null, c.id)}>
+              {/* Нажатие на карточку открывает отчёт по работе координатора. */}
+              <Link href={`/admin/coordinators/${c.id}`} className="group flex min-w-0 flex-1 items-center gap-2">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold leading-snug group-hover:text-primary">
+                    {c.region ?? "Регион не указан"}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {c.firstName} {c.lastName} · {c.email}
+                  </p>
+                </div>
+                {statusById.get(c.id) && (
+                  <span className="ml-auto shrink-0">
+                    <CoordinatorStatusBadge status={statusById.get(c.id)!} />
+                  </span>
+                )}
+                <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground group-hover:text-primary">
+                  Отчёт <ChevronRight className="size-3.5" />
+                </span>
+              </Link>
+              {canEdit && (
+<form action={demoteCoordinatorAction.bind(null, c.id)}>
                 <button
                   type="submit"
                   className="shrink-0 rounded-lg border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
@@ -75,11 +103,13 @@ export default async function StaffPage() {
                   Разжаловать
                 </button>
               </form>
+)}
             </div>
           ))}
         </div>
 
-        <StaffForm action={promoteToCoordinatorAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
+        {canEdit && (
+<StaffForm action={promoteToCoordinatorAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
           <label className="min-w-[220px] flex-1">
             <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
             <input
@@ -110,6 +140,7 @@ export default async function StaffPage() {
             Назначить
           </button>
         </StaffForm>
+)}
       </section>
 
       {/* ── Техспецы ──────────────────────────────────────────────────── */}
@@ -147,7 +178,8 @@ export default async function StaffPage() {
           ))}
         </div>
 
-        <StaffForm action={promoteToTechAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
+        {canEdit && (
+<StaffForm action={promoteToTechAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
           <label className="min-w-[220px] flex-1">
             <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
             <input
@@ -165,6 +197,64 @@ export default async function StaffPage() {
             Назначить техспецем
           </button>
         </StaffForm>
+)}
+      </section>
+
+      {/* ── Аналитики ─────────────────────────────────────────────────── */}
+      <section className="mt-7">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+          Аналитики
+        </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Видят всю админку целиком, но только смотрят: менять, отвечать и назначать они не могут.
+        </p>
+
+        <div className="mt-3 space-y-2">
+          {analysts.length === 0 && (
+            <p className="text-sm text-muted-foreground">Пока никто не назначен.</p>
+          )}
+          {analysts.map((a) => (
+            <div key={a.id} className="flex items-center justify-between gap-3 light-surface rounded-2xl border bg-card p-3.5">
+              <div className="min-w-0">
+                <p className="truncate font-semibold leading-snug">
+                  {a.firstName} {a.lastName}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{a.email}</p>
+              </div>
+              {canEdit && (
+                <form action={demoteAnalystAction.bind(null, a.id)}>
+                  <button
+                    type="submit"
+                    className="shrink-0 rounded-lg border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
+                  >
+                    Снять роль
+                  </button>
+                </form>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {canEdit && (
+          <StaffForm action={promoteToAnalystAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
+            <label className="min-w-[220px] flex-1">
+              <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
+              <input
+                name="analystEmail"
+                type="email"
+                required
+                placeholder="name@example.com"
+                className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </label>
+            <button
+              type="submit"
+              className="h-[38px] rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            >
+              Назначить аналитиком
+            </button>
+          </StaffForm>
+        )}
       </section>
 
       {/* ── Владелец ──────────────────────────────────────────────────── */}
@@ -204,7 +294,7 @@ export default async function StaffPage() {
               Сделать владельцем
             </button>
           </StaffForm>
-        ) : (
+        ) : admin.role === "tech" ? (
           <StaffForm action={requestOwnerAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
             <label className="min-w-[220px] flex-1">
               <span className="text-xs font-medium text-muted-foreground">
@@ -228,7 +318,7 @@ export default async function StaffPage() {
               Заявка вступит в силу только после подтверждения действующего владельца.
             </p>
           </StaffForm>
-        )}
+        ) : null}
 
         {admin.role === "owner" && pending.length > 0 && (
           <div className="mt-3 space-y-2">

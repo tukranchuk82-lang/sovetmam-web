@@ -25,7 +25,7 @@ export default async function SupportThreadPage({
 
   const messages = await getSupportThread(coordinatorId);
   const hadUnread = messages.some((m) => m.author === "user" && !m.readAt);
-  await markSupportRead(coordinatorId, "tech");
+  if (staff.role !== "analyst") await markSupportRead(coordinatorId, "tech");
 
   return (
     <>

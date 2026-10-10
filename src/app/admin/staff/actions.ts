@@ -106,3 +106,25 @@ export async function decideOwnerRequestAction(requestId: string, approve: boole
   await decideOwnerRequest(requestId, admin.id, approve);
   revalidatePath("/admin/staff");
 }
+
+/** Назначить аналитика — видит всю админку, но ничего не меняет. */
+export async function promoteToAnalystAction(_prev: StaffFormState, fd: FormData): Promise<StaffFormState> {
+  await requireAdmin();
+  const email = String(fd.get("analystEmail") ?? "").trim().toLowerCase();
+  if (!email) return { error: "Укажите почту.", done: null };
+  const user = await getAppUserByEmail(email);
+  if (!user) return { error: NOT_REGISTERED, done: null };
+  if (user.role === "owner" || user.role === "tech") {
+    return { error: "Этот человек владелец или техспец — у него и так полный доступ. Сначала снимите с него эту роль.", done: null };
+  }
+  await setUserRole(user.id, "analyst");
+  revalidatePath("/admin/staff");
+  return { error: null, done: `${email} назначен аналитиком: видит всё, менять ничего не может.` };
+}
+
+/** Снять роль аналитика — обратно в обычного пользователя. */
+export async function demoteAnalystAction(userId: string) {
+  await requireAdmin();
+  await setUserRole(userId, "user");
+  revalidatePath("/admin/staff");
+}

@@ -16,7 +16,7 @@ import type { AppRole } from "@/lib/onboarding-db";
  * регион), сервер проверяет по настоящей роли из базы, а не по этому cookie:
  * cookie не httpOnly и в принципе может быть подделан в браузере.
  */
-export type ViewMode = "owner" | "tech" | "coordinator" | "user";
+export type ViewMode = "owner" | "tech" | "coordinator" | "analyst" | "user";
 
 const COOKIE = "sm_view";
 
@@ -25,6 +25,7 @@ export const ALLOWED_VIEW_MODES: Record<AppRole, ViewMode[]> = {
   owner: ["owner", "tech", "coordinator", "user"],
   tech: ["owner", "tech", "coordinator", "user"],
   coordinator: ["coordinator", "user"],
+  analyst: ["analyst", "user"],
   user: ["user"],
 };
 
@@ -41,7 +42,7 @@ export async function getViewMode(role: AppRole): Promise<ViewMode> {
   const c = await cookies();
   const raw = c.get(COOKIE)?.value;
   const allowed = ALLOWED_VIEW_MODES[role];
-  if (raw === "owner" || raw === "tech" || raw === "coordinator" || raw === "user") {
+  if (raw === "owner" || raw === "tech" || raw === "coordinator" || raw === "analyst" || raw === "user") {
     if (allowed.includes(raw)) return raw;
   }
   return "user";

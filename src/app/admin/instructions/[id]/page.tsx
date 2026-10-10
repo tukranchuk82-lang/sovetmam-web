@@ -13,12 +13,13 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
   const staff = await getCurrentStaff();
   if (!staff) redirect(`/login?next=/admin/instructions/${id}`);
   const manager = staff.role === "owner" || staff.role === "tech";
+  const viewsAll = manager || staff.role === "analyst";
 
   const lesson = await getLesson(id);
   // Черновик координатору не показываем — как будто его нет.
-  if (!lesson || (!lesson.isPublished && !manager)) notFound();
+  if (!lesson || (!lesson.isPublished && !viewsAll)) notFound();
 
-  const [lessons, watched] = await Promise.all([listLessons({ publishedOnly: !manager }), getWatchedIds(staff.id)]);
+  const [lessons, watched] = await Promise.all([listLessons({ publishedOnly: !viewsAll }), getWatchedIds(staff.id)]);
   const index = lessons.findIndex((l) => l.id === id);
   const prev = index > 0 ? lessons[index - 1] : null;
   const next = index >= 0 && index < lessons.length - 1 ? lessons[index + 1] : null;

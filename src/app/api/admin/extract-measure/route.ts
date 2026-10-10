@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { extractMeasure } from "@/lib/measure-extract";
+import { getCurrentAdmin } from "@/lib/user-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +15,10 @@ const ALLOWED_MIME = new Set([
 ]);
 
 export async function POST(request: Request) {
+  // Разбор документа тратит платный ключ — только для владельца и техспеца.
+  if (!(await getCurrentAdmin())) {
+    return NextResponse.json({ error: "Нет доступа" }, { status: 403 });
+  }
   try {
     const form = await request.formData();
     const file = form.get("file");

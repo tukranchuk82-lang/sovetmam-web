@@ -13,6 +13,8 @@ import { addDisputeNoteAction, resolveDisputeAction, reopenDisputeAction } from 
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isReadOnlyViewer } from "@/lib/user-session";
+import { ReadOnlyZone } from "@/components/admin/ui/read-only-zone";
 
 export const metadata = { title: "Спорные меры" };
 export const dynamic = "force-dynamic";
@@ -50,7 +52,7 @@ function SourceLink({ source }: { source: DisputeSource }) {
   );
 }
 
-function DisputeCard({ dispute }: { dispute: MeasureDispute }) {
+function DisputeCard({ dispute, readOnly }: { dispute: MeasureDispute; readOnly: boolean }) {
   return (
     <div className="light-surface rounded-2xl border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
@@ -70,7 +72,7 @@ function DisputeCard({ dispute }: { dispute: MeasureDispute }) {
           )}
         </div>
 
-        {dispute.status === "open" ? (
+        {readOnly ? null : dispute.status === "open" ? (
           <form action={resolveDisputeAction} className="shrink-0">
             <input type="hidden" name="disputeId" value={dispute.id} />
             <button
@@ -133,7 +135,7 @@ function DisputeCard({ dispute }: { dispute: MeasureDispute }) {
         </div>
       )}
 
-      {dispute.status === "open" && (
+      {dispute.status === "open" && !readOnly && (
         <form action={addDisputeNoteAction} className="mt-3 space-y-2">
           <input type="hidden" name="disputeId" value={dispute.id} />
           <textarea
@@ -165,6 +167,7 @@ export default async function DisputesPage({
   const showResolved = sp.show === "resolved";
   const disputes = await listDisputes(showResolved ? "resolved" : "open");
   const openCount = showResolved ? null : disputes.length;
+  const readOnly = await isReadOnlyViewer();
 
   return (
     <div className="px-4 py-5 md:px-6">
@@ -204,7 +207,9 @@ export default async function DisputesPage({
       ) : (
         <div className="mt-5 space-y-3">
           {disputes.map((d) => (
-            <DisputeCard key={d.id} dispute={d} />
+            <ReadOnlyZone key={d.id} readOnly={readOnly}>
+              <DisputeCard dispute={d} readOnly={readOnly} />
+            </ReadOnlyZone>
           ))}
         </div>
       )}

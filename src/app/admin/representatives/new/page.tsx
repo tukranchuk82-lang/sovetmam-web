@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { isReadOnlyViewer } from "@/lib/user-session";
 import { RepresentativeForm } from "@/components/admin/representative-form";
 import { createRepresentativeAction } from "@/app/admin/representatives/actions";
 
 export const metadata = { title: "Новый координатор" };
 
-export default function NewRepresentativePage() {
+export default async function NewRepresentativePage() {
+  if (await isReadOnlyViewer()) redirect("/admin/representatives");
   return (
     <div className="px-4 py-5 md:px-6">
       <Link

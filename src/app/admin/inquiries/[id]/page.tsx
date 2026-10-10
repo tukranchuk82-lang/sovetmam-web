@@ -41,7 +41,9 @@ export default async function AdminInquiryDetailPage({
 
   // Открыли обращение — сообщения человека считаем прочитанными.
   const messages = await getThread(inquiry.id);
-  await markThreadRead(inquiry.id, "staff");
+  // Аналитик только смотрит: открытие не должно «прочитывать» обращение за сотрудников.
+  const readOnly = staff.role === "analyst";
+  if (!readOnly) await markThreadRead(inquiry.id, "staff");
   const waitingForUs = messages.at(-1)?.author === "user";
 
   const measure = inquiry.measureSlug
@@ -162,6 +164,7 @@ export default async function AdminInquiryDetailPage({
         {waitingForUs ? "Ответить" : "Написать ещё"}
       </h2>
 
+      {!readOnly && (
       <form action={reply} className="mt-2 space-y-3">
         <textarea
           name="response"
@@ -181,6 +184,7 @@ export default async function AdminInquiryDetailPage({
           Человек сможет ответить в этой же переписке
         </p>
       </form>
+      )}
     </article>
   );
 }

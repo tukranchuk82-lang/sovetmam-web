@@ -30,6 +30,7 @@ export function CoordinatorChatThread({
   initialText,
   fill = false,
   dark = false,
+  readOnly = false,
 }: {
   messages: ChatMessage[];
   viewer: ChatAuthor;
@@ -41,6 +42,8 @@ export function CoordinatorChatThread({
   fill?: boolean;
   /** Тёмная панель (рабочее место координатора): сообщения остаются светлыми, поле ввода — тёмное. */
   dark?: boolean;
+  /** Только просмотр (аналитик): поля ввода нет. */
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(sendAction, INITIAL);
@@ -112,6 +115,7 @@ export function CoordinatorChatThread({
       {/* Строка ввода — единственное место на экране, где нужно действовать
           прямо сейчас: рамка, тень и цветная кнопка отправки делают её
           заметной с первого взгляда, без чтения подписей. */}
+      {!readOnly && (
       <form
         ref={formRef}
         action={action}
@@ -145,6 +149,7 @@ export function CoordinatorChatThread({
           <Send className="size-4" />
         </button>
       </form>
+      )}
 
       {state.error && (
         <p className={cn("mt-2 px-1 text-sm font-medium", dark ? "text-red-300" : "text-red-600")}>{state.error}</p>

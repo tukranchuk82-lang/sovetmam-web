@@ -22,13 +22,15 @@ export default async function InstructionsPage() {
   if (!staff) redirect("/login?next=/admin/instructions");
 
   const manager = staff.role === "owner" || staff.role === "tech";
+  // Аналитик видит всё — и черновики тоже, — но без кнопок управления.
+  const viewsAll = manager || staff.role === "analyst";
   // Служебные пометки («Видят координаторы», «Черновик», размер видео — только в
   // режиме владельца и техспеца. В режиме «Координатор» экран выглядит так, как
   // его увидит настоящий координатор, — в том числе на записи обучающего видео.
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
-  const showMarks = manager && scope !== "coordinator";
+  const showMarks = viewsAll && scope !== "coordinator";
   const [lessons, watched] = await Promise.all([
-    listLessons({ publishedOnly: !manager }),
+    listLessons({ publishedOnly: !viewsAll }),
     getWatchedIds(staff.id),
   ]);
 

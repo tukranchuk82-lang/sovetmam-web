@@ -2,12 +2,15 @@ import { Inbox } from "lucide-react";
 import { listBotHelpRequests } from "@/lib/bot-help";
 import { RequestsList } from "@/components/admin/requests-list";
 import { AdminPageHeader } from "@/components/admin/page-header";
+import { isReadOnlyViewer } from "@/lib/user-session";
+import { ReadOnlyZone } from "@/components/admin/ui/read-only-zone";
 
 export const metadata = { title: "Заявки на кабинет" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminRequestsPage() {
   const items = await listBotHelpRequests();
+  const readOnly = await isReadOnlyViewer();
   const open = items.filter((r) => r.status === "new").length;
 
   return (
@@ -26,7 +29,9 @@ export default async function AdminRequestsPage() {
         </p>
       )}
 
-      <RequestsList items={items} />
+      <ReadOnlyZone readOnly={readOnly}>
+        <RequestsList items={items} />
+      </ReadOnlyZone>
 
       <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
         Ссылка для входа одноразовая и живёт сутки. Когда срок выйдет, она

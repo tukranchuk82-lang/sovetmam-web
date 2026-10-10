@@ -41,7 +41,7 @@ export default async function EditMeasurePage({
   const scope = effectiveAdminScope(staff.role, await getViewMode(staff.role));
 
   // Координатор меру только читает: правки и новые меры принимает председатель.
-  if (scope === "coordinator") {
+  if (scope === "coordinator" || staff.role === "analyst") {
     return (
       <div className="px-4 py-5 md:px-8">
         <div className="mx-auto max-w-3xl">
@@ -64,7 +64,7 @@ export default async function EditMeasurePage({
             {measure.amount ? ` · ${measure.amount}` : ""}
           </p>
 
-          <MeasureFeedbackNote className="mt-4" />
+          {scope === "coordinator" && <MeasureFeedbackNote className="mt-4" />}
 
           <div className="mt-5 space-y-5 light-surface rounded-2xl border bg-card p-5 text-[14px] leading-relaxed">
             <ReadBlock title="Кратко">{measure.shortDescription}</ReadBlock>

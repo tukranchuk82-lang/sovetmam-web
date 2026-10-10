@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { getCurrentStaff } from "@/lib/user-session";
+import { getCurrentStaffWriter } from "@/lib/user-session";
 import type { AppUser } from "@/lib/onboarding-db";
 import {
   getInquiry,
@@ -24,7 +24,7 @@ async function authorizeInquiry(inquiryId: string): Promise<{
   staff: AppUser;
   inquiryRegion: string | null;
 }> {
-  const staff = await getCurrentStaff();
+  const staff = await getCurrentStaffWriter();
   if (!staff) redirect("/login?next=/admin/inquiries");
 
   const inquiry = await getInquiry(inquiryId);
@@ -80,7 +80,7 @@ export async function resendInquiryEmailAction(inquiryId: string) {
 
 /** Разослать письма по всем неотвеченным обращениям — разом (координатору — только по своему региону). */
 export async function resendAllNewInquiriesAction() {
-  const staff = await getCurrentStaff();
+  const staff = await getCurrentStaffWriter();
   if (!staff) redirect("/login?next=/admin/inquiries");
 
   const all = await listAllInquiries(

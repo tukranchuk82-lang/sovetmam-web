@@ -108,6 +108,7 @@ export async function RegionChatWorkspace({
                   </p>
                 )}
               </div>
+              {staff.role !== "analyst" && (
               <form action={markConversationUnreadAction.bind(null, selected.userId)}>
                 <button
                   type="submit"
@@ -118,6 +119,7 @@ export async function RegionChatWorkspace({
                   <span className="hidden sm:inline">Непрочитанным</span>
                 </button>
               </form>
+              )}
               {selected.card && (
                 <ChatCardSheet name={selected.name}>
                   <ChatClientCardView card={selected.card} />
@@ -132,6 +134,7 @@ export async function RegionChatWorkspace({
                 viewer="coordinator"
                 counterpartName={selected.name}
                 sendAction={selected.sendAction}
+                readOnly={staff.role === "analyst"}
               />
             </div>
           </>

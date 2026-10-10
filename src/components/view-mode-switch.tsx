@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu } from "@base-ui/react/menu";
-import { ShieldCheck, Wrench, Landmark, UserRound, ChevronDown, Check } from "lucide-react";
+import { ShieldCheck, Wrench, Landmark, UserRound, ChartNoAxesCombined, ChevronDown, Check } from "lucide-react";
 import { switchViewMode } from "@/app/view-mode-actions";
 import type { ViewMode } from "@/lib/view-mode";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ const MODE_META: Record<ViewMode, { label: string; icon: React.ReactNode }> = {
   owner: { label: "Владелец", icon: <ShieldCheck className="size-3.5" /> },
   tech: { label: "Техспец", icon: <Wrench className="size-3.5" /> },
   coordinator: { label: "Координатор", icon: <Landmark className="size-3.5" /> },
+  analyst: { label: "Аналитик", icon: <ChartNoAxesCombined className="size-3.5" /> },
   user: { label: "Пользователь", icon: <UserRound className="size-3.5" /> },
 };
 

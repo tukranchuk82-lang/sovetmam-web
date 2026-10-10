@@ -21,6 +21,7 @@ import {
   Map,
   ClipboardList,
   Eye,
+  Activity,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { getChatInquiryCounts } from "@/lib/coordinator-insights";
@@ -37,6 +38,7 @@ import { AdminTopbar } from "@/components/admin/topbar";
 import { MobileAdminRail, type NavGroup } from "@/components/admin/mobile-rail";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
 import { OrgName } from "@/components/org-name";
+import { AdminActivityPing } from "@/components/admin/activity-ping";
 
 export const metadata = {
   title: "Админ-панель",
@@ -138,12 +140,14 @@ export default async function AdminLayout({
             // Сотрудники: координаторы по регионам, техспецы, владельцы и
             // передача прав. Видно и владельцу, и техспецу.
             { href: "/admin/staff", label: "Сотрудники", icon: <ShieldCheck /> },
+            { href: "/admin/coordinators", label: "Работа координаторов", icon: <Activity /> },
           ],
         },
       ];
 
   return (
     <div className="admin-shell flex min-h-dvh w-full bg-background text-foreground">
+      {staff.role === "coordinator" && <AdminActivityPing />}
       {/* ── Сайдбар — широкий экран ─────────────────────────────────────── */}
       <aside
         className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col overflow-y-auto px-3.5 py-5 md:flex"
@@ -216,6 +220,11 @@ export default async function AdminLayout({
 
         {/* Единая колонка контента: на широком экране строки не растягиваются
             на весь монитор — читать и сканировать глазом проще. */}
+        {staff.role === "analyst" && (
+          <p className="border-b border-white/10 bg-white/[0.06] px-4 py-2 text-center text-xs font-medium text-white/80">
+            Режим просмотра: вы видите всё, но менять данные, отвечать и назначать роли нельзя.
+          </p>
+        )}
         <main className="mx-auto w-full max-w-[1280px] flex-1">{children}</main>
       </div>
     </div>

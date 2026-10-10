@@ -33,7 +33,7 @@ export default async function RegionChatThreadPage({
 
   const [messages, card] = await Promise.all([getThread(userId), getClientCard(userId, threadRegion)]);
   const hadUnread = messages.some((m) => m.author === "user" && !m.readAt);
-  await markThreadRead(userId, "coordinator");
+  if (staff.role !== "analyst") await markThreadRead(userId, "coordinator");
 
   return (
     <>

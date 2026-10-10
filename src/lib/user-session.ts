@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { getAppUserById, isAppAdmin, isStaff, type AppUser } from "@/lib/onboarding-db";
+import { getAppUserById, isAnalyst, isAppAdmin, isStaff, type AppUser } from "@/lib/onboarding-db";
 
 // Сессия обычного пользователя: в httpOnly-cookie кладём id пользователя и
 // его HMAC-подпись (секрет — service-role ключ), чтобы cookie нельзя было
@@ -73,4 +73,29 @@ export async function getCurrentAdmin(): Promise<AppUser | null> {
 export async function getCurrentStaff(): Promise<AppUser | null> {
   const user = await getCurrentAppUser();
   return isStaff(user) ? user : null;
+}
+
+/**
+ * Сотрудник, которому можно что-то менять: то же, что getCurrentStaff, но без
+ * аналитика — у него в админке только просмотр. Все действия, меняющие данные,
+ * проверяют доступ через эту функцию (или через getCurrentAdmin).
+ */
+export async function getCurrentStaffWriter(): Promise<AppUser | null> {
+  const user = await getCurrentStaff();
+  return isAnalyst(user) ? null : user;
+}
+
+/**
+ * Владелец, техспец или аналитик — те, кому открыты разделы целиком (сотрудники,
+ * выгрузка списка людей). Менять в них может только полный админ, аналитик —
+ * только смотреть.
+ */
+/** Смотрит ли страницу аналитик — тогда кнопки правок скрываем или гасим. */
+export async function isReadOnlyViewer(): Promise<boolean> {
+  return isAnalyst(await getCurrentAppUser());
+}
+
+export async function getCurrentAdminOrAnalyst(): Promise<AppUser | null> {
+  const user = await getCurrentAppUser();
+  return isAppAdmin(user) || isAnalyst(user) ? user : null;
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getCurrentAdmin } from "@/lib/user-session";
 import {
   createRepresentative,
   updateRepresentative,
@@ -9,6 +10,12 @@ import {
   setRepresentativePublished,
   type RepresentativeInput,
 } from "@/lib/representatives-db";
+
+/** Контакты в регионах правят только владелец и техспец (аналитик — только смотрит). */
+async function requireAdmin() {
+  const admin = await getCurrentAdmin();
+  if (!admin) redirect("/login?next=/admin/representatives");
+}
 
 function buildInput(fd: FormData): RepresentativeInput {
   const str = (key: string) => {
@@ -40,6 +47,7 @@ function revalidate() {
 }
 
 export async function createRepresentativeAction(fd: FormData) {
+  await requireAdmin();
   const input = buildInput(fd);
   if (!input.region || !input.name) {
     throw new Error("Заполните регион и название организации");
@@ -50,6 +58,7 @@ export async function createRepresentativeAction(fd: FormData) {
 }
 
 export async function updateRepresentativeAction(id: string, fd: FormData) {
+  await requireAdmin();
   const input = buildInput(fd);
   if (!input.region || !input.name) {
     throw new Error("Заполните регион и название организации");
@@ -60,6 +69,7 @@ export async function updateRepresentativeAction(id: string, fd: FormData) {
 }
 
 export async function deleteRepresentativeAction(id: string) {
+  await requireAdmin();
   await deleteRepresentative(id);
   revalidate();
   redirect("/admin/representatives");
@@ -67,6 +77,7 @@ export async function deleteRepresentativeAction(id: string) {
 
 /** Включить/отключить прямо из списка — отключённый перестаёт получать обращения и не виден пользователям. */
 export async function toggleRepresentativePublishedAction(id: string, isPublished: boolean) {
+  await requireAdmin();
   await setRepresentativePublished(id, isPublished);
   revalidate();
 }

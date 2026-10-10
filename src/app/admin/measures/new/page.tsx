@@ -12,7 +12,7 @@ export default async function NewMeasurePage() {
   // Заводить новые меры может только полный админ — координатор здесь
   // делать нечего, редиректим к списку (уже своего региона).
   const admin = await getCurrentAdmin();
-  if (!admin) redirect("/login?next=/admin/measures");
+  if (!admin) redirect("/admin/measures");
   const scope = effectiveAdminScope(admin.role, await getViewMode(admin.role));
 
   return (

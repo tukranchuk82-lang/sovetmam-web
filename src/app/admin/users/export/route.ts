@@ -1,4 +1,4 @@
-import { getCurrentAdmin } from "@/lib/user-session";
+import { getCurrentAdminOrAnalyst } from "@/lib/user-session";
 import { listAppUsersForAdmin } from "@/lib/users-admin";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +51,7 @@ function consentCell(
 }
 
 export async function GET() {
-  const admin = await getCurrentAdmin();
+  const admin = await getCurrentAdminOrAnalyst();
   if (!admin) return new Response("Forbidden", { status: 403 });
 
   const users = await listAppUsersForAdmin();

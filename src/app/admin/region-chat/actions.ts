@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { getCurrentStaff } from "@/lib/user-session";
+import { getCurrentStaffWriter } from "@/lib/user-session";
 import { getAppUserById } from "@/lib/onboarding-db";
 import { getThreadRegion } from "@/lib/chat-region";
 import { addMessage, markLastUserMessageUnread } from "@/lib/coordinator-chat-db";
@@ -12,7 +12,7 @@ import type { ChatSendState } from "@/components/coordinator-chat-thread";
 
 /** Координатор — только беседы своего региона; владелец/техспец — любые. */
 async function authorize(targetUserId: string): Promise<{ region: string }> {
-  const staff = await getCurrentStaff();
+  const staff = await getCurrentStaffWriter();
   if (!staff) redirect("/login?next=/admin/region-chat");
 
   const target = await getAppUserById(targetUserId);

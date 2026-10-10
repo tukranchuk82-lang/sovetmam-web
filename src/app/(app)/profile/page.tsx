@@ -468,7 +468,7 @@ async function AppUserProfile({ user }: { user: AppUser }) {
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Доступно вам как {APP_ROLE_LABELS[user.role].toLowerCase()}
-            {mode !== user.role && ` (сейчас смотрите как ${APP_ROLE_LABELS[mode as "owner" | "tech" | "coordinator"].toLowerCase()})`}
+            {mode !== user.role && ` (сейчас смотрите как ${APP_ROLE_LABELS[mode as "owner" | "tech" | "coordinator" | "analyst"].toLowerCase()})`}
           </p>
           <div className="mt-3 space-y-2">
             {mode === "coordinator" ? (

@@ -4,6 +4,8 @@ import { listRepresentativesForAdmin } from "@/lib/representatives-db";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isReadOnlyViewer } from "@/lib/user-session";
+import { ReadOnlyZone } from "@/components/admin/ui/read-only-zone";
 import { toggleRepresentativePublishedAction } from "./actions";
 
 export const metadata = { title: "Координаторы в регионах" };
@@ -11,6 +13,7 @@ export const dynamic = "force-dynamic";
 
 export default async function RepresentativesPage() {
   const representatives = await listRepresentativesForAdmin();
+  const readOnly = await isReadOnlyViewer();
 
   return (
     <div className="px-4 py-5 md:px-6">
@@ -19,12 +22,14 @@ export default async function RepresentativesPage() {
         title="Координаторы в регионах"
         description="Аккредитованные организации, к которым человек может обратиться по мерам своего региона. Показываются в подборке и в карточках региональных мер."
         action={
+          readOnly ? undefined : (
           <Link
             href="/admin/representatives/new"
             className={cn(buttonVariants(), "h-10 gap-1.5 px-3 text-sm")}
           >
             <Plus className="size-4" /> Добавить
           </Link>
+          )
         }
       />
 
@@ -53,6 +58,7 @@ export default async function RepresentativesPage() {
 
               {/* Быстрое включение/отключение — без похода в форму. Отдельно
                   от Link, чтобы клик по кнопке не уводил на страницу. */}
+              {!readOnly && (
               <form
                 action={toggleRepresentativePublishedAction.bind(null, r.id, !r.isPublished)}
               >
@@ -77,6 +83,7 @@ export default async function RepresentativesPage() {
                   )}
                 </button>
               </form>
+              )}
             </div>
           ))}
         </div>

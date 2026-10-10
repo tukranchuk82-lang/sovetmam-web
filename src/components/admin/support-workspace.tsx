@@ -154,6 +154,7 @@ export async function SupportForTech({
                   <span className="truncate">{selected.email}</span>
                 </p>
               </div>
+              {staff.role !== "analyst" && (
               <form action={markSupportUnreadAction.bind(null, selected.coordinatorId)}>
                 <button
                   type="submit"
@@ -164,6 +165,7 @@ export async function SupportForTech({
                   <span className="hidden sm:inline">Непрочитанным</span>
                 </button>
               </form>
+              )}
             </header>
             <div className="min-h-0 flex-1">
               <CoordinatorChatThread
@@ -173,6 +175,7 @@ export async function SupportForTech({
                 viewer="coordinator"
                 counterpartName={selected.name}
                 sendAction={selected.sendAction}
+                readOnly={staff.role === "analyst"}
               />
             </div>
           </>

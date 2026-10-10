@@ -13,6 +13,7 @@ import { planFor, lastScheduledDay } from "@/lib/verification";
 import { markVerifiedAction, unmarkVerifiedAction } from "./actions";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { cn } from "@/lib/utils";
+import { isReadOnlyViewer } from "@/lib/user-session";
 
 export const metadata = { title: "Сверка мер" };
 export const dynamic = "force-dynamic";
@@ -69,6 +70,7 @@ export default async function VerificationPage({
   searchParams: Promise<{ day?: string }>;
 }) {
   const sp = await searchParams;
+  const readOnly = await isReadOnlyViewer();
   const today = new Date().getDate();
   const day = Math.min(Math.max(Number(sp.day) || today, 1), 31);
   const plan = planFor(day);
@@ -173,6 +175,7 @@ export default async function VerificationPage({
                   </p>
                 </div>
 
+                {!readOnly && (
                 <form action={stale ? markVerifiedAction : unmarkVerifiedAction}>
                   <input type="hidden" name="slug" value={r.slug} />
                   <button
@@ -187,6 +190,7 @@ export default async function VerificationPage({
                     {stale ? "Сверено" : "Снять отметку"}
                   </button>
                 </form>
+                )}
               </div>
             );
           })}

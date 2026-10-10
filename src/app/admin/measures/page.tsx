@@ -42,7 +42,7 @@ export default async function AdminMeasuresPage() {
           : "Все меры поддержки: и опубликованные, и черновики. Нажмите на меру, чтобы отредактировать её или прикрепить материалы."
       }
       actions={
-        scope !== "coordinator" ? (
+        scope !== "coordinator" && staff.role !== "analyst" ? (
           <Link
             href="/admin/measures/new"
             className={cn(buttonVariants(), "h-9 gap-1.5 px-3.5 text-[13px]")}

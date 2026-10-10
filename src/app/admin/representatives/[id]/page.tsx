@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { isReadOnlyViewer } from "@/lib/user-session";
+import { ReadOnlyZone } from "@/components/admin/ui/read-only-zone";
 import { notFound } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { RepresentativeForm } from "@/components/admin/representative-form";
@@ -29,6 +31,7 @@ export default async function EditRepresentativePage({
   const representative = await getRepresentativeForAdmin(id);
   if (!representative) notFound();
 
+  const readOnly = await isReadOnlyViewer();
   const update = updateRepresentativeAction.bind(null, id);
   const remove = deleteRepresentativeAction.bind(null, id);
 
@@ -46,6 +49,7 @@ export default async function EditRepresentativePage({
       </h1>
       <p className="mt-1 text-xs text-muted-foreground">{representative.region}</p>
 
+      <ReadOnlyZone readOnly={readOnly}>
       <div className="mt-5">
         <RepresentativeForm
           initial={representative}
@@ -54,6 +58,7 @@ export default async function EditRepresentativePage({
         />
       </div>
 
+      {!readOnly && (
       <form action={remove} className="mt-8 border-t pt-5">
         <button
           type="submit"
@@ -62,6 +67,8 @@ export default async function EditRepresentativePage({
           <Trash2 className="size-4" /> Удалить координатора
         </button>
       </form>
+      )}
+      </ReadOnlyZone>
     </div>
   );
 }

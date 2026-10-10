@@ -38,7 +38,7 @@ export default async function AdminInquiriesPage({
       title="Обращения"
       description="Вопросы, идеи и уточнения от пользователей. Откройте обращение, чтобы ответить."
       actions={
-        newCount > 0 ? (
+        newCount > 0 && staff.role !== "analyst" ? (
           <form action={resendAllNewInquiriesAction}>
             <button
               type="submit"

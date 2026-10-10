@@ -4,7 +4,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { fetchSalebotAvatar } from "@/lib/salebot";
 
 export type MessengerChannel = "telegram" | "vk" | "max";
-export type AppRole = "user" | "owner" | "tech" | "coordinator";
+export type AppRole = "user" | "owner" | "tech" | "coordinator" | "analyst";
 
 export interface AppUser {
   id: string;
@@ -46,9 +46,14 @@ export function isAppAdmin(user: AppUser | null | undefined): boolean {
   return user?.role === "owner" || user?.role === "tech";
 }
 
-/** Владелец, техспец или координатор — у всех есть какой-то вход в /admin. */
+/** Аналитик — видит всю админку, но ничего не меняет. */
+export function isAnalyst(user: AppUser | null | undefined): boolean {
+  return user?.role === "analyst";
+}
+
+/** Владелец, техспец, координатор или аналитик — у всех есть какой-то вход в /admin. */
 export function isStaff(user: AppUser | null | undefined): boolean {
-  return isAppAdmin(user) || user?.role === "coordinator";
+  return isAppAdmin(user) || user?.role === "coordinator" || isAnalyst(user);
 }
 
 export const ROLE_LABELS: Record<AppRole, string> = {
@@ -56,6 +61,7 @@ export const ROLE_LABELS: Record<AppRole, string> = {
   owner: "Владелец",
   tech: "Техспец",
   coordinator: "Координатор",
+  analyst: "Аналитик",
 };
 
 export interface Utm {
