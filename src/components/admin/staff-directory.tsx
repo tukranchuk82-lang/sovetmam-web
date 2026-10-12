@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Plus, UserRound, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, UserRound, X } from "lucide-react";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
-import { FilterBar, FilterSearch, ResetFilters, SegmentTabs } from "@/components/admin/ui/filter-bar";
+import { FilterSearch, ResetFilters } from "@/components/admin/ui/filter-bar";
+import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/admin/ui/primitives";
 import { StaffForm } from "@/components/admin/staff-form";
 import { CoordinatorStatusBadge } from "@/components/admin/coordinators-table";
@@ -49,20 +50,16 @@ function DemoteButton({ action, id, label, confirmText }: { action: (id: string)
   );
 }
 
-export function StaffDirectory({
-  coordinators,
-  techs,
-  analysts,
-  owners,
+function RoleSection({
+  tab,
+  people,
   pending,
   viewerRole,
   regions,
   actions,
 }: {
-  coordinators: StaffPerson[];
-  techs: StaffPerson[];
-  analysts: StaffPerson[];
-  owners: StaffPerson[];
+  tab: Tab;
+  people: StaffPerson[];
   pending: PendingOwnerRequest[];
   viewerRole: "owner" | "tech" | "analyst";
   regions: string[];
@@ -78,22 +75,14 @@ export function StaffDirectory({
     decideOwnerRequest: (requestId: string, approve: boolean) => Promise<void>;
   };
 }) {
-  const [tab, setTab] = useState<Tab>("coordinators");
   const [query, setQuery] = useState("");
   const [adding, setAdding] = useState(false);
   const canEdit = viewerRole !== "analyst";
 
-  const people = tab === "coordinators" ? coordinators : tab === "techs" ? techs : tab === "analysts" ? analysts : owners;
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase().replace(/ё/g, "е");
     return q ? people.filter((p) => `${p.region ?? ""} ${p.name} ${p.email}`.toLowerCase().replace(/ё/g, "е").includes(q)) : people;
   }, [people, query]);
-
-  const switchTab = (t: Tab) => {
-    setTab(t);
-    setQuery("");
-    setAdding(false);
-  };
 
   const demote =
     tab === "coordinators"
@@ -156,13 +145,6 @@ export function StaffDirectory({
       : []),
   ];
 
-  const tabItems: { key: Tab; label: string; count: number }[] = [
-    { key: "coordinators", label: "Координаторы", count: coordinators.length },
-    { key: "techs", label: "Техспецы", count: techs.length },
-    { key: "analysts", label: "Аналитики", count: analysts.length },
-    { key: "owners", label: "Владельцы", count: owners.length },
-  ];
-
   const description: Record<Tab, React.ReactNode> = {
     coordinators: (
       <>
@@ -186,11 +168,10 @@ export function StaffDirectory({
   const canAdd = canEdit && (tab !== "owners" || viewerRole === "owner" || viewerRole === "tech");
 
   return (
-    <div className="mt-2">
-      <SegmentTabs value={tab} onChange={switchTab} items={tabItems} />
-      <p className="mt-3 max-w-[80ch] text-xs text-muted-foreground">{description[tab]}</p>
+    <div>
+      <p className="max-w-[80ch] text-xs text-muted-foreground">{description[tab]}</p>
 
-      <FilterBar>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <FilterSearch
           value={query}
           onChange={setQuery}
@@ -207,7 +188,7 @@ export function StaffDirectory({
             {adding ? "Закрыть" : addLabel[tab]}
           </button>
         )}
-      </FilterBar>
+      </div>
 
       {adding && canAdd && (
         <div className="mt-3">
@@ -328,6 +309,74 @@ export function StaffDirectory({
           </div>
         )}
       />
+    </div>
+  );
+}
+
+const SECTIONS: { key: Tab; title: string; hint: string }[] = [
+  { key: "coordinators", title: "Координаторы", hint: "ведут свой регион" },
+  { key: "techs", title: "Техспецы", hint: "технический доступ" },
+  { key: "analysts", title: "Аналитики", hint: "только просмотр" },
+  { key: "owners", title: "Владельцы", hint: "полные права" },
+];
+
+/**
+ * Роли — вертикальными плашками: нажали на «Координаторы» — раскрылся список с
+ * поиском и таблицей. Сотня координаторов не растягивает страницу: остальные
+ * плашки остаются свёрнутыми.
+ */
+export function StaffDirectory(props: {
+  coordinators: StaffPerson[];
+  techs: StaffPerson[];
+  analysts: StaffPerson[];
+  owners: StaffPerson[];
+  pending: PendingOwnerRequest[];
+  viewerRole: "owner" | "tech" | "analyst";
+  regions: string[];
+  actions: React.ComponentProps<typeof RoleSection>["actions"];
+}) {
+  const [open, setOpen] = useState<Record<Tab, boolean>>({ coordinators: false, techs: false, analysts: false, owners: false });
+  const data: Record<Tab, StaffPerson[]> = {
+    coordinators: props.coordinators,
+    techs: props.techs,
+    analysts: props.analysts,
+    owners: props.owners,
+  };
+
+  return (
+    <div className="mt-2 space-y-3">
+      {SECTIONS.map((sec) => {
+        const isOpen = open[sec.key];
+        return (
+          <section key={sec.key} className="light-surface overflow-hidden rounded-2xl border bg-card shadow-[0_1px_2px_rgba(32,36,44,0.04)]">
+            <button
+              type="button"
+              onClick={() => setOpen((o) => ({ ...o, [sec.key]: !o[sec.key] }))}
+              aria-expanded={isOpen}
+              className="flex w-full items-center gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/50"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-bold leading-tight">{sec.title}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">{sec.hint}</span>
+              </span>
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold tabular-nums text-primary">{data[sec.key].length}</span>
+              <ChevronDown className={cn("size-5 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-180")} />
+            </button>
+            {isOpen && (
+              <div className="border-t px-4 pb-4 pt-3">
+                <RoleSection
+                  tab={sec.key}
+                  people={data[sec.key]}
+                  pending={props.pending}
+                  viewerRole={props.viewerRole}
+                  regions={props.regions}
+                  actions={props.actions}
+                />
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
