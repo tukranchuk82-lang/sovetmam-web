@@ -333,6 +333,11 @@ export interface EligibilityCriteria {
   requiresNotPregnant?: boolean;
   minChildren?: number;
   /**
+   * Не больше N детей (с учётом ожидаемого). Для мер «при рождении первого
+   * ребёнка»: maxChildren: 1 не покажет её маме, у которой уже есть старшие дети.
+   */
+  maxChildren?: number;
+  /**
    * Сколько нужно несовершеннолетних детей. Не то же, что minChildren:
    * тот считает всех, включая взрослых. Мера «двое детей до 18» семье
    * с подростком и студентом не положена, хотя детей у неё двое.
@@ -1105,6 +1110,7 @@ function matchesCriteria(
     ? Math.max(countedChildren + 1, profile.expectingChildNumber ?? 0)
     : countedChildren;
   if (c.minChildren && effectiveChildren < c.minChildren) return false;
+  if (c.maxChildren != null && effectiveChildren > c.maxChildren) return false;
   // Многоплодные роды: нужно, чтобы за одни роды родилось не меньше N детей.
   // Незаполненный ответ считаем обычными родами (1) — мера про двойню/тройню не
   // покажется тому, кто про многоплодные роды не отметил.
