@@ -23,6 +23,8 @@ export interface MeasureDispute {
   id: string;
   measureSlug: string | null;
   measureTitle: string | null;
+  /** Регион меры (у федеральных и «тем» — null). */
+  measureRegion: string | null;
   title: string;
   reason: string;
   sources: DisputeSource[];
@@ -50,7 +52,7 @@ interface DisputeRow {
   created_at: string;
   resolved_at: string | null;
   resolved_by: string | null;
-  measures: { title: string } | { title: string }[] | null;
+  measures: { title: string; region: string | null } | { title: string; region: string | null }[] | null;
 }
 
 interface NoteRow {
@@ -66,11 +68,17 @@ function measureTitleOf(m: DisputeRow["measures"]): string | null {
   return Array.isArray(m) ? (m[0]?.title ?? null) : m.title;
 }
 
+function measureRegionOf(m: DisputeRow["measures"]): string | null {
+  if (!m) return null;
+  return (Array.isArray(m) ? m[0]?.region : m.region) ?? null;
+}
+
 function fromRow(r: DisputeRow, notes: DisputeNote[]): MeasureDispute {
   return {
     id: r.id,
     measureSlug: r.measure_slug,
     measureTitle: measureTitleOf(r.measures),
+    measureRegion: measureRegionOf(r.measures),
     title: r.title,
     reason: r.reason,
     sources: r.sources ?? [],
@@ -89,7 +97,7 @@ export async function listDisputes(
   const supabase = createSupabaseAdminClient();
   const { data: disputes, error } = await supabase
     .from("measure_disputes")
-    .select("*, measures(title)")
+    .select("*, measures(title, region)")
     .eq("status", status)
     .order("created_at", { ascending: status === "resolved" ? false : true });
   if (error) throw error;
