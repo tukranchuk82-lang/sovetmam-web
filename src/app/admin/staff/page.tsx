@@ -1,12 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ShieldCheck, ChevronRight } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { getCurrentAdminOrAnalyst } from "@/lib/user-session";
-import { listByRole, listPendingOwnerRequests } from "@/lib/staff-db";
+import { listByRole, listPendingOwnerRequests, type StaffRow } from "@/lib/staff-db";
 import { REGIONS } from "@/lib/measures";
 import { AdminPage } from "@/components/admin/ui/admin-page";
-import { StaffForm } from "@/components/admin/staff-form";
-import { CoordinatorStatusBadge } from "@/components/admin/coordinators-table";
+import { StaffDirectory, type StaffPerson } from "@/components/admin/staff-directory";
 import { getCoordinatorsOverview } from "@/lib/analytics/coordinator-report";
 import { parsePeriod } from "@/lib/analytics/period";
 import {
@@ -24,12 +22,17 @@ import {
 export const metadata = { title: "Сотрудники" };
 export const dynamic = "force-dynamic";
 
+const person = (r: StaffRow): StaffPerson => ({
+  id: r.id,
+  name: `${r.firstName} ${r.lastName}`.trim() || r.email,
+  email: r.email,
+  region: r.region,
+});
+
 export default async function StaffPage() {
   const admin = await getCurrentAdminOrAnalyst();
   if (!admin) redirect("/login?next=/admin/staff");
-
-  // Аналитик видит всю страницу, но кнопок и форм у него нет.
-  const canEdit = admin.role !== "analyst";
+  const viewerRole = admin.role as "owner" | "tech" | "analyst";
 
   const overview = await getCoordinatorsOverview(parsePeriod("30"));
   const statusById = new Map(overview.map((o) => [o.id, o.status]));
@@ -42,310 +45,37 @@ export default async function StaffPage() {
     admin.role === "owner" ? listPendingOwnerRequests() : Promise.resolve([]),
   ]);
 
-  // Координаторы — по алфавиту названий регионов; без региона — в конце.
-  const coordinators = [...coordinatorsRaw].sort((a, b) => {
-    if (!a.region && !b.region) return 0;
-    if (!a.region) return 1;
-    if (!b.region) return -1;
-    return a.region.localeCompare(b.region, "ru");
-  });
-
   return (
     <AdminPage
       icon={<ShieldCheck />}
       title="Сотрудники"
       description="Кто ведёт какой регион, кто отвечает за техническую часть и кому переданы права владельца."
     >
-
-      {/* ── Координаторы ─────────────────────────────────────────────── */}
-      <section className="mt-6">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-          Координаторы
-        </h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Видят и отвечают на обращения своего региона, видят меры, анкеты и избранное региона. Нажмите на карточку, чтобы открыть отчёт по работе.{" "}
-          <Link href="/admin/coordinators" className="font-medium text-primary underline">
-            Сравнить всех координаторов
-          </Link>
-        </p>
-
-        <div className="mt-3 space-y-2">
-          {coordinators.length === 0 && (
-            <p className="text-sm text-muted-foreground">Пока никто не назначен.</p>
-          )}
-          {coordinators.map((c) => (
-            <div key={c.id} className="flex items-center justify-between gap-3 light-surface rounded-2xl border bg-card p-3.5">
-              {/* Нажатие на карточку открывает отчёт по работе координатора. */}
-              <Link href={`/admin/coordinators/${c.id}`} className="group flex min-w-0 flex-1 items-center gap-2">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold leading-snug group-hover:text-primary">
-                    {c.region ?? "Регион не указан"}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {c.firstName} {c.lastName} · {c.email}
-                  </p>
-                </div>
-                {statusById.get(c.id) && (
-                  <span className="ml-auto shrink-0">
-                    <CoordinatorStatusBadge status={statusById.get(c.id)!} />
-                  </span>
-                )}
-                <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground group-hover:text-primary">
-                  Отчёт <ChevronRight className="size-3.5" />
-                </span>
-              </Link>
-              {canEdit && (
-<form action={demoteCoordinatorAction.bind(null, c.id)}>
-                <button
-                  type="submit"
-                  className="shrink-0 rounded-lg border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
-                >
-                  Разжаловать
-                </button>
-              </form>
-)}
-            </div>
-          ))}
-        </div>
-
-        {canEdit && (
-<StaffForm action={promoteToCoordinatorAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
-          <label className="min-w-[220px] flex-1">
-            <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="name@example.com"
-              className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </label>
-          <label className="min-w-[200px]">
-            <span className="text-xs font-medium text-muted-foreground">Регион</span>
-            <select
-              name="region"
-              required
-              className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="">— выбрать —</option>
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="submit"
-            className="h-[38px] rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-          >
-            Назначить
-          </button>
-        </StaffForm>
-)}
-      </section>
-
-      {/* ── Техспецы ──────────────────────────────────────────────────── */}
-      <section className="mt-7">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-          Техспецы
-        </h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Полный доступ, включая технические разделы и управление ролями.
-        </p>
-
-        <div className="mt-3 space-y-2">
-          {techs.length === 0 && (
-            <p className="text-sm text-muted-foreground">Пока никто не назначен.</p>
-          )}
-          {techs.map((t) => (
-            <div key={t.id} className="flex items-center justify-between gap-3 light-surface rounded-2xl border bg-card p-3.5">
-              <div className="min-w-0">
-                <p className="truncate font-semibold leading-snug">
-                  {t.firstName} {t.lastName}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">{t.email}</p>
-              </div>
-              {admin.role === "owner" && (
-                <form action={demoteTechAction.bind(null, t.id)}>
-                  <button
-                    type="submit"
-                    className="shrink-0 rounded-lg border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
-                  >
-                    Разжаловать
-                  </button>
-                </form>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {canEdit && (
-<StaffForm action={promoteToTechAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
-          <label className="min-w-[220px] flex-1">
-            <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
-            <input
-              name="techEmail"
-              type="email"
-              required
-              placeholder="name@example.com"
-              className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-          </label>
-          <button
-            type="submit"
-            className="h-[38px] rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-          >
-            Назначить техспецем
-          </button>
-        </StaffForm>
-)}
-      </section>
-
-      {/* ── Аналитики ─────────────────────────────────────────────────── */}
-      <section className="mt-7">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-          Аналитики
-        </h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Видят всю админку целиком, но только смотрят: менять, отвечать и назначать они не могут.
-        </p>
-
-        <div className="mt-3 space-y-2">
-          {analysts.length === 0 && (
-            <p className="text-sm text-muted-foreground">Пока никто не назначен.</p>
-          )}
-          {analysts.map((a) => (
-            <div key={a.id} className="flex items-center justify-between gap-3 light-surface rounded-2xl border bg-card p-3.5">
-              <div className="min-w-0">
-                <p className="truncate font-semibold leading-snug">
-                  {a.firstName} {a.lastName}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">{a.email}</p>
-              </div>
-              {canEdit && (
-                <form action={demoteAnalystAction.bind(null, a.id)}>
-                  <button
-                    type="submit"
-                    className="shrink-0 rounded-lg border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
-                  >
-                    Снять роль
-                  </button>
-                </form>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {canEdit && (
-          <StaffForm action={promoteToAnalystAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
-            <label className="min-w-[220px] flex-1">
-              <span className="text-xs font-medium text-muted-foreground">Почта уже зарегистрированного человека</span>
-              <input
-                name="analystEmail"
-                type="email"
-                required
-                placeholder="name@example.com"
-                className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </label>
-            <button
-              type="submit"
-              className="h-[38px] rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-            >
-              Назначить аналитиком
-            </button>
-          </StaffForm>
-        )}
-      </section>
-
-      {/* ── Владелец ──────────────────────────────────────────────────── */}
-      <section className="mt-7">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-          Владелец
-        </h2>
-        <div className="mt-3 space-y-2">
-          {owners.map((o) => (
-            <div key={o.id} className="light-surface rounded-2xl border bg-card p-3.5">
-              <p className="font-semibold leading-snug">
-                {o.firstName} {o.lastName}
-              </p>
-              <p className="text-xs text-muted-foreground">{o.email}</p>
-            </div>
-          ))}
-        </div>
-
-        {admin.role === "owner" ? (
-          <StaffForm action={grantOwnerDirectAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
-            <label className="min-w-[220px] flex-1">
-              <span className="text-xs font-medium text-muted-foreground">
-                Передать права владельца — почта человека
-              </span>
-              <input
-                name="ownerEmail"
-                type="email"
-                required
-                placeholder="name@example.com"
-                className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </label>
-            <button
-              type="submit"
-              className="h-[38px] rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-            >
-              Сделать владельцем
-            </button>
-          </StaffForm>
-        ) : admin.role === "tech" ? (
-          <StaffForm action={requestOwnerAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-2xl border bg-muted/30 p-3">
-            <label className="min-w-[220px] flex-1">
-              <span className="text-xs font-medium text-muted-foreground">
-                Предложить кандидата во владельцы — почта человека
-              </span>
-              <input
-                name="candidateEmail"
-                type="email"
-                required
-                placeholder="name@example.com"
-                className="mt-1 w-full rounded-xl border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </label>
-            <button
-              type="submit"
-              className="h-[38px] rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
-            >
-              Предложить
-            </button>
-            <p className="basis-full text-xs text-muted-foreground">
-              Заявка вступит в силу только после подтверждения действующего владельца.
-            </p>
-          </StaffForm>
-        ) : null}
-
-        {admin.role === "owner" && pending.length > 0 && (
-          <div className="mt-3 space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Ждут вашего решения:</p>
-            {pending.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-white/15 bg-white/[0.07] p-3.5">
-                <p className="text-sm">
-                  <b>{p.requestedByName}</b> предлагает сделать владельцем{" "}
-                  <b>{p.targetName}</b> ({p.targetEmail})
-                </p>
-                <div className="mt-2 flex gap-2">
-                  <form action={decideOwnerRequestAction.bind(null, p.id, true)}>
-                    <button type="submit" className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
-                      Подтвердить
-                    </button>
-                  </form>
-                  <form action={decideOwnerRequestAction.bind(null, p.id, false)}>
-                    <button type="submit" className="rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                      Отклонить
-                    </button>
-                  </form>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      <StaffDirectory
+        coordinators={coordinatorsRaw.map((c) => ({ ...person(c), status: statusById.get(c.id) }))}
+        techs={techs.map(person)}
+        analysts={analysts.map(person)}
+        owners={owners.map(person)}
+        pending={pending.map((p) => ({
+          id: p.id,
+          requestedByName: p.requestedByName,
+          targetName: p.targetName,
+          targetEmail: p.targetEmail,
+        }))}
+        viewerRole={viewerRole}
+        regions={[...REGIONS]}
+        actions={{
+          promoteCoordinator: promoteToCoordinatorAction,
+          promoteTech: promoteToTechAction,
+          promoteAnalyst: promoteToAnalystAction,
+          grantOwner: grantOwnerDirectAction,
+          requestOwner: requestOwnerAction,
+          demoteCoordinator: demoteCoordinatorAction,
+          demoteTech: demoteTechAction,
+          demoteAnalyst: demoteAnalystAction,
+          decideOwnerRequest: decideOwnerRequestAction,
+        }}
+      />
     </AdminPage>
   );
 }
