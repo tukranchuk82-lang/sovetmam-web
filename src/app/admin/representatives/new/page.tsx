@@ -4,7 +4,7 @@ import { isReadOnlyViewer } from "@/lib/user-session";
 import { RepresentativeForm } from "@/components/admin/representative-form";
 import { createRepresentativeAction } from "@/app/admin/representatives/actions";
 
-export const metadata = { title: "Новый координатор" };
+export const metadata = { title: "Новая НКО" };
 
 export default async function NewRepresentativePage() {
   if (await isReadOnlyViewer()) redirect("/admin/representatives");
@@ -14,10 +14,10 @@ export default async function NewRepresentativePage() {
         href="/admin/representatives"
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        ← К списку координаторов
+        ← К региональным НКО
       </Link>
       <h1 className="mt-2 text-xl font-extrabold tracking-tight">
-        Новый координатор
+        Новая НКО
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Появится в подборке и в карточках мер выбранного региона сразу после

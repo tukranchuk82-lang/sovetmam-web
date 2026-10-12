@@ -33,7 +33,9 @@ export default async function RegionChatThreadPage({
 
   const [messages, card] = await Promise.all([getThread(userId), getClientCard(userId, threadRegion)]);
   const hadUnread = messages.some((m) => m.author === "user" && !m.readAt);
-  if (staff.role !== "analyst") await markThreadRead(userId, "coordinator");
+  // «Прочитано» ставим только когда беседу открыл сам координатор: владелец, техспец
+  // и аналитик смотрят и отвечают, но не должны гасить у координатора непрочитанное.
+  if (staff.role === "coordinator") await markThreadRead(userId, "coordinator");
 
   return (
     <>

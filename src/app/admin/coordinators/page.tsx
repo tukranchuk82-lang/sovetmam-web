@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Activity } from "lucide-react";
 import { getCurrentAdminOrAnalyst } from "@/lib/user-session";
@@ -34,6 +35,9 @@ export default async function CoordinatorsOverviewPage({
       description="Все координаторы рядом: кто заходит, как быстро отвечает людям и сколько приглашает. Нажмите на строку, чтобы открыть подробный отчёт."
       actions={<PeriodTabs value={period.key} basePath="/admin/coordinators" />}
     >
+      <Link href="/admin/representatives" className="mb-4 inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-white">
+        ← Региональные НКО
+      </Link>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Координаторов" value={rows.length} />
         <StatCard

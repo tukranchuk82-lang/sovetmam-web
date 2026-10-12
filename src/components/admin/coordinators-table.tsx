@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { UserRound } from "lucide-react";
 import type { CoordinatorOverviewRow } from "@/lib/analytics/coordinator-report";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
@@ -85,7 +86,23 @@ export function CoordinatorsTable({ rows, periodLabel }: { rows: CoordinatorOver
       className: "w-[70px] text-right",
       sort: (a, b) => a.waitingNow - b.waitingNow,
       cell: (r) =>
-        r.waitingNow > 0 ? <StatusBadge tone="new">{r.waitingNow}</StatusBadge> : <span className="text-muted-foreground/50">—</span>,
+        r.waitingNow > 0 ? (
+          // Нажатие открывает самую давнюю беседу, которая ждёт ответа.
+          r.oldestWaitingUserId ? (
+            <Link
+              href={`/admin/region-chat/${r.oldestWaitingUserId}`}
+              onClick={(e) => e.stopPropagation()}
+              title="Открыть беседу, которая ждёт дольше всех"
+              className="inline-flex"
+            >
+              <StatusBadge tone="new">{r.waitingNow} →</StatusBadge>
+            </Link>
+          ) : (
+            <StatusBadge tone="new">{r.waitingNow}</StatusBadge>
+          )
+        ) : (
+          <span className="text-muted-foreground/50">—</span>
+        ),
     },
     {
       key: "reply",

@@ -16,7 +16,11 @@ import { inPeriod, type Period } from "@/lib/analytics/period";
  *  - просмотры разделов кабинета пишутся только с момента включения журнала.
  */
 
+export type WaitingPerson = { userId: string; name: string; hours: number };
+
 export interface CoordinatorReport {
+  /** Люди, которые ждут ответа в чате, с именами. */
+  waitingPeople: WaitingPerson[];
   coordinator: { id: string; name: string; email: string; region: string | null; since: string };
   /** Сколько координаторов в этом регионе (если больше одного, ответы в чате общие). */
   sameRegionCoordinators: number;
@@ -40,6 +44,8 @@ export interface CoordinatorReport {
     waitingNow: number;
     /** Самая долгая из них, часов. */
     longestWaitHours: number | null;
+    /** Кто именно ждёт ответа (самые долгие первыми) — чтобы можно было сразу открыть беседу. */
+    waiting: { userId: string; hours: number }[];
     /** Медианное время до первого ответа, минут (по обращениям периода). */
     medianReplyMin: number | null;
     /** Доля вопросов, на которые ответили в течение суток. */
@@ -107,6 +113,7 @@ function analyzeChat(chat: ChatRow[], period: Period, now: number): ChatBlock {
   const writers = new Set<string>();
   let waitingNow = 0;
   let longestWait = 0;
+  const waitingList: { userId: string; hours: number }[] = [];
   const replyTimes: number[] = [];
   for (const [userId, list] of threads) {
     let awaitingSince: number | null = null;
@@ -130,6 +137,7 @@ function analyzeChat(chat: ChatRow[], period: Period, now: number): ChatBlock {
     if (awaitingSince !== null) {
       waitingNow++;
       longestWait = Math.max(longestWait, now - awaitingSince);
+      waitingList.push({ userId, hours: Math.round((now - awaitingSince) / HOUR) });
     }
   }
   const med = median(replyTimes);
@@ -139,6 +147,7 @@ function analyzeChat(chat: ChatRow[], period: Period, now: number): ChatBlock {
     people: writers.size,
     waitingNow,
     longestWaitHours: waitingNow ? Math.round(longestWait / HOUR) : null,
+    waiting: waitingList.sort((a, b) => b.hours - a.hours),
     medianReplyMin: med === null ? null : Math.round(med / MIN),
     within24hPct: replyTimes.length ? Math.round((replyTimes.filter((x) => x <= DAY).length / replyTimes.length) * 100) : null,
     answeredCount: replyTimes.length,
@@ -176,6 +185,8 @@ export interface CoordinatorOverviewRow {
   received: number;
   waitingNow: number;
   longestWaitHours: number | null;
+  /** Беседа, которая ждёт дольше всех (для быстрой ссылки). */
+  oldestWaitingUserId: string | null;
   medianReplyMin: number | null;
   within24hPct: number | null;
   invited: number;
@@ -240,6 +251,7 @@ export async function getCoordinatorsOverview(period: Period): Promise<Coordinat
         received: ch.received,
         waitingNow: ch.waitingNow,
         longestWaitHours: ch.longestWaitHours,
+        oldestWaitingUserId: ch.waiting[0]?.userId ?? null,
         medianReplyMin: ch.medianReplyMin,
         within24hPct: ch.within24hPct,
         invited: invitedByCode.get(inviteCode(id)) ?? 0,
@@ -395,7 +407,16 @@ export async function getCoordinatorReport(coordinatorId: string, period: Period
   }
   if (!region) flags.push({ tone: "info", text: "Регион координатору не назначен — данные по региону не считаются." });
 
+  const waitIds = chatBlock.waiting.slice(0, 30).map((w) => w.userId);
+  const nameById = new Map<string, string>();
+  if (waitIds.length) {
+    const { data: ppl } = await sb.from("app_users").select("id, first_name, last_name, email").in("id", waitIds);
+    for (const p of ppl ?? []) nameById.set(p.id as string, `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || (p.email as string));
+  }
+  const waitingPeople: WaitingPerson[] = chatBlock.waiting.slice(0, 30).map((w) => ({ userId: w.userId, name: nameById.get(w.userId) ?? "Человек без имени", hours: w.hours }));
+
   return {
+    waitingPeople,
     coordinator: { id: coordinator.id, name, email: coordinator.email, region, since: (created?.created_at as string | undefined) ?? new Date().toISOString() },
     sameRegionCoordinators: regionCoordinators.count ?? 1,
     login,

@@ -21,7 +21,6 @@ import {
   Map,
   ClipboardList,
   Eye,
-  Activity,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { getChatInquiryCounts } from "@/lib/coordinator-insights";
@@ -133,14 +132,13 @@ export default async function AdminLayout({
             { href: "/admin/disputes", label: "Спорные меры", icon: <HelpCircle />, badge: openDisputes },
             { href: "/admin/verification", label: "Сверка", icon: <CalendarCheck /> },
             { href: "/admin/measures", label: "Каталог мер", icon: <LayoutGrid /> },
-            { href: "/admin/representatives", label: "Координаторы в регионах", icon: <Landmark /> },
+            { href: "/admin/representatives", label: "Региональные НКО", icon: <Landmark /> },
             { href: "/admin/knowledge", label: "База знаний", icon: <FolderInput /> },
             { href: "/admin/instructions", label: "Инструкции", icon: <PlayCircle /> },
             { href: "/admin/support", label: "Техподдержка", icon: <LifeBuoy />, badge: supportBadge },
             // Сотрудники: координаторы по регионам, техспецы, владельцы и
             // передача прав. Видно и владельцу, и техспецу.
             { href: "/admin/staff", label: "Сотрудники", icon: <ShieldCheck /> },
-            { href: "/admin/coordinators", label: "Работа координаторов", icon: <Activity /> },
           ],
         },
       ];

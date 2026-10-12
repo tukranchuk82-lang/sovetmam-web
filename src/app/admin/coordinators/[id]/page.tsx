@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Info, LogIn, MessageCircle, UserPlus, UserRound } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Info, LogIn, MessageCircle, UserPlus, UserRound } from "lucide-react";
 import { getCurrentAdminOrAnalyst } from "@/lib/user-session";
 import { getCoordinatorReport, SECTION_LABELS } from "@/lib/analytics/coordinator-report";
 import { parsePeriod } from "@/lib/analytics/period";
@@ -64,6 +64,8 @@ export default async function CoordinatorReportPage({
   // Отчёт — только для владельца, техспеца и аналитика (только просмотр).
   const viewer = await getCurrentAdminOrAnalyst();
   if (!viewer) redirect("/admin");
+  // Ответить в беседе могут владелец и техспец; аналитик только смотрит.
+  const canReply = viewer.role !== "analyst";
 
   const period = parsePeriod((await searchParams).period);
   const r = await getCoordinatorReport(id, period);
@@ -90,6 +92,9 @@ export default async function CoordinatorReportPage({
       <Link href="/admin/staff" className="mb-4 inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-white">
         <ArrowLeft className="size-4" /> К сотрудникам
       </Link>
+      <Link href="/admin/representatives" className="mb-4 ml-5 inline-flex items-center gap-1.5 text-sm text-white/65 hover:text-white">
+        Региональные НКО
+      </Link>
 
       {r.flags.length > 0 && (
         <ul className="mb-4 space-y-2">
@@ -114,6 +119,31 @@ export default async function CoordinatorReportPage({
             </li>
           ))}
         </ul>
+      )}
+
+      {r.waitingPeople.length > 0 && (
+        <section className="light-surface mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-4">
+          <h2 className="text-[15px] font-bold text-amber-950">Ждут ответа в чате ({r.chat.waitingNow})</h2>
+          <p className="mt-0.5 text-xs text-amber-900/80">
+            {canReply ? "Откройте беседу, чтобы ответить за координатора или напомнить ему." : "Откройте беседу, чтобы посмотреть переписку."}
+          </p>
+          <ul className="mt-3 space-y-2">
+            {r.waitingPeople.map((w) => (
+              <li key={w.userId} className="flex items-center justify-between gap-3 rounded-xl bg-white px-3.5 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{w.name}</p>
+                  <p className="text-xs text-muted-foreground">ждёт ответа {w.hours < 1 ? "меньше часа" : `${w.hours} ч`}</p>
+                </div>
+                <Link
+                  href={`/admin/region-chat/${w.userId}`}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#1B3A6B] px-3 py-2 text-xs font-semibold text-white hover:bg-[#16315a]"
+                >
+                  {canReply ? "Открыть и ответить" : "Открыть беседу"} <ArrowRight className="size-3.5" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
