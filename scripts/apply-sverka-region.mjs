@@ -51,6 +51,7 @@ for (const F of cfg.files) {
     }
     const patch = {};
     for (const [k, v] of Object.entries(u.changes)) if (COLUMNS.includes(k)) patch[k] = v;
+    if (Array.isArray(patch.eligibility)) patch.eligibility = patch.eligibility.join(" ");
     const bad = patch.criteria ? unknownKeys(patch.criteria) : [];
     if (bad.length) { log.push(`ПРОПУСК (неизвестные критерии ${bad}) ${u.slug}`); disputes.push({ measure_slug: u.slug, title: `${F.region}: ${u.slug} — критерий не поддерживается`, reason: `Сверка ${cfg.day}. Предложенные критерии содержат неподдерживаемые поля ${bad.join(", ")}; правка не внесена. Что предлагалось: ${u.why}` }); continue; }
     patch.updated_at_label = LABEL; patch.verified_at = now; patch.verified_by = BY;
@@ -77,6 +78,7 @@ for (const F of cfg.files) {
     const row = { slug, level: F.level ?? "regional", region: F.region, sort_order: 0 };
     for (const k of COLUMNS) if (c[k] !== undefined) row[k] = c[k];
     row.level = F.level ?? "regional"; row.region = F.region;
+    if (Array.isArray(row.eligibility)) row.eligibility = row.eligibility.join(" ");
     const bad = unknownKeys(row.criteria);
     if (bad.length) { log.push(`НЕ ЗАВОЖУ (неизвестные критерии ${bad}) ${c.slug}`); continue; }
     row.updated_at_label = LABEL; row.verified_at = now; row.verified_by = BY;
