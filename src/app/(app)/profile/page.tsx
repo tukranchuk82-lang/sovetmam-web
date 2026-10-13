@@ -12,9 +12,6 @@ import {
   Sparkles,
   MapPin,
   Heart,
-  Gauge,
-  LayoutGrid,
-  Users,
   MessageCircle,
 } from "lucide-react";
 import {
@@ -24,7 +21,7 @@ import {
   ROLE_LABELS,
 } from "@/lib/demo-auth";
 import { getCurrentAppUser } from "@/lib/user-session";
-import { ALLOWED_VIEW_MODES, getViewMode } from "@/lib/view-mode";
+import { ALLOWED_VIEW_MODES } from "@/lib/view-mode";
 import { ViewModeSwitch } from "@/components/view-mode-switch";
 import { logoutDemoUser } from "@/app/(app)/login/actions";
 import { logout } from "@/app/(app)/login/onboarding-actions";
@@ -32,7 +29,7 @@ import { LegalLinks } from "@/components/legal-links";
 import {
   isStaff,
   markMessengerHintSeen,
-  ROLE_LABELS as APP_ROLE_LABELS,
+
   type AppUser,
 } from "@/lib/onboarding-db";
 import { resolveUserAvatar } from "@/lib/avatar";
@@ -243,11 +240,12 @@ export default async function ProfilePage() {
 async function AppUserProfile({ user }: { user: AppUser }) {
   const fullName = `${user.firstName} ${user.lastName}`.trim();
   const staff = isStaff(user);
-  // Режим просмотра переключает сам сотрудник. В режиме «пользователь»
-  // кабинет выглядит ровно так же, как у обычной мамы, — чтобы можно было
-  // проверить приложение её глазами, не заводя второй аккаунт.
-  const mode = staff ? await getViewMode(user.role) : "user";
-  const asUser = !staff || mode === "user";
+  // Личный кабинет ВСЕГДА открывается в режиме «пользователь» — ровно как у
+  // обычной мамы, чтобы сотрудник мог проверить приложение её глазами. Рабочие
+  // роли (владелец, техспец, аналитик, координатор) переключаются кнопкой справа
+  // вверху и ведут прямиком в админку; промежуточной «панели управления» здесь нет.
+  const mode = "user" as const;
+  const asUser = true;
   const initial = {
     telegram: user.telegramId != null,
     vk: user.vkId != null,
@@ -458,99 +456,6 @@ async function AppUserProfile({ user }: { user: AppUser }) {
               .
             </p>
           )}
-        </section>
-      )}
-
-      {staff && mode !== "user" && (
-        <section className="mt-7">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
-            Панель управления
-          </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Доступно вам как {APP_ROLE_LABELS[user.role].toLowerCase()}
-            {mode !== user.role && ` (сейчас смотрите как ${APP_ROLE_LABELS[mode as "owner" | "tech" | "coordinator" | "analyst"].toLowerCase()})`}
-          </p>
-          <div className="mt-3 space-y-2">
-            {mode === "coordinator" ? (
-              <>
-                <AdminLink
-                  href="/admin"
-                  icon={<Gauge className="size-5" />}
-                  title="Сводка по региону"
-                  hint="Обращения, анкеты, избранное — в одном месте"
-                />
-                <AdminLink
-                  href="/admin/inquiries"
-                  icon={<MessageSquare className="size-5" />}
-                  title="Обращения"
-                  hint="Только по вашему региону"
-                />
-                <AdminLink
-                  href="/admin/measures"
-                  icon={<LayoutGrid className="size-5" />}
-                  title="Меры региона"
-                  hint="Править существующие меры"
-                />
-                <AdminLink
-                  href="/admin/region-survey"
-                  icon={<Users className="size-5" />}
-                  title="Пользователи региона"
-                  hint="Кто заполнил анкету"
-                />
-                <AdminLink
-                  href="/admin/region-saved"
-                  icon={<LayoutGrid className="size-5" />}
-                  title="Избранное региона"
-                  hint="Какие меры сохраняют"
-                />
-              </>
-            ) : (
-              <>
-                <AdminLink
-                  href="/admin"
-                  icon={<Gauge className="size-5" />}
-                  title="Сводка"
-                  hint="Что в базе, кто пришёл, что сделать сегодня"
-                />
-                <AdminLink
-                  href="/admin/measures"
-                  icon={<LayoutGrid className="size-5" />}
-                  title="Каталог мер"
-                  hint="Добавлять и править меры"
-                />
-                <AdminLink
-                  href="/admin/users"
-                  icon={<Users className="size-5" />}
-                  title="Пользователи"
-                  hint="База зарегистрированных, выгрузка в CSV"
-                />
-                <AdminLink
-                  href="/admin/inquiries"
-                  icon={<MessageSquare className="size-5" />}
-                  title="Обращения"
-                  hint="Отвечать пользователям"
-                />
-                <AdminLink
-                  href="/admin/verification"
-                  icon={<CalendarCheck className="size-5" />}
-                  title="Сверка"
-                  hint="Порция мер на сегодня"
-                />
-                <AdminLink
-                  href="/admin/knowledge"
-                  icon={<FolderInput className="size-5" />}
-                  title="База знаний"
-                  hint="Загружать материалы для AI"
-                />
-                <AdminLink
-                  href="/admin/staff"
-                  icon={<Users className="size-5" />}
-                  title="Сотрудники"
-                  hint="Координаторы по регионам, техспецы, передача прав владельца"
-                />
-              </>
-            )}
-          </div>
         </section>
       )}
 

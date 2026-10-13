@@ -28,6 +28,9 @@ function verify(userId: string, sig: string): boolean {
 
 export async function setUserSession(userId: string): Promise<void> {
   const c = await cookies();
+  // Новый вход — всегда с режима «пользователь»: выбранная в прошлый раз рабочая
+  // роль не должна «залипать» (см. lib/view-mode.ts).
+  c.delete("sm_view");
   c.set(COOKIE, `${userId}.${sign(userId)}`, {
     httpOnly: true,
     sameSite: "lax",
