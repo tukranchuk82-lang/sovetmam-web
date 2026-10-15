@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentAppUser } from "@/lib/user-session";
 import { getAllMeasures } from "@/lib/measures-db";
-import { matchMeasures, type UserProfile } from "@/lib/measures";
+import type { UserProfile } from "@/lib/measures";
+import { groupPodbor } from "@/lib/podbor-groups";
+import { PRIORITY_SITUATIONS } from "@/lib/taxonomy";
 import { buildPodborPdf } from "@/lib/podbor-pdf";
 
 /**
@@ -28,10 +30,16 @@ export async function GET(): Promise<Response> {
   if (!survey || typeof survey.hasChildren !== "boolean") redirect("/podbor");
 
   const all = await getAllMeasures();
-  const matched = matchMeasures(survey, all);
+  // Раскладка та же, что на экране результатов: выбранная тема первой, затем
+  // федеральные и региональные меры, внутри — срочное и выплаты/бесплатное/скидки.
+  const groups = groupPodbor(survey, all);
+  const situation = survey.prioritySituation
+    ? PRIORITY_SITUATIONS.find((s) => s.key === survey.prioritySituation)
+    : undefined;
 
   const pdf = await buildPodborPdf({
-    measures: matched,
+    groups,
+    priority: situation ? { title: situation.title, short: situation.short } : null,
     userName: [user.firstName, user.lastName].filter(Boolean).join(" ") || null,
     region: survey.region || null,
   });

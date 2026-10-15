@@ -3,7 +3,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import type { SupportMeasure } from "@/lib/measures";
+import { PENDING_TEXT, type SupportMeasure } from "@/lib/measures";
+import {
+  POCKET_ORDER,
+  POCKET_TITLE,
+  type PodborBlock,
+  type PodborGroups,
+  type PodborItem,
+} from "@/lib/podbor-groups";
 import { ORG_FOOTER_SHORT } from "@/lib/org-brand";
 
 /**
@@ -153,8 +160,91 @@ function measureHeight(ctx: Ctx, m: SupportMeasure): number {
   return h;
 }
 
+/**
+ * Одна мера в файле. Порядок и состав карточки — как в приложении: название,
+ * сумма, регион, суть, срок (если сгорает), чего не хватает для права, шаги,
+ * документы, подсказки.
+ */
+function drawMeasure(ctx: Ctx, item: PodborItem, n: number): void {
+  const m = item.measure;
+  // Если на странице осталось меньше, чем занимает «шапка» меры, начинаем
+  // новую — иначе название повиснет внизу отдельно от текста.
+  if (ctx.y - measureHeight(ctx, m) < MARGIN + 20) addPage(ctx);
+
+  text(ctx, `${n}. ${m.title}`, { size: 12, bold: true, color: INK, gap: 2 });
+
+  if (item.deadline) {
+    text(ctx, item.deadline.text, { size: 9.5, bold: true, color: item.deadline.urgent ? BORDO : INK_SOFT, gap: 2 });
+  }
+  if (m.amount) text(ctx, m.amount, { size: 10, bold: true, color: BORDO, gap: 2 });
+  if (m.region) text(ctx, m.region, { size: 8.5, color: INK_SOFT, gap: 2 });
+
+  text(ctx, m.shortDescription, { size: 10, gap: 4 });
+
+  if (item.pending.length > 0) {
+    text(ctx, "Что нужно уточнить", { size: 9.5, bold: true, color: BORDO, gap: 1 });
+    item.pending.forEach((reason) => text(ctx, `• ${PENDING_TEXT[reason]}`, { size: 9.5, indent: 10 }));
+    ctx.y -= 3;
+  }
+
+  if (m.howToApply.length > 0) {
+    text(ctx, "Как оформить", { size: 9.5, bold: true, color: NAVY, gap: 1 });
+    m.howToApply.forEach((step, k) => {
+      text(ctx, `${k + 1}. ${step}`, { size: 9.5, indent: 10 });
+    });
+    ctx.y -= 3;
+  }
+
+  if (m.documents.length > 0) {
+    text(ctx, "Документы", { size: 9.5, bold: true, color: NAVY, gap: 1 });
+    m.documents.forEach((d) => text(ctx, `• ${d}`, { size: 9.5, indent: 10 }));
+    ctx.y -= 3;
+  }
+
+  if (m.tips.length > 0) {
+    text(ctx, "Важно знать", { size: 9.5, bold: true, color: NAVY, gap: 1 });
+    m.tips.forEach((t) => text(ctx, `• ${t}`, { size: 9.5, indent: 10 }));
+    ctx.y -= 3;
+  }
+
+  if (m.sourceName) {
+    text(ctx, `Источник: ${m.sourceName}`, { size: 8.5, color: INK_SOFT });
+  }
+
+  rule(ctx);
+}
+
+/**
+ * Блок подборки: срочное сверху, затем «Выплаты», «Бесплатно», «Скидки», «Права
+ * и поддержка» — в том же порядке, что и в приложении. Нумерация сквозная
+ * внутри блока.
+ */
+function drawBlock(ctx: Ctx, title: string, note: string, block: PodborBlock): void {
+  if (block.count === 0) return;
+  if (ctx.y - 60 < MARGIN) addPage(ctx);
+  ctx.y -= 6;
+  text(ctx, `${title} — ${block.count}`, { size: 14, bold: true, color: NAVY, gap: 2 });
+  text(ctx, note, { size: 9, color: INK_SOFT, gap: 6 });
+
+  let n = 0;
+  if (block.urgent.length > 0) {
+    text(ctx, "Скоро истечёт срок — начните с этих", { size: 10.5, bold: true, color: BORDO, gap: 4 });
+    for (const item of block.urgent) drawMeasure(ctx, item, ++n);
+  }
+  for (const key of POCKET_ORDER) {
+    const items = block.pockets[key];
+    if (items.length === 0) continue;
+    if (ctx.y - 50 < MARGIN) addPage(ctx);
+    text(ctx, `${POCKET_TITLE[key]} — ${items.length}`, { size: 10.5, bold: true, color: BORDO, gap: 4 });
+    for (const item of items) drawMeasure(ctx, item, ++n);
+  }
+}
+
 export function buildPodborPdf(input: {
-  measures: SupportMeasure[];
+  /** Раскладка подборки — та же, что на экране результатов приложения. */
+  groups: PodborGroups;
+  /** Тема, которую человек назвал самой важной: её меры идут первыми. */
+  priority: { title: string; short: string } | null;
   userName: string | null;
   region: string | null;
 }): Promise<Uint8Array> {
@@ -199,7 +289,7 @@ export function buildPodborPdf(input: {
 
     text(
       ctx,
-      `Подобрано мер: ${input.measures.length}. Список составлен по ответам анкеты. ` +
+      `Подобрано мер: ${input.groups.total}. Список составлен по ответам анкеты, в том же порядке, как в приложении. ` +
         `Условия и суммы могут меняться — уточняйте их при подаче заявления.`,
       { size: 9.5, color: INK_SOFT, gap: 8 },
     );
@@ -218,69 +308,30 @@ export function buildPodborPdf(input: {
     }
     rule(ctx);
 
-    // ── Меры: сначала федеральные, потом региональные ────────────────────
-    const groups: { title: string; list: SupportMeasure[] }[] = [
-      {
-        title: "Федеральные меры",
-        list: input.measures.filter((m) => m.level === "federal"),
-      },
-      {
-        title: "Региональные меры",
-        list: input.measures.filter((m) => m.level !== "federal"),
-      },
-    ];
-
-    for (const group of groups) {
-      if (group.list.length === 0) continue;
-
-      if (ctx.y - 40 < MARGIN) addPage(ctx);
-      ctx.y -= 6;
-      text(ctx, `${group.title} — ${group.list.length}`, {
-        size: 13,
-        bold: true,
-        color: NAVY,
-        gap: 6,
-      });
-
-      group.list.forEach((m, i) => {
-        // Если на странице осталось меньше, чем занимает «шапка» меры,
-        // начинаем новую — иначе название повиснет внизу отдельно от текста.
-        if (ctx.y - measureHeight(ctx, m) < MARGIN + 20) addPage(ctx);
-
-        text(ctx, `${i + 1}. ${m.title}`, { size: 12, bold: true, color: INK, gap: 2 });
-
-        if (m.amount) text(ctx, m.amount, { size: 10, bold: true, color: BORDO, gap: 2 });
-        if (m.region) text(ctx, m.region, { size: 8.5, color: INK_SOFT, gap: 2 });
-
-        text(ctx, m.shortDescription, { size: 10, gap: 4 });
-
-        if (m.howToApply.length > 0) {
-          text(ctx, "Как оформить", { size: 9.5, bold: true, color: NAVY, gap: 1 });
-          m.howToApply.forEach((step, n) => {
-            text(ctx, `${n + 1}. ${step}`, { size: 9.5, indent: 10 });
-          });
-          ctx.y -= 3;
-        }
-
-        if (m.documents.length > 0) {
-          text(ctx, "Документы", { size: 9.5, bold: true, color: NAVY, gap: 1 });
-          m.documents.forEach((d) => text(ctx, `• ${d}`, { size: 9.5, indent: 10 }));
-          ctx.y -= 3;
-        }
-
-        if (m.tips.length > 0) {
-          text(ctx, "Важно знать", { size: 9.5, bold: true, color: NAVY, gap: 1 });
-          m.tips.forEach((t) => text(ctx, `• ${t}`, { size: 9.5, indent: 10 }));
-          ctx.y -= 3;
-        }
-
-        if (m.sourceName) {
-          text(ctx, `Источник: ${m.sourceName}`, { size: 8.5, color: INK_SOFT });
-        }
-
-        rule(ctx);
-      });
+    // ── Меры — в том же порядке, как показало приложение ─────────────────
+    // Сначала выбранная человеком тема, затем федеральные меры и меры его
+    // региона; внутри блока срочное наверху, потом выплаты, бесплатное, скидки.
+    if (input.priority && input.groups.priority.count > 0) {
+      drawBlock(
+        ctx,
+        `Важно для вас сейчас: ${input.priority.title}`,
+        input.priority.short,
+        input.groups.priority,
+      );
     }
+    drawBlock(ctx, "Федеральные меры", "Действуют по всей стране — не зависят от того, где вы живёте.", input.groups.federal);
+    drawBlock(
+      ctx,
+      "Меры вашего региона",
+      "Их назначают местные власти, и в соседней области условия могут быть другими.",
+      input.groups.regional,
+    );
+    drawBlock(
+      ctx,
+      "Положено вашему ребёнку",
+      "Заявление ребёнок подаёт на себя сам — с 14 лет через свои Госуслуги. Родитель помогает, но заявителем не будет.",
+      input.groups.child,
+    );
 
     // ── Хвост ────────────────────────────────────────────────────────────
     if (ctx.y - 40 < MARGIN) addPage(ctx);
