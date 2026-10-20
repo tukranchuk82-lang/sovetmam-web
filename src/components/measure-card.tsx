@@ -28,10 +28,13 @@ type MeasureCardData = {
 export function MeasureCard({
   measure,
   representatives = [],
+  footer,
 }: {
   measure: MeasureCardData;
   /** Представители регионов — карточка сама находит своего по measure.region. */
   representatives?: RegionalRepresentative[];
+  /** Блок внизу карточки, внутри её рамки (например, «Вы оформляли эту меру?»). */
+  footer?: React.ReactNode;
 }) {
   const isFederal = measure.level === "federal";
   const cat = categoryMeta(measure.category);
@@ -51,7 +54,7 @@ export function MeasureCard({
         href={`/catalog/${measure.slug}`}
         className={cn(
           "block border border-[#E5E0D6] bg-[#FCFBF9] p-4 shadow-[0_1px_2px_rgba(30,30,40,0.04)] transition-colors duration-200 hover:border-[#1B3A6B]/30 hover:shadow-[0_12px_26px_-16px_rgba(27,58,107,0.3)]",
-          representative ? "rounded-t-xl border-b-0" : "rounded-xl",
+          representative || footer ? "rounded-t-xl border-b-0" : "rounded-xl",
         )}
       >
       {/* Мета: категория (navy) · уровень (бордовый). Справа оставляем место
@@ -91,6 +94,16 @@ export function MeasureCard({
         </span>
       </div>
       </Link>
+      {footer && (
+        <div
+          className={cn(
+            "border border-t-0 border-[#E5E0D6] bg-[#F7F4EC] px-4 pb-3 pt-2.5",
+            representative ? "" : "rounded-b-xl",
+          )}
+        >
+          {footer}
+        </div>
+      )}
       {representative && (
         <RepresentativeContactLine representative={representative} />
       )}

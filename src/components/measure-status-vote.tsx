@@ -6,23 +6,24 @@ import { MEASURE_STATUS_LABEL, type MeasureStatus } from "@/lib/measure-status-l
 import { cn } from "@/lib/utils";
 
 const OPTIONS: { key: MeasureStatus; icon: React.ReactNode; on: string }[] = [
-  { key: "using", icon: <Check className="size-3.5" />, on: "border-emerald-600 bg-emerald-600 text-white" },
-  { key: "not_applied", icon: <Hourglass className="size-3.5" />, on: "border-[#1B3A6B] bg-[#1B3A6B] text-white" },
-  { key: "refused", icon: <CircleSlash className="size-3.5" />, on: "border-[#8E1D2C] bg-[#8E1D2C] text-white" },
+  { key: "using", icon: <Check className="size-3" />, on: "border-emerald-600 bg-emerald-600 text-white" },
+  { key: "not_applied", icon: <Hourglass className="size-3" />, on: "border-[#1B3A6B] bg-[#1B3A6B] text-white" },
+  { key: "refused", icon: <CircleSlash className="size-3" />, on: "border-[#8E1D2C] bg-[#8E1D2C] text-white" },
 ];
 
 /**
- * «Вы уже оформляли эту меру?» — три ответа рядом с мерой в подборке. Нужны,
- * чтобы понимать, дошло ли дело до оформления: сколько людей пользуются мерой,
- * сколько не подавали, а где отказывают. Повторное нажатие снимает ответ.
+ * «Оформляли эту меру?» — три ответа внутри самой карточки меры, под её
+ * подвалом: так сразу понятно, к какой мере относится вопрос. Нужны, чтобы
+ * понимать, дошло ли дело до оформления: пользуются, не подавали или получили
+ * отказ. Повторное нажатие снимает ответ.
  */
 export function MeasureStatusVote({ slug }: { slug: string }) {
   const { statusOf, choose } = useMeasureStatus();
   const current = statusOf(slug);
   return (
-    <div className="mt-2 rounded-xl bg-[#F4F1EA] px-3 py-2.5">
-      <p className="text-[11.5px] font-semibold text-[#5d6470]">Вы уже оформляли эту меру?</p>
-      <div className="mt-1.5 flex flex-wrap gap-1.5" role="group" aria-label="Статус меры">
+    <div>
+      <p className="text-[11.5px] font-semibold text-[#82796c]">Оформляли эту меру?</p>
+      <div className="mt-1.5 flex flex-wrap gap-1.5" role="group" aria-label="Статус этой меры">
         {OPTIONS.map((o) => {
           const active = current === o.key;
           return (
@@ -32,7 +33,7 @@ export function MeasureStatusVote({ slug }: { slug: string }) {
               onClick={() => choose(slug, o.key)}
               aria-pressed={active}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors active:scale-95",
+                "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11.5px] font-semibold transition-colors active:scale-95",
                 active ? o.on : "border-[#D9D2C6] bg-white text-[#3A4D63] hover:bg-[#FBF8F3]",
               )}
             >

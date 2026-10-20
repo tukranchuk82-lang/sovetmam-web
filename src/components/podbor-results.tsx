@@ -76,10 +76,13 @@ function Item({
 }) {
   return (
     <div>
-      <MeasureCard measure={item.measure} representatives={representatives} />
+      <MeasureCard
+        measure={item.measure}
+        representatives={representatives}
+        footer={<MeasureStatusVote slug={item.measure.slug} />}
+      />
       <Deadline item={item} />
       <Pending item={item} />
-      <MeasureStatusVote slug={item.measure.slug} />
     </div>
   );
 }
