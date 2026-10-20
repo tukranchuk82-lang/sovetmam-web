@@ -12,10 +12,15 @@ export function AuthPromptModal({
   open,
   onLogin,
   onClose,
+  title = "Сохранение — для своих",
+  text = "Добавлять меры в избранное могут только вошедшие пользователи. Войдите — и всё, что отметите, будет ждать вас в разделе «Избранное».",
 }: {
   open: boolean;
   onLogin: () => void;
   onClose: () => void;
+  /** Заголовок и пояснение можно заменить под другое действие (по умолчанию — про избранное). */
+  title?: string;
+  text?: string;
 }) {
   // Esc закрывает; на время показа блокируем прокрутку фона.
   useEffect(() => {
@@ -64,12 +69,9 @@ export function AuthPromptModal({
           className="mt-4 text-xl leading-snug text-[#1E2A3A]"
           style={{ fontFamily: "var(--font-playfair), serif" }}
         >
-          Сохранение — для своих
+          {title}
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-[#82796c]">
-          Добавлять меры в избранное могут только вошедшие пользователи. Войдите —
-          и всё, что отметите, будет ждать вас в разделе «Избранное».
-        </p>
+        <p className="mt-2 text-sm leading-relaxed text-[#82796c]">{text}</p>
 
         <div className="mt-6 flex flex-col gap-2.5">
           <button

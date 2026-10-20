@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Clock, AlertCircle, Sparkles } from "lucide-react";
 import { MeasureCard } from "@/components/measure-card";
+import { MeasureStatusVote } from "@/components/measure-status-vote";
 import { PENDING_TEXT } from "@/lib/measures";
 import {
   POCKET_ORDER,
@@ -78,6 +79,7 @@ function Item({
       <MeasureCard measure={item.measure} representatives={representatives} />
       <Deadline item={item} />
       <Pending item={item} />
+      <MeasureStatusVote slug={item.measure.slug} />
     </div>
   );
 }

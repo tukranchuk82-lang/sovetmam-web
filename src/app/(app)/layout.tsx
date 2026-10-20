@@ -8,6 +8,7 @@ import { Avatar } from "@/components/avatar";
 import { UserAvatar } from "@/components/user-avatar";
 import { AppShell } from "@/components/app-shell";
 import { SavedProvider } from "@/components/saved-provider";
+import { MeasureStatusProvider } from "@/components/measure-status-provider";
 import { UtmCapture } from "@/components/utm-capture";
 import { ShareArrival } from "@/components/share-arrival";
 import { NavTrail } from "@/components/nav-trail";
@@ -60,6 +61,7 @@ export default async function AppLayout({
   return (
     <>
       <SavedProvider authed={canSave}>
+        <MeasureStatusProvider authed={canSave}>
         <AppShell
           avatarSlot={avatarSlot}
           authed={Boolean(demoUser || appUser)}
@@ -71,6 +73,7 @@ export default async function AppLayout({
         >
           {children}
         </AppShell>
+        </MeasureStatusProvider>
       </SavedProvider>
       <UtmCapture />
       {/* Отметка о приходе по размеченной ссылке — считает пересылки и рассылки. */}

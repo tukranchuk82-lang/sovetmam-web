@@ -21,6 +21,7 @@ import {
   Map,
   ClipboardList,
   Eye,
+  ClipboardCheck,
 } from "lucide-react";
 import { countNewInquiries } from "@/lib/inquiries-db";
 import { getChatInquiryCounts } from "@/lib/coordinator-insights";
@@ -122,6 +123,7 @@ export default async function AdminLayout({
             { href: "/admin/views", label: "Что смотрят", icon: <Eye /> },
             { href: "/admin/surveys", label: "Анкеты", icon: <ClipboardList /> },
             { href: "/admin/saved", label: "Избранное", icon: <Heart /> },
+            { href: "/admin/measure-status", label: "Оформление мер", icon: <ClipboardCheck /> },
           ],
         },
         {
