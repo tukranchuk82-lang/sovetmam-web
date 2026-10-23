@@ -22,3 +22,17 @@ check("Тверь, вопрос не задавали", shown({ ...base }), fals
 check("Тверь, ответ «нет»", shown({ ...base, employers: [] }), false);
 check("другая компания", shown({ ...base, employers: ["other"] }), false);
 check("другой регион, ответ «да»", shown({ ...base, region: "Москва", employers: ["trikotazhny-dom"] }), false);
+
+// Регион ребёнка и НДФЛ за прошлый год.
+import { paysNdfl } from "../src/lib/measures.ts";
+const reg = (region) => ({ ...m, slug: "r" + region, region, criteria: { regions: [region] } });
+const fed = { ...m, slug: "f", level: "federal", region: null, criteria: {} };
+const own = { ...base, region: "Москва", childRegion: "Тверская область" };
+const ids = (p, list) => matchMeasures(p, list).map((x) => x.slug).join(",");
+check("регион ребёнка: меры Твери показаны", ids(own, [reg("Тверская область")]) === "rТверская область", true);
+check("регион ребёнка: меры Москвы (региона мамы) скрыты", ids(own, [reg("Москва")]) === "", true);
+check("регион ребёнка: федеральные на месте", ids(own, [fed]) === "f", true);
+check("регионы совпадают: как раньше", ids({ ...base, region: "Москва" }, [reg("Москва")]) === "rМосква", true);
+check("работодатель привязан к региону родителя", shown({ ...own, region: "Тверская область", childRegion: "Москва", employers: ["trikotazhny-dom"] }), true);
+check("НДФЛ: не работает, но работал в прошлом году", paysNdfl({ ...base, employed: false, workedLastYearHired: true }) === true, true);
+check("НДФЛ: не работает и не работал", paysNdfl({ ...base, employed: false, workedLastYearHired: false }) === false, true);

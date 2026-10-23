@@ -737,6 +737,17 @@ export interface UserProfile {
   rareDisease?: boolean;
   /** Компании со своей программой поддержки, где человек работает (lib/employers.ts). */
   employers?: string[];
+  /**
+   * Регион регистрации ребёнка, если он не совпадает с регионом родителя.
+   * Региональные выплаты назначают по месту регистрации ребёнка, поэтому
+   * подбор берёт меры этого региона. null или пусто — регионы совпадают.
+   */
+  childRegion?: string | null;
+  /**
+   * Работал(а) в прошлом году по найму — НДФЛ удерживали, и налоговый вычет
+   * можно получить, даже если сейчас человек не работает. null — не спрашивали.
+   */
+  workedLastYearHired?: boolean | null;
   /** Работает, не работает или в декрете. */
   employmentStatus?: EmploymentStatus | null;
   /** Как оформлена занятость: можно совмещать наём с самозанятостью. */
@@ -822,15 +833,20 @@ export function evaluateEligibility(
   // Региональные меры показываем ТОЛЬКО при совпадении региона. Источник региона —
   // criteria.regions (если задан) или колонка region. Без выбранного региона
   // региональные меры не показываем вовсе — иначе в выдачу попадают чужие регионы.
+  //
+  // Региональные меры назначают по месту регистрации ребёнка, поэтому при
+  // разных регионах берём регион ребёнка. Исключение — меры работодателя: они
+  // привязаны к месту работы родителя.
+  const region = c.requiresEmployer ? profile.region : profile.childRegion || profile.region;
   if (m.level === "regional" && !ignoreRegion) {
-    if (!profile.region) return { fits: false, pending: [] };
+    if (!region) return { fits: false, pending: [] };
     const allowed =
       c.regions && c.regions.length > 0
         ? c.regions
         : m.region
           ? [m.region]
           : [];
-    if (allowed.length > 0 && !allowed.includes(profile.region)) {
+    if (allowed.length > 0 && !allowed.includes(region)) {
       return { fits: false, pending: [] };
     }
   }
@@ -839,8 +855,8 @@ export function evaluateEligibility(
   if (
     !ignoreRegion &&
     c.excludeRegions &&
-    profile.region &&
-    c.excludeRegions.includes(profile.region)
+    region &&
+    c.excludeRegions.includes(region)
   ) {
     return { fits: false, pending: [] };
   }
@@ -854,7 +870,7 @@ export function evaluateEligibility(
   // помечена федеральной. Тоже уважает ignoreRegion — иначе региональные меры
   // отсеиваются здесь, даже если выше их пропустили.
   if (!ignoreRegion && c.regions && c.regions.length > 0) {
-    if (!profile.region || !c.regions.includes(profile.region)) {
+    if (!region || !c.regions.includes(region)) {
       return { fits: false, pending: [] };
     }
   }
@@ -912,6 +928,9 @@ export function isYoungFamily(profile: UserProfile): boolean {
  */
 export function paysNdfl(profile: UserProfile): boolean | null {
   if (profile.employed === true) return true;
+  // Сейчас не работает по найму, но в прошлом году работал: НДФЛ удерживали,
+  // вычет за тот год получить можно.
+  if (profile.workedLastYearHired === true) return true;
 
   if (profile.entrepreneur) {
     if (profile.taxSystem === "osno") return true;

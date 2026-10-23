@@ -587,6 +587,8 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     fosterParent: !!v.fosterParent,
     teacher: !!v.teacher,
     employers: Array.isArray(v.employers) ? v.employers : [],
+    childRegion: typeof v.childRegion === "string" && v.childRegion ? v.childRegion : null,
+    workedLastYearHired: typeof v.workedLastYearHired === "boolean" ? v.workedLastYearHired : null,
   };
 }
 
@@ -917,6 +919,15 @@ function PodborFormInner({
   );
   const [hardship, setHardship] = useState<boolean | null>(saved?.hardship ?? null);
   const [region, setRegion] = useState(saved?.region ?? "");
+  // Ребёнок зарегистрирован в том же регионе? null — не отвечали; false — в
+  // другом, тогда меры берутся по региону ребёнка (childRegion).
+  const [childSameRegion, setChildSameRegion] = useState<boolean | null>(
+    saved?.childRegion ? false : null,
+  );
+  const [childRegion, setChildRegion] = useState(saved?.childRegion ?? "");
+  const [workedLastYear, setWorkedLastYear] = useState<boolean | null>(
+    saved?.workedLastYearHired ?? null,
+  );
   // «Выше 2 ПМ» — это не отсутствие ответа, поэтому шкала хранит отдельный
   // флаг «ответил» (incomeAnswered) рядом со значением (null = выше 2 ПМ).
   const [incomePm, setIncomePm] = useState<IncomePm | null>(saved ? toIncomePm(saved) : null);
@@ -1078,6 +1089,9 @@ function PodborFormInner({
   // работающих, и у тех, кто в декрете.
   const needsTaxSystem = isEntrepreneur;
   const needsInsurance = isEntrepreneur || isSelfEmployed;
+  // Работал(а) ли в прошлом году по найму — спрашиваем тех, у кого наёмной
+  // работы сейчас нет: вычет положен за год, когда удерживали НДФЛ.
+  const askWorkedLastYear = employmentStatus != null && !isHired;
   // Компании со своей программой в выбранном регионе — спрашиваем только тех,
   // кто работает по найму (см. lib/employers.ts).
   const employerQuestions =
@@ -1231,6 +1245,9 @@ function PodborFormInner({
     disabledParent,
     fosterParent,
     employerAnswers,
+    childSameRegion,
+    childRegion,
+    workedLastYear,
   };
 
   // Человек уже что-то ответил? Считаем сравнением с пустой анкетой, а не
@@ -1357,6 +1374,9 @@ function PodborFormInner({
     setHasEmployees(bool(d.hasEmployees));
     setDisabledParent(bool(d.disabledParent));
     setFosterParent(bool(d.fosterParent));
+    setChildSameRegion(bool(d.childSameRegion));
+    if (typeof d.childRegion === "string") setChildRegion(d.childRegion);
+    setWorkedLastYear(bool(d.workedLastYear));
     if (d.employerAnswers && typeof d.employerAnswers === "object") {
       setEmployerAnswers(d.employerAnswers as Record<string, boolean>);
     }
@@ -1460,6 +1480,9 @@ function PodborFormInner({
       disabledParent: disabledParent ?? false,
       fosterParent: fosterParent ?? false,
       teacher: (workFields ?? []).includes("education"),
+      childRegion:
+        childSameRegion === false && childRegion && childRegion !== region ? childRegion : null,
+      workedLastYearHired: askWorkedLastYear ? workedLastYear : null,
       employers: employerQuestions.filter((e) => employerAnswers[e.id] === true).map((e) => e.id),
     };
     setResultProfile(profile);
@@ -1672,7 +1695,7 @@ function PodborFormInner({
                 наткнулся на неё случайно внутри одной из карточек. */}
             <RepresentativeBanner
               representatives={representatives}
-              region={resultProfile?.region}
+              region={resultProfile?.childRegion || resultProfile?.region}
             />
 
             {/* Подборка разложена по блокам: сначала выбранная тема, затем
@@ -1846,6 +1869,54 @@ function PodborFormInner({
             />
           </div>
         </div>
+
+        {/* Регион ребёнка: региональные выплаты назначают по месту его
+            регистрации, а у семьи он может отличаться от региона родителя. */}
+        {region && (
+          <div>
+            <p className="text-sm font-medium">Ребёнок зарегистрирован в этом же регионе?</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Региональные выплаты назначают по месту регистрации ребёнка. Если он
+              зарегистрирован в другом регионе, покажем меры того региона.
+              Если детей пока нет — пропустите.
+            </p>
+            <div className="mt-2 flex gap-2">
+              <YesNo
+                value={childSameRegion}
+                onChange={(v) => {
+                  setChildSameRegion(v);
+                  if (v !== false) setChildRegion("");
+                }}
+                clearable
+              />
+            </div>
+            {childSameRegion === false && (
+              <div className="relative mt-2">
+                <select
+                  value={childRegion}
+                  onChange={(e) => setChildRegion(e.target.value)}
+                  className={cn(
+                    "w-full appearance-none rounded-xl border bg-white py-2.5 pl-3 pr-8 text-sm shadow-sm focus:border-[#1B3A6B]/40 focus:outline-none",
+                    childRegion
+                      ? "border-black/[0.08] font-medium text-[#2b2f36]"
+                      : "border-[#8E1D2C]/30 text-[#7a808a]",
+                  )}
+                >
+                  <option value="">Регион регистрации ребёнка</option>
+                  {REGIONS.filter((r) => r !== region).map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden
+                  className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-[#9aa0a8]"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Город или село — отдельный вопрос, потому что часть программ
             привязана не к региону, а к размеру населённого пункта: сельская
@@ -2159,9 +2230,17 @@ function PodborFormInner({
           </div>
         </div>
 
-        <Question label="Вы единственный родитель (неполная семья)?">
-          <YesNo value={singleParent} onChange={setSingleParent} />
-        </Question>
+        <div>
+          <p className="text-sm font-medium">Вы единственный родитель (неполная семья)?</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Единственным считается родитель, если в свидетельстве о рождении
+            ребёнка в графе о втором родителе стоит прочерк. Развод и алименты
+            этого статуса не дают.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <YesNo value={singleParent} onChange={setSingleParent} />
+          </div>
+        </div>
 
         <Question label="Родители учатся очно (студенческая семья)?">
           <YesNo value={student} onChange={setStudent} />
@@ -2305,6 +2384,20 @@ function PodborFormInner({
             </div>
           )}
         </div>
+
+        {askWorkedLastYear && (
+          <div className="rounded-2xl border bg-card p-3.5">
+            <p className="text-sm font-medium">Работали ли вы в прошлом году по найму?</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Налоговый вычет возвращают за год, когда с зарплаты удерживали НДФЛ, —
+              даже если сейчас вы не работаете. Если работали, покажем все налоговые
+              вычеты.
+            </p>
+            <div className="mt-2 flex gap-2">
+              <YesNo value={workedLastYear} onChange={setWorkedLastYear} clearable />
+            </div>
+          </div>
+        )}
 
         {/* Уточнения для предпринимателей — в любой ветке, включая декрет. */}
         {needsTaxSystem && (

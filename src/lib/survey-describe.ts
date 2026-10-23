@@ -125,6 +125,8 @@ export function describeSurvey(survey: Record<string, unknown> | null): SurveyRo
 
   add("Доход на человека", INCOME[String(survey.incomePm)]);
   if (typeof survey.employmentStatus === "string") add("Занятость", EMPLOYMENT[survey.employmentStatus]);
+  if (typeof survey.childRegion === "string" && survey.childRegion) add("Ребёнок зарегистрирован в", survey.childRegion);
+  if (survey.workedLastYearHired === true) add("В прошлом году", "работал(а) по найму");
   if (Array.isArray(survey.employers) && survey.employers.length > 0) {
     const names = survey.employers.map((id) => EMPLOYER_PROGRAMS.find((e) => e.id === id)?.name ?? String(id));
     add("Работает в", names.join(", "));
