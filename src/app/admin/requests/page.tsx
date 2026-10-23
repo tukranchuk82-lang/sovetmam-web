@@ -1,5 +1,5 @@
 import { Inbox } from "lucide-react";
-import { listBotHelpRequests } from "@/lib/bot-help";
+import { enrichOpenRequests, listBotHelpRequests } from "@/lib/bot-help";
 import { RequestsList } from "@/components/admin/requests-list";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { isReadOnlyViewer } from "@/lib/user-session";
@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminRequestsPage() {
   const items = await listBotHelpRequests();
+  await enrichOpenRequests(items);
   const readOnly = await isReadOnlyViewer();
   const open = items.filter((r) => r.status === "new").length;
 

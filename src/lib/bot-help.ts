@@ -1,7 +1,7 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { sendPushToUser } from "@/lib/push";
-import { notifyAdminsSalebot } from "@/lib/salebot";
+import { fetchSalebotClientCard, notifyAdminsSalebot } from "@/lib/salebot";
 import { appUrl } from "@/lib/inquiry-token";
 import type { MessengerChannel } from "@/lib/onboarding-db";
 
@@ -31,6 +31,10 @@ export interface BotHelpRequest {
   userId: string | null;
   handledAt: string | null;
   createdAt: string;
+  /** Что человек написал боту (новые первыми). Не хранится — берём из Salebot, пока почта не найдена. */
+  recentMessages: string[];
+  /** Профиль во «ВКонтакте», если заявка оттуда. Не хранится. */
+  profileUrl: string | null;
 }
 
 type Row = {
@@ -59,6 +63,8 @@ const fromRow = (r: Row): BotHelpRequest => ({
   userId: r.user_id,
   handledAt: r.handled_at,
   createdAt: r.created_at,
+  recentMessages: [],
+  profileUrl: null,
 });
 
 export const CHANNEL_LABEL: Record<MessengerChannel, string> = {
@@ -102,14 +108,19 @@ export async function createBotHelpRequest(input: {
     return { created: false, id: open.id as string };
   }
 
+  // Воронка имя не присылает, а Salebot его знает — берём из профиля.
+  const card = input.name && input.email ? null : await fetchSalebotClientCard(input.salebotClientId);
+  const name = input.name || card?.name || null;
+  const email = input.email || card?.email || null;
+
   const { data, error } = await sb
     .from("bot_help_requests")
     .insert({
       salebot_client_id: input.salebotClientId,
       channel: input.channel,
-      name: input.name ?? null,
+      name,
       username: input.username ?? null,
-      email: input.email ?? null,
+      email,
       note: input.note ?? null,
     })
     .select("id")
@@ -117,8 +128,8 @@ export async function createBotHelpRequest(input: {
   if (error) throw error;
 
   await notifyNewRequest({
-    name: input.name ?? null,
-    email: input.email ?? null,
+    name,
+    email,
     channel: input.channel,
   });
   return { created: true, id: data.id as string };
@@ -176,6 +187,32 @@ export async function listBotHelpRequests(): Promise<BotHelpRequest[]> {
     .limit(500);
   if (error) throw error;
   return (data as Row[]).map(fromRow);
+}
+
+/**
+ * Дозаполняет открытые заявки из Salebot: имя из профиля и почта, которую
+ * человек написал боту уже после обращения. Найденное сохраняем в заявку, чтобы
+ * в следующий раз не ходить в Salebot. Пока почты нет, подкладываем последние
+ * сообщения человека — по ним видно, что он просил.
+ */
+export async function enrichOpenRequests(items: BotHelpRequest[]): Promise<void> {
+  const sb = createSupabaseAdminClient();
+  await Promise.all(
+    items
+      .filter((r) => r.status === "new" && (!r.email || !r.name))
+      .map(async (r) => {
+        const card = await fetchSalebotClientCard(r.salebotClientId);
+        if (!card) return;
+        const patch: { name?: string; email?: string } = {};
+        if (!r.name && card.name) patch.name = r.name = card.name;
+        if (!r.email && card.email) patch.email = r.email = card.email;
+        if (Object.keys(patch).length > 0) {
+          await sb.from("bot_help_requests").update(patch).eq("id", r.id);
+        }
+        r.profileUrl = card.profileUrl;
+        if (!r.email) r.recentMessages = card.messages;
+      }),
+  );
 }
 
 /** Сколько заявок ждёт ответа — для кружка в меню админки. */

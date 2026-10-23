@@ -60,6 +60,69 @@ export async function fetchSalebotAvatar(clientId: string): Promise<string | nul
   }
 }
 
+export interface SalebotClientCard {
+  /** Имя и фамилия из профиля мессенджера. */
+  name: string | null;
+  /** Последняя почта, которую человек написал боту. */
+  email: string | null;
+  /** Последние сообщения человека (новые первыми) — чтобы понять, что он просил. */
+  messages: string[];
+  /** Ссылка на профиль во «ВКонтакте» — только для VK-клиентов. */
+  profileUrl: string | null;
+}
+
+const EMAIL_IN_TEXT = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+
+/**
+ * Что Salebot знает о человеке, который написал боту: имя из профиля и почта,
+ * которую он прислал в чат. Заявка из бота приходит без них — почту человек
+ * пишет уже после того, как нажал «Начать», — поэтому забираем их отдельно.
+ * Без ключа или при сбое Salebot — null: заявка просто останется как есть.
+ */
+export async function fetchSalebotClientCard(clientId: string): Promise<SalebotClientCard | null> {
+  const key = process.env.SALEBOT_API_KEY;
+  if (!key) return null;
+  const base = `https://chatter.salebot.pro/api/${key}`;
+  const id = encodeURIComponent(clientId);
+  try {
+    const [varsRes, histRes] = await Promise.all([
+      fetch(`${base}/get_variables?client_id=${id}`),
+      fetch(`${base}/get_history?client_id=${id}&limit=30`),
+    ]);
+
+    let name: string | null = null;
+    let profileUrl: string | null = null;
+    if (varsRes.ok) {
+      const v = (await varsRes.json()) as Record<string, unknown>;
+      const str = (x: unknown) => (typeof x === "string" ? x.trim() : "");
+      name = str(v.full_name) || [str(v.name), str(v.last_name)].filter(Boolean).join(" ") || null;
+      const vkId = str(v.vk_id);
+      if (/^\d+$/.test(vkId)) profileUrl = `https://vk.com/id${vkId}`;
+    }
+
+    const messages: string[] = [];
+    let email: string | null = null;
+    if (histRes.ok) {
+      const h = (await histRes.json()) as {
+        result?: { client_replica?: boolean; text?: string | null }[];
+      };
+      for (const m of h.result ?? []) {
+        if (!m.client_replica) continue;
+        const text = (m.text ?? "").trim();
+        if (!text) continue;
+        if (messages.length < 3) messages.push(text.length > 200 ? `${text.slice(0, 200)}…` : text);
+        if (!email) {
+          const found = text.match(EMAIL_IN_TEXT);
+          if (found) email = found[found.length - 1].toLowerCase();
+        }
+      }
+    }
+    return { name, email, messages, profileUrl };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Уведомление в мессенджер через Salebot.
  *

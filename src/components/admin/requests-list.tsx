@@ -148,8 +148,20 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
         <p className="mt-1 text-xs font-medium text-emerald-700">{req.email}</p>
       ) : (
         <p className="mt-1 text-xs text-amber-700">
-          Почта не распозналась — уточните у человека в {CHANNEL[req.channel]} и впишите ниже
+          Почту человек боту не писал — уточните у него в {CHANNEL[req.channel]} и впишите ниже
         </p>
+      )}
+      {!req.email && req.recentMessages.length > 0 && (
+        <div className="mt-1.5 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+          <p className="font-semibold text-[#20242c]">Что написал человек:</p>
+          <ul className="mt-0.5 space-y-0.5">
+            {req.recentMessages.map((m, i) => (
+              <li key={i} className="break-words">
+                «{m}»
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       <a
         href={salebotClientUrl(req.salebotClientId)}
@@ -159,6 +171,16 @@ function RequestCard({ req }: { req: BotHelpRequest }) {
       >
         <ExternalLink className="size-3" /> Открыть чат в Salebot
       </a>
+      {req.profileUrl && (
+        <a
+          href={req.profileUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="ml-3 mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline"
+        >
+          <ExternalLink className="size-3" /> Профиль во «ВКонтакте»
+        </a>
+      )}
 
       {req.note && (
         <p className="mt-1.5 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
