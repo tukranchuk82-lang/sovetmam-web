@@ -51,6 +51,7 @@ import {
   type StudyFunding,
   type UserProfile,
 } from "@/lib/measures";
+import { employersForRegion } from "@/lib/employers";
 import { PRIORITY_SITUATIONS, type PrioritySituationKey } from "@/lib/taxonomy";
 import { groupPodbor } from "@/lib/podbor-groups";
 import { useBackHandler } from "@/components/back-handler";
@@ -585,6 +586,7 @@ function toProfile(v: Partial<UserProfile>): UserProfile {
     disabledParent: !!v.disabledParent,
     fosterParent: !!v.fosterParent,
     teacher: !!v.teacher,
+    employers: Array.isArray(v.employers) ? v.employers : [],
   };
 }
 
@@ -1003,6 +1005,11 @@ function PodborFormInner({
   );
   const [disabledParent, setDisabledParent] = useState<boolean | null>(saved?.disabledParent ?? null);
   const [fosterParent, setFosterParent] = useState<boolean | null>(saved?.fosterParent ?? null);
+  // Ответы «работаю ли в компании со своей программой»: код компании → да/нет.
+  // Из сохранённой анкеты восстанавливаем только «да»; «нет» на результат не влияет.
+  const [employerAnswers, setEmployerAnswers] = useState<Record<string, boolean>>(
+    () => Object.fromEntries((saved?.employers ?? []).map((id) => [id, true])),
+  );
 
 
   // Сколько окошек возраста показывать. При «10 и более» число берётся из
@@ -1071,6 +1078,12 @@ function PodborFormInner({
   // работающих, и у тех, кто в декрете.
   const needsTaxSystem = isEntrepreneur;
   const needsInsurance = isEntrepreneur || isSelfEmployed;
+  // Компании со своей программой в выбранном регионе — спрашиваем только тех,
+  // кто работает по найму (см. lib/employers.ts).
+  const employerQuestions =
+    employmentStatus === "working" && employmentKinds.includes("hired")
+      ? employersForRegion(region)
+      : [];
 
   /**
    * Смена статуса занятости стирает ответы других ветвей.
@@ -1217,6 +1230,7 @@ function PodborFormInner({
     hasEmployees,
     disabledParent,
     fosterParent,
+    employerAnswers,
   };
 
   // Человек уже что-то ответил? Считаем сравнением с пустой анкетой, а не
@@ -1343,6 +1357,9 @@ function PodborFormInner({
     setHasEmployees(bool(d.hasEmployees));
     setDisabledParent(bool(d.disabledParent));
     setFosterParent(bool(d.fosterParent));
+    if (d.employerAnswers && typeof d.employerAnswers === "object") {
+      setEmployerAnswers(d.employerAnswers as Record<string, boolean>);
+    }
     if (d.incomeAnswered === true) {
       setIncomeAnswered(true);
       const pm = d.incomePm;
@@ -1443,6 +1460,7 @@ function PodborFormInner({
       disabledParent: disabledParent ?? false,
       fosterParent: fosterParent ?? false,
       teacher: (workFields ?? []).includes("education"),
+      employers: employerQuestions.filter((e) => employerAnswers[e.id] === true).map((e) => e.id),
     };
     setResultProfile(profile);
     submitted.current = true;
@@ -2354,6 +2372,32 @@ function PodborFormInner({
             </div>
           </div>
         )}
+
+        {/* Работодатели со своей программой поддержки — только в их регионе и
+            только тем, кто работает по найму. */}
+        {employerQuestions.map((e) => (
+          <div key={e.id} className="rounded-2xl border bg-card p-3.5">
+            <p className="text-sm font-medium">Вы работаете в {e.name}?</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              У компании есть своя программа поддержки сотрудников с семьями —
+              покажем её среди мер.
+            </p>
+            <div className="mt-2 flex gap-2">
+              <YesNo
+                value={employerAnswers[e.id] ?? null}
+                onChange={(v) =>
+                  setEmployerAnswers((prev) => {
+                    const next = { ...prev };
+                    if (v === null) delete next[e.id];
+                    else next[e.id] = v;
+                    return next;
+                  })
+                }
+                clearable
+              />
+            </div>
+          </div>
+        ))}
 
         {/* Сфера работы вместо прежнего вопроса «вы работаете учителем?»:
             подъёмные по земским программам, IT-ипотека и жилищные кооперативы

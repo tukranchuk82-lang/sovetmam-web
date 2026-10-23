@@ -443,6 +443,12 @@ export interface EligibilityCriteria {
    * а часть мер адресована их детям — например, первоочередной приём в детсад.
    */
   requiresTeacher?: boolean;
+  /**
+   * Родитель работает в компании со своей программой поддержки (код из
+   * lib/employers.ts). Строгое условие: мера показывается только тем, кто
+   * ответил «да» — пропущенный вопрос её не открывает.
+   */
+  requiresEmployer?: string;
   /** Инвалидность у самого родителя (не у ребёнка — для того requiresDisabledChild). */
   requiresDisabledParent?: boolean;
   /** Приёмные родители, опекуны, попечители, усыновители. */
@@ -729,6 +735,8 @@ export interface UserProfile {
   children?: ChildInfo[];
   /** У ребёнка редкое (орфанное) заболевание. */
   rareDisease?: boolean;
+  /** Компании со своей программой поддержки, где человек работает (lib/employers.ts). */
+  employers?: string[];
   /** Работает, не работает или в декрете. */
   employmentStatus?: EmploymentStatus | null;
   /** Как оформлена занятость: можно совмещать наём с самозанятостью. */
@@ -1194,6 +1202,9 @@ function matchesCriteria(
   if (c.requiresDisabledParent && !profile.disabledParent) return false;
   if (c.requiresFosterParent && !profile.fosterParent) return false;
   if (c.requiresTeacher && !profile.teacher) return false;
+  if (c.requiresEmployer && !(profile.employers ?? []).includes(c.requiresEmployer)) {
+    return false;
+  }
 
   // ── Анкета версии 2 ───────────────────────────────────────────────────
 

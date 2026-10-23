@@ -1,5 +1,6 @@
 import { PRIORITY_SITUATIONS } from "@/lib/taxonomy";
 import { TAX_SYSTEM_LABEL, type TaxSystem } from "@/lib/measures";
+import { EMPLOYER_PROGRAMS } from "@/lib/employers";
 
 /**
  * Анкета подбора простыми словами — для просмотра координатором.
@@ -124,6 +125,10 @@ export function describeSurvey(survey: Record<string, unknown> | null): SurveyRo
 
   add("Доход на человека", INCOME[String(survey.incomePm)]);
   if (typeof survey.employmentStatus === "string") add("Занятость", EMPLOYMENT[survey.employmentStatus]);
+  if (Array.isArray(survey.employers) && survey.employers.length > 0) {
+    const names = survey.employers.map((id) => EMPLOYER_PROGRAMS.find((e) => e.id === id)?.name ?? String(id));
+    add("Работает в", names.join(", "));
+  }
   if (typeof survey.taxSystem === "string") {
     add("Налогообложение ИП", TAX_SYSTEM_LABEL[survey.taxSystem as TaxSystem] ?? survey.taxSystem);
   }
