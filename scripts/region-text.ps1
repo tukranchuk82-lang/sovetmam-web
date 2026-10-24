@@ -2,7 +2,7 @@
 # Без -Index: печатает индекс + регион + тип + примерное число строк по каждому docx/xlsx.
 # С -Index N: печатает ЧИСТЫЙ текст файла N (теги убраны). UTF-8.
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$src = "c:\Таня\РАБОТА\Dev\SovetMam\_input_regions"
+$src = Join-Path $PSScriptRoot "..\..\_input_regions"
 $files = @(Get-ChildItem -LiteralPath $src -File | Where-Object { $_.Extension -in '.docx', '.xlsx' } | Sort-Object Name)
 
 function ZipText($zipPath, $entryName) {

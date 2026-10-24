@@ -2,8 +2,8 @@
 # и пишет в scripts/_regions.json (UTF-8). Запуск: powershell -File scripts/extract-regions.ps1
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-$src = "c:\Таня\РАБОТА\Dev\SovetMam\_input_regions"
-$out = "c:\Таня\РАБОТА\Dev\SovetMam\sovetmam-web\scripts\_regions.json"
+$src = Join-Path $PSScriptRoot "..\..\_input_regions"
+$out = Join-Path $PSScriptRoot "_regions.json"
 
 function Get-ZipEntryText($zipPath, $entryName) {
   $zip = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
